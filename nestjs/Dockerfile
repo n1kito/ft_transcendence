@@ -14,7 +14,8 @@ WORKDIR /usr/src/app
 COPY --chown=node:node ./package*.json ./
 
 # Instal app dependencies using the `npm ci` (clean install) command instead of `npm install`
-RUN npm ci
+# Used npm install here to @nestjs/cli would be installed as well, otherwise the container does not start
+RUN npm install
 
 # Bundle app source
 COPY --chown=node:node . .
