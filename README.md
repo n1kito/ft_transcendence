@@ -6,6 +6,12 @@ Soon, you will realize that you already know things that you thought you didn’
 ```bash
 #!/bin/bash
 
+# Checking that we are in a .git repo
+if ! git status &> /dev/null; then
+    echo "This is not a git repository !\n"
+    exit 1
+fi
+
 # retrieve the path to the git repo top level
 root_dir=$(git rev-parse --show-toplevel)
 
@@ -25,6 +31,7 @@ DATABASE_URL=\"postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$PO
 DATABASE_URL=\"postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB?schema=public\""
 
 # run npm install
+echo
 echo "* Running npm install *"
 cd nestjs && npm install
 cd $root_dir
