@@ -33,4 +33,12 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - ../postgresql:/var/lib/postgresql/data
+      - postgresql:/var/lib/postgresql/data
+
+volumes:
+  postgresql:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: ${PWD}/../postgresql
