@@ -25,7 +25,7 @@ npm-debug.log*
 # **/*.d.ts
 
 # Ignore NestJS build output
-/dist
+**/dist
 
 # Ignore JetBrains IDE settings
 .idea
