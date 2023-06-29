@@ -17,7 +17,8 @@ services:
     depends_on:
       - postgres
     ports:
-      - 3000:3000
+      - '3000:3000'
+
   postgres:
     image: postgres
     restart: always
@@ -36,6 +37,20 @@ services:
       - '5432:5432'
     volumes:
       - postgresql:/var/lib/postgresql/data
+
+  react:
+    build:
+      dockerfile: Dockerfile 
+      context: ../react-chamaje
+      target: development
+    command: npm start
+    restart: unless-stopped
+    ports:
+      - '3001:3000'
+    depends_on:
+      - api
+    volumes:
+      - ../react-chamaje:/usr/src/app
 
 volumes:
   postgresql:
