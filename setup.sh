@@ -20,7 +20,7 @@ read -p "POSTGRES_USER=" POSTGRES_USER
 read -p "POSTGRES_PASSWORD=" POSTGRES_PASSWORD
 read -p "POSTGRES_DB=" POSTGRES_DB
 
-> "$root_dir"/Docker/.env printf "\
+> "$root_dir"/.env printf "\
 POSTGRES_DB=\"db\"
 POSTGRES_USER=\"postgres\"
 POSTGRES_PASSWORD=\"password\"
@@ -37,5 +37,5 @@ printf "
 ░▀░▀░▀░░░▀░▀░░░▀▀▀░▀░▀░▀▀▀░░▀░░▀░▀░▀▀▀░▀▀▀
 
 "
-cd nestjs && npm install
+cd $root_dir/nestjs && npm install
 cd $root_dir
