@@ -1,0 +1,37 @@
+# Dependencies
+**/node_modules
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Optional npm cache directory
+.npm
+
+# Output of 'npm pack'
+*.tgz
+
+# dotenv environment variable files
+**/.env
+**/.env.test
+
+# OS Files
+.DS_Store
+
+# # Ignore compiled typescript files
+# **/*.js
+# **/*.js.map
+# **/*.d.ts
+
+# Ignore NestJS build output
+/dist
+
+# Ignore JetBrains IDE settings
+.idea
+
+# Ignore VSCode settings
+.vscode
+
+# Ignore Postgresql data files
+*.pgdata
