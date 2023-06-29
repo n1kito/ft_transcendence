@@ -37,5 +37,5 @@ printf "
 ░▀░▀░▀░░░▀░▀░░░▀▀▀░▀░▀░▀▀▀░░▀░░▀░▀░▀▀▀░▀▀▀
 
 "
-cd nestjs && npm install
+cd $root_dir/nestjs && npm install
 cd $root_dir
