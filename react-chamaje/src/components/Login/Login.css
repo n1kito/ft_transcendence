@@ -1,0 +1,70 @@
+/* Styling the Login component */
+
+#wrapper {
+	/* background-color: aquamarine; */
+	height: 100dvh;
+	width: 100dvw;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	background: rgb(238, 174, 202);
+	background: radial-gradient(
+		circle,
+		rgba(238, 174, 202, 1) 0%,
+		rgba(148, 187, 233, 1) 100%
+	);
+	font-family: 'Courier New', Courier, monospace;
+}
+
+#navBar {
+	/* outline: 1px solid blue; */
+	position: initial;
+	top: 2rem;
+	left: 2rem;
+	/* transition: position 1s linear; */
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: space-evenly;
+	gap: 1rem;
+	padding: 1rem 2rem;
+	color: white;
+}
+
+#navBar * {
+	/* outline: 1px solid black; */
+}
+
+#toolBox {
+	display: flex;
+	flex-direction: row;
+	/* gap: 1rem; */
+	justify-content: right;
+	gap: 1rem;
+}
+
+#menuItems {
+	display: flex;
+	justify-content: left;
+	gap: 1rem;
+}
+
+#menuItems,
+#toolBox {
+	flex-grow: 1;
+	flex-basis: 0;
+}
+
+#content {
+	/* background-color: purple; */
+	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	/* height:100%; */
+}
+
+#inputField {
+	/* background-color: yellow; */
+	align-self: center;
+}
