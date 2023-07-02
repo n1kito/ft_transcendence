@@ -19,7 +19,9 @@ const Login = () => {
 					</div>
 				</div>
 				<div id="content">
-					<div id="inputField">type <b>“omer”</b> to login</div>
+					<div id="inputField">
+						type <b>“omer”</b> to login
+					</div>
 				</div>
 			</div>
 			<Background></Background>
