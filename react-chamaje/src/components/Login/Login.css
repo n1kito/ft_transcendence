@@ -1,18 +1,23 @@
 /* Styling the Login component */
 
 #wrapper {
-	/* background-color: aquamarine; */
-	height: 100dvh;
-	width: 100dvw;
+	/* opacity: 0; */
+	/* background-color: rgb(221, 230, 240); */
+	position: fixed;
+	z-index: 100;
+	height: 100vh;
+	width: 100vw;
 	margin: 0;
 	display: flex;
 	flex-direction: column;
-	background: rgb(238, 174, 202);
-	background: radial-gradient(
+	/* /* background: rgb(238, 174, 202); */
+	/* background: radial-gradient(
 		circle,
-		rgba(238, 174, 202, 1) 0%,
-		rgba(148, 187, 233, 1) 100%
-	);
+		rgba(148, 187, 233, 1) 0%,
+		rgba(148, 187, 233, 15) 100%
+	); */
+	background: rgba(148, 187, 233, 1);
+	background-color: transparent;
 	font-family: 'Courier New', Courier, monospace;
 }
 
@@ -28,7 +33,8 @@
 	justify-content: space-evenly;
 	gap: 1rem;
 	padding: 1rem 2rem;
-	color: white;
+	/* color: white; */
+	color: black;
 }
 
 #navBar * {
@@ -39,7 +45,7 @@
 	display: flex;
 	flex-direction: row;
 	/* gap: 1rem; */
-	justify-content: right;
+	justify-content: flex-end;
 	gap: 1rem;
 }
 

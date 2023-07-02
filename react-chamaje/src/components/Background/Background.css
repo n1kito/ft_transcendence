@@ -1,0 +1,49 @@
+/* Styling the Background component */
+
+.cls-1 {
+	fill: none;
+	/* stroke: black; */
+	stroke-miterlimit: 1;
+}
+
+#bgwrapper {
+	position: fixed;
+	z-index: 0;
+	top: 0;
+	left: 0;
+	margin: 0;
+	overflow: hidden;
+	width: 100dvw;
+	height: 100dvh;
+	background-color: rgba(148, 187, 233, 1);
+	opacity: 0;
+}
+
+#blur {
+	position: absolute;
+	z-index: 10;
+	height: 100%;
+	width: 100%;
+	/* background-color: rgba(255, 255, 255, 0.1); */
+	backdrop-filter: blur(350px);
+}
+
+#noise {
+	/* background-image: ; */
+	position: fixed;
+	z-index: 11;
+	/* background-color: red; */
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-size: 10%;
+	background-blend-mode: overlay;
+	opacity: 0.05;
+}
+
+#circle1,
+#circle2,
+#circle3 {
+	/* display: none; */
+}
