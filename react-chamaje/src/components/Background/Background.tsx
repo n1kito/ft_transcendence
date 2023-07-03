@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import './Background.css';
 import { gsap } from 'gsap';
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
-import noiseImg from '../../images/noise.jpeg';
 
 gsap.registerPlugin(MotionPathPlugin);
 
@@ -44,7 +43,7 @@ const Background = () => {
 	//
 	return (
 		<div id="bgwapper">
-			<div id="noise" style={{ backgroundImage: `url(${noiseImg})` }}></div>
+			<div id="noise"></div>
 			<div id="blur"></div>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"

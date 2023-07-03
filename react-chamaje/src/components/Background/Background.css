@@ -38,8 +38,25 @@
 	width: 100vw;
 	height: 100vh;
 	background-size: 10%;
-	background-blend-mode: overlay;
-	opacity: 0.05;
+	background-blend-mode: soft-light;
+	opacity: 0.3;
+	background-color: rgba(161, 17, 140, 0.5);
+	animation: background-noise 0.3s infinite;
+}
+
+@keyframes background-noise {
+	0% {
+		background-image: url('./images/grain1.png');
+	}
+	33% {
+		background-image: url('./images/grain2.png');
+	}
+	66% {
+		background-image: url('./images/grain3.png');
+	}
+	100% {
+		background-image: url('./images/grain1.png');
+	}
 }
 
 #circle1,

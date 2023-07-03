@@ -1,5 +1,7 @@
 /* Styling the Login component */
 
+@import url('https://use.typekit.net/rgo5nbx.css');
+
 #wrapper {
 	/* opacity: 0; */
 	/* background-color: rgb(221, 230, 240); */
@@ -19,6 +21,7 @@
 	background: rgba(148, 187, 233, 1);
 	background-color: transparent;
 	font-family: 'Courier New', Courier, monospace;
+	user-select: none;
 }
 
 #navBar {
@@ -33,8 +36,10 @@
 	justify-content: space-evenly;
 	gap: 1rem;
 	padding: 1rem 2rem;
-	/* color: white; */
-	color: black;
+	align-items: center;
+	color: white;
+	font-weight: bold;
+	/* color: black; */
 }
 
 #navBar * {
@@ -63,6 +68,11 @@
 
 #content {
 	/* background-color: purple; */
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
 	flex-grow: 1;
 	display: flex;
 	flex-direction: column;
@@ -73,4 +83,12 @@
 #inputField {
 	/* background-color: yellow; */
 	align-self: center;
+}
+
+#siteTitle {
+	font-family: groupie-gloss, sans-serif;
+	font-style: normal;
+	font-weight: 400;
+	font-size: 4rem;
+	color: white;
 }

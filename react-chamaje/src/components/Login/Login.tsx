@@ -1,6 +1,7 @@
 import React from 'react';
 import './Login.css';
 import Background from '../Background/Background';
+import Button from '../Button/Button';
 
 const Login = () => {
 	return (
@@ -8,11 +9,12 @@ const Login = () => {
 			<div id="wrapper">
 				<div id="navBar">
 					<div id="menuItems">
+						{/* <Button></Button> */}
 						<div>Link</div>
 						<div>Link</div>
 						<div>Link</div>
 					</div>
-					<div id="siteTitle">Chamaje</div>
+					<div id="siteTitle">chamaje</div>
 					<div id="toolBox">
 						<div id="lock">lock</div>
 						<div id="time">17:37</div>
