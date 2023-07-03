@@ -1,0 +1,39 @@
+/* Styling the Button component */
+
+#coloredButton {
+	width: 5rem;
+	height: 2rem;
+	flex-shrink: 0;
+	border-radius: 0.5rem;
+	background: #f8ef57;
+	padding: 0.32038rem 1.12125rem;
+
+	color: #625d04;
+	text-align: center;
+	font-size: 0.8rem;
+	font-family: 'Courier New', Courier, monospace;
+	font-style: normal;
+	font-weight: 600;
+	line-height: normal;
+	letter-spacing: 0.00625rem;
+	margin: 0;
+	padding: 0;
+	border: 0;
+
+	box-shadow: 0 0.5rem 0 0 rgba(153, 144, 0, 0.3);
+	/* opacity: 0.8; */
+	position: relative;
+	top: -0.5rem;
+
+	border: 1px solid yellow;
+}
+
+#coloredButton:active {
+	/* position: relative; */
+	top: 0rem;
+	box-shadow: none;
+}
+
+#coloredButton:hover {
+	opacity: 1;
+}
