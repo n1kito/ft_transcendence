@@ -47,7 +47,7 @@ const Background = () => {
 			<div id="blur"></div>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
-				width="100ddvw"
+				width="100dvw"
 				height="100dvh"
 				viewBox="0 0 2044 1216"
 				overflow="hidden"
