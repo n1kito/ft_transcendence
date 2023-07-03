@@ -1,8 +1,8 @@
 /* Styling the Background component */
 
-.cls-1 {
+.paths {
 	fill: none;
-	/* stroke: black; */
+	stroke: black;
 	stroke-miterlimit: 1;
 }
 
@@ -11,12 +11,15 @@
 	z-index: 0;
 	top: 0;
 	left: 0;
-	margin: 0;
+	padding: 0;
+	/* margin: 0 !important; */
 	overflow: hidden;
-	width: 100dvw;
-	height: 100dvh;
-	background-color: rgba(148, 187, 233, 1);
+	max-width: 100dvw;
+	max-height: 100dvh;
+	/* background-color: rgba(148, 187, 233, 1); */
+	background-color: black;
 	opacity: 0;
+	pointer-events: none;
 }
 
 #blur {
@@ -24,23 +27,20 @@
 	z-index: 10;
 	height: 100%;
 	width: 100%;
-	/* background-color: rgba(255, 255, 255, 0.1); */
 	backdrop-filter: blur(350px);
 }
 
 #noise {
-	/* background-image: ; */
 	position: fixed;
-	z-index: 11;
-	/* background-color: red; */
+	z-index: 150;
 	top: 0;
 	left: 0;
 	width: 100vw;
 	height: 100vh;
 	background-size: 10%;
 	background-blend-mode: soft-light;
-	opacity: 0.3;
-	background-color: rgba(161, 17, 140, 0.5);
+	opacity: 0.2;
+	pointer-events: none;
 	animation: background-noise 0.3s infinite;
 }
 
@@ -57,10 +57,4 @@
 	100% {
 		background-image: url('./images/grain1.png');
 	}
-}
-
-#circle1,
-#circle2,
-#circle3 {
-	/* display: none; */
 }

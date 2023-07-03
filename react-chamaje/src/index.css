@@ -5,6 +5,8 @@ body {
 		sans-serif;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	overflow: hidden;
+	/* TODO: try to change overflow hidden on body, cause issue with Login background overflow on height */
 }
 
 code {
