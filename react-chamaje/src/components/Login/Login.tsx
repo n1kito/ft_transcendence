@@ -17,12 +17,12 @@ const Login = () => {
 						if (newInput !== 'omer') {
 							setFailedAttempts((prevAttempts) => {
 								switch (prevAttempts) {
-								case 0:
-									alert('we told you to type OMER');
-									break;
-								case 1:
-									alert('are you dense ?');
-									break;
+									case 0:
+										alert('we told you to type OMER');
+										break;
+									case 1:
+										alert('are you dense ?');
+										break;
 								}
 								setDisplayState('block');
 								return prevAttempts + 1;
@@ -31,6 +31,8 @@ const Login = () => {
 						} else {
 							setTimeout(() => {
 								setInput('logging in...');
+								//send api request
+								fetch('http://localhost:3000/login', {method:'GET'}).then((response) => response.json()).then(data => console.log(data));
 							}, 500);
 							return newInput;
 						}
@@ -40,9 +42,9 @@ const Login = () => {
 				});
 			}
 		};
-	
+
 		document.addEventListener('keydown', handleKeyPress);
-	
+
 		return () => {
 			document.removeEventListener('keydown', handleKeyPress);
 		};
