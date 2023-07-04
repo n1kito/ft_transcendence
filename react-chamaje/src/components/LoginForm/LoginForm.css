@@ -1,0 +1,55 @@
+#loginFormWrapper fieldset {
+	display: flex;
+	flex-direction: column;
+	gap: 0.7rem;
+	border: none;
+}
+
+#loginFormWrapper input {
+	padding: 1rem;
+	border-radius: 10px;
+	border: 1px solid black;
+	box-shadow: 1px 1px 0 0 black;
+	background-color: rgba(255, 255, 255, 0.2);
+	font-family: 'Courier New', Courier, monospace;
+	color: black;
+	font-weight: bold;
+	text-align: center;
+	width: 100%;
+}
+
+#loginFormWrapper input::placeholder {
+	color: black;
+}
+
+#loginFormWrapper input:focus::placeholder {
+	color: transparent;
+}
+
+#loginFormWrapper h1 {
+	font-family: sans-serif;
+	letter-spacing: 1px;
+	font-size: 1.5rem;
+	text-decoration: underline;
+	margin: 0;
+}
+
+.submitRow {
+	display: flex;
+	flex-direction: row;
+	/* margin-top: 0.5rem; */
+	justify-content: center;
+}
+
+#loginFormWrapper p {
+}
+
+#loginFormWrapper input:focus {
+	background-color: white;
+	outline: none;
+}
+
+.formRow {
+	display: flex;
+	gap: 1rem;
+}
