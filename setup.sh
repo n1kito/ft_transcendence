@@ -54,4 +54,5 @@ printf "
 cd $root_dir/nestjs && npm install
 cd $root_dir
 
+echo
 echo "All done ! 🔥"
