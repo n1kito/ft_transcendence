@@ -31,6 +31,13 @@ const Login = () => {
 						} else {
 							setTimeout(() => {
 								setInput('logging in...');
+								//send api request
+								// fetch('http://localhost:3000/login/auth', {
+								// 	method: 'GET',
+								// })
+								// 	.then((response) => response.json())
+								// 	.then((data) => console.log(data));
+								window.location.href = 'http://localhost:3000/login/auth';
 							}, 500);
 							return newInput;
 						}
@@ -40,9 +47,9 @@ const Login = () => {
 				});
 			}
 		};
-	
+
 		document.addEventListener('keydown', handleKeyPress);
-	
+
 		return () => {
 			document.removeEventListener('keydown', handleKeyPress);
 		};
