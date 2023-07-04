@@ -40,8 +40,8 @@ DATABASE_URL=\"postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$PO
 DATABASE_URL=\"postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB?schema=public\"
 
 # 42 API
-42UID=\"$FT_UID\"
-42SECRET=\"$FT_SECRET\"
+FT_UID=\"$FT_UID\"
+FT_SECRET=\"$FT_SECRET\"
 "
 
 # run npm install
