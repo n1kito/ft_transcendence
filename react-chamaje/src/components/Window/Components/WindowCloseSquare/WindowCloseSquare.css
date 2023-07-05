@@ -1,0 +1,14 @@
+/* Styling the WindowCloseSquare component */
+
+#square {
+	/* border: 2px solid black; */
+	background-color: white;
+	/* height: calc(100% - 4px); */
+	height: 100%;
+	aspect-ratio: 1/1;
+	/* width: 100%; */
+
+	/* padding: 1.5rem 1.5rem; */
+	outline: 3px solid black;
+	outline-offset: -2.5px;
+}

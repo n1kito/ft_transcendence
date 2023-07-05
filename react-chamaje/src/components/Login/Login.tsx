@@ -3,11 +3,12 @@ import './Login.css';
 import Background from '../Background/Background';
 import { userEvent } from '@storybook/testing-library';
 import LoginForm from '../LoginForm/LoginForm';
+import Window from '../Window/Window';
 
 const Login = () => {
-	const [input, setInput] = useState('');
-	const [displayState, setDisplayState] = useState('block');
-	const [failedAttempts, setFailedAttempts] = useState(0);
+	// const [input, setInput] = useState('');
+	// const [displayState, setDisplayState] = useState('block');
+	// const [failedAttempts, setFailedAttempts] = useState(0);
 
 	// useEffect(() => {
 	// const handleKeyPress = (event: KeyboardEvent) => {
@@ -65,12 +66,13 @@ const Login = () => {
 					</div>
 				</div>
 				<div id="content">
+					<Window />
 					<div id="inputField">
 						<div id="inputText">
 							<span id="placeHolder" /*style={{ display: displayState }}*/>
 								{/* type <b>omer</b> to login */}
 							</span>
-							<LoginForm />
+							{/* <LoginForm /> */}
 							{/* {input} */}
 						</div>
 						{/* <div id="cursor">_</div> */}

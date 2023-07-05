@@ -14,11 +14,17 @@ const Button: React.FC<MyButtonProps> = ({
 }) => {
 	// Convert the baseColor array to an rgb color string
 	const btnBgColor = `hsl(${baseColor[0]}, ${baseColor[1]}%, ${baseColor[2]}%)`;
-	const btnTxtColor = `hsl(${baseColor[0]}, ${baseColor[1]}%, ${baseColor[2] - 70}%)`;
+	const btnTxtColor = `hsl(${baseColor[0]}, ${baseColor[1]}%, ${
+		baseColor[2] - 70
+	}%)`;
 	// Calculate darker and lighter shades of your base color.
 	// This is a simple example, you might want to use a more sophisticated method.
-	const btnBorderColor = `hsl(${baseColor[0]}, ${baseColor[1] + 30}%, ${baseColor[2] - 5}%)`;
-	const btnShadowColor = `hsl(${baseColor[0]}, ${baseColor[1]}%, ${baseColor[2] - 50}%, 30%)`;
+	const btnBorderColor = `hsl(${baseColor[0]}, ${baseColor[1] + 30}%, ${
+		baseColor[2] - 5
+	}%)`;
+	const btnShadowColor = `hsl(${baseColor[0]}, ${baseColor[1]}%, ${
+		baseColor[2] - 50
+	}%, 30%)`;
 
 	const buttonStyle = {
 		'--btnBgColor': btnBgColor,
