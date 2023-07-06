@@ -1,8 +1,12 @@
 import React from 'react';
 import './WindowTitle.css';
 
-const WindowTitle = () => {
-	return <div>{/* Component JSX */}</div>;
+interface WindowTitleProps {
+	windowTitle?: string;
+}
+
+const WindowTitle: React.FC<WindowTitleProps> = ({ windowTitle }) => {
+	return <span>{windowTitle}</span>;
 };
 
 export default WindowTitle;

@@ -3,7 +3,8 @@ import './Login.css';
 import Background from '../Background/Background';
 import { userEvent } from '@storybook/testing-library';
 import LoginForm from '../LoginForm/LoginForm';
-import Window from '../Window/Window';
+import Window, { MenuLinks } from '../Window/Window';
+import Terminal from './Components/Terminal/Terminal';
 
 const Login = () => {
 	// const [input, setInput] = useState('');
@@ -49,6 +50,14 @@ const Login = () => {
 	// document.removeEventListener('keydown', handleKeyPress);
 	// };
 	// }, []);
+	
+	// Add links to the menu using the "links" property
+	// const links: MenuLinks[] = [
+	// 	{ name: 'Link 0', url: 'http://www.42.fr' },
+	// 	{ name: 'Link 1', url: 'http://www.42.fr' },
+	// 	{ name: 'Link 2', url: 'http://www.42.fr' },
+	// ];
+
 	return (
 		<div>
 			<div id="wrapper">
@@ -66,7 +75,9 @@ const Login = () => {
 					</div>
 				</div>
 				<div id="content">
-					<Window />
+					<Window windowTitle="Login">
+						<Terminal />
+					</Window>
 					<div id="inputField">
 						<div id="inputText">
 							<span id="placeHolder" /*style={{ display: displayState }}*/>

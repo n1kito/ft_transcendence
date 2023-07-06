@@ -22,4 +22,6 @@
 
 #windowContent {
 	min-height: 5rem;
+	padding: 1rem 1.3rem;
+	text-align: left;
 }

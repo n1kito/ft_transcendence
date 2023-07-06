@@ -1,13 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import './Window.css';
 import WindowTitleBar from './Components/WindowTitleBar/WindowTitleBar';
 import WindowMenu from './Components/WindowMenu/WindowMenu';
 
-export interface WindowProps {
-	windowTitle?: string;
+export interface MenuLinks {
+	name: string,
+	url: string
 }
 
-const Window: React.FC<WindowProps> = ({ windowTitle = 'Title' }) => {
+export interface WindowProps {
+	windowTitle?: string;
+	links?: MenuLinks[]
+	children?: ReactNode;
+}
+
+const Window: React.FC<WindowProps> = ({ windowTitle = 'Title', children, links = [] }) => {
 	const [isDragging, setIsDragging] = useState(false);
 	const [initialPosition, setInitialPosition] = useState({ x: 0, y: 0 });
 	const [windowPosition, setWindowPosition] = useState({ top: 100, left: 100 });
@@ -54,18 +61,17 @@ const Window: React.FC<WindowProps> = ({ windowTitle = 'Title' }) => {
 	return (
 		<div
 			id="windowWrapper"
-			style={{ top: windowPosition.top, left: windowPosition.left }}
+			// style={{ top: windowPosition.top, left: windowPosition.left }}
 		>
 			<WindowTitleBar
-				windowTitle={windowTitle}
-				onMouseDown={handleMouseDown}
+				windowTitle={windowTitle} /*onMouseDown={handleMouseDown}*/
 			/>
 			<WindowMenu>
-				<span>Menu 1</span>
-				<span>Menu 2</span>
-				<span>Menu 3</span>
+				{links.map((linkElem) => (
+					<a href={linkElem.url} key={linkElem.url}>{linkElem.name}</a>
+				))}
 			</WindowMenu>
-			<div id="windowContent"></div>
+			<div id="windowContent">{children}</div>
 		</div>
 	);
 };

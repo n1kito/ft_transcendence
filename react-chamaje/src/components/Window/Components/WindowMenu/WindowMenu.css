@@ -5,14 +5,20 @@
 #windowMenu {
 	background-color: black;
 	color: white;
-	height: 1.2rem;
+	height: fit-content;
 	display: flex;
 	flex-wrap: nowrap;
-	padding: 0 1rem 0.3rem 1rem;
 	align-items: center;
 	gap: 1rem;
 	font-family: 'VT323', monospace;
 	margin-top: -1px;
 	font-size: 1.3rem;
+	padding-left: 1rem;
 }
 
+#windowMenu * {
+	color: inherit;
+	text-decoration: none;
+	padding: 0.05rem 0 0.3rem 0;
+	/* cursor: default; */
+}
