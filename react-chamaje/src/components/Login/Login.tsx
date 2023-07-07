@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Login.css';
-import Background from '../Background/Background';
+// import Background from '../Background/Background';
 import { userEvent } from '@storybook/testing-library';
 import LoginForm from '../LoginForm/LoginForm';
 import Window, { MenuLinks } from '../Window/Window';
@@ -112,7 +112,7 @@ const Login = () => {
 					)}
 				</motion.div>
 			</div>
-			<Background />
+			{/* <Background /> */}
 		</div>
 	);
 };
