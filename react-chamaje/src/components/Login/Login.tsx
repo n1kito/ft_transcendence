@@ -8,6 +8,7 @@ import Terminal from './Components/Terminal/Terminal';
 import Clock from '../Clock/Clock';
 import Lock from '../Lock/Lock';
 import { motion } from 'framer-motion';
+import { tsParticles } from 'tsparticles-engine';
 
 const Login = () => {
 	// const [input, setInput] = useState('');
