@@ -6,6 +6,7 @@ import LoginForm from '../LoginForm/LoginForm';
 import Window, { MenuLinks } from '../Window/Window';
 import Terminal from './Components/Terminal/Terminal';
 import Clock from '../Clock/Clock';
+import Lock from '../Lock/Lock';
 
 const Login = () => {
 	// const [input, setInput] = useState('');
@@ -71,7 +72,7 @@ const Login = () => {
 					</div>
 					<div id="siteTitle">chamaje</div>
 					<div id="toolBox">
-						<div id="lock">lock</div>
+						<Lock />
 						<Clock />
 					</div>
 				</div>

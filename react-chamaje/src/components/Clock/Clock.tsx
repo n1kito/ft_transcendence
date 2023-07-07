@@ -14,7 +14,9 @@ const Clock = () => {
 		};
 	}, []);
 
-	return <div>{currentTime.toLocaleTimeString().replace(/(.*)\D\d+/, '$1')}</div>;
+	return (
+		<div>{currentTime.toLocaleTimeString().replace(/(.*)\D\d+/, '$1')}</div>
+	);
 };
 
 export default Clock;
