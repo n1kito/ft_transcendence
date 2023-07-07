@@ -4,17 +4,21 @@ import WindowTitleBar from './Components/WindowTitleBar/WindowTitleBar';
 import WindowMenu from './Components/WindowMenu/WindowMenu';
 
 export interface MenuLinks {
-	name: string,
-	url: string
+	name: string;
+	url: string;
 }
 
 export interface WindowProps {
 	windowTitle?: string;
-	links?: MenuLinks[]
+	links?: MenuLinks[];
 	children?: ReactNode;
 }
 
-const Window: React.FC<WindowProps> = ({ windowTitle = 'Title', children, links = [] }) => {
+const Window: React.FC<WindowProps> = ({
+	windowTitle = 'Title',
+	children,
+	links = [],
+}) => {
 	const [isDragging, setIsDragging] = useState(false);
 	const [initialPosition, setInitialPosition] = useState({ x: 0, y: 0 });
 	const [windowPosition, setWindowPosition] = useState({ top: 100, left: 100 });
@@ -68,7 +72,9 @@ const Window: React.FC<WindowProps> = ({ windowTitle = 'Title', children, links 
 			/>
 			<WindowMenu>
 				{links.map((linkElem) => (
-					<a href={linkElem.url} key={linkElem.url}>{linkElem.name}</a>
+					<a href={linkElem.url} key={linkElem.url}>
+						{linkElem.name}
+					</a>
 				))}
 			</WindowMenu>
 			<div id="windowContent">{children}</div>

@@ -5,6 +5,7 @@ import { userEvent } from '@storybook/testing-library';
 import LoginForm from '../LoginForm/LoginForm';
 import Window, { MenuLinks } from '../Window/Window';
 import Terminal from './Components/Terminal/Terminal';
+import Clock from '../Clock/Clock';
 
 const Login = () => {
 	// const [input, setInput] = useState('');
@@ -50,7 +51,7 @@ const Login = () => {
 	// document.removeEventListener('keydown', handleKeyPress);
 	// };
 	// }, []);
-	
+
 	// Add links to the menu using the "links" property
 	// const links: MenuLinks[] = [
 	// 	{ name: 'Link 0', url: 'http://www.42.fr' },
@@ -71,7 +72,7 @@ const Login = () => {
 					<div id="siteTitle">chamaje</div>
 					<div id="toolBox">
 						<div id="lock">lock</div>
-						<div id="time">17:37</div>
+						<Clock />
 					</div>
 				</div>
 				<div id="content">
