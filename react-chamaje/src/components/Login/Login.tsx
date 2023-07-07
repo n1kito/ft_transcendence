@@ -66,9 +66,13 @@ const Login = () => {
 	const [passkey, setPasskey] = useState('');
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
-			setPasskey(passkey + event.key);
+			const updatedPasskey = passkey.slice(-3) + event.key;
+			setPasskey(updatedPasskey);
 		};
 		document.addEventListener('keydown', handleKeyDown);
+
+		if (passkey === 'omer')
+			document.removeEventListener('keydown', handleKeyDown);
 
 		return () => {
 			document.removeEventListener('keydown', handleKeyDown);
@@ -101,7 +105,9 @@ const Login = () => {
 						</>
 					) : (
 						<>
-							<div>type &quot;<b>omer</b>&quot; to login</div>
+							<div>
+								type &quot;<b>omer</b>&quot; to login
+							</div>
 						</>
 					)}
 				</motion.div>
