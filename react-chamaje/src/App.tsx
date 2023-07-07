@@ -3,11 +3,13 @@ import logo from './logo.svg';
 import './App.css';
 import Login from './components/Login/Login';
 import Window from './components/Window/Window';
+import StickerParticles from './components/Stickerparticles/Stickerparticles';
 
 function App() {
 	return (
 		<div className="App">
 			<Login></Login>
+			<StickerParticles />
 			{/*<header className="App-header">
 				<img src={logo} className="App-logo" alt="logo" />
 				<p>

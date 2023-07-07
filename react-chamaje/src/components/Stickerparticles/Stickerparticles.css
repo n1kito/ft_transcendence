@@ -1,0 +1,9 @@
+/* Styling the Stickerparticles component */
+
+#tsparticles {
+	width: 100vw;
+	height: 100vw;
+	position: absolute;
+	top: 0;
+	z-index: 10;
+}
