@@ -32,6 +32,10 @@
 	background-color: white;
 }
 
+#titleBarWrapper:hover {
+	cursor: grab;
+}
+
 #titleBarWrapper #windowTitle {
 	margin: 0 5rem 0 4rem;
 }
