@@ -1,0 +1,10 @@
+/* Styling the Lock component */
+
+#lockWrapper {
+	position: relative;
+	height: 1rem;
+}
+
+#lockWrapper img {
+	height: 100%;
+}
