@@ -1,0 +1,43 @@
+/* Styling the Prompt component */
+
+#prompt {
+	display: flex;
+	align-items: flex-end;
+	justify-items: space-between;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	gap: 0.5rem;
+}
+
+#prompt label {
+	white-space: nowrap;
+	font-weight: bold;
+	/* outline: 1px solid red; */
+}
+
+#prompt label::first-letter {
+	text-transform: uppercase;
+}
+
+#prompt input {
+	padding: 0;
+	border: none;
+}
+
+#prompt input:focus {
+	outline: none;
+}
+
+/* 
+@keyframes blink-animation {
+	to {
+	  visibility: hidden;
+	}
+  } */
+
+.typeCursor {
+	width: 5px;
+	height: 1rem;
+	background-color: black;
+	/* animation: blink-animation 1s steps(2, start) infinite; */
+}

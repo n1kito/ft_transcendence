@@ -1,0 +1,13 @@
+/* Styling the Terminal component */
+
+#terminal {
+	font-size: 0.8rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	/* min-width: 50rem; */
+}
+
+#terminal:last-child > .typeCursor {
+	opacity: 1 !important;
+}

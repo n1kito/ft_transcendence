@@ -1,0 +1,24 @@
+/* Styling the WindowMenu component */
+
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+#windowMenu {
+	background-color: black;
+	color: white;
+	height: fit-content;
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: center;
+	gap: 1rem;
+	font-family: 'VT323', monospace;
+	margin-top: -1px;
+	font-size: 1.3rem;
+	padding-left: 1rem;
+}
+
+#windowMenu * {
+	color: inherit;
+	text-decoration: none;
+	padding: 0.05rem 0 0.3rem 0;
+	/* cursor: default; */
+}
