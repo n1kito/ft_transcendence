@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './Login.css';
 import Background from '../Background/Background';
 import { userEvent } from '@storybook/testing-library';
@@ -7,6 +7,7 @@ import Window, { MenuLinks } from '../Window/Window';
 import Terminal from './Components/Terminal/Terminal';
 import Clock from '../Clock/Clock';
 import Lock from '../Lock/Lock';
+import { motion } from 'framer-motion';
 
 const Login = () => {
 	// const [input, setInput] = useState('');
@@ -60,6 +61,24 @@ const Login = () => {
 	// 	{ name: 'Link 2', url: 'http://www.42.fr' },
 	// ];
 
+	const constraintRef = useRef(null);
+
+	const [passkey, setPasskey] = useState('');
+	useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			const updatedPasskey = passkey.slice(-3) + event.key;
+			setPasskey(updatedPasskey);
+		};
+		document.addEventListener('keydown', handleKeyDown);
+
+		if (passkey === 'omer')
+			document.removeEventListener('keydown', handleKeyDown);
+
+		return () => {
+			document.removeEventListener('keydown', handleKeyDown);
+		};
+	}, [passkey]);
+
 	return (
 		<div>
 			<div id="wrapper">
@@ -76,21 +95,22 @@ const Login = () => {
 						<Clock />
 					</div>
 				</div>
-				<div id="content">
-					<Window windowTitle="Login">
-						<Terminal />
-					</Window>
-					<div id="inputField">
-						<div id="inputText">
-							<span id="placeHolder" /*style={{ display: displayState }}*/>
-								{/* type <b>omer</b> to login */}
-							</span>
-							{/* <LoginForm /> */}
-							{/* {input} */}
-						</div>
-						{/* <div id="cursor">_</div> */}
-					</div>
-				</div>
+				<motion.div id="content" ref={constraintRef}>
+					<div id="prompt"></div>
+					{passkey === 'omer' ? (
+						<>
+							<Window windowTitle="Login">
+								<Terminal />
+							</Window>
+						</>
+					) : (
+						<>
+							<div>
+								type &quot;<b>omer</b>&quot; to login
+							</div>
+						</>
+					)}
+				</motion.div>
 			</div>
 			<Background />
 		</div>
