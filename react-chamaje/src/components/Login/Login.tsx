@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Login.css';
 // import Background from '../Background/Background';
-import { userEvent } from '@storybook/testing-library';
-import LoginForm from '../LoginForm/LoginForm';
-import Window, { MenuLinks } from '../Window/Window';
+import Window from '../Window/Window';
 import Terminal from './Components/Terminal/Terminal';
 import Clock from '../Clock/Clock';
 import Lock from '../Lock/Lock';
 import { motion } from 'framer-motion';
-import { tsParticles } from 'tsparticles-engine';
+import Stickerparticles from '../Stickerparticles/Stickerparticles';
 
 const Login = () => {
 	// const [input, setInput] = useState('');
@@ -112,6 +110,7 @@ const Login = () => {
 						</>
 					)}
 				</motion.div>
+				<Stickerparticles />
 			</div>
 			{/* <Background /> */}
 		</div>

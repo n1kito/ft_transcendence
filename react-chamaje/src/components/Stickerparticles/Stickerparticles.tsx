@@ -120,7 +120,7 @@ const Stickerparticles = () => {
 								{
 									src: omerSticker,
 								},
-							]
+							],
 						},
 					},
 					size: {

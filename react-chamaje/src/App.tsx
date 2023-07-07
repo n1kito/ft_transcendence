@@ -3,12 +3,17 @@ import './App.css';
 import Login from './components/Login/Login';
 import Layout from './components/Layout/Layout';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import Stickerparticles from './components/Stickerparticles/Stickerparticles';
 
 const router = createBrowserRouter([
 	{
 		path: '/',
 		element: <Layout />,
-		errorElement: <Layout><div>Error ! Make a cute component.</div></Layout>,
+		errorElement: (
+			<Layout>
+				<div>Error ! Make a cute component.</div>
+			</Layout>
+		),
 		children: [
 			{
 				index: true,
@@ -24,7 +29,6 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-
 	return (
 		<div className="App">
 			<RouterProvider router={router} />
