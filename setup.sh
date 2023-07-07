@@ -16,19 +16,33 @@ printf "
 
 "
 # retrieve variables from users
-read -p "POSTGRES_USER=" POSTGRES_USER
-read -p "POSTGRES_PASSWORD=" POSTGRES_PASSWORD
-read -p "POSTGRES_DB=" POSTGRES_DB
+echo "Retrieving database information:"
+echo
+read -p "> POSTGRES_USER:	" POSTGRES_USER
+read -p "> POSTGRES_PASSWORD:	" POSTGRES_PASSWORD
+read -p "> POSTGRES_DB:		" POSTGRES_DB
+echo 
+echo "Retrieving API information"
+echo
+read -p "> UID:			" FT_UID
+read -p "> SECRET:		" FT_SECRET
 
 > "$root_dir"/.env printf "\
-POSTGRES_DB=\"db\"
-POSTGRES_USER=\"postgres\"
-POSTGRES_PASSWORD=\"password\"
+# Postgres variables
+POSTGRES_DB=\"$POSTGRES_DB\"
+POSTGRES_USER=\"$POSTGRES_USER\"
+POSTGRES_PASSWORD=\"$POSTGRES_PASSWORD\"
 
 DATABASE_URL=\"postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB?schema=public\""
 
 > "$root_dir"/nestjs/.env printf "\
-DATABASE_URL=\"postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB?schema=public\""
+# Database
+DATABASE_URL=\"postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB?schema=public\"
+
+# 42 API
+FT_UID=\"$FT_UID\"
+FT_SECRET=\"$FT_SECRET\"
+"
 
 # run npm install
 printf "
@@ -39,3 +53,6 @@ printf "
 "
 cd $root_dir/nestjs && npm install
 cd $root_dir
+
+echo
+echo "All done ! 🔥"
