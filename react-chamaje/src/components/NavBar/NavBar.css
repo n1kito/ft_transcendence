@@ -9,7 +9,7 @@
 	flex-wrap: nowrap;
 	justify-content: space-evenly;
 	gap: 1rem;
-	z-index: 1;
+	z-index: 2;
 	padding: 0.1rem 2rem;
 	align-items: center;
 	color: white;
@@ -19,6 +19,7 @@
 	font-size: 1.2rem;
 	letter-spacing: 1px;
 	font-weight: normal;
+	border: 1px solid transparent;
 	/* background-color: white; */
 	/* border: 1px solid black; */
 	/* color: black; */
@@ -62,8 +63,7 @@
 .loggedIn {
 	color: black;
 	background-color: white;
-	outline: 1px solid black;
-	outline-offset: -1px;
+	border: 1px solid black;
 }
 
 .loggedIn .siteTitle {
