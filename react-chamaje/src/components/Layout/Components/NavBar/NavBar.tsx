@@ -1,7 +1,7 @@
 import React from 'react';
 import './NavBar.css';
-import Lock from '../Lock/Lock';
-import Clock from '../Clock/Clock';
+import Lock from './Components/Lock/Lock';
+import Clock from './Components/Clock/Clock';
 
 export interface navBarProps {
 	isLoggedIn?: boolean;

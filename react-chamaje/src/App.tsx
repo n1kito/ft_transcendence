@@ -3,9 +3,9 @@ import './App.css';
 import Login from './components/Login/Login';
 import Layout from './components/Layout/Layout';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import Stickerparticles from './components/Stickerparticles/Stickerparticles';
+import Stickerparticles from './components/Login/Components/Stickerparticles/Stickerparticles';
 import roadconeIcon from './images/ROADCONE.svg';
-import DesktopIcon from './components/DesktopIcon/DesktopIcon';
+import DesktopIcon from './components/Desktop/Components/DesktopIcon/DesktopIcon';
 
 const router = createBrowserRouter([
 	{
