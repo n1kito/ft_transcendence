@@ -7,6 +7,11 @@ import Clock from '../Clock/Clock';
 import Lock from '../Lock/Lock';
 import { motion } from 'framer-motion';
 import Stickerparticles from '../Stickerparticles/Stickerparticles';
+import { MenuLinks } from '../Window/Window';
+import DesktopIcon from '../DesktopIcon/DesktopIcon';
+import cokeIcon from '../DesktopIcon/images/COKE2.svg';
+import cupcakeIcon from '../DesktopIcon/images/CUPCAKE.svg';
+import NavBar from '../NavBar/NavBar';
 
 const Login = () => {
 	// const [input, setInput] = useState('');
@@ -55,9 +60,9 @@ const Login = () => {
 
 	// Add links to the menu using the "links" property
 	// const links: MenuLinks[] = [
-	// 	{ name: 'Link 0', url: 'http://www.42.fr' },
-	// 	{ name: 'Link 1', url: 'http://www.42.fr' },
-	// 	{ name: 'Link 2', url: 'http://www.42.fr' },
+	// 	{ name: 'Charlotte', url: 'http://www.42.fr' },
+	// 	{ name: 'Jee', url: 'http://www.42.fr' },
+	// 	{ name: 'Matthieu', url: 'http://www.42.fr' },
 	// ];
 
 	const constraintRef = useRef(null);
@@ -81,24 +86,13 @@ const Login = () => {
 	return (
 		<div>
 			<div id="wrapper">
-				<div id="navBar">
-					<div id="menuItems">
-						{/* <Button></Button> */}
-						<div>Link</div>
-						<div>Link</div>
-						<div>Link</div>
-					</div>
-					<div id="siteTitle">chamaje</div>
-					<div id="toolBox">
-						<Lock />
-						<Clock />
-					</div>
-				</div>
+				{/* <NavBar /> */}
 				<motion.div id="content" ref={constraintRef}>
 					<div id="prompt"></div>
 					{passkey === 'omer' ? (
 						<>
 							<Window windowTitle="Login">
+								{/* <Window windowTitle="Charlotte" links={links}> */}
 								<Terminal />
 							</Window>
 						</>

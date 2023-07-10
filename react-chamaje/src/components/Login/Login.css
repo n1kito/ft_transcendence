@@ -3,10 +3,10 @@
 @import url('https://use.typekit.net/rgo5nbx.css');
 
 #wrapper {
-	position: fixed;
+	/* position: fixed; */
 	z-index: 100;
-	height: 100vh;
-	width: 100vw;
+	/* height: 100vh; */
+	/* width: 100vw; */
 	margin: 0;
 	display: flex;
 	flex-direction: column;
@@ -18,49 +18,6 @@
 	z-index: 1500;
 }
 
-#navBar {
-	position: initial;
-	top: 2rem;
-	left: 2rem;
-	display: flex;
-	flex-direction: row;
-	flex-wrap: nowrap;
-	justify-content: space-evenly;
-	gap: 1rem;
-	z-index: 1;
-	padding: 0.1rem 2rem;
-	align-items: center;
-	color: white;
-	font-weight: bold;
-	/* background-color: white; */
-	/* border: 1px solid black; */
-	/* color: black; */
-}
-
-#navBar * {
-	/* outline: 1px solid black; */
-}
-
-#toolBox {
-	display: flex;
-	flex-direction: row;
-	/* gap: 1rem; */
-	justify-content: flex-end;
-	gap: 1rem;
-}
-
-#menuItems {
-	display: flex;
-	justify-content: left;
-	gap: 1rem;
-	opacity: 0;
-}
-
-#menuItems,
-#toolBox {
-	flex-grow: 1;
-	flex-basis: 0;
-}
 
 #content {
 	/* background-color: purple; */
@@ -99,12 +56,4 @@
 	100% {
 		opacity: 0;
 	}
-}
-
-#siteTitle {
-	font-family: groupie-gloss, sans-serif;
-	font-style: normal;
-	font-weight: 400;
-	font-size: 4rem;
-	color: white;
 }

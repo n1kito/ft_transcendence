@@ -1,0 +1,48 @@
+/* Styling the DesktopIcon component */
+
+.desktopIconWrapper,
+.desktopIconWrapper * {
+	/* outline: 1px solid pink; */
+}
+
+.desktopIconWrapper {
+	width: fit-content;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	z-index: 2000;
+}
+
+.desktopIconWrapper:hover {
+	cursor: default;
+	user-select: none;
+}
+
+.desktopIconWrapper span {
+	font-family: 'VT323', monospace;
+	color: black;
+	background-color: white;
+	width: fit-content;
+	padding: 0 0.5rem;
+	text-transform: capitalize;
+	font-size: 1.2rem;
+}
+
+.desktopIconWrapper img {
+	width: 7rem;
+	--stroke-pos: 2px;
+	--stroke-neg: -2px;
+	filter: drop-shadow(var(--stroke-pos) var(--stroke-pos) 0 black)
+		drop-shadow(var(--stroke-neg) var(--stroke-pos) 0 black)
+		drop-shadow(var(--stroke-pos) var(--stroke-neg) 0 black)
+		drop-shadow(var(--stroke-neg) var(--stroke-neg) 0 black)
+		drop-shadow(var(--stroke-pos) var(--stroke-pos) 0 white)
+		drop-shadow(var(--stroke-neg) var(--stroke-pos) 0 white)
+		drop-shadow(var(--stroke-pos) var(--stroke-neg) 0 white)
+		drop-shadow(var(--stroke-neg) var(--stroke-neg) 0 white)
+		drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8));
+}
+
+.desktopIconWrapper:active span {
+	background-color: yellow;
+}

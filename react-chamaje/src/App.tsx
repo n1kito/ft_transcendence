@@ -4,6 +4,8 @@ import Login from './components/Login/Login';
 import Layout from './components/Layout/Layout';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Stickerparticles from './components/Stickerparticles/Stickerparticles';
+import roadconeIcon from './images/ROADCONE.svg';
+import DesktopIcon from './components/DesktopIcon/DesktopIcon';
 
 const router = createBrowserRouter([
 	{
@@ -11,7 +13,7 @@ const router = createBrowserRouter([
 		element: <Layout />,
 		errorElement: (
 			<Layout>
-				<div>Error ! Make a cute component.</div>
+				<DesktopIcon name="Error :(" iconSrc={roadconeIcon} />
 			</Layout>
 		),
 		children: [

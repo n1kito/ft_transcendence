@@ -1,0 +1,91 @@
+/* Styling the NavBar component */
+
+.navBar {
+	position: initial;
+	top: 2rem;
+	left: 2rem;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: space-evenly;
+	gap: 1rem;
+	z-index: 1;
+	padding: 0.1rem 2rem;
+	align-items: center;
+	color: white;
+	font-weight: bold;
+	transition: all 1s linear;
+	font-family: 'VT323', monospace;
+	font-size: 1.2rem;
+	letter-spacing: 1px;
+	font-weight: normal;
+	/* background-color: white; */
+	/* border: 1px solid black; */
+	/* color: black; */
+}
+
+.navBar * {
+	/* outline: 1px solid black; */
+}
+
+.toolBox {
+	display: flex;
+	flex-direction: row;
+	/* gap: 1rem; */
+	justify-content: flex-end;
+	gap: 1rem;
+}
+
+.menuItems {
+	display: flex;
+	justify-content: left;
+	gap: 1rem;
+	/* opacity: 0; */
+}
+
+.menuItems a {
+	display: none;
+}
+
+.menuItems a {
+	color: initial;
+	text-decoration: none;
+	cursor: default;
+}
+
+.menuItems,
+.toolBox {
+	flex-grow: 1;
+	flex-basis: 0;
+}
+
+.loggedIn {
+	color: black;
+	background-color: white;
+	outline: 1px solid black;
+	outline-offset: -1px;
+}
+
+.loggedIn .siteTitle {
+	color: black;
+}
+
+.loggedIn .menuItems a {
+	display: flex;
+}
+
+.siteTitle {
+	font-family: groupie-gloss, sans-serif;
+	font-style: normal;
+	font-weight: 400;
+	font-size: 4rem;
+	color: white;
+}
+
+.loggedIn .lockHead {
+	stroke: black;
+}
+
+.loggedIn .lockBody {
+	fill: black;
+}
