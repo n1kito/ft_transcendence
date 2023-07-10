@@ -6,7 +6,7 @@
 	aspect-ratio: 1/1;
 }
 
-#lockWrapper img {
+#lockWrapper svg {
 	height: 100%;
 }
 
@@ -35,4 +35,15 @@
 	100% {
 		transform: translateX(0);
 	}
+}
+
+.lockHead {
+	fill: none;
+	stroke: #fff;
+	stroke-miterlimit: 10;
+	stroke-width: 3px;
+}
+
+.lockBody {
+	fill: #fff;
 }

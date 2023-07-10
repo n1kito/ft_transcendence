@@ -1,7 +1,5 @@
 /* Styling the WindowTitleBar component */
 
-@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-
 #titleBarWrapper {
 	position: relative;
 	padding: 1rem 1.3rem;
