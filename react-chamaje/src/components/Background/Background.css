@@ -23,7 +23,7 @@
 
 #blur {
 	position: absolute;
-	z-index: 10;
+	z-index: 0;
 	height: 100%;
 	width: 100%;
 	backdrop-filter: blur(350px);
@@ -31,7 +31,7 @@
 
 #noise {
 	position: fixed;
-	z-index: 150;
+	z-index: 1;
 	top: 0;
 	left: 0;
 	width: 100vw;

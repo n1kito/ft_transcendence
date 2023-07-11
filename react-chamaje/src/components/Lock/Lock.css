@@ -10,7 +10,7 @@
 	height: 100%;
 }
 
-#lockWrapper:hover img {
+#lockWrapper:hover svg {
 	position: relative;
 	animation: 1s linear shakeShakeShake;
 }

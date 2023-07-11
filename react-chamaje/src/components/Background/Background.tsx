@@ -43,7 +43,7 @@ const Background = () => {
 	//
 	return (
 		<div id="bgWrapper">
-			{/* <div id="noise"></div> */}
+			<div id="noise"></div>
 			<div id="blur"></div>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
