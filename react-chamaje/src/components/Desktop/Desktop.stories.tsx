@@ -2,7 +2,7 @@
 import Desktop from './Desktop';
 
 export default {
-	title: 'Desktop',
+	title: 'Components/Desktop',
 };
 
 export const Default = () => <Desktop />;

@@ -2,7 +2,7 @@
 import Layout from './Layout';
 
 export default {
-	title: 'Layout',
+	title: 'Components/Layout',
 };
 
 export const Default = () => <Layout />;

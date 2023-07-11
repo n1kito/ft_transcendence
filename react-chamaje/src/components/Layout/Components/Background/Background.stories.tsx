@@ -2,7 +2,7 @@
 import Background from './Background';
 
 export default {
-	title: 'Background',
+	title: 'Components/Layout/Background',
 };
 
 export const Default = () => <Background />;
