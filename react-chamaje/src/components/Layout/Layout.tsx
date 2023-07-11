@@ -16,7 +16,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 	// document.getElementsByClassName('navBar')[0].classList.add('loggedIn');
 	return (
 		<div className="layoutWrapper">
-			<NavBar isLoggedIn={false} />
+			<NavBar isLoggedIn={true} />
 			{/* <div class="layoutContent"> */}
 			<div className="layoutChildren">
 				{children}

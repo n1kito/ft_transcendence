@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Stickerparticles from './components/Login/Components/Stickerparticles/Stickerparticles';
 import roadconeIcon from './images/ROADCONE.svg';
 import DesktopIcon from './components/Desktop/Components/DesktopIcon/DesktopIcon';
+import Desktop from './components/Desktop/Desktop';
 
 const router = createBrowserRouter([
 	{
@@ -13,7 +14,7 @@ const router = createBrowserRouter([
 		element: <Layout />,
 		errorElement: (
 			<Layout>
-				<DesktopIcon name="Error :(" iconSrc={roadconeIcon} />
+				{/* <DesktopIcon name="Error :(" iconSrc={roadconeIcon} /> */}
 			</Layout>
 		),
 		children: [
@@ -24,7 +25,11 @@ const router = createBrowserRouter([
 			},
 			{
 				path: 'desktop',
-				element: <div>Desktop</div>,
+				element: <Desktop />,
+			},
+			{
+				path: 'friends',
+				element: <Desktop />,
 			},
 		],
 	},

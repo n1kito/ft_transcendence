@@ -5,7 +5,7 @@ import DesktopIcon from './DesktopIcon';
 
 describe('<DesktopIcon />', () => {
 	test('it should mount', () => {
-		render(<DesktopIcon name="Test" iconSrc="" />);
+		render(<DesktopIcon name="Test" iconSrc="" onDoubleClick={() => {}} />);
 
 		const desktopIcon = screen.getByTestId('DesktopIcon');
 
