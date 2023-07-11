@@ -2,7 +2,7 @@
 import Button from './Button';
 
 export default {
-	title: 'Button',
+	title: 'Shared Components/Button',
 };
 
 export const Default = () => <Button />;

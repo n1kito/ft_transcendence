@@ -4,7 +4,7 @@ import DesktopIcon from './DesktopIcon';
 import { IconProps } from './DesktopIcon';
 
 export default {
-	title: 'DesktopIcon',
+	title: 'Components/Desktop/DesktopIcon',
 	iconSrc: '',
 };
 

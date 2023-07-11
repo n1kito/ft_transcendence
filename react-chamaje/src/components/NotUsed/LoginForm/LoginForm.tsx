@@ -1,6 +1,6 @@
 import React from 'react';
 import './LoginForm.css';
-import Button from '../Button/Button';
+import Button from '../../Shared/Button/Button';
 
 const LoginForm = () => {
 	return (

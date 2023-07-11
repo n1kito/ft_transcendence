@@ -2,7 +2,7 @@
 import NavBar from './NavBar';
 
 export default {
-	title: 'NavBar',
+	title: 'Components/Layout/NavBar',
 };
 
 export const Default = () => <NavBar />;

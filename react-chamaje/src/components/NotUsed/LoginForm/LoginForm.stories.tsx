@@ -2,7 +2,7 @@
 import LoginForm from './LoginForm';
 
 export default {
-	title: 'LoginForm',
+	title: 'NotUsed/LoginForm',
 };
 
 export const Default = () => <LoginForm />;

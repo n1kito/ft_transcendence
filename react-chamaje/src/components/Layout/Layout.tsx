@@ -1,8 +1,8 @@
 import React, { ReactNode } from 'react';
 import './Layout.css';
-import Background from '../Background/Background';
+import Background from './Components/Background/Background';
 import { Outlet } from 'react-router-dom';
-import NavBar from '../NavBar/NavBar';
+import NavBar from './Components/NavBar/NavBar';
 
 export interface LayoutProps {
 	children?: ReactNode;
