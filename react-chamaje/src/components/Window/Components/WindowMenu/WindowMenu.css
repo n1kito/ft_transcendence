@@ -22,3 +22,7 @@
 	padding: 0.05rem 0 0.3rem 0;
 	/* cursor: default; */
 }
+
+#windowMenu a:hover {
+	cursor: default;
+}

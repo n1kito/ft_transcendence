@@ -1,0 +1,27 @@
+/* Styling the FriendsList component */
+
+.friendsList {
+	padding: 1.5rem;
+	display: grid;
+	grid-template-columns: repeat(6, 1fr);
+	gap: 2rem;
+	max-height: 70dvh;
+	overflow-y: scroll;
+}
+
+.bottomInfo {
+	width: 100%;
+	height: fit-content;
+	text-align: center;
+	font-size: 0.8rem;
+	font-family: 'VT323', monospace;
+	font-size: 1.2rem;
+	line-height: 1.7rem;
+	bottom: 0;
+	left: 0;
+	/* color: white; */
+	border-bottom-left-radius: 10px;
+	border-bottom-right-radius: 10px;
+	background-color: white;
+	border-top: 3px solid black;
+}

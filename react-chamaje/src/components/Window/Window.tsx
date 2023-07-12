@@ -24,7 +24,6 @@ const Window: React.FC<WindowProps> = ({
 	links = [],
 	constraintRef,
 }) => {
-
 	const dragControls = useDragControls();
 	const [isDragged, setIsDragged] = useState(false);
 	const [dragEnded, setDragEnded] = useState(false);
@@ -48,7 +47,7 @@ const Window: React.FC<WindowProps> = ({
 
 	return (
 		<motion.div
-			initial={!hasMounted ? { opacity: 0, scale: 0, y: '300%' } : { }}
+			initial={!hasMounted ? { opacity: 0, scale: 0, y: '300%' } : {}}
 			animate={
 				dragEnded ? { scale: 1, opacity: 1 } : { scale: 1, opacity: 1, y: '0%' }
 			}

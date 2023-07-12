@@ -4,6 +4,7 @@ import DesktopIcon from './Components/DesktopIcon/DesktopIcon';
 import cupcakeIcon from './Components/DesktopIcon/images/CUPCAKE.svg';
 import Window from '../Window/Window';
 import { useNavigate } from 'react-router-dom';
+import FriendsList from '../Friends/Components/FriendsList/FriendsList';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -32,7 +33,10 @@ const Desktop = () => {
 				iconSrc={cupcakeIcon}
 				onDoubleClick={friendsClickHandler}
 			/>
-			{openFriendsWindow && <Window windowTitle="Friends" />}
+			{/* {openFriendsWindow && <Window windowTitle="Friends"><FriendsList /></Window>}*/}
+			<Window windowTitle="Friends" links={[{ name: 'Add friend', url: '#' }, { name: 'See online friends', url: '#' }, { name: 'Do something', url: '#' }]}>
+				<FriendsList />
+			</Window>
 		</div>
 	);
 };
