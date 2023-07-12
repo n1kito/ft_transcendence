@@ -14,13 +14,14 @@ const NavBar: React.FC<navBarProps> = ({ isLoggedIn = true }) => {
 			<div className="menuItems">
 				{/* <Button></Button> */}
 				<a href="#" title="Link name">
-					Link
+					Game
 				</a>
-				<a>Link</a>
-				<a>Link</a>
+				<a>Friends</a>
+				<a>Settings</a>
 			</div>
 			<div className="siteTitle">chamaje</div>
 			<div className="toolBox">
+				<span>jeepark</span>
 				<Lock />
 				<Clock />
 			</div>

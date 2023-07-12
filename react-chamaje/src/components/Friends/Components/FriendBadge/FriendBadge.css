@@ -1,0 +1,54 @@
+/* Styling the FriendBadge component */
+
+/* font-size: 1.2rem; */
+
+.friendBadge {
+	display: flex;
+	flex-direction: column;
+	justify-items: center;
+	align-items: center;
+	gap: 0.6rem;
+	/* font-size: 1rem; */
+	width: fit-content;
+	padding: 7px 7px 0 7px;
+}
+
+.friendBadge img {
+	border-radius: 50%;
+	width: 5rem;
+	aspect-ratio: 1/1;
+	box-shadow: 0 0 0 4px white, 0 0 0 7px black, 7px 7px 10px 0px grey;
+	/* --stroke-pos: 2px; */
+	/* --stroke-neg: -2px; */
+	/* filter: drop-shadow(var(--stroke-pos) var(--stroke-pos) 0 white)
+	drop-shadow(var(--stroke-neg) var(--stroke-pos) 0 white)
+	drop-shadow(var(--stroke-pos) var(--stroke-neg) 0 white)
+	drop-shadow(var(--stroke-neg) var(--stroke-neg) 0 white)
+	drop-shadow(var(--stroke-pos) var(--stroke-pos) 0 black)
+	drop-shadow(var(--stroke-neg) var(--stroke-pos) 0 black)
+	drop-shadow(var(--stroke-pos) var(--stroke-neg) 0 black)
+	drop-shadow(var(--stroke-neg) var(--stroke-neg) 0 black)
+	drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8)); */
+}
+
+.friendBadge span {
+	padding: 2px 10px;
+}
+
+.online img {
+	box-shadow: 0 0 0 5px white, 0 0 0 7.5px lightgreen, 7px 7px 10px 0px lightgreen;
+}
+
+.selected:active img {
+	box-shadow: 0 0 0 5px white, 0 0 0 7.5px cyan, 7px 7px 10px 0px cyan;
+}
+
+/* .friendBadge:hover {
+	background-color: rgba(0, 150, 255, 0.2);
+	border-radius: 15px;
+} */
+
+.friendBadge:hover span {
+	background-color: rgba(0, 150, 255, 0.2);
+	border-radius: 15px;
+}
