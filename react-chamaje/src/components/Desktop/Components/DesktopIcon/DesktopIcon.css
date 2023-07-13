@@ -15,7 +15,6 @@
 
 .desktopIconWrapper:hover {
 	cursor: default;
-	user-select: none;
 }
 
 .desktopIconWrapper span {

@@ -15,9 +15,9 @@ async function bootstrap() {
 	// 	preflightContinue: false,
 	// 	optionsSuccessStatus: 204,
 	// };
-	// app.enableCors({
-	// 	origin: 'http://localhost:3001',
-	// });
+	app.enableCors({
+		origin: 'http://localhost:3001',
+	});
 	await app.listen(3000);
 }
 bootstrap();

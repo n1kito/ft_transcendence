@@ -11,11 +11,14 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+// TODO: the email cannot be the ID since it can be changed, the ID variable should the the ID
 model User {
-    id        Int      @id @default(autoincrement())
-    hash      String
+    id        Int      @default(autoincrement())
+    hash      String?
+    login     String   @unique
     firstName String
     lastName  String
-    email     String   @unique
+    email     String   @id @unique
+    image     String?
     createdAt DateTime @default(now())
 }

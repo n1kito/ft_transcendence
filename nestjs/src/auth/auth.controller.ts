@@ -24,7 +24,9 @@ export class AuthController {
 			// check that the state we received is the same we setup on class construction
 			this.authService.checkState(state);
 			await this.authService.handleAuthCallback(code);
-			return { url: 'success' }; // TODO: return 'desktop' (homepage) URL
+			await this.authService.retrieveUserInfo();
+			const redirectURL = `http://localhost:3001/desktop?login=${this.authService.getLogin()}`;
+			return { url: redirectURL }; // TODO: return 'desktop' (homepage) URL
 		} catch {
 			return { url: 'login-failed' }; // TODO: return error URl and find out how to customize the error message if we want to
 		}
