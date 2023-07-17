@@ -26,7 +26,11 @@ const NavBar: React.FC<navBarProps> = ({ isLoggedIn = true }) => {
 				<span>mjallada</span>
 				<img
 					className="userAvatar"
-					src={userData ? userData.image : 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Anna_Wintour_2019_crop_%28cropped%29.jpg'}
+					src={
+						userData
+							? userData.image
+							: 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Anna_Wintour_2019_crop_%28cropped%29.jpg'
+					}
 				/>
 				<Lock />
 				<Clock />
