@@ -26,6 +26,11 @@ echo "Retrieving API information"
 echo
 read -p "> UID:			" FT_UID
 read -p "> SECRET:		" FT_SECRET
+echo
+echo "Retrieving JWT secret key"
+echo
+read -p "> SECRET KEY:		" JWT_SECRET_KEY
+echo
 
 > "$root_dir"/.env printf "\
 # Postgres variables
@@ -42,6 +47,9 @@ DATABASE_URL=\"postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$PO
 # 42 API
 FT_UID=\"$FT_UID\"
 FT_SECRET=\"$FT_SECRET\"
+
+# JWT SECRET KEY
+JWT_SECRET_KEY=\"$JWT_SECRET_KEY\"
 "
 
 # run npm install

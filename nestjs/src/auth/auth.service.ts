@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { randomBytes } from 'crypto';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, User } from '@prisma/client';
 
 interface UserData {
+	ft_id: number;
 	login: string;
 	firstName: string;
 	lastName: string;
@@ -22,6 +23,7 @@ export class AuthService {
 	private readonly ftApiFetchUrl: string;
 	private readonly stateRandomString: string;
 	private token: string;
+	private userId: number; // TODO: do we need this ? Added so we could add it to JWT token
 	private userData: UserData;
 
 	private readonly prisma: PrismaClient;
@@ -88,9 +90,11 @@ export class AuthService {
 			throw new Error('State strings do not match');
 	}
 
+	// Use a fetch request using the 42 token to retrieve the information we want about the user
 	async retrieveUserInfo() {
 		// make fetch data to retriece user info
 		try {
+			// Make a fetch request to the 42 API
 			const requestOptions = {
 				headers: {
 					Authorization: `Bearer ${this.token}`,
@@ -100,10 +104,10 @@ export class AuthService {
 			if (!response.ok) {
 				throw new Error('Fetch request failed');
 			}
+			// Parse the received data to json
 			const responseData = await response.json();
-			console.log(responseData);
 			this.userData = {
-				// id: responseData.id,
+				ft_id: responseData.id,
 				login: responseData.login,
 				firstName: responseData.first_name,
 				lastName: responseData.last_name,
@@ -112,20 +116,51 @@ export class AuthService {
 				image: responseData.image.versions.small,
 			};
 
-			// TODO: Store the response in our database
-			// TODO: handle the possibility of the login already existing in our database (must be unique)
-			console.log(this.userData);
-			// const createdUser = await this.prisma.user.create(this.userData);
-			// TODO: check whether the user already exists, if so update it, otherwise create it. here we create it
 			// TODO: add try/catch around this if we want to have more precise error logs ?
-			await this.prisma.user.create({
-				data: this.userData,
+			// Find the user in our database
+			const userInDb = await this.prisma.user.findUnique({
+				where: { ft_id: this.userData.ft_id },
 			});
+			// If the user was not found, create it with the retrieved data
+			if (userInDb == null) {
+				const newUser = await this.prisma.user.create({
+					data: this.userData,
+				});
+				// Store the user id in the local object, so we can use it in the JWT token
+				this.userId = newUser.id;
+			}
+			// if the user already exists, update their information (if they have not manually overwritten it themselves)
+			else await this.updateUserInfo(userInDb);
 			// this.yourDataRepository.save(mappedData);
+			this.userId = userInDb.id;
 		} catch (error) {
 			// TODO:: handle error accordingly
 			console.log(error);
 		}
-		// store it in our database
+	}
+
+	// TODO: test that this works once the profile update process has been setup
+	// Updates user info on login depending on whether those values where manually updated by the user or not
+	async updateUserInfo(userInDb: User) {
+		await this.prisma.user.update({
+			where: { ft_id: userInDb.ft_id },
+			data: {
+				login: !userInDb.login_is_locked ? this.userData.login : undefined,
+				email: !userInDb.email_is_locked ? this.userData.email : undefined,
+				firstName: !userInDb.firstName_is_locked
+					? this.userData.firstName
+					: undefined,
+				lastName: !userInDb.lastName_is_locked
+					? this.userData.lastName
+					: undefined,
+				image: !userInDb.image_is_locked ? this.userData.image : undefined,
+			},
+		});
+		// Store the user id in the local object, so we can use it in the JWT token
+		this.userId = userInDb.id;
+	}
+
+	getUserId() {
+		return this.userId;
 	}
 }
