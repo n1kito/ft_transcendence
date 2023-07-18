@@ -49,7 +49,7 @@ export class AuthController {
 				sameSite: 'strict',
 				// TODO: set this to true for production only, as it sends it over https and https is not used in local environments
 				// secure: true,
-				expires: new Date(Date.now() + expiresIn * 1000),  // Set cookie to expire when the JWT does
+				expires: new Date(Date.now() + expiresIn * 1000), // Set cookie to expire when the JWT does
 			});
 			const redirectURL = `http://localhost:3001/desktop`;
 			return { url: redirectURL }; // TODO: return 'desktop' (homepage) URL

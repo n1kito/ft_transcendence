@@ -19,7 +19,10 @@ const Desktop = () => {
 			// Feth the user data from the server
 			try {
 				console.log('trying to fetch');
-				const response = await fetch('http://localhost:3000/user/pouet');
+				const response = await fetch('http://localhost:3000/user/pouet', {
+					method: 'GET',
+					credentials: 'include',
+				});
 				const data = await response.json();
 				console.log(data);
 				// Set the user data in the context

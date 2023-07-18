@@ -13,7 +13,7 @@ datasource db {
 
 // TODO: the email cannot be the ID since it can be changed, the ID variable should the the ID
 model User {
-    id            Int      @id @default(autoincrement())
+    id            Int      @id @unique @default(autoincrement())
     ft_id         Int?     @unique
     hash          String?
     login         String   @unique
