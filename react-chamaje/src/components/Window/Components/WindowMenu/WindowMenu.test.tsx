@@ -5,7 +5,7 @@ import WindowMenu from './WindowMenu';
 
 describe('<WindowMenu />', () => {
 	test('it should mount', () => {
-		render(<WindowMenu />);
+		render(<WindowMenu>Test</WindowMenu>);
 
 		const windowMenu = screen.getByTestId('WindowMenu');
 

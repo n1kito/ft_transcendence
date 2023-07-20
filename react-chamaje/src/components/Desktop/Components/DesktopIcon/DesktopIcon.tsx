@@ -1,12 +1,10 @@
-import React, { MouseEvent, ReactComponentElement, useState } from 'react';
+import React from 'react';
 import './DesktopIcon.css';
-import Window from '../../../Window/Window';
-// import iconImage from './images/COKE2.svg';
 
 export interface IconProps {
 	name: string;
 	iconSrc: string;
-	onDoubleClick: React.MouseEventHandler<HTMLDivElement>;
+	onDoubleClick?: React.MouseEventHandler<HTMLDivElement>;
 }
 
 const DesktopIcon: React.FC<IconProps> = ({

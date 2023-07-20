@@ -3,23 +3,27 @@ import './Desktop.css';
 import DesktopIcon from './Components/DesktopIcon/DesktopIcon';
 import cupcakeIcon from './Components/DesktopIcon/images/CUPCAKE.svg';
 import Window from '../Window/Window';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import FriendsList from '../Friends/Components/FriendsList/FriendsList';
-import { UserContext } from '../../UserContext';
+import { UserContext } from '../../contexts/UserContext';
+import useAuth from '../../hooks/userAuth';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
 	const { userData, setUserData } = useContext(UserContext);
 	const [openFriendsWindow, setOpenedFriendsWindows] = useState(false);
 	const navigate = useNavigate();
+	const { isAuthentificated } = useAuth();
 
+	if (isAuthentificated) console.log('user is authentificated');
+	else console.log('user is not authentificated');
 	useEffect(() => {
 		// fetch request
 		const fetchUserData = async () => {
 			// Feth the user data from the server
 			try {
 				console.log('trying to fetch');
-				const response = await fetch('http://localhost:3000/user/pouet', {
+				const response = await fetch('http://localhost:3000/user/mjallada', {
 					method: 'GET',
 					credentials: 'include',
 				});

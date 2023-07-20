@@ -3,15 +3,8 @@ import './Login.css';
 // import Background from '../Background/Background';
 import Window from '../Window/Window';
 import Terminal from './Components/Terminal/Terminal';
-import Clock from '../Layout/Components/NavBar/Components/Clock/Clock';
-import Lock from '../Layout/Components/NavBar/Components/Lock/Lock';
 import { motion } from 'framer-motion';
 import Stickerparticles from './Components/Stickerparticles/Stickerparticles';
-import { MenuLinks } from '../Window/Window';
-import DesktopIcon from '../Desktop/Components/DesktopIcon/DesktopIcon';
-import cokeIcon from '../DesktopIcon/images/COKE2.svg';
-import cupcakeIcon from '../DesktopIcon/images/CUPCAKE.svg';
-import NavBar from '../Layout/Components/NavBar/NavBar';
 
 const Login = () => {
 	const constraintRef = useRef(null);

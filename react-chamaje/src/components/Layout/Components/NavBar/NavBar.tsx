@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import './NavBar.css';
 import Lock from './Components/Lock/Lock';
 import Clock from './Components/Clock/Clock';
-import { UserContext } from '../../../../UserContext';
+import { UserContext } from '../../../../contexts/UserContext';
 export interface navBarProps {
 	isLoggedIn?: boolean;
 }
