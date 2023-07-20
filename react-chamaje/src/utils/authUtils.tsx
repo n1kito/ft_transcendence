@@ -42,7 +42,7 @@ export function showComponentIfLoggedIn<P extends object>(
 
 		return <Component {...props} />;
 	};
-	
+
 	// Gives the component a name, for debugging purposes
 	WrappedComponent.displayName = `showComponentIfLoggedIn(${
 		Component.displayName || Component.name || 'Component'

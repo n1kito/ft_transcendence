@@ -38,7 +38,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 				console.log('Error occured while checking authentification:', error);
 			}
 		};
-		
+
 		checkAuth();
 	}, []);
 
