@@ -35,6 +35,7 @@
 	flex-direction: row;
 	/* gap: 1rem; */
 	justify-content: flex-end;
+	align-items: center;
 	gap: 1rem;
 }
 
@@ -64,7 +65,7 @@
 .loggedIn {
 	color: black;
 	background-color: white;
-	border: 1px solid black;
+	border: 2px solid black;
 }
 
 .loggedIn .siteTitle {
@@ -89,4 +90,12 @@
 
 .loggedIn .lockBody {
 	fill: black;
+}
+
+.userAvatar {
+	height: 2rem;
+	aspect-ratio: 1/1;
+	border-radius: 50%;
+	border: 2px solid black;
+	box-shadow: 1px 1px pink;
 }

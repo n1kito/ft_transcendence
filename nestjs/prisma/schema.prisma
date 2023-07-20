@@ -11,11 +11,24 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+// TODO: the email cannot be the ID since it can be changed, the ID variable should the the ID
 model User {
-    id        Int      @id @default(autoincrement())
-    hash      String
-    firstName String
-    lastName  String
-    email     String   @unique
-    createdAt DateTime @default(now())
+    id            Int      @id @unique @default(autoincrement())
+    ft_id         Int?     @unique
+    hash          String?
+    login         String   @unique
+    firstName     String
+    lastName      String
+    email         String   @unique
+    image         String?
+    createdAt     DateTime @default(now())
+    token         String?
+    refresh_token String?
+
+    // Will be set to true if our user manually updated the corresponding values from their profiles
+    login_is_locked     Boolean @default(false)
+    firstName_is_locked Boolean @default(false)
+    lastName_is_locked  Boolean @default(false)
+    email_is_locked     Boolean @default(false)
+    image_is_locked     Boolean @default(false)
 }

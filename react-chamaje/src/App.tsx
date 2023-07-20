@@ -7,6 +7,7 @@ import Stickerparticles from './components/Login/Components/Stickerparticles/Sti
 import roadconeIcon from './images/ROADCONE.svg';
 import DesktopIcon from './components/Desktop/Components/DesktopIcon/DesktopIcon';
 import Desktop from './components/Desktop/Desktop';
+import { UserProvider } from './UserContext';
 
 const router = createBrowserRouter([
 	{
@@ -37,9 +38,11 @@ const router = createBrowserRouter([
 
 function App() {
 	return (
-		<div className="App">
-			<RouterProvider router={router} />
-		</div>
+		<UserProvider>
+			<div className="App">
+				<RouterProvider router={router} />
+			</div>
+		</UserProvider>
 	);
 }
 

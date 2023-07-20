@@ -1,20 +1,52 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import './Desktop.css';
 import DesktopIcon from './Components/DesktopIcon/DesktopIcon';
 import cupcakeIcon from './Components/DesktopIcon/images/CUPCAKE.svg';
 import Window from '../Window/Window';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import FriendsList from '../Friends/Components/FriendsList/FriendsList';
+import { UserContext } from '../../UserContext';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
+	const { userData, setUserData } = useContext(UserContext);
 	const [openFriendsWindow, setOpenedFriendsWindows] = useState(false);
 	const navigate = useNavigate();
+
+	useEffect(() => {
+		// fetch request
+		const fetchUserData = async () => {
+			// Feth the user data from the server
+			try {
+				console.log('trying to fetch');
+				const response = await fetch('http://localhost:3000/user/pouet', {
+					method: 'GET',
+					credentials: 'include',
+				});
+				const data = await response.json();
+				console.log(data);
+				// Set the user data in the context
+				setUserData(data);
+			} catch (error) {
+				console.log('Error: error');
+			}
+		};
+
+		fetchUserData();
+	}, [setUserData]);
 
 	const friendsClickHandler = () => {
 		setOpenedFriendsWindows(true);
 		navigate('/friends');
 	};
+
+	// const location = useLocation();
+	// const searchParams = new URLSearchParams(location.search);
+	// const parameterValue = searchParams.get('login');
+
+	// setUserData({
+	// 	login: parameterValue || ''
+	// });
 
 	return (
 		<div className="desktopWrapper">
@@ -34,7 +66,14 @@ const Desktop = () => {
 				onDoubleClick={friendsClickHandler}
 			/>
 			{/* {openFriendsWindow && <Window windowTitle="Friends"><FriendsList /></Window>}*/}
-			<Window windowTitle="Friends" links={[{ name: 'Add friend', url: '#' }, { name: 'See online friends', url: '#' }, { name: 'Do something', url: '#' }]}>
+			<Window
+				windowTitle="Friends"
+				links={[
+					{ name: 'Add friend', url: '#' },
+					{ name: 'See online friends', url: '#' },
+					{ name: 'Do something', url: '#' },
+				]}
+			>
 				<FriendsList />
 			</Window>
 		</div>

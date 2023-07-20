@@ -36,7 +36,8 @@
 }
 
 .online img {
-	box-shadow: 0 0 0 5px white, 0 0 0 7.5px lightgreen, 7px 7px 10px 0px lightgreen;
+	box-shadow: 0 0 0 5px white, 0 0 0 7.5px lightgreen,
+		7px 7px 10px 0px lightgreen;
 }
 
 .selected:active img {
