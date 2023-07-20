@@ -17,7 +17,8 @@ async function bootstrap() {
 	// 	optionsSuccessStatus: 204,
 	// };
 	app.enableCors({
-		origin: 'http://localhost:3001',
+		origin: 'http://localhost:3001', // Allow requests from this origin
+		credentials: true, // Allow credentials (cookies, for us)
 	});
 	app.use(cookieParser());
 	await app.listen(3000);
