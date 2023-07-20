@@ -23,7 +23,10 @@ export class AuthMiddleWare implements NestMiddleware {
 			// Now, we verify the JWT using the secret key.
 			// If the token is valid, jwt.verify returns the payload of the token (the data that was initially stored in the token when it was signed).
 			// If the token is not valid (maybe it was tampered with, or it's expired), jwt.verify throws an error.
-			const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+			const decoded = jwt.verify(
+				token,
+				process.env.JWT_SECRET_KEY,
+			) as jwt.JwtPayload;
 			// Check that the user is indeed part of our database (maybe they are using an old cookie, should not happen but does not hurt to check)
 			const userPromise = prisma.user.findUnique({
 				where: { id: decoded.userId },
