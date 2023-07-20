@@ -1,9 +1,13 @@
 import React from 'react';
 import './WindowMenu.css';
 
-const WindowMenu = (props: any) => {
+interface WindowMenuProps {
+	children: React.ReactNode;
+  }
+
+const WindowMenu = ({ children }: WindowMenuProps) => {
 	// TODO: figure out what type props should be
-	return <div id="windowMenu">{props.children}</div>;
+	return <div className="windowMenu">{children}</div>;
 };
 
 export default WindowMenu;

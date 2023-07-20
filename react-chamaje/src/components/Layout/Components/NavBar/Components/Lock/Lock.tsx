@@ -1,10 +1,9 @@
 import React from 'react';
 import './Lock.css';
-import locked from '../../images/lock.svg';
 
 const Lock = () => {
 	return (
-		<div id="lockWrapper">
+		<div id="lockWrapper" title="Click to log out">
 			<svg
 				id="lockIcon"
 				data-name="Layer 2"

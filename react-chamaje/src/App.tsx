@@ -2,47 +2,52 @@ import React from 'react';
 import './App.css';
 import Login from './components/Login/Login';
 import Layout from './components/Layout/Layout';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import Stickerparticles from './components/Login/Components/Stickerparticles/Stickerparticles';
-import roadconeIcon from './images/ROADCONE.svg';
-import DesktopIcon from './components/Desktop/Components/DesktopIcon/DesktopIcon';
+import {
+	BrowserRouter,
+	// createBrowserRouter,
+	Route,
+	// Router,
+	// RouterProvider,
+	Routes,
+	useNavigate,
+} from 'react-router-dom';
 import Desktop from './components/Desktop/Desktop';
-import { UserProvider } from './UserContext';
+import { UserProvider } from './contexts/UserContext';
+import AuthContextProvider from './contexts/AuthContext';
+import DesktopIcon from './components/Desktop/Components/DesktopIcon/DesktopIcon';
+import roadconeIcon from './images/ROADCONE.svg';
+import {
+	showComponentIfLoggedIn,
+	showComponentIfNotLoggedIn,
+} from './utils/authUtils';
 
-const router = createBrowserRouter([
-	{
-		path: '/',
-		element: <Layout />,
-		errorElement: (
-			<Layout>
-				{/* <DesktopIcon name="Error :(" iconSrc={roadconeIcon} /> */}
-			</Layout>
-		),
-		children: [
-			{
-				index: true,
-				path: '/',
-				element: <Login />,
-			},
-			{
-				path: 'desktop',
-				element: <Desktop />,
-			},
-			{
-				path: 'friends',
-				element: <Desktop />,
-			},
-		],
-	},
-]);
+// These are functions that will return a component passed as parameter depending on user authentification status
+const ProtectedLogin = showComponentIfNotLoggedIn(Login);
+const ProtectedDesktop = showComponentIfLoggedIn(Desktop);
 
 function App() {
 	return (
-		<UserProvider>
-			<div className="App">
-				<RouterProvider router={router} />
-			</div>
-		</UserProvider>
+		<AuthContextProvider>
+			<UserProvider>
+				<div className="App">
+					<BrowserRouter>
+						<Layout>
+							<Routes>
+								<Route path="/" element={<ProtectedLogin />} />
+								<Route path="/desktop" element={<ProtectedDesktop />} />
+								<Route path="/friends" element={<ProtectedDesktop />} />
+								<Route
+									path="*"
+									element={
+										<DesktopIcon name="Error :(" iconSrc={roadconeIcon} />
+									}
+								/>
+							</Routes>
+						</Layout>
+					</BrowserRouter>
+				</div>
+			</UserProvider>
+		</AuthContextProvider>
 	);
 }
 

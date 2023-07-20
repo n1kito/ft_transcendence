@@ -2,7 +2,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
-#windowMenu {
+.windowMenu {
 	background-color: black;
 	color: white;
 	height: fit-content;
@@ -16,13 +16,13 @@
 	padding-left: 1rem;
 }
 
-#windowMenu * {
+.windowMenu * {
 	color: inherit;
 	text-decoration: none;
 	padding: 0.05rem 0 0.3rem 0;
 	/* cursor: default; */
 }
 
-#windowMenu a:hover {
+.windowMenu a:hover {
 	cursor: default;
 }

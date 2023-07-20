@@ -5,7 +5,7 @@ export default {
 	title: 'Components/Window/WindowMenu',
 };
 
-export const Default = () => <WindowMenu />;
+export const Default = () => <WindowMenu>Test</WindowMenu>;
 
 Default.story = {
 	name: 'default',

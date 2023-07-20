@@ -1,10 +1,8 @@
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import './Window.css';
 import WindowTitleBar from './Components/WindowTitleBar/WindowTitleBar';
 import WindowMenu from './Components/WindowMenu/WindowMenu';
-import { PanInfo, motion, useDragControls } from 'framer-motion';
-import Login from '../Login/Login';
-import { start } from 'repl';
+import { motion, useDragControls } from 'framer-motion';
 
 export interface MenuLinks {
 	name: string;
@@ -67,8 +65,8 @@ const Window: React.FC<WindowProps> = ({
 				<WindowTitleBar windowTitle={windowTitle} />
 			</div>
 			<WindowMenu>
-				{links.map((linkElem) => (
-					<a href={linkElem.url} key={linkElem.url}>
+				{links.map((linkElem, index) => (
+					<a href={linkElem.url} key={index}>
 						{linkElem.name}
 					</a>
 				))}
