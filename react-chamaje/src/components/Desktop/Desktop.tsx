@@ -80,7 +80,12 @@ const Desktop = () => {
 				]}
 			>
 				{/* <FriendsList /> */}
-				<Title title="My profile" highlight={true} highlightColor="#F8EF57" />
+				<Title
+					title="my profile"
+					highlight={true}
+					highlightColor="#F8EF57"
+					fontSize="2rem"
+				/>
 			</Window>
 		</div>
 	);

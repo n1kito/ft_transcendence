@@ -5,15 +5,17 @@ interface TitleProps {
 	title?: string;
 	highlight?: boolean;
 	highlightColor?: string;
+	fontSize?: string;
 }
 
 const Title: React.FC<TitleProps> = ({
 	title = '',
 	highlight = false,
 	highlightColor = '',
+	fontSize = '2rem',
 }) => {
 	return (
-		<div className="title">
+		<div className="title" style={{ fontSize: fontSize }}>
 			<span>{title}</span>
 			{highlight && (
 				<div
