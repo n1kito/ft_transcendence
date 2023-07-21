@@ -19,7 +19,6 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 		<ShadowWrapper shadow={shadow} clickable={clickable}>
 			{/* TODO: change the title property to use the person's actual name */}
 			<div className="friendBadge" title="Open Jee's profile">
-				{/* <div className="statusIndicator"></div> */}
 				<div className="badgeAvatar">
 					<img src={badgeImage} />
 				</div>

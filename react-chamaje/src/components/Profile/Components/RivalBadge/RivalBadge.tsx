@@ -5,8 +5,8 @@ import FriendBadge from '../../../Friends/Components/FriendBadge/FriendBadge';
 
 const RivalBadge = () => {
 	return (
-		<div className='rival-badge'>
-			<FriendBadge badgeTitle="Rival"/>
+		<div className="rival-badge">
+			<FriendBadge badgeTitle="Rival" />
 			<BlackBadge>@megan</BlackBadge>
 		</div>
 	);

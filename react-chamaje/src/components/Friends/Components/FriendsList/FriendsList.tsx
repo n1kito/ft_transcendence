@@ -3,6 +3,7 @@ import './FriendsList.css';
 import FriendBadge from '../FriendBadge/FriendBadge';
 import MatchHistoryBadge from '../../../Profile/Components/MatchHistoryBadge/MatchHistoryBadge';
 import RivalBadge from '../../../Profile/Components/RivalBadge/RivalBadge';
+import OnlineStatusFriendBadge from '../../../Profile/Components/OnlineStatusFriendBadge/OnlineStatusFriendBadge';
 
 const FriendsList = () => {
 	return (
@@ -11,7 +12,7 @@ const FriendsList = () => {
 				<FriendBadge badgeTitle="m3gan" shadow={true} clickable={true} />
 				<FriendBadge badgeTitle="m3gan" />
 				<FriendBadge badgeTitle="m3gan" />
-				<FriendBadge badgeTitle="m3gan" />
+				<OnlineStatusFriendBadge badgeTitle="m3gan" />
 				<RivalBadge />
 				<MatchHistoryBadge
 					badgeTitle="m3gan"
