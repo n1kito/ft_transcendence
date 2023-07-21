@@ -10,7 +10,7 @@
 }
 
 .statBadgeTitle {
-    /* padding:  0.1rem ; */
+    white-space: nowrap;
     font-weight: 600;
 }
 
@@ -26,4 +26,5 @@
     justify-content: center;
     align-items: center;
     padding-top: unset;
+    white-space: nowrap;
 }
