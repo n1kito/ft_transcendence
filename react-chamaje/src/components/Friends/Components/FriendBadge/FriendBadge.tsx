@@ -1,13 +1,20 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import './FriendBadge.css';
 import jeeAvatar from './images/79132132.jpeg';
+import m3ganAvatar from './images/m3gan.jpg';
+import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 
 const FriendBadge = () => {
 	return (
-		<div className="friendBadge selected" title="Open Jee's profile">
-			<img className="" src={jeeAvatar} />
-			<span>jeepark</span>
-		</div>
+		<ShadowWrapper shadow={true} clickable={true}>
+			<div className="friendBadge" title="Open Jee's profile">
+				<div className="statusIndicator"></div>
+				<div className="badgeAvatar">
+					<img src={m3ganAvatar} />
+				</div>
+				<span>@m3gan</span>
+			</div>
+		</ShadowWrapper>
 	);
 };
 

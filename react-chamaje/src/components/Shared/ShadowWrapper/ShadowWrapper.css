@@ -1,0 +1,20 @@
+/* Styling the ShadowWrapper component */
+
+.shadow-wrapper {
+	border-radius: 0.71838rem;
+	border: 2px solid #000;
+	background: #fff;
+	overflow: hidden;
+	height: fit-content;
+}
+
+.shadow {
+	box-shadow: 3px 3px black;
+}
+
+.clickable:active {
+	box-shadow: none;
+	position: relative;
+	top: 3px;
+	left: 3px;
+}

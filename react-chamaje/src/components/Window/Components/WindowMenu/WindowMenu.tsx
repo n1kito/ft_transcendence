@@ -3,7 +3,7 @@ import './WindowMenu.css';
 
 interface WindowMenuProps {
 	children: React.ReactNode;
-  }
+}
 
 const WindowMenu = ({ children }: WindowMenuProps) => {
 	// TODO: figure out what type props should be
