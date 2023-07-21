@@ -1,11 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './MatchHistoryBadge.css';
 import FriendBadge from '../../../Friends/Components/FriendBadge/FriendBadge';
 import BlackBadge from '../Shared/BlackBadge/BlackBadge';
 
-const MatchHistoryBadge = () => {
+interface IMatchHistoryBadgeProps {
+	badgeTitle: string;
+	badgeImage?: string;
+	userScore: number;
+	adversaryScore: number;
+}
+
+const MatchHistoryBadge: React.FC<IMatchHistoryBadgeProps> = ({
+	badgeTitle,
+	badgeImage,
+	userScore,
+	adversaryScore,
+}) => {
 	// TODO: implement this state/variable dynamically
-	const [playerWon, setPlayerWon] = useState(true);
+	const [playerWon, setPlayerWon] = useState(false);
+
+	useEffect(() => {
+		setPlayerWon(userScore > adversaryScore);
+	}, []);
 
 	return (
 		<div
@@ -16,9 +32,10 @@ const MatchHistoryBadge = () => {
 			>
 				YOU {`${playerWon ? 'WON' : 'LOST'}`}
 			</div>
-			<FriendBadge />
-			{/* TODO: retrieve actual score here */}
-			<BlackBadge>Score: 5/7</BlackBadge>
+			<FriendBadge badgeTitle={badgeTitle} badgeImage={badgeImage} />
+			<BlackBadge>
+				Score: {userScore}/{adversaryScore}
+			</BlackBadge>
 		</div>
 	);
 };

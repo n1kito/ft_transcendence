@@ -8,12 +8,16 @@ const FriendsList = () => {
 	return (
 		<div>
 			<div className="friendsList">
-				<FriendBadge shadow={true} clickable={true} />
-				<FriendBadge />
-				<FriendBadge />
-				<FriendBadge />
+				<FriendBadge badgeTitle="m3gan" shadow={true} clickable={true} />
+				<FriendBadge badgeTitle="m3gan" />
+				<FriendBadge badgeTitle="m3gan" />
+				<FriendBadge badgeTitle="m3gan" />
 				<RivalBadge />
-				<MatchHistoryBadge />
+				<MatchHistoryBadge
+					badgeTitle="m3gan"
+					userScore={5}
+					adversaryScore={7}
+				/>
 			</div>
 			<div className="bottomInfo">3 friends, 1 online</div>
 		</div>

@@ -1,13 +1,19 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 import './FriendBadge.css';
-import jeeAvatar from './images/79132132.jpeg';
 import m3ganAvatar from './images/m3gan.jpg';
 import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import { ShadowWrapperProps } from '../../../Shared/ShadowWrapper/ShadowWrapper';
 
-const FriendBadge: React.FC<ShadowWrapperProps> = ({
+export interface IFriendBadgeProps extends ShadowWrapperProps {
+	badgeTitle: string;
+	badgeImage?: string;
+}
+
+const FriendBadge: React.FC<IFriendBadgeProps> = ({
 	clickable = false,
 	shadow = clickable || false,
+	badgeTitle,
+	badgeImage = m3ganAvatar,
 }) => {
 	return (
 		<ShadowWrapper shadow={shadow} clickable={clickable}>
@@ -15,9 +21,9 @@ const FriendBadge: React.FC<ShadowWrapperProps> = ({
 			<div className="friendBadge" title="Open Jee's profile">
 				{/* <div className="statusIndicator"></div> */}
 				<div className="badgeAvatar">
-					<img src={m3ganAvatar} />
+					<img src={badgeImage} />
 				</div>
-				<span className="friend-name">@m3gan</span>
+				<span className="friend-name">{badgeTitle}</span>
 			</div>
 		</ShadowWrapper>
 	);
