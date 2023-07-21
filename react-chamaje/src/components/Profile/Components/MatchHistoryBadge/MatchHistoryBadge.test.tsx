@@ -1,0 +1,14 @@
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom/extend-expect';
+import MatchHistoryBadge from './MatchHistoryBadge';
+
+describe('<MatchHistoryBadge />', () => {
+	test('it should mount', () => {
+		render(<MatchHistoryBadge />);
+
+		const matchHistoryBadge = screen.getByTestId('MatchHistoryBadge');
+
+		expect(matchHistoryBadge).toBeInTheDocument();
+	});
+});
