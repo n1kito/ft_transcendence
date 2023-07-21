@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './MatchHistoryBadge.css';
 import FriendBadge from '../../../Friends/Components/FriendBadge/FriendBadge';
+import BlackBadge from '../Shared/BlackBadge/BlackBadge';
 
 const MatchHistoryBadge = () => {
 	// TODO: implement this state/variable dynamically
@@ -17,7 +18,7 @@ const MatchHistoryBadge = () => {
 			</div>
 			<FriendBadge />
 			{/* TODO: retrieve actual score here */}
-			<div className="score-status">Score: 7/5</div>
+			<BlackBadge>Score: 5/7</BlackBadge>
 		</div>
 	);
 };
