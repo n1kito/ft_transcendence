@@ -5,7 +5,7 @@ import OnlineStatusFriendBadge from './OnlineStatusFriendBadge';
 
 describe('<OnlineStatusFriendBadge />', () => {
 	test('it should mount', () => {
-		render(<OnlineStatusFriendBadge />);
+		render(<OnlineStatusFriendBadge badgeTitle="Login" />);
 
 		const onlineStatusFriendBadge = screen.getByTestId(
 			'OnlineStatusFriendBadge',
