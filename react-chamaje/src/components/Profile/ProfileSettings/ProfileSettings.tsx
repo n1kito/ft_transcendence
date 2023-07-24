@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Button from '../../Shared/Button/Button';
 import ShadowWrapper from '../../Shared/ShadowWrapper/ShadowWrapper';
 import InputField from '../InputField/InputField';
 import './ProfileSettings.css';
@@ -18,10 +19,9 @@ const ProfileSettings: React.FC = () => {
 	return (
 		<ShadowWrapper>
 			<div className="ProfileForm">
-				{/* <ShadowWrapper> */}
 				<InputField value={username} onChange={handleUsernameChange} />
 				<InputField value={email} onChange={handleEmailChange} />
-				{/* </ShadowWrapper> */}
+				<Button buttonText="Save"></Button>
 			</div>
 		</ShadowWrapper>
 	);

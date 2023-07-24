@@ -1,16 +1,21 @@
 .input {
-	width: 166px;
-	height: 34px;
+	width: 50%;
 	flex-shrink: 0;
-
 	border-radius: 8px;
 	border: 1.5px solid #000;
 	background: #fff;
+	box-shadow: 1px 1px 0 0 black;
+	background-color: rgba(255, 255, 255, 0.2);
+	width: fit-content;
+	padding: 0.8rem;
 }
 
-/* Additional styles for the <input> element */
+.inputFieldWrapper input:focus {
+	background-color: white;
+	outline: none;
+}
+
 input[type='text'] {
 	font-family: 'Roboto Mono';
 	color: black;
-	/* Add specific styles for input type 'text' (if needed) */
 }

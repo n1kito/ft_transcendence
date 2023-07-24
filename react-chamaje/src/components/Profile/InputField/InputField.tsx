@@ -15,12 +15,14 @@ const InputField: React.FC<InputFieldProps> = ({ value, onChange }) => {
 	};
 
 	return (
-		<input
-			className="input"
-			type="text"
-			value={value}
-			onChange={handleChange}
-		/>
+		<div className="inputFieldWrapper">
+			<input
+				className="input"
+				type="text"
+				value={value}
+				onChange={handleChange}
+			/>
+		</div>
 	);
 };
 

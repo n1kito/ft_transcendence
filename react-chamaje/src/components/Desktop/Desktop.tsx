@@ -10,6 +10,7 @@ import useAuth from '../../hooks/userAuth';
 import ShadowWrapper from '../Shared/ShadowWrapper/ShadowWrapper';
 import InputField from '../Profile/InputField/InputField';
 import ProfileSettings from '../Profile/ProfileSettings/ProfileSettings';
+import LoginForm from '../NotUsed/LoginForm/LoginForm';
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
 	const { userData, setUserData } = useContext(UserContext);
@@ -81,9 +82,7 @@ const Desktop = () => {
 				]}
 			>
 				{/* <FriendsList /> */}
-				{/* <ShadowWrapper shadow={true}> */}
 				<ProfileSettings />
-				{/* </ShadowWrapper> */}
 			</Window>
 		</div>
 	);
