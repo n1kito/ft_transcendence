@@ -1,9 +1,9 @@
 .titleWrapper {
+	position: relative;
 	display: flex;
-	flex-direction: row;
 	gap: 1rem;
-	align-items: baseline;
 	font-family: 'Fredoka', sans-serif;
+	align-items: center;
 }
 
 .title {
@@ -13,6 +13,7 @@
 	position: relative;
 	width: fit-content;
 	white-space: nowrap;
+	/* outline: 1px solid red; */
 }
 
 .highlight {
@@ -32,5 +33,7 @@
 
 .tooltip {
 	font-size: 1rem;
-	letter-spacing: 0.1px;
+	letter-spacing: 0rem;
+	margin-bottom: -0.5rem;
+	margin-left: 0rem;
 }
