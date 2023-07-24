@@ -7,7 +7,9 @@ import { useNavigate } from 'react-router-dom';
 import FriendsList from '../Friends/Components/FriendsList/FriendsList';
 import { UserContext } from '../../contexts/UserContext';
 import useAuth from '../../hooks/userAuth';
-
+import ShadowWrapper from '../Shared/ShadowWrapper/ShadowWrapper';
+import InputField from '../Profile/InputField/InputField';
+import ProfileSettings from '../Profile/ProfileSettings/ProfileSettings';
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
 	const { userData, setUserData } = useContext(UserContext);
@@ -78,7 +80,10 @@ const Desktop = () => {
 					{ name: 'Do something', url: '#' },
 				]}
 			>
-				<FriendsList />
+				{/* <FriendsList /> */}
+				{/* <ShadowWrapper shadow={true}> */}
+				<ProfileSettings />
+				{/* </ShadowWrapper> */}
 			</Window>
 		</div>
 	);

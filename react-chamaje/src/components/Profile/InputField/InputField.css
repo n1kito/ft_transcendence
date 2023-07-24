@@ -1,0 +1,16 @@
+.input {
+	width: 166px;
+	height: 34px;
+	flex-shrink: 0;
+
+	border-radius: 8px;
+	border: 1.5px solid #000;
+	background: #fff;
+}
+
+/* Additional styles for the <input> element */
+input[type='text'] {
+	font-family: 'Roboto Mono';
+	color: black;
+	/* Add specific styles for input type 'text' (if needed) */
+}
