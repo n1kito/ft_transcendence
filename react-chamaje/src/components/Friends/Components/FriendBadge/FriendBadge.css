@@ -32,18 +32,6 @@
 
 .friendBadge span {
 	font-size: 1.2rem;
-	padding: 4px 8px 8px 8px;
+	padding: 0.5rem 0 0.7rem 0;
 	font-family: 'Fredoka', sans-serif;
-}
-
-.statusIndicator {
-	width: 0.8rem;
-	aspect-ratio: 1/1;
-	position: absolute;
-	border-radius: 50%;
-	left: 0.5rem;
-	top: 0.5rem;
-	background-color: #57f8ab;
-	border: 1px solid black;
-	z-index: 1;
 }

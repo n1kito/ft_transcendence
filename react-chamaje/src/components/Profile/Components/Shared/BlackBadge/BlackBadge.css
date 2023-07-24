@@ -1,0 +1,16 @@
+/* Styling the BlackBadge component */
+
+.black-badge {
+	white-space: nowrap;
+	text-align: center;
+	font-family: 'Fredoka', sans-serif;
+
+	transition: all 0.3s ease-in-out;
+
+	background-color: black;
+	color: white;
+	border-radius: 0.4rem;
+
+	font-size: 0.8rem;
+	padding: 0.1rem 0.5rem 0.2rem 0.5rem;
+}
