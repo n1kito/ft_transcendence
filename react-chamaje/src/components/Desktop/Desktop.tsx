@@ -20,15 +20,17 @@ const Desktop = () => {
 	const navigate = useNavigate();
 	const { isAuthentificated } = useAuth();
 
-	if (isAuthentificated) console.log('user is authentificated');
-	else console.log('user is not authentificated');
+	if (isAuthentificated) {
+		console.log('user is authentificated');
+		console.log('user login is ' + userData?.login);
+	} else console.log('user is not authentificated');
 	useEffect(() => {
 		// fetch request
 		const fetchUserData = async () => {
 			// Feth the user data from the server
 			try {
 				console.log('trying to fetch');
-				const response = await fetch('http://localhost:3000/user/mjallada', {
+				const response = await fetch('http://localhost:3000/user/jeepark', {
 					method: 'GET',
 					credentials: 'include',
 				});

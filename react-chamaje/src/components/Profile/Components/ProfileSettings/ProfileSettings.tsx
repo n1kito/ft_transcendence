@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { UserContext } from '../../../../contexts/UserContext';
 import Button from '../../../Shared/Button/Button';
 import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import InputField from '../InputField/InputField';
@@ -6,8 +7,22 @@ import Title from '../Title/Title';
 import './ProfileSettings.css';
 
 const ProfileSettings: React.FC = () => {
-	const [username, setUsername] = useState('cgosseli');
-	const [email, setEmail] = useState('cgosseli@student.42.fr');
+	const { userData, setUserData } = useContext(UserContext);
+	let login = userData ? userData.login : 'MyLogin';
+
+	console.log('profile settings' + login);
+
+	console.log({ userData });
+
+	const [username, setUsername] = useState('');
+	const [email, setEmail] = useState('');
+
+	useEffect(() => {
+		if (userData) {
+			setUsername(userData.login);
+			setEmail(userData.email);
+		}
+	}, [userData]);
 
 	const handleUsernameChange = (newUsername: string) => {
 		setUsername(newUsername);
@@ -17,8 +32,14 @@ const ProfileSettings: React.FC = () => {
 		setEmail(newEmail);
 	};
 
+	const handleSaveButtonClick = () => {
+		// send a request to update username and/or email on the server
+		// create update endpoint
+		// setUserData();
+	};
+
 	return (
-		<ShadowWrapper backgroundColor="#D5B1F9">
+		<ShadowWrapper shadow={true} backgroundColor="#D5B1F9">
 			<div className="ProfileForm">
 				<Title
 					title="My Profile"
