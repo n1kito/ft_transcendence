@@ -85,6 +85,7 @@ const Desktop = () => {
 					highlight={true}
 					highlightColor="#F8EF57"
 					fontSize="2rem"
+					toolTip="edit my profile"
 				/>
 			</Window>
 		</div>

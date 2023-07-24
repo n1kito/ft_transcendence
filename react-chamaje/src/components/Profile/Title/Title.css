@@ -1,5 +1,12 @@
-.title {
+.titleWrapper {
+	display: flex;
+	flex-direction: row;
+	gap: 1rem;
+	align-items: baseline;
 	font-family: 'Fredoka', sans-serif;
+}
+
+.title {
 	color: black;
 	font-weight: 600;
 	letter-spacing: 0.1px;
@@ -21,4 +28,9 @@
 .title > span {
 	z-index: 1;
 	position: relative;
+}
+
+.tooltip {
+	font-size: 1rem;
+	letter-spacing: 0.1px;
 }

@@ -6,6 +6,7 @@ interface TitleProps {
 	highlight?: boolean;
 	highlightColor?: string;
 	fontSize?: string;
+	toolTip?: string;
 }
 
 const Title: React.FC<TitleProps> = ({
@@ -13,16 +14,24 @@ const Title: React.FC<TitleProps> = ({
 	highlight = false,
 	highlightColor = '',
 	fontSize = '2rem',
+	toolTip = '',
 }) => {
 	return (
-		<div className="title" style={{ fontSize: fontSize }}>
-			<span>{title}</span>
-			{highlight && (
-				<div
-					className="highlight"
-					style={{ backgroundColor: highlightColor }}
-				></div>
-			)}
+		<div
+			className="titleWrapper"
+			style={{ fontSize: fontSize }}
+			title={toolTip}
+		>
+			<div className="title">
+				<span>{title}</span>
+				{highlight && (
+					<div
+						className="highlight"
+						style={{ backgroundColor: highlightColor }}
+					></div>
+				)}
+			</div>
+			{toolTip ? <div className="tooltip">(?)</div> : null}
 		</div>
 	);
 };
