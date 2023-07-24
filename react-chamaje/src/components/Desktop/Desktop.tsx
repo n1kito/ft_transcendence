@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import FriendsList from '../Friends/Components/FriendsList/FriendsList';
 import { UserContext } from '../../contexts/UserContext';
 import useAuth from '../../hooks/userAuth';
+import Title from '../Profile/Title/Title';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -78,7 +79,14 @@ const Desktop = () => {
 					{ name: 'Do something', url: '#' },
 				]}
 			>
-				<FriendsList />
+				{/* <FriendsList /> */}
+				<Title
+					title="my profile"
+					highlight={true}
+					highlightColor="#F8EF57"
+					fontSize="2rem"
+					toolTip="edit my profile"
+				/>
 			</Window>
 		</div>
 	);
