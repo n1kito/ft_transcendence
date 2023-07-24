@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Button from '../../../Shared/Button/Button';
 import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import InputField from '../InputField/InputField';
+import Title from '../Title/Title';
 import './ProfileSettings.css';
 
 const ProfileSettings: React.FC = () => {
@@ -17,8 +18,14 @@ const ProfileSettings: React.FC = () => {
 	};
 
 	return (
-		<ShadowWrapper>
+		<ShadowWrapper backgroundColor="#D5B1F9">
 			<div className="ProfileForm">
+				<Title
+					title="My Profile"
+					highlight={true}
+					highlightColor="#F8EF57"
+					fontSize="1.5rem"
+				/>
 				<InputField value={username} onChange={handleUsernameChange} />
 				<InputField value={email} onChange={handleEmailChange} />
 				<Button buttonText="Save"></Button>

@@ -21,7 +21,8 @@
 	height: 60%;
 	width: 100%;
 	position: absolute;
-	top: 1.2rem;
+	/* top: 0.4rem; */
+	top: 40%;
 	left: 0.5rem;
 	opacity: 0.8;
 }
