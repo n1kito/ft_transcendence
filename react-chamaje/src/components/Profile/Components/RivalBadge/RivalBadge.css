@@ -1,0 +1,18 @@
+/* Styling the RivalBadge component */
+
+.rival-badge {
+	position: relative;
+}
+
+.rival-badge .friend-name {
+	transform: translateY(-0.3rem);
+}
+
+.rival-badge .black-badge {
+	position: absolute;
+	z-index: 1;
+	left: 50%;
+	transform: translateX(-50%);
+	bottom: -0.5rem;
+	transition: all 0.3s ease-in-out;
+}

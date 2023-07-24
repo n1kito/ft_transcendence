@@ -1,0 +1,74 @@
+/* Styling the MatchHistoryBadge component */
+
+.match-history-badge {
+	position: relative;
+}
+
+.match-history-badge:hover .winning-status {
+	opacity: 1;
+	top: -1rem;
+}
+
+.match-history-badge:hover .black-badge {
+	opacity: 1;
+	bottom: -0.5rem;
+}
+
+.match-history-badge .friend-name {
+	transition: all 0.3s ease-in-out;
+}
+
+.match-history-badge:hover .friend-name {
+	position: relative;
+	transform: translateY(-0.3rem);
+}
+
+.winning-status {
+	position: absolute;
+	z-index: 1;
+	white-space: nowrap;
+	text-align: center;
+	font-family: 'Fredoka', sans-serif;
+	left: 50%;
+	transform: translateX(-50%);
+	opacity: 0;
+	transition: all 0.3s ease-in-out;
+}
+
+.winning-status {
+	font-weight: bold;
+	border-radius: 0.7rem;
+	border: 4px solid;
+	letter-spacing: 0.00313rem;
+	padding: 0.2rem 0.5rem;
+	top: 0;
+}
+
+.player-won {
+	color: #57f8ab;
+	border-color: #57f8ab;
+	background: #d7f6d5;
+	box-shadow: 1.5px 1.5px 0px 0px #57f8ab;
+}
+
+.player-lost {
+	color: #f85774;
+	border-color: #f85774;
+	background: #f6d5df;
+	box-shadow: 1.5px 1.5px 0px 0px #f85774;
+}
+
+.black-and-white img {
+	filter: grayscale();
+}
+
+.match-history-badge .black-badge {
+	position: absolute;
+	z-index: 1;
+	left: 50%;
+	transform: translateX(-50%);
+	opacity: 0;
+	bottom: 0;
+	opacity: 0;
+	transition: all 0.3s ease-in-out;
+}

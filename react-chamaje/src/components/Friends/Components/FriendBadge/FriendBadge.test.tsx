@@ -5,7 +5,7 @@ import FriendBadge from './FriendBadge';
 
 describe('<FriendBadge />', () => {
 	test('it should mount', () => {
-		render(<FriendBadge />);
+		render(<FriendBadge badgeTitle="Title" />);
 
 		const friendBadge = screen.getByTestId('FriendBadge');
 
