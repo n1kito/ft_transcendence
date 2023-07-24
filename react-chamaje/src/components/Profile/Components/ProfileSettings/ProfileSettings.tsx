@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Button from '../../Shared/Button/Button';
-import ShadowWrapper from '../../Shared/ShadowWrapper/ShadowWrapper';
+import Button from '../../../Shared/Button/Button';
+import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import InputField from '../InputField/InputField';
 import './ProfileSettings.css';
 

@@ -8,10 +8,10 @@ import FriendsList from '../Friends/Components/FriendsList/FriendsList';
 import { UserContext } from '../../contexts/UserContext';
 import useAuth from '../../hooks/userAuth';
 import ShadowWrapper from '../Shared/ShadowWrapper/ShadowWrapper';
-import InputField from '../Profile/InputField/InputField';
-import ProfileSettings from '../Profile/ProfileSettings/ProfileSettings';
+import InputField from '../Profile/Components/InputField/InputField';
+import ProfileSettings from '../Profile/Components/ProfileSettings/ProfileSettings';
 import LoginForm from '../NotUsed/LoginForm/LoginForm';
-import Title from '../Profile/Title/Title';
+import Title from '../Profile/Components/Title/Title';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
