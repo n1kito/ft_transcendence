@@ -4,18 +4,11 @@
 	position: relative;
 }
 
-.status-indicator {
-	width: 0.8rem;
-	aspect-ratio: 1/1;
-	position: absolute;
-	border-radius: 50%;
-	left: 0.5rem;
-	top: 0.5rem;
-	background-color: #57f8ab;
-	border: 1px solid black;
-	z-index: 1;
-}
-
 .friend-is-playing .status-indicator {
 	background-color: #f8ef57;
+}
+
+.online-status-friend-badge:active .status-indicator {
+	margin-left: 3px;
+	margin-top: 3px;
 }

@@ -16,3 +16,12 @@
 	bottom: -0.5rem;
 	transition: all 0.3s ease-in-out;
 }
+
+.rival-badge .black-badge {
+	transition: none;
+}
+
+.rival-badge:active .black-badge {
+	bottom: calc(-0.5rem - 3px);
+	margin-left: 3px;
+}
