@@ -15,9 +15,9 @@ const OnlineIndicator: React.FC<IOnlineIndicatorProps> = ({
 			className={`status-indicator ${
 				isPlaying
 					? 'status-indicator-is-playing'
-					: isOnline
-						? 'status-indicator-is-online'
-						: ''
+					: isOnline // prettier-ignore
+						? 'status-indicator-is-online' // prettier-ignore
+						: '' // prettier-ignore
 			}`}
 		></div>
 	);
