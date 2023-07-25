@@ -13,7 +13,11 @@ const FriendsList = () => {
 				<FriendBadge badgeTitle="m3gan" shadow={true} clickable={true} />
 				<FriendBadge badgeTitle="m3gan" />
 				<FriendBadge badgeTitle="m3gan" />
-				<FriendBadge badgeTitle="m3gan" onlineIndicator={true} clickable={true} />
+				<FriendBadge
+					badgeTitle="m3gan"
+					onlineIndicator={true}
+					clickable={true}
+				/>
 				<TargetBadge />
 				<RivalBadge />
 				<MatchHistoryBadge

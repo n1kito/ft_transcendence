@@ -1,5 +1,9 @@
 # Postgresql volume
-postgresql
+# Ignore all subfiles
+/postgresql/*
+# Except the .gitkeep file
+# This way, the directory is synced to git with nothing of value inside
+!/postgresql/.gitkeep
 
 # Dependencies
 **/node_modules

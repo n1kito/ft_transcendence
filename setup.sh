@@ -1,5 +1,8 @@
 #!/bin/bash
 
+BOLD=$(tput bold)
+END_C=$(tput sgr0)
+
 # Checking that we are in a .git repo
 if ! git status &> /dev/null; then
     echo "This is not a git repository !\n"
@@ -18,18 +21,18 @@ printf "
 # retrieve variables from users
 echo "Retrieving database information:"
 echo
-read -p "> POSTGRES_USER:	" POSTGRES_USER
-read -p "> POSTGRES_PASSWORD:	" POSTGRES_PASSWORD
-read -p "> POSTGRES_DB:		" POSTGRES_DB
+read -p "> ${BOLD}POSTGRES_USER${END_C}${END_C}:	" POSTGRES_USER
+read -p "> ${BOLD}POSTGRES_PASSWORD${END_C}:	" POSTGRES_PASSWORD
+read -p "> ${BOLD}POSTGRES_DB${END_C}:		" POSTGRES_DB
 echo 
 echo "Retrieving API information"
 echo
-read -p "> UID:			" FT_UID
-read -p "> SECRET:		" FT_SECRET
+read -p "> ${BOLD}UID${END_C}:			" FT_UID
+read -p "> ${BOLD}SECRET${END_C}:		" FT_SECRET
 echo
 echo "Retrieving JWT secret key"
 echo
-read -p "> SECRET KEY:		" JWT_SECRET_KEY
+read -p "> ${BOLD}SECRET KEY${END_C}:		" JWT_SECRET_KEY
 echo
 
 > "$root_dir"/.env printf "\
@@ -52,15 +55,21 @@ FT_SECRET=\"$FT_SECRET\"
 JWT_SECRET_KEY=\"$JWT_SECRET_KEY\"
 "
 
-# run npm install
-printf "
-░█▀█░█▀█░█▄█░░░▀█▀░█▀█░█▀▀░▀█▀░█▀█░█░░░█░░
-░█░█░█▀▀░█░█░░░░█░░█░█░▀▀█░░█░░█▀█░█░░░█░░
-░▀░▀░▀░░░▀░▀░░░▀▀▀░▀░▀░▀▀▀░░▀░░▀░▀░▀▀▀░▀▀▀
-
-"
-cd $root_dir/nestjs && npm install
-cd $root_dir
-
 echo
 echo "All done ! 🔥"
+echo
+echo -n "> ${BOLD}Would you like to install nestJs and React packages and launch Docker ?${END_C} (y/N)"
+read -n1 answer
+echo
+case ${answer:0:1} in
+    y|Y )
+        # Run your script here. For example:
+        ./launch.sh
+    ;;
+    * )
+		echo
+        echo "Fine ! Do what you want I'm not your mother."
+		echo
+        exit
+    ;;
+esac
