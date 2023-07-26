@@ -22,6 +22,7 @@ const Button: React.FC<MyButtonProps> = ({
 	const btnBorderColor = `hsl(${baseColor[0]}, ${baseColor[1] + 30}%, ${
 		baseColor[2] - 5
 	}%)`;
+
 	const btnShadowColor = `hsl(${baseColor[0]}, ${baseColor[1]}%, ${
 		baseColor[2] - 50
 	}%, 30%)`;

@@ -7,6 +7,11 @@ import { useNavigate } from 'react-router-dom';
 import FriendsList from '../Friends/Components/FriendsList/FriendsList';
 import { UserContext } from '../../contexts/UserContext';
 import useAuth from '../../hooks/userAuth';
+import ShadowWrapper from '../Shared/ShadowWrapper/ShadowWrapper';
+import InputField from '../Profile/Components/InputField/InputField';
+import ProfileSettings from '../Profile/Components/ProfileSettings/ProfileSettings';
+import LoginForm from '../NotUsed/LoginForm/LoginForm';
+import Title from '../Profile/Components/Title/Title';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -15,15 +20,18 @@ const Desktop = () => {
 	const navigate = useNavigate();
 	const { isAuthentificated } = useAuth();
 
-	if (isAuthentificated) console.log('user is authentificated');
-	else console.log('user is not authentificated');
+	if (isAuthentificated) {
+		console.log('user is authentificated');
+		console.log('user login is ' + userData?.login);
+	} else console.log('user is not authentificated');
 	useEffect(() => {
 		// fetch request
 		const fetchUserData = async () => {
 			// Feth the user data from the server
 			try {
 				console.log('trying to fetch');
-				const response = await fetch('http://localhost:3000/user/mjallada', {
+				// user/me
+				const response = await fetch('http://localhost:3000/user/jeepark', {
 					method: 'GET',
 					credentials: 'include',
 				});
@@ -78,7 +86,8 @@ const Desktop = () => {
 					{ name: 'Do something', url: '#' },
 				]}
 			>
-				<FriendsList />
+				{/* <FriendsList /> */}
+				<ProfileSettings />
 			</Window>
 		</div>
 	);

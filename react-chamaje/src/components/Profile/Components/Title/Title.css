@@ -1,0 +1,39 @@
+.titleWrapper {
+	position: relative;
+	display: flex;
+	gap: 1rem;
+	font-family: 'Fredoka', sans-serif;
+	align-items: center;
+}
+
+.title {
+	color: black;
+	font-weight: 600;
+	letter-spacing: 0.1px;
+	position: relative;
+	width: fit-content;
+	white-space: nowrap;
+	/* outline: 1px solid red; */
+}
+
+.highlight {
+	border-radius: 0.5em;
+	height: 60%;
+	width: 100%;
+	position: absolute;
+	top: 0.6em;
+	left: 0.25em;
+	opacity: 0.8;
+}
+
+.title > span {
+	z-index: 1;
+	position: relative;
+}
+
+.tooltip {
+	font-size: 1rem;
+	letter-spacing: 0rem;
+	margin-bottom: -0.5rem;
+	margin-left: 0rem;
+}
