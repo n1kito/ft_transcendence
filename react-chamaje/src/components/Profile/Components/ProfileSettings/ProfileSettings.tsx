@@ -7,13 +7,10 @@ import Title from '../Title/Title';
 import './ProfileSettings.css';
 
 const ProfileSettings: React.FC = () => {
+	// Access userData from the UserContext
 	const { userData, setUserData } = useContext(UserContext);
-	let login = userData ? userData.login : 'MyLogin';
 
-	console.log('profile settings' + login);
-
-	console.log({ userData });
-
+	// States to hold username and email values
 	const [username, setUsername] = useState('');
 	const [email, setEmail] = useState('');
 
@@ -24,10 +21,12 @@ const ProfileSettings: React.FC = () => {
 		}
 	}, [userData]);
 
+	// Handle username state when it is changed in the inputfield
 	const handleUsernameChange = (newUsername: string) => {
 		setUsername(newUsername);
 	};
 
+	// Handle email state when it is changed in the inputfield
 	const handleEmailChange = (newEmail: string) => {
 		setEmail(newEmail);
 	};

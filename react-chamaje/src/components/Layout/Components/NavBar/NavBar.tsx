@@ -23,7 +23,7 @@ const NavBar: React.FC<navBarProps> = ({ isLoggedIn = true }) => {
 			</div>
 			<div className="siteTitle">chamaje</div>
 			<div className="toolBox">
-				<span>mjallada</span>
+				<span>{userData ? userData.login : 'myLogin'}</span>
 				<img
 					className="userAvatar"
 					src={

@@ -31,7 +31,7 @@ const Desktop = () => {
 			try {
 				console.log('trying to fetch');
 				// user/me
-				const response = await fetch('http://localhost:3000/user/jeepark', {
+				const response = await fetch('http://localhost:3000/user/me', {
 					method: 'GET',
 					credentials: 'include',
 				});
