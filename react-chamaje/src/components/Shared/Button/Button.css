@@ -7,7 +7,6 @@
 	border-radius: 0.5rem;
 	background: var(--btnBgColor);
 	padding: 0.5rem 1rem !important;
-	width: 100%;
 
 	color: var(--btnTxtColor);
 	text-align: center;
@@ -44,6 +43,7 @@
 	padding-bottom: 0.5rem;
 	border: 2px solid var(--btnBorderColor);
 	border-radius: 0.7rem;
+	width: fit-content;
 	/* display: inline-block; */
 }
 
