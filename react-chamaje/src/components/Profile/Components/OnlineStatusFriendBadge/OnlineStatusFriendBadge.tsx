@@ -1,26 +1,25 @@
 import React, { useState } from 'react';
 import './OnlineStatusFriendBadge.css';
 import FriendBadge from '../../../Friends/Components/FriendBadge/FriendBadge';
+import OnlineIndicator from '../Shared/OnlineIndicator/OnlineIndicator';
 
 interface IOnlineStatusFriendsBadgeProps {
 	badgeTitle: string;
-	badgeImage?: string;
+	badgeImageUrl?: string;
 }
 
 const OnlineStatusFriendBadge: React.FC<IOnlineStatusFriendsBadgeProps> = ({
 	badgeTitle,
-	badgeImage,
+	badgeImageUrl,
 }) => {
-	const [friendIsOnline, setFriendIsOnline] = useState(true);
-	const [friendIsPlaying, setFriendIsPlaying] = useState(false);
 	return (
-		<div
-			className={`online-status-friend-badge ${
-				friendIsPlaying ? 'friend-is-playing' : ''
-			}`}
-		>
-			{friendIsOnline && <div className="status-indicator"></div>}
-			<FriendBadge badgeTitle={badgeTitle} badgeImage={badgeImage} />
+		<div className="online-status-friend-badge">
+			<FriendBadge
+				badgeTitle={badgeTitle}
+				badgeImageUrl={badgeImageUrl}
+				clickable={true}
+				onlineIndicator={true}
+			/>
 		</div>
 	);
 };

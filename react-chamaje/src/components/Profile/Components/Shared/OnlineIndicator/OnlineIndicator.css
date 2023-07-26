@@ -1,0 +1,33 @@
+/* Styling the OnlineIndicator component */
+
+.status-indicator {
+	width: 0.8rem;
+	aspect-ratio: 1/1;
+	position: absolute;
+	border-radius: 50%;
+	left: 0.5rem;
+	top: 0.5rem;
+	/* opacity: 0; */
+	border: 1px solid black;
+	z-index: 1;
+	animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+	0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+.status-indicator-is-online {
+	opacity: 1;
+	background-color: #57f8ab;
+}
+
+.status-indicator-is-playing {
+	opacity: 1;
+	background-color: #f8ef57;
+}
