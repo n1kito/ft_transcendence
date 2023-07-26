@@ -11,7 +11,6 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-// TODO: the email cannot be the ID since it can be changed, the ID variable should the the ID
 model User {
     id            Int      @id @unique @default(autoincrement())
     ft_id         Int?     @unique
@@ -25,10 +24,26 @@ model User {
     token         String?
     refresh_token String?
 
+    // Friendship system
+    sentRequests     FriendRequest[] @relation("requestFromUser")
+    receivedRequests FriendRequest[] @relation("requestToUser")
+    friends          User[]          @relation("Friendship")
+    friendedBy       User[]          @relation("Friendship")
+
     // Will be set to true if our user manually updated the corresponding values from their profiles
     login_is_locked     Boolean @default(false)
     firstName_is_locked Boolean @default(false)
     lastName_is_locked  Boolean @default(false)
     email_is_locked     Boolean @default(false)
     image_is_locked     Boolean @default(false)
+    userId              Int?
+}
+
+model FriendRequest {
+    id         Int     @id @default(autoincrement())
+    fromUserId Int // the ID of the user who sent the friend request
+    toUserId   Int // the ID of the user to whom the request was sent
+    accepted   Boolean // whether the request has been accepted
+    fromUser   User    @relation("requestFromUser", fields: [fromUserId], references: [id])
+    toUser     User    @relation("requestToUser", fields: [toUserId], references: [id])
 }

@@ -14,6 +14,7 @@ export class UserController {
 	constructor(private readonly userService: UserService) {}
 
 	// TODO: switch this endpoint to userID
+	// TODO: move the logics to user.service.ts ?
 	@Get(':login')
 	async getUserInfo(
 		@Param('login') login: string,

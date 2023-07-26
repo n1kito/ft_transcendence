@@ -126,6 +126,7 @@ export class AuthService {
 				const newUser = await this.prisma.user.create({
 					data: this.userData,
 				});
+				// TODO: add our 5 default users as the new user's friend
 				// Store the user id in the local object, so we can use it in the JWT token
 				this.userId = newUser.id;
 			}
