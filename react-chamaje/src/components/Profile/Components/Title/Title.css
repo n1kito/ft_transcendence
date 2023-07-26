@@ -17,13 +17,12 @@
 }
 
 .highlight {
-	border-radius: 8px;
+	border-radius: 0.5em;
 	height: 60%;
 	width: 100%;
 	position: absolute;
-	/* top: 0.4rem; */
-	top: 40%;
-	left: 0.5rem;
+	top: 0.6em;
+	left: 0.25em;
 	opacity: 0.8;
 }
 
