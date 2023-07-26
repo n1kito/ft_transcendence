@@ -1,7 +1,8 @@
-import { Controller, Get, Param, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Put, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { PrismaClient } from '@prisma/client';
 import { Request } from 'express';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 const prisma = new PrismaClient();
 
@@ -39,6 +40,25 @@ export class UserController {
 			image: user.image,
 		};
 	}
+
+	@Put('me/update')
+	async updateMyUser(
+		@Body() updateUserDto: UpdateUserDto,
+		@Req() request: CustomRequest,
+	) {
+		const userId = request?.userId;
+		if (!userId) {
+			return { error: 'Authentication required' };
+		}
+		try {
+			await this.userService.updateUser(userId, updateUserDto);
+
+			return { message: 'User updated successfully' };
+		} catch (error) {
+			return { error: 'Failed to update user' };
+		}
+	}
+
 	// TODO: switch this endpoint to userID
 	@Get(':login')
 	async getUserInfo(
