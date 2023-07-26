@@ -21,7 +21,7 @@ printf "
 # retrieve variables from users
 echo "Retrieving database information:"
 echo
-read -p "> ${BOLD}POSTGRES_USER${END_C}${END_C}:	" POSTGRES_USER
+read -p "> ${BOLD}POSTGRES_USER${END_C}:	" POSTGRES_USER
 read -p "> ${BOLD}POSTGRES_PASSWORD${END_C}:	" POSTGRES_PASSWORD
 read -p "> ${BOLD}POSTGRES_DB${END_C}:		" POSTGRES_DB
 echo 
