@@ -13,7 +13,28 @@ interface CustomRequest extends Request {
 export class UserController {
 	constructor(private readonly userService: UserService) {}
 
+	// TODO: change route to user/me/friends or something, I just created a separate one to avoid with the /user/me routes Jee created
+	// TODO: move the logic to the service file
+	@Get('friends')
+	async getUserFriends(@Req() request: CustomRequest) {
+		// Retrieve the entry corresponding to the user requesting those changes
+		const userRequesting = await prisma.user.findUnique({
+			where: { id: request.userId },
+			include: {
+				friends: true,
+			},
+		});
+		// TODO: select more fields
+		// Only select some fields for each friend
+		const friends = userRequesting.friends.map((currentFriend) => ({
+			login: currentFriend.login,
+			image: currentFriend.image,
+		}));
+		return friends;
+	}
+
 	// TODO: switch this endpoint to userID
+	// TODO: move the logics to user.service.ts ?
 	@Get(':login')
 	async getUserInfo(
 		@Param('login') login: string,
