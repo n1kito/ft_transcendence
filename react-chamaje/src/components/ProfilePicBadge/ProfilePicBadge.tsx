@@ -1,7 +1,7 @@
 import React from 'react';
 import './ProfilePicBadge.css';
 import ShadowWrapper from '../Shared/ShadowWrapper/ShadowWrapper';
-import pen  from './images/edit-pen-svgrepo-com.svg';
+import pen from './images/edit-pen-svgrepo-com.svg';
 
 export interface ProfilePicBadgeProps {
 	picture: string;

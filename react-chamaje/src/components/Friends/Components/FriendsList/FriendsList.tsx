@@ -12,6 +12,7 @@ const FriendsList = () => {
 
 	useEffect(() => {
 		// TODO: instead of just storing them in a State, the user context should simply be updated so all other components that use it can be re-rendered (I think)
+		// TODO: if the user is not auth the map method cannot iterate since the friends variable is not an array. Should not be an issue since only logged in users can access the desktop but it might be better to think ahead for this
 		fetch('http://localhost:3000/user/friends', {
 			method: 'GET',
 			credentials: 'include',

@@ -28,7 +28,7 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 			{/* TODO: change the title property to use the person's actual name */}
 			<div className="friendBadge" title={toolTip}>
 				<div className="badgeAvatar">
-					<img src={badgeImageUrl} />
+					<img src={badgeImageUrl} draggable={false} />
 				</div>
 				<span className="friend-name">{badgeTitle}</span>
 				{onlineIndicator && (

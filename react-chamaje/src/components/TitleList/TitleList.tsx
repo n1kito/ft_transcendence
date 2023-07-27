@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import './TitleList.css';
 import ShadowWrapper from '../Shared/ShadowWrapper/ShadowWrapper';
-import Title from '../Profile/Title/Title';
+import Title from '../Profile/Components/Title/Title';
 
 export interface titleListProps {
 	children?: ReactNode;
