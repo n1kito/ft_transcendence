@@ -3,6 +3,7 @@ import './NavBar.css';
 import Lock from './Components/Lock/Lock';
 import Clock from './Components/Clock/Clock';
 import { UserContext } from '../../../../contexts/UserContext';
+import FullscreenTrigger from './Components/FullscreenTrigger/FullscreenTrigger';
 export interface navBarProps {
 	isLoggedIn?: boolean;
 }
@@ -23,6 +24,7 @@ const NavBar: React.FC<navBarProps> = ({ isLoggedIn = true }) => {
 			</div>
 			<div className="siteTitle">chamaje</div>
 			<div className="toolBox">
+				<FullscreenTrigger />
 				<span>mjallada</span>
 				<img
 					className="userAvatar"
