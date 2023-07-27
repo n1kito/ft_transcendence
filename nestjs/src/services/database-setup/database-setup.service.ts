@@ -21,7 +21,8 @@ export class DatabaseSetupService implements OnModuleInit {
 						lastName: 'Viger',
 						login: 'sosophie',
 						email: 'sophie@42.fr',
-						image: 'images/sophie.jpg',
+						image: '/images/sophie.jpg',
+						isDefaultProfile: true,
 					},
 					{
 						firstName: 'Xavier',
@@ -29,6 +30,7 @@ export class DatabaseSetupService implements OnModuleInit {
 						login: 'freexav',
 						email: 'xavier@42.fr',
 						image: '/images/xavier.jpg',
+						isDefaultProfile: true,
 					},
 					{
 						firstName: 'Chucky',
@@ -36,13 +38,15 @@ export class DatabaseSetupService implements OnModuleInit {
 						login: 'chucky75',
 						email: 'chucky@murderdolls.fr',
 						image: '/images/chucky.jpg',
+						isDefaultProfile: true,
 					},
 					{
 						firstName: 'm3gan',
 						lastName: 'Android',
-						login: 'm3gandroid',
+						login: 'm3gan',
 						email: 'm3g@n.droid',
 						image: '/images/m3gan.jpg',
+						isDefaultProfile: true,
 					},
 					{
 						firstName: 'Emmanuel',
@@ -50,6 +54,7 @@ export class DatabaseSetupService implements OnModuleInit {
 						login: 't1t1bon',
 						email: 'tintin@bon.fr',
 						image: '/images/emmanuel.jpg',
+						isDefaultProfile: true,
 					},
 					{
 						firstName: 'Norminet',
@@ -57,6 +62,7 @@ export class DatabaseSetupService implements OnModuleInit {
 						login: 'norminet',
 						email: 'norminet@42.fr',
 						image: '/images/norminet.jpg',
+						isDefaultProfile: true,
 					},
 				],
 			});

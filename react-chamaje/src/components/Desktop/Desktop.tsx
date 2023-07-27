@@ -32,7 +32,7 @@ const Desktop = () => {
 				// Set the user data in the context
 				setUserData(data);
 			} catch (error) {
-				console.log('Error: error');
+				console.log('Error: ', error);
 			}
 		};
 

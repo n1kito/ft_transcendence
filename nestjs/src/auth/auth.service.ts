@@ -126,7 +126,9 @@ export class AuthService {
 				const newUser = await this.prisma.user.create({
 					data: this.userData,
 				});
+				// give the user some default friends
 				// TODO: add our 5 default users as the new user's friend
+				await this.addDefaultUsersAsFriends(newUser);
 				// Store the user id in the local object, so we can use it in the JWT token
 				this.userId = newUser.id;
 			}
@@ -163,5 +165,46 @@ export class AuthService {
 
 	getUserId() {
 		return this.userId;
+	}
+
+	async addDefaultUsersAsFriends(user: User) {
+		// Fetch all of our default friends from our database
+		const defaultUsers = await this.prisma.user.findMany({
+			where: {
+				isDefaultProfile: true,
+			},
+		});
+		// For each of them, add them as a friend of our user, and vice-versa
+		const friendUpdates = defaultUsers
+			.map((currentDefaultUser) => {
+				// TODO: check is the default users are not already friends with our main user
+				// but this should not be possible since this is only done on entry creation
+				return [
+					this.prisma.user.update({
+						where: { id: user.id },
+						data: {
+							friends: {
+								connect: { id: currentDefaultUser.id },
+							},
+						},
+					}),
+					this.prisma.user.update({
+						where: { id: currentDefaultUser.id },
+						data: {
+							friends: {
+								connect: { id: user.id },
+							},
+						},
+					}),
+				];
+			})
+			.flat(); // this allows us to turn the updated variables from an array of arrays, into a simple array by combining its values
+		// Execute all the updates in a single prisma transaction
+		// Since this is a transation, if any of the updates fail, the DB will be reverted to its original state, before the updated where attempted
+		try {
+			await this.prisma.$transaction(friendUpdates);
+		} catch (error) {
+			console.error('Could not add default users as friends: ', error);
+		}
 	}
 }
