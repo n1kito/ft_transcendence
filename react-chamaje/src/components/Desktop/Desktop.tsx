@@ -22,7 +22,6 @@ const Desktop = () => {
 
 	if (isAuthentificated) {
 		console.log('user is authentificated');
-		console.log('user login is ' + userData?.login);
 	} else console.log('user is not authentificated');
 	useEffect(() => {
 		// fetch request

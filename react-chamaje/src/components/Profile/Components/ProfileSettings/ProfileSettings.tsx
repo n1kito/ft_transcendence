@@ -14,6 +14,10 @@ const ProfileSettings: React.FC = () => {
 	const [username, setUsername] = useState('');
 	const [email, setEmail] = useState('');
 
+	// States to store validation errors
+	const [usernameError, setUsernameError] = useState<string | null>('');
+	const [emailError, SetEmailError] = useState<string | null>('');
+
 	useEffect(() => {
 		if (userData) {
 			setUsername(userData.login);
@@ -24,6 +28,12 @@ const ProfileSettings: React.FC = () => {
 	// Handle username state when it is changed in the inputfield
 	const handleUsernameChange = (newUsername: string) => {
 		setUsername(newUsername);
+
+		if (!newUsername) {
+			setUsernameError('Username cannot be empty');
+		} else {
+			setUsernameError(null);
+		}
 	};
 
 	// Handle email state when it is changed in the inputfield
@@ -31,8 +41,41 @@ const ProfileSettings: React.FC = () => {
 		setEmail(newEmail);
 	};
 
-	const handleSaveButtonClick = () => {
+	const handleSaveButtonClick = async () => {
 		// send a request to update username and/or email on the server
+		if (usernameError || emailError) {
+			alert('Invalid username or email');
+			return;
+		}
+
+		try {
+			const response = await fetch('http://localhost:3000/user/me/update', {
+				method: 'PUT',
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ login: username, email: email }),
+			});
+
+			if (response.ok) {
+				// Update the userData in the context with the updated user data
+				const updatedUserData = {
+					...userData,
+					login: username,
+					email: email,
+					image: userData?.image || '',
+				};
+				setUserData(updatedUserData);
+				// alert('User data updated successfully!');
+			} else {
+				// alert('Failed to update user data. Please try again.');
+				console.log('Failed to update ');
+			}
+		} catch (error) {
+			console.error('Error updating user data:', error);
+			alert('An error occrred while updating user data. Please try again');
+		}
 		// create update endpoint
 		// setUserData();
 	};
@@ -46,9 +89,17 @@ const ProfileSettings: React.FC = () => {
 					highlightColor="#F8EF57"
 					fontSize="1.5rem"
 				/>
-				<InputField value={username} onChange={handleUsernameChange} />
+				<InputField
+					value={username}
+					onChange={handleUsernameChange}
+					error={usernameError}
+				/>
 				<InputField value={email} onChange={handleEmailChange} />
-				<Button buttonText="Save"></Button>
+				<Button
+					buttonText="Save"
+					onClick={handleSaveButtonClick}
+					// disabled={usernameError?.length || emailError?.length}
+				></Button>
 			</div>
 		</ShadowWrapper>
 	);

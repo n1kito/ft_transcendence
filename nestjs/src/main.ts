@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { config } from 'dotenv';
 // import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import * as cookieParser from 'cookie-parser';
+import { ValidationPipe } from '@nestjs/common';
 
 // Configure dotenv
 config();
@@ -21,6 +22,7 @@ async function bootstrap() {
 		credentials: true, // Allow credentials (cookies, for us)
 	});
 	app.use(cookieParser());
+	// app.useGlobalPipes(new ValidationPipe());
 	await app.listen(3000);
 }
 bootstrap();
