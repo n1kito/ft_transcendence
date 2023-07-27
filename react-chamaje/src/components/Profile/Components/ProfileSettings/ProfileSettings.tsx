@@ -15,8 +15,8 @@ const ProfileSettings: React.FC = () => {
 	const [email, setEmail] = useState('');
 
 	// States to store validation errors
-	const [usernameError, setUsernameError] = useState<string | null>('');
-	const [emailError, SetEmailError] = useState<string | null>('');
+	const [usernameError, setUsernameError] = useState<string | null>(null);
+	const [emailError, SetEmailError] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (userData) {
@@ -29,7 +29,7 @@ const ProfileSettings: React.FC = () => {
 	const handleUsernameChange = (newUsername: string) => {
 		setUsername(newUsername);
 
-		if (!newUsername) {
+		if (!newUsername || newUsername.length > 8) {
 			setUsernameError('Username cannot be empty');
 		} else {
 			setUsernameError(null);
@@ -76,8 +76,6 @@ const ProfileSettings: React.FC = () => {
 			console.error('Error updating user data:', error);
 			alert('An error occrred while updating user data. Please try again');
 		}
-		// create update endpoint
-		// setUserData();
 	};
 
 	return (
@@ -98,8 +96,8 @@ const ProfileSettings: React.FC = () => {
 				<Button
 					buttonText="Save"
 					onClick={handleSaveButtonClick}
-					// disabled={usernameError?.length || emailError?.length}
-				></Button>
+					disabled={!!usernameError || !!emailError}
+				/>
 			</div>
 		</ShadowWrapper>
 	);

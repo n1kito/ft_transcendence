@@ -38,6 +38,8 @@ const Button: React.FC<MyButtonProps> = ({
 		'--btnTxtColor': btnTxtColor,
 		'--btnBorderColor': btnBorderColor,
 		'--btnShadowColor': btnShadowColor,
+		// '--paddingBottom': disabled ? '0' : 'initial',
+		// '--marginTop': disabled ? '0.5rem' : 'initial',
 	} as React.CSSProperties;
 
 	console.log(buttonStyle.backgroundColor);
