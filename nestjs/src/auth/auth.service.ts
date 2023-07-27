@@ -5,8 +5,6 @@ import { PrismaClient, User } from '@prisma/client';
 interface UserData {
 	ft_id: number;
 	login: string;
-	firstName: string;
-	lastName: string;
 	email: string;
 	hash: string;
 	image: string;
@@ -109,8 +107,6 @@ export class AuthService {
 			this.userData = {
 				ft_id: responseData.id,
 				login: responseData.login,
-				firstName: responseData.first_name,
-				lastName: responseData.last_name,
 				email: responseData.email,
 				hash: 'temporary password',
 				image: responseData.image.versions.small,
@@ -147,12 +143,6 @@ export class AuthService {
 			data: {
 				login: !userInDb.login_is_locked ? this.userData.login : undefined,
 				email: !userInDb.email_is_locked ? this.userData.email : undefined,
-				firstName: !userInDb.firstName_is_locked
-					? this.userData.firstName
-					: undefined,
-				lastName: !userInDb.lastName_is_locked
-					? this.userData.lastName
-					: undefined,
 				image: !userInDb.image_is_locked ? this.userData.image : undefined,
 			},
 		});
