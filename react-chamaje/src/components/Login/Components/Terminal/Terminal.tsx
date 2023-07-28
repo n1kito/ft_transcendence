@@ -8,7 +8,7 @@ const Terminal = () => {
 			<Prompt
 				instruction="Would you like to login with 42 ? (Y/n)"
 				type="bool"
-				redirUrl="http://www.42.fr"
+				redirUrl="http://localhost:3000/login/auth"
 			></Prompt>
 			{/* <Prompt instruction='Please input your email:'></Prompt> */}
 			{/* <Prompt instruction='enter your password:'></Prompt> */}

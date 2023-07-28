@@ -17,7 +17,6 @@ const Desktop = () => {
 
 	if (isAuthentificated) {
 		console.log('user is authentificated');
-		console.log('user login is ' + userData?.login);
 	} else console.log('user is not authentificated');
 	useEffect(() => {
 		// fetch request
@@ -26,7 +25,7 @@ const Desktop = () => {
 			try {
 				console.log('trying to fetch');
 				// user/me
-				const response = await fetch('http://localhost:3000/user/jeepark', {
+				const response = await fetch('http://localhost:3000/user/me', {
 					method: 'GET',
 					credentials: 'include',
 				});

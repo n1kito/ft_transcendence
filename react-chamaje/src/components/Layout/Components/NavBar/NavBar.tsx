@@ -24,8 +24,8 @@ const NavBar: React.FC<navBarProps> = ({ isLoggedIn = true }) => {
 			</div>
 			<div className="siteTitle">chamaje</div>
 			<div className="toolBox">
+				<span>{userData ? userData.login : 'myLogin'}</span>
 				<FullscreenTrigger />
-				<span>mjallada</span>
 				<img
 					className="userAvatar"
 					src={
