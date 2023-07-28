@@ -8,7 +8,7 @@ import './ProfileSettings.css';
 
 const ProfileSettings: React.FC = () => {
 	const { userData, setUserData } = useContext(UserContext);
-	let login = userData ? userData.login : 'MyLogin';
+	const login = userData ? userData.login : 'MyLogin';
 
 	console.log('profile settings' + login);
 

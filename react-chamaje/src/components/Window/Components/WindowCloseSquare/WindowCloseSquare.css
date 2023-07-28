@@ -1,14 +1,29 @@
 /* Styling the WindowCloseSquare component */
 
-#square {
-	/* border: 2px solid black; */
+.close-square {
 	background-color: white;
-	/* height: calc(100% - 4px); */
 	height: 100%;
 	aspect-ratio: 1/1;
-	/* width: 100%; */
 
-	/* padding: 1.5rem 1.5rem; */
 	outline: 3px solid black;
 	outline-offset: -2.5px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.close-square:hover {
+	cursor: pointer;
+}
+
+.inside-square {
+	width: 0;
+	height: 0;
+	transition: all 0.2s ease-in-out;
+}
+
+.close-square:hover .inside-square {
+	width: 60%;
+	height: 60%;
+	background-color: #f8ef57;
 }
