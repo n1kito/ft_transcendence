@@ -60,8 +60,6 @@ export class UserController {
 				email: user.email,
 				createdAt: user.createdAt,
 				image: user.image,
-				firstName: user.firstName,
-				lastName: user.lastName,
 			};
 		else
 			return {
