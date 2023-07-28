@@ -6,6 +6,8 @@ import InputField from '../InputField/InputField';
 import Title from '../Title/Title';
 import './ProfileSettings.css';
 
+// TODO: cursor not allowed
+
 const ProfileSettings: React.FC = () => {
 	// Access userData from the UserContext
 	const { userData, setUserData } = useContext(UserContext);
@@ -29,9 +31,18 @@ const ProfileSettings: React.FC = () => {
 	const handleUsernameChange = (newUsername: string) => {
 		setUsername(newUsername);
 
-		if (!newUsername || newUsername.length > 8) {
-			setUsernameError('Username cannot be empty');
-		} else {
+		const allowedCharactersRegex = /^[A-Za-z0-9-_\.]*$/;
+
+		if (!newUsername) setUsernameError('Username cannot be empty');
+		else if (newUsername.length > 8)
+			setUsernameError('Username must not exceed 8 characters');
+		else if (newUsername.length < 4)
+			setUsernameError('Username must be at least 4 characters');
+		else if (!allowedCharactersRegex.test(newUsername))
+			setUsernameError(
+				'Username can only contain letters, numbers, "-", "_", and "."',
+			);
+		else {
 			setUsernameError(null);
 		}
 	};
@@ -39,6 +50,12 @@ const ProfileSettings: React.FC = () => {
 	// Handle email state when it is changed in the inputfield
 	const handleEmailChange = (newEmail: string) => {
 		setEmail(newEmail);
+		const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
+		if (!newEmail) SetEmailError('Email cannot be empty');
+		else if (!emailRegex.test(newEmail))
+			SetEmailError('Email format is invalid');
+		else SetEmailError(null);
 	};
 
 	const handleSaveButtonClick = async () => {
@@ -70,6 +87,7 @@ const ProfileSettings: React.FC = () => {
 				// alert('User data updated successfully!');
 			} else {
 				// alert('Failed to update user data. Please try again.');
+				setUsernameError('username already exists');
 				console.log('Failed to update ');
 			}
 		} catch (error) {
@@ -92,7 +110,11 @@ const ProfileSettings: React.FC = () => {
 					onChange={handleUsernameChange}
 					error={usernameError}
 				/>
-				<InputField value={email} onChange={handleEmailChange} />
+				<InputField
+					value={email}
+					onChange={handleEmailChange}
+					error={emailError}
+				/>
 				<Button
 					buttonText="Save"
 					onClick={handleSaveButtonClick}

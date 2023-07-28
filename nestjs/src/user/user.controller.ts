@@ -1,18 +1,29 @@
-import { Body, Controller, Get, Param, Put, Req } from '@nestjs/common';
+import {
+	Body,
+	Controller,
+	Get,
+	HttpStatus,
+	Param,
+	Put,
+	Req,
+	Response,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { PrismaClient } from '@prisma/client';
 import { Request } from 'express';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { PrismaService } from 'prisma/prisma.service';
 
-const prisma = new PrismaClient();
-
-interface CustomRequest extends Request {
+export interface CustomRequest extends Request {
 	userId: number;
 }
 
 @Controller('user')
 export class UserController {
-	constructor(private readonly userService: UserService) {}
+	constructor(
+		private readonly userService: UserService,
+		private readonly prisma: PrismaService,
+	) {}
 
 	@Get('me')
 	async getMyinfo(@Req() request: CustomRequest) {
@@ -24,7 +35,7 @@ export class UserController {
 		}
 
 		// Fetch the user information from the database using the userId
-		const user = await prisma.user.findUnique({
+		const user = await this.prisma.user.findUnique({
 			where: { id: request.userId },
 		});
 
@@ -45,11 +56,22 @@ export class UserController {
 	async updateMyUser(
 		@Body() updateUserDto: UpdateUserDto,
 		@Req() request: CustomRequest,
+		@Response() res: any,
 	) {
-		const userId = request?.userId;
-		if (!userId) {
-			return { error: 'Authentication required' };
+		const userId = this.userService.authenticateUser(request);
+
+		const { login } = updateUserDto;
+		if (login) {
+			const usernameTaken = await this.userService.isUsernameTaken(login);
+			if (usernameTaken) {
+				console.log('username is already taken');
+				res
+					.status(HttpStatus.BAD_REQUEST)
+					.json({ error: 'Username is already taken' });
+				return;
+			}
 		}
+
 		try {
 			await this.userService.updateUser(userId, updateUserDto);
 
@@ -65,7 +87,7 @@ export class UserController {
 		@Param('login') login: string,
 		@Req() request: CustomRequest,
 	) {
-		const user = await prisma.user.findUnique({
+		const user = await this.prisma.user.findUnique({
 			where: { login },
 		});
 		if (!user) {
@@ -73,7 +95,7 @@ export class UserController {
 			return { message: 'User not found' };
 		}
 		// identify the login associated with the ID the request is coming from
-		const userRequesting = await prisma.user.findUnique({
+		const userRequesting = await this.prisma.user.findUnique({
 			where: { id: request.userId },
 		});
 		const userRequestingLogin = userRequesting?.login;
