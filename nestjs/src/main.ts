@@ -1,9 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { config } from 'dotenv';
-// import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import * as cookieParser from 'cookie-parser';
-import { ValidationPipe } from '@nestjs/common';
+import * as express from 'express';
+import { join } from 'path';
 
 // Configure dotenv
 config();
@@ -22,7 +22,19 @@ async function bootstrap() {
 		credentials: true, // Allow credentials (cookies, for us)
 	});
 	app.use(cookieParser());
-	// app.useGlobalPipes(new ValidationPipe());
+	app.use(
+		'/images',
+		express.static(
+			join(
+				__dirname,
+				'..',
+				'src',
+				'services',
+				'database-setup',
+				'default-images',
+			),
+		),
+	);
 	await app.listen(3000);
 }
 bootstrap();

@@ -76,6 +76,10 @@
 	display: flex;
 }
 
+.loggedIn .fullscreen-trigger .cls-1 {
+	stroke: black;
+}
+
 .siteTitle {
 	font-family: groupie-gloss, sans-serif;
 	font-style: normal;

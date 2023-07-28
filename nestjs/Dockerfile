@@ -19,6 +19,9 @@ RUN npm ci
 # Bundle app source
 COPY --chown=node:node . .
 
+# Generate Prisma database client code
+RUN npx prisma generate
+
 # User the node user for the image (instead of root)
 USER node
 

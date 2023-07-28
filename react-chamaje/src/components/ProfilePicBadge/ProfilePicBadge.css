@@ -1,0 +1,32 @@
+/* Styling the ProfilePicBadge component */
+
+.ProfilePicBadgeWrapper {
+	position: relative;
+}
+
+.pictureContainer {
+	height: 7rem;
+	aspect-ratio: 1/1;
+}
+
+.modifyButton {
+	position: absolute;
+	bottom: -1.2rem;
+	left: -1.2rem;
+}
+
+.modifyButton .shadow-wrapper {
+	background-color: #f8ef57;
+	width: 2.4rem;
+	aspect-ratio: 1/1;
+	border-radius: 50%;
+	/* border: none; */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.modifyButton .shadow-wrapper img {
+	width: 1.3rem;
+	aspect-ratio: 1/1;
+}

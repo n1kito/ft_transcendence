@@ -12,7 +12,7 @@ import { UserService } from './user.service';
 import { PrismaClient } from '@prisma/client';
 import { Request } from 'express';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { PrismaService } from 'prisma/prisma.service';
+import { PrismaService } from 'src/services/prisma-service/prisma.service';
 
 export interface CustomRequest extends Request {
 	userId: number;
@@ -81,7 +81,28 @@ export class UserController {
 		}
 	}
 
+	// TODO: change route to user/me/friends or something, I just created a separate one to avoid with the /user/me routes Jee created
+	// TODO: move the logic to the service file
+	@Get('friends')
+	async getUserFriends(@Req() request: CustomRequest) {
+		// Retrieve the entry corresponding to the user requesting those changes
+		const userRequesting = await this.prisma.user.findUnique({
+			where: { id: request.userId },
+			include: {
+				friends: true,
+			},
+		});
+		// TODO: select more fields
+		// Only select some fields for each friend
+		const friends = userRequesting.friends.map((currentFriend) => ({
+			login: currentFriend.login,
+			image: currentFriend.image,
+		}));
+		return friends;
+	}
+
 	// TODO: switch this endpoint to userID
+	// TODO: move the logics to user.service.ts ?
 	@Get(':login')
 	async getUserInfo(
 		@Param('login') login: string,
@@ -107,8 +128,6 @@ export class UserController {
 				email: user.email,
 				createdAt: user.createdAt,
 				image: user.image,
-				firstName: user.firstName,
-				lastName: user.lastName,
 			};
 		else
 			return {

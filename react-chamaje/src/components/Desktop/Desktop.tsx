@@ -7,11 +7,6 @@ import { useNavigate } from 'react-router-dom';
 import FriendsList from '../Friends/Components/FriendsList/FriendsList';
 import { UserContext } from '../../contexts/UserContext';
 import useAuth from '../../hooks/userAuth';
-import ShadowWrapper from '../Shared/ShadowWrapper/ShadowWrapper';
-import InputField from '../Profile/Components/InputField/InputField';
-import ProfileSettings from '../Profile/Components/ProfileSettings/ProfileSettings';
-import LoginForm from '../NotUsed/LoginForm/LoginForm';
-import Title from '../Profile/Components/Title/Title';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -39,7 +34,7 @@ const Desktop = () => {
 				// Set the user data in the context
 				setUserData(data);
 			} catch (error) {
-				console.log('Error: error');
+				console.log('Error: ', error);
 			}
 		};
 
@@ -85,8 +80,8 @@ const Desktop = () => {
 					{ name: 'Do something', url: '#' },
 				]}
 			>
-				{/* <FriendsList /> */}
-				<ProfileSettings />
+				<FriendsList />
+				{/* <ProfileSettings /> */}
 			</Window>
 		</div>
 	);
