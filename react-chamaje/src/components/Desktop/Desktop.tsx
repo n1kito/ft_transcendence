@@ -10,6 +10,7 @@ import useAuth from '../../hooks/userAuth';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
+	let iconId = 0;
 	const { userData, setUserData } = useContext(UserContext);
 	const [openFriendsWindow, setOpenedFriendsWindows] = useState(false);
 	const navigate = useNavigate();
@@ -59,16 +60,19 @@ const Desktop = () => {
 			<DesktopIcon
 				name="Game"
 				iconSrc={cupcakeIcon}
+				id={++iconId}
 				onDoubleClick={friendsClickHandler}
 			/>
 			<DesktopIcon
 				name="Friends"
 				iconSrc={cupcakeIcon}
+				id={++iconId}
 				onDoubleClick={friendsClickHandler}
 			/>
 			<DesktopIcon
 				name="Chat"
 				iconSrc={cupcakeIcon}
+				id={++iconId}
 				onDoubleClick={friendsClickHandler}
 			/>
 			{/* {openFriendsWindow && <Window windowTitle="Friends"><FriendsList /></Window>}*/}
