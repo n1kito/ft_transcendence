@@ -4,9 +4,9 @@ export class UpdateUserDto {
 	@IsAlpha()
 	@IsString()
 	@IsNotEmpty()
-	login: string;
+	readonly login: string;
 
 	@IsEmail()
 	@IsNotEmpty()
-	email: string;
+	readonly email: string;
 }

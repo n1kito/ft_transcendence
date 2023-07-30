@@ -1,3 +1,4 @@
+import { Http2ServerRequest } from 'http2';
 import React, { useContext, useEffect, useState } from 'react';
 import { UserContext } from '../../../../contexts/UserContext';
 import Button from '../../../Shared/Button/Button';
@@ -18,7 +19,7 @@ const ProfileSettings: React.FC = () => {
 
 	// States to store validation errors
 	const [usernameError, setUsernameError] = useState<string | null>(null);
-	const [emailError, SetEmailError] = useState<string | null>(null);
+	const [emailError, setEmailError] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (userData) {
@@ -31,14 +32,14 @@ const ProfileSettings: React.FC = () => {
 	const handleUsernameChange = (newUsername: string) => {
 		setUsername(newUsername);
 
-		const allowedCharactersRegex = /^[A-Za-z0-9-_\.]*$/;
+		const usernameRegex = /^[A-Za-z0-9-_\.]*$/;
 
 		if (!newUsername) setUsernameError('Username cannot be empty');
 		else if (newUsername.length > 8)
 			setUsernameError('Username must not exceed 8 characters');
 		else if (newUsername.length < 4)
 			setUsernameError('Username must be at least 4 characters');
-		else if (!allowedCharactersRegex.test(newUsername))
+		else if (!usernameRegex.test(newUsername))
 			setUsernameError(
 				'Username can only contain letters, numbers, "-", "_", and "."',
 			);
@@ -52,19 +53,13 @@ const ProfileSettings: React.FC = () => {
 		setEmail(newEmail);
 		const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
-		if (!newEmail) SetEmailError('Email cannot be empty');
+		if (!newEmail) setEmailError('Email cannot be empty');
 		else if (!emailRegex.test(newEmail))
-			SetEmailError('Email format is invalid');
-		else SetEmailError(null);
+			setEmailError('Email format is invalid');
+		else setEmailError(null);
 	};
 
 	const handleSaveButtonClick = async () => {
-		// send a request to update username and/or email on the server
-		if (usernameError || emailError) {
-			alert('Invalid username or email');
-			return;
-		}
-
 		try {
 			const response = await fetch('http://localhost:3000/user/me/update', {
 				method: 'PUT',
@@ -75,8 +70,10 @@ const ProfileSettings: React.FC = () => {
 				body: JSON.stringify({ login: username, email: email }),
 			});
 
+			console.log('response status:', response.status);
+
+			// Update the userData in the context with the updated user data
 			if (response.ok) {
-				// Update the userData in the context with the updated user data
 				const updatedUserData = {
 					...userData,
 					login: username,
@@ -84,15 +81,21 @@ const ProfileSettings: React.FC = () => {
 					image: userData?.image || '',
 				};
 				setUserData(updatedUserData);
-				// alert('User data updated successfully!');
-			} else {
-				// alert('Failed to update user data. Please try again.');
-				setUsernameError('username already exists');
-				console.log('Failed to update ');
+			} else if (response.status === 400 || response.status === 409) {
+				const responseData = await response.clone().json();
+				console.log('responseData: ', responseData.errors);
+				// Handle validation errors
+				if (responseData.errors) {
+					if (responseData.errors[0].field === 'login') {
+						setUsernameError(responseData.errors[0].message);
+					}
+					if (responseData.errors.email) {
+						setEmailError(responseData.errors[0].message);
+					}
+				}
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Error updating user data:', error);
-			alert('An error occrred while updating user data. Please try again');
 		}
 	};
 

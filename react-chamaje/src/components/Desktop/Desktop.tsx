@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import FriendsList from '../Friends/Components/FriendsList/FriendsList';
 import { UserContext } from '../../contexts/UserContext';
 import useAuth from '../../hooks/userAuth';
+import ProfileSettings from '../Profile/Components/ProfileSettings/ProfileSettings';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -80,8 +81,7 @@ const Desktop = () => {
 					{ name: 'Do something', url: '#' },
 				]}
 			>
-				<FriendsList />
-				{/* <ProfileSettings /> */}
+				<ProfileSettings />
 			</Window>
 		</div>
 	);

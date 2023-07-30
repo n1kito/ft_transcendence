@@ -13,7 +13,7 @@ export interface MyButtonProps {
 const Button: React.FC<MyButtonProps> = ({
 	buttonText = 'default',
 	baseColor = [57, 92, 66],
-	onClick, // Set the default value to an empty function
+	onClick = () => {}, // Set the default value to an empty function
 	disabled = false,
 }) => {
 	// Convert the baseColor array to an rgb color string

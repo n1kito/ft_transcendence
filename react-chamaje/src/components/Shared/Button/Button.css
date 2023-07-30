@@ -47,7 +47,7 @@
 	/* display: inline-block; */
 }
 
-#buttonWrapper:not([disabled])active {
+#buttonWrapper:active {
 	padding-bottom: 0;
 	margin-top: 0.5rem;
 }

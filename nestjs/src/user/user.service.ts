@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+	BadRequestException,
+	ConflictException,
+	Injectable,
+	NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CustomRequest } from './user.controller';
@@ -15,17 +20,9 @@ export class UserService {
 		return userId;
 	}
 
-	// TODO: uncomment line 14 after merging with nikito's friends list
-	async isUsernameTaken(username: string): Promise<boolean> {
-		const user = await this.prisma.user.findUnique({
-			where: { login: username },
-		});
-		// if (user) return true;
-		return true;
-	}
-
 	async updateUser(userId: number, updateUserDto: UpdateUserDto) {
 		try {
+			// update the user's data with prisma client
 			const updatedUser = await this.prisma.user.update({
 				where: { id: userId },
 				data: {
@@ -35,8 +32,24 @@ export class UserService {
 			});
 			return updatedUser;
 		} catch (error) {
-			console.log('username is invalid', error.message);
-			throw new Error('Failed to update user');
+			const field = this.isUniqueError(error, 'login');
+			if (field) {
+				throw new ConflictException({
+					error: 'Conflict',
+					message: 'Username already exists',
+					field,
+				});
+			} else {
+				throw new Error('Failed to update user');
+			}
 		}
+	}
+
+	// search if
+	private isUniqueError(error: any, field: string): string | null {
+		if (error.code === 'P2002' && error.meta?.target?.includes(field)) {
+			return field;
+		}
+		return null;
 	}
 }
