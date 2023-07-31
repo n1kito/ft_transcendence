@@ -8,14 +8,20 @@ import Title from '../Title/Title';
 import './ProfileSettings.css';
 
 // TODO: cursor not allowed
+type ValidationError = {
+	property: string;
+	constraints: {
+		[key: string]: string;
+	};
+};
 
 const ProfileSettings: React.FC = () => {
 	// Access userData from the UserContext
 	const { userData, setUserData } = useContext(UserContext);
 
 	// States to hold username and email values
-	const [username, setUsername] = useState('');
-	const [email, setEmail] = useState('');
+	const [username, setUsername] = useState(userData?.login || ''); // Provide an empty string as the fallback value
+	const [email, setEmail] = useState(userData?.email || ''); // Provide an empty string as the fallback value
 
 	// States to store validation errors
 	const [usernameError, setUsernameError] = useState<string | null>(null);
@@ -23,8 +29,8 @@ const ProfileSettings: React.FC = () => {
 
 	useEffect(() => {
 		if (userData) {
-			setUsername(userData.login);
-			setEmail(userData.email);
+			setUsername(userData.login || '');
+			setEmail(userData.email || '');
 		}
 	}, [userData]);
 
@@ -46,6 +52,7 @@ const ProfileSettings: React.FC = () => {
 		else {
 			setUsernameError(null);
 		}
+		console.log(usernameError);
 	};
 
 	// Handle email state when it is changed in the inputfield
@@ -61,13 +68,27 @@ const ProfileSettings: React.FC = () => {
 
 	const handleSaveButtonClick = async () => {
 		try {
+			// Check if there are any changes in the username or email
+			const updatedFields: { [key: string]: string } = {};
+			if (userData?.login !== username) {
+				updatedFields.login = username;
+			}
+			if (userData?.email !== email) {
+				updatedFields.email = email;
+			}
+
+			// If there are no changes, there's nothing to update
+			if (Object.keys(updatedFields).length === 0) {
+				console.log('No changes to update.');
+				return;
+			}
 			const response = await fetch('http://localhost:3000/user/me/update', {
 				method: 'PUT',
 				credentials: 'include',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ login: username, email: email }),
+				body: JSON.stringify(updatedFields),
 			});
 
 			console.log('response status:', response.status);
@@ -81,20 +102,38 @@ const ProfileSettings: React.FC = () => {
 					image: userData?.image || '',
 				};
 				setUserData(updatedUserData);
-			} else if (response.status === 400 || response.status === 409) {
-				const responseData = await response.clone().json();
-				console.log('responseData: ', responseData.errors);
-				// Handle validation errors
-				if (responseData.errors) {
-					if (responseData.errors[0].field === 'login') {
-						setUsernameError(responseData.errors[0].message);
-					}
-					if (responseData.errors.email) {
-						setEmailError(responseData.errors[0].message);
-					}
+			}
+			const responseData = await response.clone().json();
+			console.log(responseData);
+			if (response.status === 409) {
+				if (responseData.error === 'login') {
+					console.log('it is login');
+					setUsernameError(responseData.message);
+				}
+				if (responseData.error === 'email') {
+					setEmailError(responseData.message);
 				}
 			}
-		} catch (error: any) {
+
+			// Check if the response data contains validation errors
+			// if (responseData.message && Array.isArray(responseData.message))
+			if (response.status === 400) {
+				// Clear existing errors
+				setUsernameError(null);
+				setEmailError(null);
+
+				// Loop through the validation errors
+				responseData.message.forEach((validationError: ValidationError) => {
+					const { property, constraints } = validationError;
+					if (property === 'login') {
+						setUsernameError(Object.values(constraints)[0]);
+					}
+					if (property === 'email') {
+						setEmailError(Object.values(constraints)[0]);
+					}
+				});
+			}
+		} catch (error) {
 			console.error('Error updating user data:', error);
 		}
 	};

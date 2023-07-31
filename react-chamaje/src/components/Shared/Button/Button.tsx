@@ -16,6 +16,9 @@ const Button: React.FC<MyButtonProps> = ({
 	onClick = () => {}, // Set the default value to an empty function
 	disabled = false,
 }) => {
+	console.log('Button: disabled:', { disabled });
+	const buttonClass = disabled ? 'disabled' : '';
+
 	// Convert the baseColor array to an rgb color string
 	const btnBgColor = disabled
 		? 'hsl(0, 0%, 70%)'
@@ -46,15 +49,15 @@ const Button: React.FC<MyButtonProps> = ({
 
 	const handleClick = () => {
 		console.log('Button clicked');
-		if (onClick) {
+		if (!disabled && onClick) {
 			onClick();
 		}
 	};
 
 	return (
 		<div>
-			<div id="buttonWrapper" style={buttonStyle}>
-				<button id="coloredButton" onClick={handleClick} disabled={disabled}>
+			<div id="buttonWrapper" className={buttonClass} style={buttonStyle}>
+				<button disabled={disabled} id="coloredButton" onClick={handleClick}>
 					{buttonText}
 				</button>
 			</div>

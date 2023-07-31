@@ -29,21 +29,6 @@ export class UserController {
 		private readonly prisma: PrismaService,
 	) {}
 
-	private handleErrorResponse(response: Response, error: any) {
-		if (error instanceof HttpException) {
-			const errorResponse = {
-				statusCode: error.getStatus(),
-				message: error.message,
-				error: error.getResponse()['error'],
-				field: error.getResponse()['field'],
-			};
-
-			response.status(error.getStatus()).json({ errors: [errorResponse] });
-		} else {
-			response.status(500).json({ error: 'Failed to update user' });
-		}
-	}
-
 	@Get('me')
 	async getMyinfo(@Req() request: CustomRequest) {
 		const userId = this.userService.authenticateUser(request);
@@ -74,42 +59,16 @@ export class UserController {
 	) {
 		const userId = this.userService.authenticateUser(request);
 
-		// Validate the UpdateUserDto using class-validator library
-		const errors = await validate(updateUserDto);
-
-		// Check if there are validation errors
-		if (errors.length > 0) {
-			// Handle validation errors
-
-			// Create an object to collect validation errors for each field
-			const validationErrors = {};
-
-			// Loop through each validation error and categorize them by field
-			errors.forEach((error) => {
-				Object.keys(error.constraints).forEach((key) => {
-					if (!validationErrors[key]) {
-						validationErrors[key] = [];
-					}
-					validationErrors[key].push(error.constraints[key]);
-				});
-			});
-
-			// Return the validation errors as part of the response
-			response
-				.status(HttpStatus.BAD_REQUEST)
-				.json({ errors: validationErrors });
-			return;
-		}
-		try {
-			await this.userService.updateUser(userId, updateUserDto);
-			response
-				.status(HttpStatus.OK)
-				.json({ message: 'User updated successfully' });
-			return { message: 'User updated successfully' };
-		} catch (error) {
-			this.handleErrorResponse(response, error);
-		}
+		// Validate the UpdateUserDto
+		await this.userService.validateUpdateUserDto(updateUserDto);
+		// update operation in the database
+		await this.userService.updateUser(userId, updateUserDto);
+		response
+			.status(HttpStatus.OK)
+			.json({ message: 'User updated successfully' });
+		return { message: 'User updated successfully' };
 	}
+
 	// TODO: change route to user/me/friends or something, I just created a separate one to avoid with the /user/me routes Jee created
 	// TODO: move the logic to the service file
 	@Get('friends')
