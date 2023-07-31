@@ -17,23 +17,30 @@ import { CustomRequest } from './user.controller';
 import { Prisma } from '@prisma/client';
 import { plainToClass } from 'class-transformer';
 
+//  custom exception class to store an array of errors each containing
+// `statusCode` `field` and `message` properties.
 export class CustomException extends HttpException {
 	constructor(
 		errors: { statusCode: number; field: string; message: string }[],
 	) {
-		super({ errors }, HttpStatus.BAD_REQUEST);
+		super({ errors }, errors[0].statusCode);
 	}
 }
 
 @Injectable()
 export class UserService {
+	// array of errors that can be thrown all at once
 	private errors: { field: string; message: string; statusCode: number }[] = [];
 
 	constructor(private readonly prisma: PrismaService) {}
 
+	// method to push any encountered error
 	private pushError(field: string, message: string, statusCode: number) {
 		this.errors.push({ field, message, statusCode });
 	}
+
+	// check if the user is authenticated or not. request parameter is expected to contain the
+	// property `userId`. If found, return the user id, else throw a NotFoundException
 	authenticateUser(request: CustomRequest): number {
 		const userId = request.userId;
 		if (!userId) {
@@ -42,9 +49,12 @@ export class UserService {
 		return userId;
 	}
 
+	// update the user data with the provided 'updateUserDto'
 	async updateUser(userId: number, updateUserDto: UpdateUserDto) {
+		// clean up errors[]
 		this.errors = [];
 		try {
+			// looks for validation errors
 			await this.validateUpdateUserDto(updateUserDto);
 			const updatedUser = await this.prisma.user.update({
 				where: { id: userId },
@@ -53,70 +63,53 @@ export class UserService {
 					login: updateUserDto.login,
 				},
 			});
+			// Check if there are any validation errors from dto, throw error
+			if (this.errors.length > 0) {
+				throw new CustomException(this.errors);
+			}
 			return updatedUser;
 		} catch (error) {
+			// Handle Prisma database errors
 			if (error instanceof Prisma.PrismaClientKnownRequestError) {
 				const usernameError = this.isUniqueError(error, 'login');
-				if (usernameError) {
-					this.pushError(
-						usernameError.field,
-						usernameError.message,
-						HttpStatus.CONFLICT,
-					);
-				}
 				const emailError = this.isUniqueError(error, 'email');
-				if (emailError) {
-					this.pushError(
-						emailError.field,
-						emailError.message,
-						HttpStatus.CONFLICT,
-					);
-				}
-				if (this.errors.length > 0) {
-					throw new CustomException(this.errors);
-				} else {
-					throw new HttpException(
-						{
-							statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-							error: 'Internal Server Error',
-							message: 'Something went wrong.',
-						},
-						HttpStatus.INTERNAL_SERVER_ERROR,
-					);
-				}
-			} else {
-				throw error;
 			}
+			// Check for any errors like Validation errors ou Prisma errors
+			if (this.errors.length > 0) {
+				throw new CustomException(this.errors);
+			} else throw error; // throw other errors
 		}
 	}
 
+	// Using class-validator, adds any validation errors to the 'errors' property
+	//with corresponding fields and sets the status code to 'HttpStatus.BAD_REQUEST'.
 	async validateUpdateUserDto(updateUserDto: UpdateUserDto): Promise<void> {
+		// converts the plain js object updateUserDto into an instance of the 'UpdateUserDto class'
+		// Any dto errors are stored in classValidatorErrors
 		const classValidatorErrors: ValidationError[] = await validate(
 			plainToClass(UpdateUserDto, updateUserDto),
 		);
-
+		// if classValidators is not empty
 		if (classValidatorErrors.length > 0) {
-			const errors: { field: string; message: string }[] = [];
+			// iterates over each error
 			for (const error of classValidatorErrors) {
+				// add the dto error into the 'errors' property
 				for (const constraintKey of Object.keys(error.constraints)) {
-					const field = error.property;
-					const message = error.constraints[constraintKey];
-					this.pushError(field, message, HttpStatus.BAD_REQUEST);
+					this.pushError(
+						error.property,
+						error.constraints[constraintKey],
+						HttpStatus.BAD_REQUEST,
+					);
 				}
 			}
 		}
 	}
 
-	private isUniqueError(
-		error: any,
-		field: string,
-	): { field: string; message: string } | null {
+	// check for duplicate while updating user data.
+	private isUniqueError(error: any, field: string) {
+		// searching for error that matches with unique constraint violation code on a specified `field`,
 		if (error.code === 'P2002' && error.meta?.target?.includes(field)) {
-			const message = `${field} already exists`;
-			console.log('isUniqueError:', field, message);
-			return { field, message };
+			this.pushError(field, `${field} already exists`, HttpStatus.CONFLICT);
 		}
-		console.log('isUniqueError not found');
-		return null;
 	}
 }

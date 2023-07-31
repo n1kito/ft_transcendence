@@ -1,10 +1,14 @@
 .ProfileForm {
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
 	align-items: center;
-	/* padding-top: 0.6rem; */
-	/* padding-left: 1rem; */
-	padding: 1rem;
-	gap: 1rem;
+
+	padding: 1rem 1rem 1rem 1rem;
+
+	/* Set maximum width to avoid stretching on larger screens */
+	max-width: 400px;
+
+	/* Set a fixed width if you want a specific size */
+	/* width: 100%; */
+	gap: 2rem;
 }
