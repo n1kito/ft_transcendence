@@ -105,34 +105,32 @@ const ProfileSettings: React.FC = () => {
 			}
 			const responseData = await response.clone().json();
 			console.log(responseData);
-			if (response.status === 409) {
-				if (responseData.error === 'login') {
-					console.log('it is login');
-					setUsernameError(responseData.message);
-				}
-				if (responseData.error === 'email') {
-					setEmailError(responseData.message);
-				}
-			}
-
-			// Check if the response data contains validation errors
-			// if (responseData.message && Array.isArray(responseData.message))
-			if (response.status === 400) {
-				// Clear existing errors
-				setUsernameError(null);
-				setEmailError(null);
-
-				// Loop through the validation errors
-				responseData.message.forEach((validationError: ValidationError) => {
-					const { property, constraints } = validationError;
-					if (property === 'login') {
-						setUsernameError(Object.values(constraints)[0]);
-					}
-					if (property === 'email') {
-						setEmailError(Object.values(constraints)[0]);
+			if (response.status === 409 || response.status === 400) {
+				responseData.errors.forEach((error: any) => {
+					if (error.field === 'login') {
+						console.log('it is login');
+						setUsernameError(error.message);
+					} else if (error.field === 'email') {
+						setEmailError(error.message);
 					}
 				});
 			}
+			// if (response.status === 400) {
+			// 	// Clear existing errors
+			// 	setUsernameError(null);
+			// 	setEmailError(null);
+
+			// 	// Loop through the validation errors
+			// 	responseData.message.forEach((validationError: ValidationError) => {
+			// 		const { property, constraints } = validationError;
+			// 		if (property === 'login') {
+			// 			setUsernameError(Object.values(constraints)[0]);
+			// 		}
+			// 		if (property === 'email') {
+			// 			setEmailError(Object.values(constraints)[0]);
+			// 		}
+			// 	});
+			// }
 		} catch (error) {
 			console.error('Error updating user data:', error);
 		}

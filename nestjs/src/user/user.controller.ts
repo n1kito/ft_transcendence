@@ -59,14 +59,10 @@ export class UserController {
 	) {
 		const userId = this.userService.authenticateUser(request);
 
-		// Validate the UpdateUserDto
-		await this.userService.validateUpdateUserDto(updateUserDto);
-		// update operation in the database
 		await this.userService.updateUser(userId, updateUserDto);
 		response
 			.status(HttpStatus.OK)
 			.json({ message: 'User updated successfully' });
-		return { message: 'User updated successfully' };
 	}
 
 	// TODO: change route to user/me/friends or something, I just created a separate one to avoid with the /user/me routes Jee created

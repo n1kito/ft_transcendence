@@ -1,11 +1,13 @@
 import {
 	BadRequestException,
 	ConflictException,
+	ConsoleLogger,
 	HttpException,
 	HttpStatus,
 	Injectable,
 	NotFoundException,
 	Res,
+	ValidationError,
 } from '@nestjs/common';
 import { validate } from 'class-validator';
 import { Request, response, Response } from 'express';
@@ -15,10 +17,23 @@ import { CustomRequest } from './user.controller';
 import { Prisma } from '@prisma/client';
 import { plainToClass } from 'class-transformer';
 
+export class CustomException extends HttpException {
+	constructor(
+		errors: { statusCode: number; field: string; message: string }[],
+	) {
+		super({ errors }, HttpStatus.BAD_REQUEST);
+	}
+}
+
 @Injectable()
 export class UserService {
+	private errors: { field: string; message: string; statusCode: number }[] = [];
+
 	constructor(private readonly prisma: PrismaService) {}
 
+	private pushError(field: string, message: string, statusCode: number) {
+		this.errors.push({ field, message, statusCode });
+	}
 	authenticateUser(request: CustomRequest): number {
 		const userId = request.userId;
 		if (!userId) {
@@ -28,8 +43,9 @@ export class UserService {
 	}
 
 	async updateUser(userId: number, updateUserDto: UpdateUserDto) {
+		this.errors = [];
 		try {
-			// update the user's data with prisma client
+			await this.validateUpdateUserDto(updateUserDto);
 			const updatedUser = await this.prisma.user.update({
 				where: { id: userId },
 				data: {
@@ -42,64 +58,54 @@ export class UserService {
 			if (error instanceof Prisma.PrismaClientKnownRequestError) {
 				const usernameError = this.isUniqueError(error, 'login');
 				if (usernameError) {
-					throw new ConflictException(usernameError.message, 'login');
+					this.pushError(
+						usernameError.field,
+						usernameError.message,
+						HttpStatus.CONFLICT,
+					);
 				}
 				const emailError = this.isUniqueError(error, 'email');
 				if (emailError) {
-					throw new ConflictException(emailError.message, 'email');
+					this.pushError(
+						emailError.field,
+						emailError.message,
+						HttpStatus.CONFLICT,
+					);
+				}
+				if (this.errors.length > 0) {
+					throw new CustomException(this.errors);
 				} else {
-					throw new ConflictException('Conflict occurred.');
+					throw new HttpException(
+						{
+							statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+							error: 'Internal Server Error',
+							message: 'Something went wrong.',
+						},
+						HttpStatus.INTERNAL_SERVER_ERROR,
+					);
 				}
 			} else {
-				throw error; // Re-throw other errors if needed
+				throw error;
 			}
 		}
 	}
 
 	async validateUpdateUserDto(updateUserDto: UpdateUserDto): Promise<void> {
-		// Validate the UpdateUserDto using class-validator library
-		const errors = await validate(plainToClass(UpdateUserDto, updateUserDto));
+		const classValidatorErrors: ValidationError[] = await validate(
+			plainToClass(UpdateUserDto, updateUserDto),
+		);
 
-		console.log(errors);
-		if (errors.length > 0) {
-			// If validation errors are found, throw a BadRequestException with the validation errors
-			throw new BadRequestException(errors);
-		}
-	}
-
-	// Move the error handling logic to the UserService
-	handleErrorResponse(response: Response, error: any) {
-		console.log('handleErrorResponse');
-		if (error instanceof HttpException) {
-			if (error instanceof BadRequestException) {
-				// If validation errors occurred, return the array of error messages in the response
-				response
-					.status(HttpStatus.BAD_REQUEST)
-					.json({ errors: error.getResponse() });
-			} else if (error instanceof ConflictException) {
-				// For other HttpExceptions, return the error response with status code and message
-				const errorResponse = {
-					statusCode: error.getStatus(),
-					message: error.message,
-					error: error.getResponse()['error'],
-					field: error.getResponse()['field'],
-				};
-				response.status(error.getStatus()).json({ errors: [errorResponse] });
+		if (classValidatorErrors.length > 0) {
+			const errors: { field: string; message: string }[] = [];
+			for (const error of classValidatorErrors) {
+				for (const constraintKey of Object.keys(error.constraints)) {
+					const field = error.property;
+					const message = error.constraints[constraintKey];
+					this.pushError(field, message, HttpStatus.BAD_REQUEST);
+				}
 			}
-		} else {
-			// For non-HttpException errors, return a generic error response
-			response.status(500).json({ error: 'Failed to update user' });
 		}
-		console.log(response.statusMessage);
 	}
-
-	// search if input already exists in the database
-	// private isUniqueError(error: any, field: string): string | null {
-	// 	if (error.code === 'P2002' && error.meta?.target?.includes(field)) {
-	// 		return field;
-	// 	}
-	// 	return null;
-	// }
 
 	private isUniqueError(
 		error: any,
@@ -107,8 +113,10 @@ export class UserService {
 	): { field: string; message: string } | null {
 		if (error.code === 'P2002' && error.meta?.target?.includes(field)) {
 			const message = `${field} already exists`;
+			console.log('isUniqueError:', field, message);
 			return { field, message };
 		}
+		console.log('isUniqueError not found');
 		return null;
 	}
 }
