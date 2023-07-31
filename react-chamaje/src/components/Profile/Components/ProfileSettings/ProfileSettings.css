@@ -2,13 +2,7 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-
-	padding: 1rem 1rem 1rem 1rem;
-
-	/* Set maximum width to avoid stretching on larger screens */
-	max-width: 400px;
-
-	/* Set a fixed width if you want a specific size */
-	/* width: 100%; */
+	justify-content: space-between;
+	padding: 1rem 2rem;
 	gap: 2rem;
 }

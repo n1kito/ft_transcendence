@@ -5,6 +5,8 @@ import {
 	IsNotEmpty,
 	IsOptional,
 	IsString,
+	MaxLength,
+	MinLength,
 } from 'class-validator';
 
 export class UpdateUserDto {
@@ -12,6 +14,8 @@ export class UpdateUserDto {
 	@IsAlpha()
 	@IsString()
 	@IsNotEmpty()
+	@MinLength(4)
+	@MaxLength(8)
 	readonly login?: string;
 
 	@IsOptional()

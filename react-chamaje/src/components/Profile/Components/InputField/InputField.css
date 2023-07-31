@@ -5,14 +5,18 @@
 	border: 1.5px solid #000;
 	background: #fff;
 	box-shadow: 1px 1px 0 0 black;
-	background-color: rgba(255, 255, 255, 0.2);
-	width: unset;
+	background-color: rgba(255, 255, 255, 0.4);
+	width: fit-content;
 	padding: 0.6rem;
 
 	display: flex;
 	flex-direction: column;
 	font-family: 'Roboto Mono';
 	color: black;
+}
+
+.inputFieldWrapper {
+	position: relative;
 }
 
 .inputFieldWrapper input:focus {
@@ -27,8 +31,8 @@
 
 .errorMessage {
 	color: #f85787;
-	font-size: 0.6rem;
+	font-size: 0.7rem;
 	position: relatif;
-	overflow: hidden;
-	width: max-content;
+	z-index: 100;
+	position: absolute;
 }

@@ -46,9 +46,7 @@ const ProfileSettings: React.FC = () => {
 		else if (newUsername.length < 4)
 			setUsernameError('Username must be at least 4 characters');
 		else if (!usernameRegex.test(newUsername))
-			setUsernameError(
-				'Username can only contain letters, numbers, "-", "_", and "."',
-			);
+			setUsernameError('Username can be letters, numbers, "-", "_", and "."');
 		else {
 			setUsernameError(null);
 		}
@@ -108,29 +106,12 @@ const ProfileSettings: React.FC = () => {
 			if (response.status === 409 || response.status === 400) {
 				responseData.errors.forEach((error: any) => {
 					if (error.field === 'login') {
-						console.log('it is login');
 						setUsernameError(error.message);
 					} else if (error.field === 'email') {
 						setEmailError(error.message);
 					}
 				});
 			}
-			// if (response.status === 400) {
-			// 	// Clear existing errors
-			// 	setUsernameError(null);
-			// 	setEmailError(null);
-
-			// 	// Loop through the validation errors
-			// 	responseData.message.forEach((validationError: ValidationError) => {
-			// 		const { property, constraints } = validationError;
-			// 		if (property === 'login') {
-			// 			setUsernameError(Object.values(constraints)[0]);
-			// 		}
-			// 		if (property === 'email') {
-			// 			setEmailError(Object.values(constraints)[0]);
-			// 		}
-			// 	});
-			// }
 		} catch (error) {
 			console.error('Error updating user data:', error);
 		}
