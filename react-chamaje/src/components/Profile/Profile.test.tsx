@@ -1,14 +1,14 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
-import Title from './Title';
+import Profile from './Profile';
 
-describe('<Title />', () => {
+describe('<Profile />', () => {
 	test('it should mount', () => {
-		render(<Title>Title</Title>);
+		render(<Profile />);
 
-		const title = screen.getByTestId('Title');
+		const profile = screen.getByTestId('Profile');
 
-		expect(title).toBeInTheDocument();
+		expect(profile).toBeInTheDocument();
 	});
 });

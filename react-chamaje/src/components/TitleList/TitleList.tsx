@@ -12,11 +12,10 @@ const TitleList: React.FC<titleListProps> = (props) => {
 		<ShadowWrapper shadow={true}>
 			<div className="titleBoxWrapper">
 				<Title
-					title="Titles"
 					highlight={true}
 					highlightColor="#FBD9F6"
 					fontSize="1.25rem"
-				/>
+				>Titles</Title>
 				<div className="titlesContainer">{props.children}</div>
 			</div>
 		</ShadowWrapper>

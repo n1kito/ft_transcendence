@@ -10,7 +10,12 @@ export class DatabaseSetupService implements OnModuleInit {
 	}
 
 	async seedDatabase() {
-		const userCount = await this.prisma.user.count();
+		let userCount;
+		try {
+			const userCount = await this.prisma.user.count();
+		  } catch (error) {
+			console.error('Error counting users:', error);
+		  }
 		// TODO: they will also need to have detault friends
 		if (userCount === 0) {
 			console.log('Populating database with default profiles...');

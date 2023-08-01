@@ -21,7 +21,7 @@ services:
       - '5555:5555'
 
   postgres:
-    image: postgres
+    image: 'arm64v8/postgres'
     restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -38,7 +38,7 @@ services:
       retries: 5
       start_period: 5s
     ports:
-      - '5432:5432'
+      - '5434:5432'
     volumes:
       - postgresql:/var/lib/postgresql/data
 

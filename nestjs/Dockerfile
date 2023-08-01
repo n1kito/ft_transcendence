@@ -4,7 +4,7 @@
 
 FROM node:alpine As development
 
-# Create app directory
+# Create app 	directory
 WORKDIR /usr/src/app
 
 # Copy application dependency manifests to the container image
@@ -15,6 +15,8 @@ COPY --chown=node:node ./package*.json ./
 
 # Instal app dependencies using the `npm ci` (clean install) command instead of `npm install`
 RUN npm ci
+
+RUN npm install -g @nestjs/cli
 
 # Bundle app source
 COPY --chown=node:node . .

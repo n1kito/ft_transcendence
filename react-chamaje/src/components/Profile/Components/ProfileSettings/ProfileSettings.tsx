@@ -100,11 +100,8 @@ const ProfileSettings: React.FC = () => {
 		<ShadowWrapper shadow={true} backgroundColor="#D5B1F9">
 			<div className="ProfileForm">
 				<Title
-					title="My Profile"
-					highlight={true}
 					highlightColor="#F8EF57"
-					fontSize="1.5rem"
-				/>
+				>My Profile</Title>
 				<InputField
 					value={username}
 					onChange={handleUsernameChange}

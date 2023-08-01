@@ -35,6 +35,8 @@ async function bootstrap() {
 			),
 		),
 	);
-	await app.listen(3000);
+	await app.listen(3000, '0.0.0.0').catch((error) => {
+		console.error('Error starting the application:', error);
+	  });
 }
 bootstrap();

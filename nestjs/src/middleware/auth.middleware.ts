@@ -2,8 +2,7 @@ import { Injectable, NestMiddleware, Redirect } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { NextFunction, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
-
-const prisma = new PrismaClient();
+import { PrismaService } from 'src/services/prisma-service/prisma.service';
 
 // TODO: Here I should use the same interface type for request as the once I put in user.controller.ts,
 // interface CustomRequest extends Request {
@@ -14,6 +13,7 @@ const prisma = new PrismaClient();
 // We use @Injectable decorator provided by NestJS here to mark this class as a provider that can be managed by the NestJS's dependency injection system.
 @Injectable()
 export class AuthMiddleWare implements NestMiddleware {
+	constructor(private readonly prisma: PrismaService) {}
 	// The use method is what we implement as part of the NestMiddleware interface. It gets executed when a middleware function is invoked.
 	// This method has three parameters: req (which represents the request object), res (which represents the response object), and next (which is a callback to invoke the next middleware function).
 	use(req: any, res: Response, next: NextFunction) {
@@ -28,7 +28,7 @@ export class AuthMiddleWare implements NestMiddleware {
 				process.env.JWT_SECRET_KEY,
 			) as jwt.JwtPayload;
 			// Check that the user is indeed part of our database (maybe they are using an old cookie, should not happen but does not hurt to check)
-			const userPromise = prisma.user.findUnique({
+			const userPromise = this.prisma.user.findUnique({
 				where: { id: decoded.userId },
 			});
 
