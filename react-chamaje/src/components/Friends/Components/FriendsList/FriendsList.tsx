@@ -31,7 +31,7 @@ const FriendsList = () => {
 						badgeTitle={friend.login}
 						badgeImageUrl={`http://localhost:3000${friend.image}`}
 						onlineIndicator={true}
-						clickable={true}
+						isClickable={true}
 					/>
 				))}
 			</div>

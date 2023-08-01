@@ -84,12 +84,13 @@ const Desktop = () => {
 				<FriendsList />
 			</Window> */}
 			<Window
-				windowTitle="norminet"
+				windowTitle={userData?.login || 'window title'}
 				links={[
 					{ name: 'Link1', url: '#' },
 					{ name: 'Link2', url: '#' },
 					{ name: 'Link3', url: '#' },
 				]}
+				useBeigeBackground={true}
 			>
 				<Profile />
 			</Window>

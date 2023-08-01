@@ -4,17 +4,17 @@ import './Button.css';
 // TODO: the border around the button should be around the shadow as well, like on gandi
 
 export interface MyButtonProps {
-	buttonText?: string;
 	baseColor?: number[];
 	onClick?: () => void;
+	children: React.ReactNode;
 	disabled?: boolean;
 }
 
 const Button: React.FC<MyButtonProps> = ({
-	buttonText = 'default',
 	baseColor = [57, 92, 66],
 	onClick, // Set the default value to an empty function
 	disabled = false,
+	children,
 }) => {
 	// Convert the baseColor array to an rgb color string
 	const btnBgColor = disabled
@@ -31,7 +31,7 @@ const Button: React.FC<MyButtonProps> = ({
 
 	const btnShadowColor = disabled
 		? 'hsl(0, 0%, 60%)'
-		: `hsl(${baseColor[0]}, ${baseColor[1]}%, ${baseColor[2] - 50}%, 30%)`;
+		: `hsl(${baseColor[0]}, ${baseColor[1]}%, ${baseColor[2] - 20}%, 60%)`;
 
 	const buttonStyle = {
 		'--btnBgColor': btnBgColor,
@@ -53,9 +53,13 @@ const Button: React.FC<MyButtonProps> = ({
 
 	return (
 		<div>
-			<div id="buttonWrapper" style={buttonStyle}>
+			<div
+				id="buttonWrapper"
+				className={`${disabled ? 'disabled-button' : ''}`}
+				style={buttonStyle}
+			>
 				<button id="coloredButton" onClick={handleClick} disabled={disabled}>
-					{buttonText}
+					{children}
 				</button>
 			</div>
 		</div>

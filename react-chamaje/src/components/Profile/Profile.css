@@ -3,17 +3,38 @@
 .profile-wrapper {
 	padding: 1.5rem 2.5rem;
 	/* outline: 1px solid red; */
-	display: grid;
-	grid-template-columns: 1fr 2fr;
+	display: flex;
+	flex-direction: row;
+	gap: 3rem;
 }
 
-.profile-wrapper > *:hover {
+.profile-sidebar .pictureContainer {
+	width: 10rem;
 }
 
-.profile-wrapper > * { 
+.profile-sidebar .shadow-wrapper {
+	width: 100%;
+}
+
+.profile-wrapper > * {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	justify-content: space-between;
 	gap: 1rem;
+}
+
+.profile-sidebar {
+	justify-content: flex-start;
+}
+
+.profile-content {
+	justify-content: space-between;
+}
+
+.profile-buttons {
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: space-between;
 }

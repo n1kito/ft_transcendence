@@ -11,11 +11,7 @@ const TitleList: React.FC<titleListProps> = (props) => {
 	return (
 		<ShadowWrapper shadow={true}>
 			<div className="titleBoxWrapper">
-				<Title
-					highlight={true}
-					highlightColor="#FBD9F6"
-					fontSize="1.25rem"
-				>Titles</Title>
+				<Title highlightColor="#FBD9F6">Titles</Title>
 				<div className="titlesContainer">{props.children}</div>
 			</div>
 		</ShadowWrapper>

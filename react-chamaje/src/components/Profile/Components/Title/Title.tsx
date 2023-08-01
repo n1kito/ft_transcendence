@@ -16,7 +16,7 @@ const Title: React.FC<TitleProps> = ({
 	bigTitle = false,
 	highlight = bigTitle ? false : true,
 	highlightColor = highlight ? '#FBD9F6' : '',
-	fontSize = bigTitle ? '2rem' : '1.5rem',
+	fontSize = bigTitle ? '2.5rem' : '1.5rem',
 	toolTip = '',
 	children,
 }) => {

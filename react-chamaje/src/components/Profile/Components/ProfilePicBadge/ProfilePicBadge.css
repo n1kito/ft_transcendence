@@ -5,7 +5,7 @@
 }
 
 .pictureContainer {
-	height: 7rem;
+	min-height: 7rem;
 	aspect-ratio: 1/1;
 }
 

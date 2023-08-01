@@ -13,8 +13,8 @@ export interface IFriendBadgeProps extends ShadowWrapperProps {
 }
 
 const FriendBadge: React.FC<IFriendBadgeProps> = ({
-	clickable = false,
-	shadow = clickable || false,
+	isClickable = false,
+	shadow = isClickable || false,
 	badgeTitle,
 	badgeImageUrl = m3ganAvatar,
 	toolTip = '',
@@ -24,7 +24,7 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 	const [friendIsPlaying, setFriendIsPlaying] = useState(false);
 
 	return (
-		<ShadowWrapper shadow={shadow} clickable={clickable}>
+		<ShadowWrapper shadow={shadow} isClickable={isClickable}>
 			{/* TODO: change the title property to use the person's actual name */}
 			<div className="friendBadge" title={toolTip}>
 				<div className="badgeAvatar">

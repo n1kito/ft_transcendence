@@ -1,6 +1,6 @@
 import React from 'react';
 import './ProfilePicBadge.css';
-import ShadowWrapper from '../Shared/ShadowWrapper/ShadowWrapper';
+import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import pen from './images/edit-pen-svgrepo-com.svg';
 
 export interface ProfilePicBadgeProps {
@@ -25,7 +25,7 @@ const ProfilePicBadge: React.FC<ProfilePicBadgeProps> = ({
 				></div>
 				{isModifiable && (
 					<div className="modifyButton">
-						<ShadowWrapper shadow={true} clickable={true}>
+						<ShadowWrapper shadow={true} isClickable={true}>
 							<img src={pen}></img>
 						</ShadowWrapper>
 					</div>
