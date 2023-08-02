@@ -22,7 +22,7 @@ const Title: React.FC<TitleProps> = ({
 }) => {
 	return (
 		<div
-			className="titleWrapper"
+			className="title-wrapper"
 			style={{ fontSize: fontSize }}
 			title={toolTip}
 		>

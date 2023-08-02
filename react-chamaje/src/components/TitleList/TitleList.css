@@ -1,6 +1,6 @@
 /* Styling the TitleList component */
 
-.titleBoxWrapper {
+.title-box-wrapper {
 	display: flex;
 	align-items: center;
 	flex-direction: column;
@@ -8,7 +8,7 @@
 	padding: 0.75rem 1rem;
 }
 
-.titlesContainer {
+.titles-container {
 	display: grid;
 	grid-template-columns: repeat(4, 1fr);
 	/* column-gap: 1rem; */
@@ -16,7 +16,7 @@
 	width: 90%;
 }
 
-.titlesContainer img {
+.titles-container img {
 	width: 1.75rem;
 	align-self: center;
 	justify-self: center;

@@ -9,12 +9,14 @@ export interface titleListProps {
 
 const TitleList: React.FC<titleListProps> = (props) => {
 	return (
-		<ShadowWrapper shadow={true}>
-			<div className="titleBoxWrapper">
-				<Title highlightColor="#FBD9F6">Titles</Title>
-				<div className="titlesContainer">{props.children}</div>
-			</div>
-		</ShadowWrapper>
+		<div className="title-list-wrapper">
+			<ShadowWrapper shadow={true}>
+				<div className="title-box-wrapper">
+					<Title highlightColor="#FBD9F6">Titles</Title>
+					<div className="titles-container">{props.children}</div>
+				</div>
+			</ShadowWrapper>
+		</div>
 	);
 };
 

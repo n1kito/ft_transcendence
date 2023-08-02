@@ -13,10 +13,10 @@ const ProfilePicBadge: React.FC<ProfilePicBadgeProps> = ({
 	isModifiable = false,
 }) => {
 	return (
-		<div className="ProfilePicBadgeWrapper">
+		<div className="profile-pic-badge-wrapper">
 			<ShadowWrapper shadow={true}>
 				<div
-					className="pictureContainer"
+					className="picture-container"
 					style={{
 						backgroundImage: `url('${picture}')`,
 						backgroundSize: 'cover',
@@ -24,7 +24,7 @@ const ProfilePicBadge: React.FC<ProfilePicBadgeProps> = ({
 					}}
 				></div>
 				{isModifiable && (
-					<div className="modifyButton">
+					<div className="modify-button">
 						<ShadowWrapper shadow={true} isClickable={true}>
 							<img src={pen}></img>
 						</ShadowWrapper>
