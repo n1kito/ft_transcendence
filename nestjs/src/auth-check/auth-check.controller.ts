@@ -10,7 +10,7 @@ export class AuthCheckController {
 	@Get()
 	checkAuth(@Req() req: Request): { isAuthentificated: boolean } {
 		try {
-			const token = req.cookies['jwt'];
+			const token = req.cookies['accessToken'];
 			const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 			const isAuthentificated = !!decoded;
 			return { isAuthentificated };

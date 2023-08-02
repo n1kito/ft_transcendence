@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { PrismaClient, User } from '@prisma/client';
+import * as jwt from 'jsonwebtoken';
 
 interface UserData {
 	ft_id: number;
@@ -198,3 +199,5 @@ export class AuthService {
 		}
 	}
 }
+
+export default AuthService;
