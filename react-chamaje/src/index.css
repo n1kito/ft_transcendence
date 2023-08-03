@@ -21,6 +21,7 @@ body::after {
 	z-index: 2;
 	opacity: 0.9;
 	mix-blend-mode: soft-light;
+	pointer-events: none;
 
 	background: black;
 	filter: url(#noise-filter);
