@@ -6,7 +6,7 @@ import Title from '../Title/Title';
 const ProfileStats = () => {
 	// TODO: this should open Jee's profile
 	const logSomething = () => {
-		console.log("You just had to click this button, didn't you...");
+		console.log('You just had to click this button...');
 	};
 	return (
 		<div className="profile-stats-wrapper">

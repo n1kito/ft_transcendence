@@ -21,7 +21,7 @@ services:
       - '5555:5555'
 
   postgres:
-    image: 'arm64v8/postgres'
+    image: 'postgres'
     restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB}

@@ -71,7 +71,7 @@ const MatchHistory = () => {
 						userScore={8}
 						badgeImageUrl={m3gan}
 					></MatchHistoryBadge>
-					{/* <MatchHistoryBadge
+					<MatchHistoryBadge
 						badgeTitle="@jeepark"
 						adversaryScore={8}
 						userScore={5}
@@ -100,7 +100,7 @@ const MatchHistory = () => {
 						adversaryScore={5}
 						userScore={8}
 						badgeImageUrl={m3gan}
-					></MatchHistoryBadge> */}
+					></MatchHistoryBadge>
 				</div>
 			</ShadowWrapper>
 		</div>
