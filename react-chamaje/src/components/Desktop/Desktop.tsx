@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import FriendsList from '../Friends/Components/FriendsList/FriendsList';
 import { UserContext } from '../../contexts/UserContext';
 import useAuth from '../../hooks/userAuth';
+import ProfileSettings from '../Profile/Components/ProfileSettings/ProfileSettings';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -23,7 +24,7 @@ const Desktop = () => {
 		const fetchUserData = async () => {
 			// Feth the user data from the server
 			try {
-				console.log('trying to fetch');
+				console.log('\n\n DESKTOP: trying to fetch');
 				// user/me
 				const response = await fetch('http://localhost:3000/user/me', {
 					method: 'GET',
@@ -80,8 +81,8 @@ const Desktop = () => {
 					{ name: 'Do something', url: '#' },
 				]}
 			>
-				<FriendsList />
-				{/* <ProfileSettings /> */}
+				{/* <FriendsList /> */}
+				<ProfileSettings />
 			</Window>
 		</div>
 	);

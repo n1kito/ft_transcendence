@@ -8,6 +8,7 @@ import {
 	Request,
 	Res,
 	UnauthorizedException,
+	Req,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import * as jwt from 'jsonwebtoken';
@@ -95,45 +96,5 @@ export class AuthController {
 	@Get('login-failed')
 	loginFailed(): string {
 		return 'User could not login 🛑';
-	}
-
-	@Post('refresh-token')
-	async refreshToken(@Request() req, @Res() res) {
-		// get refresh token from the request headers
-		const refreshToken = req.headers['refreshToken'];
-
-		console.log('/refresh-token:', refreshToken);
-
-		if (!refreshToken) {
-			throw new UnauthorizedException('No refresh token provided');
-		}
-
-		try {
-			// Verify the refresh token
-			const payload = this.tokenService.verifyToken(refreshToken);
-
-			// If the refresh token is valid, generate a new access token
-			const newAccessToken = this.tokenService.generateAccessToken(
-				this.authService.getUserId,
-			);
-
-			res.cookie('accessToken', newAccessToken, {
-				httpOnly: true,
-			});
-
-			return { accessToken: newAccessToken };
-		} catch (error) {
-			res.clearCookie('accessToken');
-			throw new UnauthorizedException('Invalid or expired refresh token');
-		}
-	}
-	@Post('decode-token')
-	async decodeToken(@Body() body: { token: string }): Promise<any> {
-		try {
-			const decodedToken = jwt.verify(body.token);
-			return { isValid: true, decodedToken };
-		} catch (error) {
-			return { isValid: false };
-		}
 	}
 }

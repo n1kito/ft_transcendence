@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
+import { emitKeypressEvents } from 'readline';
 
 interface IAuthContext {
 	isAuthentificated: boolean;
@@ -22,6 +23,9 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 	useEffect(() => {
 		const checkAuth = async () => {
 			try {
+				console.log(
+					'\n\n----------------------- AUTH CONTEXT -----------------\n\n',
+				);
 				const response = await fetch('http://localhost:3000/auth-check', {
 					method: 'GET',
 					credentials: 'include',
@@ -29,7 +33,23 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 				if (response.ok) {
 					const data = await response.json();
 					setIsAuthentificated(data.isAuthentificated);
-					console.log('User is authentificated = ' + data.isAuthentificated);
+
+					// console.log('User is authentificated = ' + data.isAuthentificated);
+					if (data.isAuthentificated === false) {
+						const accessToken = Cookies.get('accessToken');
+						const response = await fetch(
+							'http://localhost:3000/auth-check/decode-token',
+							{
+								method: 'POST',
+								credentials: 'include',
+							},
+						);
+						if (response.ok) {
+							const data = await response.json();
+							setIsAuthentificated(data.isAuthentificated);
+							console.log('user is authenticated token refreshed');
+						}
+					}
 				} else {
 					setIsAuthentificated(false);
 					console.log('NestJs request failed to auth-check');

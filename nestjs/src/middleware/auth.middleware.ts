@@ -20,7 +20,7 @@ export class AuthMiddleWare implements NestMiddleware {
 	// The use method is what we implement as part of the NestMiddleware interface. It gets executed when a middleware function is invoked.
 	// This method has three parameters: req (which represents the request object), res (which represents the response object), and next (which is a callback to invoke the next middleware function).
 	async use(req: any, res: Response, next: NextFunction) {
-		console.log('auth middleware');
+		console.log('\n\n--------------AUTH MIDDLEWARE--------------------\n\n');
 		// Here, we extract the JWT from the cookies sent with the request.
 		const accessToken = req.cookies['accessToken'];
 		const refreshToken = req.cookies['refreshToken'];
@@ -56,10 +56,14 @@ export class AuthMiddleWare implements NestMiddleware {
 				.catch((error) => {
 					throw new Error(error);
 				});
+			// return next();
 		} catch (error) {
-			console.log('middleware error', error);
+			console.log('\n\n----------- middleware error -----------\n\n', error);
 			console.log('error name', error.name);
-			if (error.name === 'TokenExpiredError') {
+			if (
+				error.name === 'TokenExpiredError' ||
+				error.name === 'JsonWebTokenError'
+			) {
 				const decodedRefreshToken = jwt.verify(
 					refreshToken,
 					process.env.JWT_SECRET_KEY,
@@ -85,7 +89,6 @@ export class AuthMiddleWare implements NestMiddleware {
 				req.accessToken = newAccessToken;
 				req.userId = decodedRefreshToken.userId;
 				console.log('expired access token has been replaced by a new one!');
-				req.authContext.setIsAuthentificated(true);
 				return next();
 			}
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Req } from '@nestjs/common';
+import { Controller, Get, Post, Req } from '@nestjs/common';
 import { AuthCheckService } from './auth-check.service';
 import * as jwt from 'jsonwebtoken';
 import { Request } from 'express';
@@ -15,6 +15,30 @@ export class AuthCheckController {
 			const isAuthentificated = !!decoded;
 			return { isAuthentificated };
 		} catch (error) {
+			console.log('\n\n----------AUTH CHECK-------------\n\n');
+			console.log('user is not authenticated cannot find access token', error);
+			return { isAuthentificated: false };
+		}
+	}
+	@Post('decode-token')
+	async decodeToken(@Req() req): Promise<any> {
+		try {
+			console.log('\n\n---------DECODE TOKEN --------------\n\n');
+
+			const token = req.cookies?.accessToken;
+
+			if (!token) {
+				throw new Error('Access token not found');
+			}
+
+			// Now you can verify the token
+			const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
+
+			console.log(decodedToken);
+			return { isAuthentificated: true };
+		} catch (error) {
+			console.log('error:', error);
+			throw new Error(error);
 			return { isAuthentificated: false };
 		}
 	}
