@@ -23,9 +23,6 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 	useEffect(() => {
 		const checkAuth = async () => {
 			try {
-				console.log(
-					'\n\n----------------------- AUTH CONTEXT -----------------\n\n',
-				);
 				const response = await fetch('http://localhost:3000/auth-check', {
 					method: 'GET',
 					credentials: 'include',
@@ -35,7 +32,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 					setIsAuthentificated(data.isAuthentificated);
 
 					// console.log('User is authentificated = ' + data.isAuthentificated);
-					if (data.isAuthentificated === false) {
+					if (!data.isAuthentificated) {
 						const accessToken = Cookies.get('accessToken');
 						const response = await fetch(
 							'http://localhost:3000/auth-check/decode-token',

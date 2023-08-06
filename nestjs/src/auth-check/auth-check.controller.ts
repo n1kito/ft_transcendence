@@ -1,4 +1,11 @@
-import { Controller, Get, Post, Req } from '@nestjs/common';
+import {
+	Controller,
+	Get,
+	HttpException,
+	HttpStatus,
+	Post,
+	Req,
+} from '@nestjs/common';
 import { AuthCheckService } from './auth-check.service';
 import * as jwt from 'jsonwebtoken';
 import { Request } from 'express';
@@ -8,7 +15,9 @@ export class AuthCheckController {
 	constructor(private readonly authCheckService: AuthCheckService) {}
 	// TODO: do we need a separate service here ? It's a simple check
 	@Get()
-	checkAuth(@Req() req: Request): { isAuthentificated: boolean } {
+	async checkAuth(
+		@Req() req: Request,
+	): Promise<{ isAuthentificated: boolean }> {
 		try {
 			const token = req.cookies['accessToken'];
 			const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
@@ -28,7 +37,10 @@ export class AuthCheckController {
 			const token = req.cookies?.accessToken;
 
 			if (!token) {
-				throw new Error('Access token not found');
+				throw new HttpException(
+					'Access token not found',
+					HttpStatus.UNAUTHORIZED,
+				);
 			}
 
 			// Now you can verify the token
@@ -38,8 +50,7 @@ export class AuthCheckController {
 			return { isAuthentificated: true };
 		} catch (error) {
 			console.log('error:', error);
-			throw new Error(error);
-			return { isAuthentificated: false };
+			throw new HttpException('Authentication failed', HttpStatus.UNAUTHORIZED);
 		}
 	}
 }
