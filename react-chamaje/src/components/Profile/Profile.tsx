@@ -46,9 +46,11 @@ const Profile: React.FC<ProfileProps> = (props) => {
 					<img src={moneyIcon} />
 					<img src={rocketIcon} />
 				</TitleList>
-				<ProfileSettings />
+				{userData && userData.login == props.login && <ProfileSettings />}
+				
 				<div className="profile-buttons">
-					<Button baseColor={[308, 80, 92]}>change password</Button>
+					{userData && userData.login == props.login && <Button baseColor={[308, 80, 92]}>change password</Button>}
+					{userData && !(userData.login == props.login) && <Button baseColor={[308, 80, 92]}>add friend</Button>}
 					<Button baseColor={[0, 80, 92]}>
 						<svg
 							className="trashcan-sgv"
