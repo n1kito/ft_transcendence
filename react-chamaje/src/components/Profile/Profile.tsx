@@ -4,7 +4,7 @@ import ProfilePicBadge from './Components/ProfilePicBadge/ProfilePicBadge';
 import { UserContext } from '../../contexts/UserContext';
 import placeholderImage from '../../images/placeholder-image.png';
 import Title from './Components/Title/Title';
-import ShadowWrapper from '../Shared/ShadowWrapper/ShadowWrapper';
+// import ShadowWrapper from '../Shared/ShadowWrapper/ShadowWrapper';
 import ProfileSettings from './Components/ProfileSettings/ProfileSettings';
 import ProfileStats from './Components/ProfileStats/ProfileStats';
 import ProfileMissions from './Components/ProfileMissions/ProfileMissions';
@@ -21,8 +21,11 @@ import rocketIcon from './icons/rocket-icon.svg';
 import Button from '../Shared/Button/Button';
 
 // TODO: find a way to make the shaddow wrapper widht's 100% so if fills the sidebar
+export interface ProfileProps {
+	login: string;
+}
 
-const Profile = () => {
+const Profile: React.FC<ProfileProps> = (props) => {
 	const { userData } = useContext(UserContext);
 
 	return (
@@ -30,7 +33,7 @@ const Profile = () => {
 			<div className="profile-sidebar">
 				<ProfilePicBadge
 					picture={userData ? userData.image : placeholderImage}
-					isModifiable={true}
+					isModifiable={userData ? userData.login == props.login : false}
 				/>
 				<Title bigTitle={true}>{userData ? userData.login : 'pouet'}</Title>
 				<TitleList>

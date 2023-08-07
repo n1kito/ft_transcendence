@@ -92,7 +92,8 @@ const Desktop = () => {
 				]}
 				useBeigeBackground={true}
 			>
-				<Profile />
+				<Profile login={userData ? userData.login : 'random'}/>
+				{/* <Profile login='randomLg'/> */}
 			</Window>
 		</div>
 	);
