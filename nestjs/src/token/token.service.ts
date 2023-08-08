@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Req } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
+import { Request } from 'express';
 
 @Injectable()
 export class TokenService {
@@ -9,9 +10,10 @@ export class TokenService {
 
 	constructor() {
 		this.jwtSecretKey = process.env.JWT_SECRET_KEY || 'your-default-secret-key';
-		this.accessTokenExpiresIn = 30; // Access token expiry time in seconds
+		this.accessTokenExpiresIn = 10; // Access token expiry time in seconds
 		this.refreshTokenExpiresIn = 30 * 24 * 60 * 60; // Refresh token expiry time in seconds
 	}
+
 	generateAccessToken(payload: any): string {
 		console.log('generate access token payload : ', payload);
 		const secretKey = process.env.JWT_SECRET_KEY;
@@ -26,35 +28,31 @@ export class TokenService {
 		return jwt.verify(token, this.jwtSecretKey) as jwt.JwtPayload;
 		// return jwt.verify(token);
 	}
+
+	async refreshToken(@Req() req: Request): Promise<string> {
+		const refreshToken = req.cookies['refreshToken'];
+
+		if (!refreshToken) {
+			throw new Error('No refresh token provided');
+		}
+
+		try {
+			// Verify the refresh token
+			const decodedRefreshToken = this.verifyToken(refreshToken);
+			// You can fetch the user from the database based on the decoded data
+			// For example, if your refresh token contains a user ID:
+			const userId = decodedRefreshToken.userId;
+
+			// ... Fetch the user from the database based on userId
+
+			// Generate a new access token
+			const accessToken = jwt.sign({ userId }, this.jwtSecretKey, {
+				expiresIn: this.accessTokenExpiresIn,
+			});
+			console.log(accessToken);
+			return accessToken;
+		} catch (error) {
+			throw new Error('Invalid or expired refresh token');
+		}
+	}
 }
-
-// async refreshAccessToken(refreshToken: string): Promise<string | null> {
-//     try {
-//         // Verify the refresh token
-//         const decoded = jwt.verify(
-//             refreshToken,
-//             process.env.JWT_REFRESH_SECRET_KEY,
-//         ) as jwt.JwtPayload;
-
-//         // Check if the refresh token is valid
-//         const user = await this.prisma.user.findUnique({
-//             where: { id: decoded.userId },
-//         });
-//         if (!user) {
-//             throw new Error('Invalid refresh token');
-//         }
-
-//         // If the refresh token is valid, generate a new access token and return it
-//         const payload = {
-//             userId: user.id,
-//         };
-//         const accessTokenExpiresIn = 3600; // Token expiry time (in seconds)
-//         const accessToken = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
-//             expiresIn: accessTokenExpiresIn,
-//         });
-
-//         return accessToken;
-//     } catch (error) {
-//         console.log('Error refreshing access token:', error);
-//         return null; // Return null if the refresh token is invalid or expired
-//     }

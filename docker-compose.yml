@@ -32,7 +32,7 @@ services:
       && exec docker-entrypoint.sh postgres"
     # pg_isready checks whether postgres is ready to accept connections
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER}']
       interval: 10s
       timeout: 30s
       retries: 5
@@ -44,7 +44,7 @@ services:
 
   react:
     build:
-      dockerfile: Dockerfile 
+      dockerfile: Dockerfile
       context: ./react-chamaje
       target: development
     command: npm start

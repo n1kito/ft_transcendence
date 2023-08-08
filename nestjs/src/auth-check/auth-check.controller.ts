@@ -29,28 +29,4 @@ export class AuthCheckController {
 			return { isAuthentificated: false };
 		}
 	}
-	@Post('decode-token')
-	async decodeToken(@Req() req): Promise<any> {
-		try {
-			console.log('\n\n---------DECODE TOKEN --------------\n\n');
-
-			const token = req.cookies?.accessToken;
-
-			if (!token) {
-				throw new HttpException(
-					'Access token not found',
-					HttpStatus.UNAUTHORIZED,
-				);
-			}
-
-			// Now you can verify the token
-			const decodedToken = jwt.verify(token, process.env.JWT_SECRET_KEY);
-
-			console.log(decodedToken);
-			return { isAuthentificated: true };
-		} catch (error) {
-			console.log('error:', error);
-			throw new HttpException('Authentication failed', HttpStatus.UNAUTHORIZED);
-		}
-	}
 }

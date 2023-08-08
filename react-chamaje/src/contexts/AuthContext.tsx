@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
-import { emitKeypressEvents } from 'readline';
 
 interface IAuthContext {
 	isAuthentificated: boolean;
 	logOut: () => void; // function that will log out the user
+	refreshToken: () => Promise<void>;
 }
 
 export const AuthContext = React.createContext<IAuthContext | undefined>(
@@ -30,42 +30,53 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 				if (response.ok) {
 					const data = await response.json();
 					setIsAuthentificated(data.isAuthentificated);
-
-					// console.log('User is authentificated = ' + data.isAuthentificated);
-					if (!data.isAuthentificated) {
-						const accessToken = Cookies.get('accessToken');
-						const response = await fetch(
-							'http://localhost:3000/auth-check/decode-token',
-							{
-								method: 'POST',
-								credentials: 'include',
-							},
-						);
-						if (response.ok) {
-							const data = await response.json();
-							setIsAuthentificated(data.isAuthentificated);
-							console.log('user is authenticated token refreshed');
-						}
-					}
 				} else {
 					setIsAuthentificated(false);
-					console.log('NestJs request failed to auth-check');
 				}
 			} catch (error) {
 				console.log('Error occured while checking authentification:', error);
 			}
 		};
-
 		checkAuth();
 	}, []);
 
 	const logOut = () => {
-		Cookies.remove('token');
+		Cookies.remove('accessToken');
+		Cookies.remove('refreshToken');
+
 		setIsAuthentificated(false);
 	};
 
+	const refreshToken = async () => {
+		try {
+			const response = await fetch(
+				'http://localhost:3000/token/refresh-token',
+				{
+					method: 'POST',
+					credentials: 'include',
+				},
+			);
+
+			if (response.ok) {
+				// Assuming the response contains a new access token
+				const data = await response.json();
+				const newAccessToken = data.accessToken;
+				console.log('--- AUTH CONTEXT ---');
+				console.log('new access token: ', newAccessToken);
+				// Update the state with the new access token and set isAuthenticated to true
+				setIsAuthentificated(true);
+				return;
+			} else {
+				// If the refresh token is invalid or expired, log the user out
+				logOut();
+			}
+		} catch (error) {
+			console.log('Error occurred while refreshing token:', error);
+		}
+	};
+
 	return (
-		<AuthContext.Provider value={{ isAuthentificated, logOut }}>
+		<AuthContext.Provider value={{ isAuthentificated, logOut, refreshToken }}>
 			{children}
 		</AuthContext.Provider>
 	);

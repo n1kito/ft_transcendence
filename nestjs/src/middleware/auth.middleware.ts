@@ -58,41 +58,43 @@ export class AuthMiddleWare implements NestMiddleware {
 				});
 			// return next();
 		} catch (error) {
-			console.log('\n\n----------- middleware error -----------\n\n', error);
-			console.log('error name', error.name);
-			if (
-				error.name === 'TokenExpiredError' ||
-				error.name === 'JsonWebTokenError'
-			) {
-				const decodedRefreshToken = jwt.verify(
-					refreshToken,
-					process.env.JWT_SECRET_KEY,
-				) as jwt.JwtPayload;
+			// console.log('\n\n----------- middleware error -----------\n\n', error);
+			// console.log('error name', error.name);
+			// if (
+			// 	error.name === 'TokenExpiredError' ||
+			// 	error.name === 'JsonWebTokenError'
+			// ) {
+			// 	const decodedRefreshToken = jwt.verify(
+			// 		refreshToken,
+			// 		process.env.JWT_SECRET_KEY,
+			// 	) as jwt.JwtPayload;
 
-				const user = await prisma.user.findUnique({
-					where: { id: decodedRefreshToken.userId },
-				});
-				if (!user) {
-					throw new Error('Request coming from unknown user');
-				}
-				const payload = {
-					userId: user.id,
-				};
-				//token has expired then generate a new access token
-				const newAccessToken = this.tokenService.generateAccessToken(payload);
+			// 	const user = await prisma.user.findUnique({
+			// 		where: { id: decodedRefreshToken.userId },
+			// 	});
+			// 	if (!user) {
+			// 		throw new Error('Request coming from unknown user');
+			// 	}
+			// 	const payload = {
+			// 		userId: user.id,
+			// 	};
 
-				// send the new access token as a cookie
-				res.cookie('accessToken', newAccessToken, {
-					httpOnly: true,
-				});
+			// 	//token has expired then generate a new access token
+			// 	const newAccessToken = this.tokenService.generateAccessToken(payload);
 
-				req.accessToken = newAccessToken;
-				req.userId = decodedRefreshToken.userId;
-				console.log('expired access token has been replaced by a new one!');
-				return next();
-			}
+			// 	// send the new access token as a cookie
+			// 	res.cookie('accessToken', newAccessToken, {
+			// 		httpOnly: true,
+			// 	});
+
+			// 	req.accessToken = newAccessToken;
+			// 	req.userId = decodedRefreshToken.userId;
+			// 	console.log('expired access token has been replaced by a new one!');
+			// 	next();
+			// }
 
 			res.status(401).json({ message: 'Authentication failed :(' + error });
+			// throw new Error(error);
 		}
 	}
 }

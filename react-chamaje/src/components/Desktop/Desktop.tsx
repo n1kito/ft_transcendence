@@ -14,7 +14,7 @@ const Desktop = () => {
 	const { userData, setUserData } = useContext(UserContext);
 	const [openFriendsWindow, setOpenedFriendsWindows] = useState(false);
 	const navigate = useNavigate();
-	const { isAuthentificated } = useAuth();
+	const { isAuthentificated, refreshToken } = useAuth();
 
 	if (isAuthentificated) {
 		console.log('user is authentificated');
@@ -30,10 +30,21 @@ const Desktop = () => {
 					method: 'GET',
 					credentials: 'include',
 				});
-				const data = await response.json();
-				console.log(data);
-				// Set the user data in the context
-				setUserData(data);
+				if (response.ok) {
+					const data = await response.json();
+					// Set the user data in the context
+					setUserData(data);
+				} else if (response.status === 401) {
+					try {
+						await refreshToken();
+						// After token refresh, re-fetch user data (recursive call)
+						fetchUserData();
+					} catch (refreshError) {
+						console.log('Error refreshing token:', refreshError);
+					}
+				} else {
+					console.log('Error fetching user data:', response);
+				}
 			} catch (error) {
 				console.log('Error: ', error);
 			}

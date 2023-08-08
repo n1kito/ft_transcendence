@@ -14,4 +14,10 @@ export class PrismaService
 	async onApplicationShutdown() {
 		await this.$disconnect(); // close the database connection
 	}
+
+	async findUserById(userId: number) {
+		return this.user.findUnique({
+			where: { id: userId },
+		});
+	}
 }
