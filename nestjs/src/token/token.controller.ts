@@ -1,6 +1,7 @@
 import { Controller, Post, Req, Res } from '@nestjs/common';
 import { TokenService } from './token.service';
 import { Response, Request } from 'express';
+import { PrismaService } from 'src/services/prisma-service/prisma.service';
 @Controller('token')
 export class TokenController {
 	constructor(private readonly tokenService: TokenService) {}

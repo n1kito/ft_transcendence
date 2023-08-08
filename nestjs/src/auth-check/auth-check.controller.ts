@@ -26,6 +26,12 @@ export class AuthCheckController {
 		} catch (error) {
 			console.log('\n\n----------AUTH CHECK-------------\n\n');
 			console.log('user is not authenticated cannot find access token', error);
+			if (
+				error.name === 'JsonWebTokenError' ||
+				error.name === 'TokenExpiredError'
+			) {
+				throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+			}
 			return { isAuthentificated: false };
 		}
 	}

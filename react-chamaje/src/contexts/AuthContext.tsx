@@ -31,10 +31,16 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 					const data = await response.json();
 					setIsAuthentificated(data.isAuthentificated);
 				} else {
-					setIsAuthentificated(false);
+					try {
+						refreshToken();
+					} catch (error) {
+						console.log('error:', error);
+						logOut();
+					}
+					logOut();
 				}
 			} catch (error) {
-				console.log('Error occured while checking authentification:', error);
+				logOut();
 			}
 		};
 		checkAuth();
@@ -58,19 +64,11 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 			);
 
 			if (response.ok) {
-				// Assuming the response contains a new access token
-				const data = await response.json();
-				const newAccessToken = data.accessToken;
-				console.log('--- AUTH CONTEXT ---');
-				console.log('new access token: ', newAccessToken);
-				// Update the state with the new access token and set isAuthenticated to true
 				setIsAuthentificated(true);
-				return;
-			} else {
-				// If the refresh token is invalid or expired, log the user out
-				logOut();
 			}
 		} catch (error) {
+			logOut();
+
 			console.log('Error occurred while refreshing token:', error);
 		}
 	};

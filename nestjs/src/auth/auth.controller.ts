@@ -48,40 +48,24 @@ export class AuthController {
 			this.authService.checkState(state);
 			await this.authService.handleAuthCallback(code);
 			await this.authService.retrieveUserInfo();
-			// TODO: put in a separate method ?
-			// generate JWT token
+
 			const payload = {
 				userId: this.authService.getUserId(),
 			};
-			console.log('auth controller', payload);
-			const secretKey = process.env.JWT_SECRET_KEY;
-			const accessTokenExpiresIn = 30; // Token expiry time (in seconds)
-			const accessToken = jwt.sign(payload, secretKey, {
-				expiresIn: accessTokenExpiresIn,
-			});
 
-			const refreshTokenExpiresIn = 30 * 24 * 60 * 40;
-			const refreshToken = jwt.sign(payload, secretKey, {
-				expiresIn: refreshTokenExpiresIn,
-			});
+			const accessToken = this.tokenService.generateAccessToken(payload);
+			const refreshToken = this.tokenService.generateRefreshToken(payload);
 
-			// Attach the token to the response as a cookie
-			res.cookie('accessToken', accessToken, {
-				httpOnly: true,
-				sameSite: 'strict',
-				// TODO: set this to true for production only, as it sends it over https and https is not used in local environments
-				// secure: true,
-				expires: new Date(Date.now() + accessTokenExpiresIn * 1000), // Set cookie to expire when the JWT does
-			});
+			this.tokenService.attachAccessTokenCookie(res, accessToken);
+			this.tokenService.attachRefreshTokenCookie(res, refreshToken);
+			// Store the refresh token using Prisma
+			// const createdRefreshToken = await this.tokenService.storeRefreshToken(
+			// 	this.authService.getUserId(),
+			// 	refreshToken,
+			// );
 
-			res.cookie('refreshToken', refreshToken, {
-				httpOnly: true,
-				sameSite: 'strict',
-				expires: new Date(Date.now() + refreshTokenExpiresIn * 1000),
-			});
-			console.log('callback');
 			const redirectURL = `http://localhost:3001/desktop`;
-			return { url: redirectURL }; // TODO: return 'desktop' (homepage) URL
+			return { url: redirectURL };
 		} catch (error) {
 			console.log('lofin error: ', error);
 			return { url: 'login-failed' }; // TODO: return error URl and find out how to customize the error message if we want to

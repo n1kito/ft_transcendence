@@ -14,7 +14,7 @@ const Desktop = () => {
 	const { userData, setUserData } = useContext(UserContext);
 	const [openFriendsWindow, setOpenedFriendsWindows] = useState(false);
 	const navigate = useNavigate();
-	const { isAuthentificated, refreshToken } = useAuth();
+	const { isAuthentificated, refreshToken, logOut } = useAuth();
 
 	if (isAuthentificated) {
 		console.log('user is authentificated');
@@ -34,19 +34,14 @@ const Desktop = () => {
 					const data = await response.json();
 					// Set the user data in the context
 					setUserData(data);
-				} else if (response.status === 401) {
-					try {
-						await refreshToken();
-						// After token refresh, re-fetch user data (recursive call)
-						fetchUserData();
-					} catch (refreshError) {
-						console.log('Error refreshing token:', refreshError);
-					}
 				} else {
 					console.log('Error fetching user data:', response);
+					logOut();
+					return;
 				}
 			} catch (error) {
 				console.log('Error: ', error);
+				return;
 			}
 		};
 
@@ -57,14 +52,6 @@ const Desktop = () => {
 		setOpenedFriendsWindows(true);
 		navigate('/friends');
 	};
-
-	// const location = useLocation();
-	// const searchParams = new URLSearchParams(location.search);
-	// const parameterValue = searchParams.get('login');
-
-	// setUserData({
-	// 	login: parameterValue || ''
-	// });
 
 	return (
 		<div className="desktopWrapper">

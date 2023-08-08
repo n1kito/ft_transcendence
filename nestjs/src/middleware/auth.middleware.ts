@@ -1,4 +1,10 @@
-import { Injectable, NestMiddleware, Redirect } from '@nestjs/common';
+import {
+	HttpException,
+	HttpStatus,
+	Injectable,
+	NestMiddleware,
+	Redirect,
+} from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { NextFunction, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
@@ -23,10 +29,10 @@ export class AuthMiddleWare implements NestMiddleware {
 		console.log('\n\n--------------AUTH MIDDLEWARE--------------------\n\n');
 		// Here, we extract the JWT from the cookies sent with the request.
 		const accessToken = req.cookies['accessToken'];
-		const refreshToken = req.cookies['refreshToken'];
+		// const refreshToken = req.cookies['refreshToken'];
 
 		console.log('access token:', accessToken);
-		console.log('refresh token:', refreshToken);
+		// console.log('refresh token:', refreshToken);
 
 		try {
 			// Now, we verify the JWT using the secret key.
@@ -34,11 +40,12 @@ export class AuthMiddleWare implements NestMiddleware {
 			// If the token is not valid (maybe it was tampered with, or it's expired), jwt.verify throws an error.
 			const decodedAccessToken = this.tokenService.verifyToken(accessToken);
 
-			// verify if refresh token is valid
-			const decodedRefreshToken = jwt.verify(
-				refreshToken,
-				process.env.JWT_SECRET_KEY,
-			) as jwt.JwtPayload;
+			// if (!refreshToken) throw new Error('refresh token not found');
+			// // verify if refresh token is valid
+			// const decodedRefreshToken = jwt.verify(
+			// 	refreshToken,
+			// 	process.env.JWT_SECRET_KEY,
+			// ) as jwt.JwtPayload;
 
 			// Check that the user is indeed part of our database (maybe they are using an old cookie, should not happen but does not hurt to check)
 			const userPromise = prisma.user.findUnique({
@@ -58,6 +65,7 @@ export class AuthMiddleWare implements NestMiddleware {
 				});
 			// return next();
 		} catch (error) {
+			console.log('error: ', error);
 			// console.log('\n\n----------- middleware error -----------\n\n', error);
 			// console.log('error name', error.name);
 			// if (
@@ -93,8 +101,9 @@ export class AuthMiddleWare implements NestMiddleware {
 			// 	next();
 			// }
 
-			res.status(401).json({ message: 'Authentication failed :(' + error });
+			// res.status(401).json({ message: 'Authentication failed :(' + error });
 			// throw new Error(error);
+			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 		}
 	}
 }
