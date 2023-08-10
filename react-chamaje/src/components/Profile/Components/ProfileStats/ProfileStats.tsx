@@ -12,7 +12,7 @@ const ProfileStats = () => {
 		<div className="profile-stats-wrapper">
 			<Title>Stats</Title>
 			<div className="profile-stats">
-				<StatBadge title="Rank">#149</StatBadge>
+				<StatBadge title="Rank" isClickable={true}>#149</StatBadge>
 				<StatBadge title="Win Rate">27%</StatBadge>
 				<StatBadge title="Played">120</StatBadge>
 				<StatBadge title="Killcount">12</StatBadge>
