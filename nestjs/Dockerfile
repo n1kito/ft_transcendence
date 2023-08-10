@@ -8,8 +8,9 @@ FROM node:alpine As development
 RUN apk update && apk add --no-cache shadow
 
 # Put node in the same id and  group id as the user in the host machine (needed for Linux)
-RUN groupmod -g 1002 node && usermod -u 1001 -g 1002 node
-RUN  mkdir -p /usr/src/app && chown -R node:node /usr/src/app
+# RUN groupmod -g 1001 node && usermod -u 1001 -g 1002 node
+RUN groupmod -g 1000 node && usermod -u 1000 -g 1000 node
+RUN  mkdir -p /app && chown -R node:node /app
 
 # User the node user for the image (instead of root)
 USER node
