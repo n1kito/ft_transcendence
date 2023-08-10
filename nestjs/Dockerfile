@@ -16,7 +16,7 @@ USER node
 
 
 # Create app directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Copy application dependency manifests to the container image
 # This copies both package.json and package-lock.json (if available)
