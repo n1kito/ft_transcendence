@@ -29,3 +29,6 @@ RUN npm ci
 
 # Bundle app source
 COPY --chown=node:node . .
+
+
+# this is just the development part, the rest of the stages (build for prod and prod) is documented here: https://www.tomray.dev/nestjs-docker-compose-postgres
