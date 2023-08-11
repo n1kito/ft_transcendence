@@ -1,0 +1,15 @@
+/* Styling the AchievementBadge component */
+
+.achievement-badge-wrapper {
+	/* border: 1px solid red; */
+	width: fit-content;
+	height: fit-content;
+	position: relative;
+	justify-self: center;
+}
+
+.achievement-badge-wrapper img {
+	width: 1.75rem;
+	align-self: center;
+	justify-self: center;
+}

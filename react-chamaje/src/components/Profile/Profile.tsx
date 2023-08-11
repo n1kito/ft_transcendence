@@ -19,6 +19,7 @@ import giftIcon from './icons/gift-icon.svg';
 import moneyIcon from './icons/money-icon.svg';
 import rocketIcon from './icons/rocket-icon.svg';
 import Button from '../Shared/Button/Button';
+import AchievementBadge from './Components/AchievementBadge/AchievementBadge';
 
 // TODO: find a way to make the shaddow wrapper widht's 100% so if fills the sidebar
 
@@ -34,14 +35,15 @@ const Profile = () => {
 				/>
 				<Title bigTitle={true}>{userData ? userData.login : 'pouet'}</Title>
 				<TitleList>
-					<img src={burgerIcon} />
+					<AchievementBadge achievementTitle="neverDied" />
+					{/* <img src={burgerIcon} />
 					<img src={cdIcon} />
 					<img src={coinsIcon} />
 					<img src={computerIcon} />
 					<img src={friesIcon} />
 					<img src={giftIcon} />
 					<img src={moneyIcon} />
-					<img src={rocketIcon} />
+					<img src={rocketIcon} /> */}
 				</TitleList>
 				<ProfileSettings />
 				<div className="profile-buttons">

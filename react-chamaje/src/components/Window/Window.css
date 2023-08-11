@@ -1,6 +1,6 @@
 /* Styling the Window component */
 
-#windowWrapper {
+.windowWrapper {
 	z-index: 1;
 	/* position: absolute;
 	top: 50%;
@@ -18,11 +18,12 @@
 
 	box-shadow: 0.7rem 0.7rem 0 0 #f8ef57;
 	cursor: default;
-	overflow: hidden;
+	/* overflow: hidden; */
 }
 
-#windowContent {
+.windowContent {
 	min-height: 5rem;
 	/* padding: 1rem 1.3rem; */
 	text-align: left;
+	border-radius: 10px;
 }
