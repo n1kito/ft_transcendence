@@ -12,8 +12,10 @@ RUN apk update && apk add --no-cache shadow
 RUN groupmod -g 1000 node && usermod -u 1000 -g 1000 node
 RUN  mkdir -p /app && chown -R node:node /app
 
+
+
 # User the node user for the image (instead of root)
-USER node
+# USER node
 
 
 # Create app directory
@@ -25,11 +27,17 @@ WORKDIR /app
 # The --chown flag is used to set the ownership of the files to user and groupe `node` inside the container.
 COPY --chown=node:node ./package*.json ./
 
+
+COPY entrypoint.sh ./app/entrypoint.sh
+RUN chmod  +x /app/entrypoint.sh
+# RUN chown node:node /app/entrypoint.sh
+ENTRYPOINT ["sh", "/app/entrypoint.sh"]
+
 # Instal app dependencies using the `npm ci` (clean install) command instead of `npm install`
-RUN npm ci
+# RUN npm install
 
 # Bundle app source
-COPY --chown=node:node . .
+# COPY --chown=node:node . .
 
 
 # this is just the development part, the rest of the stages (build for prod and prod) is documented here: https://www.tomray.dev/nestjs-docker-compose-postgres

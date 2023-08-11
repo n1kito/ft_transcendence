@@ -1,5 +1,6 @@
 services:
   api:
+    container_name: nestjs-container
     build:
       dockerfile: Dockerfile
       context: ./nestjs
@@ -13,7 +14,7 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
     # Run a command against the development stage of the image
-    command: npm run start:dev
+    # command: npm run start:dev
     depends_on:
       - postgres
     ports:
@@ -21,6 +22,7 @@ services:
       - '5555:5555'
 
   postgres:
+    container_name: postgres-container
     image: postgres
     restart: always
     environment:
@@ -43,12 +45,13 @@ services:
     #   - postgresql:/var/lib/postgresql/data
 
   react:
+    container_name: react-container
     build:
       dockerfile: Dockerfile 
       context: ./react-chamaje
       target: development
     command: npm start
-    restart: unless-stopped
+    # restart: unless-stopped
     ports:
       - '3001:3000'
     depends_on:
