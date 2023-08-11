@@ -35,13 +35,10 @@ const Desktop = () => {
 					// Set the user data in the context
 					setUserData(data);
 				} else {
-					console.log('Error fetching user data:', response);
 					logOut();
-					return;
 				}
 			} catch (error) {
 				console.log('Error: ', error);
-				return;
 			}
 		};
 

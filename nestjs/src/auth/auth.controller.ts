@@ -46,28 +46,28 @@ export class AuthController {
 		try {
 			// check that the state we received is the same we setup on class construction
 			this.authService.checkState(state);
+			// Handle the authentication callback using the provided code
 			await this.authService.handleAuthCallback(code);
+			// Retrieve user information after successful authentication
 			await this.authService.retrieveUserInfo();
 
+			// Prepare the payload for generating tokens
 			const payload = {
 				userId: this.authService.getUserId(),
 			};
 
+			// Generate a new access token and a refresh token based on the payload
 			const accessToken = this.tokenService.generateAccessToken(payload);
 			const refreshToken = this.tokenService.generateRefreshToken(payload);
 
+			// Attach the generated access and refresh tokens as cookies in the response
 			this.tokenService.attachAccessTokenCookie(res, accessToken);
 			this.tokenService.attachRefreshTokenCookie(res, refreshToken);
-			// Store the refresh token using Prisma
-			// const createdRefreshToken = await this.tokenService.storeRefreshToken(
-			// 	this.authService.getUserId(),
-			// 	refreshToken,
-			// );
 
+			// Define the URL to redirect the user after successful authentication
 			const redirectURL = `http://localhost:3001/desktop`;
 			return { url: redirectURL };
 		} catch (error) {
-			console.log('lofin error: ', error);
 			return { url: 'login-failed' }; // TODO: return error URl and find out how to customize the error message if we want to
 		}
 	}

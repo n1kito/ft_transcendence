@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './Terminal.css';
 import Prompt from '../Prompt/Prompt';
 

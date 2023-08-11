@@ -9,26 +9,27 @@ export class TokenService {
 	private readonly jwtSecretKey: string;
 	private readonly accessTokenExpiresIn: number;
 	private readonly refreshTokenExpiresIn: number;
-	private readonly prisma: PrismaService;
 
-	constructor() {
+	constructor(private readonly prisma: PrismaService) {
 		this.jwtSecretKey = process.env.JWT_SECRET_KEY;
 		this.accessTokenExpiresIn = 10; // Access token expiry time in seconds
 		this.refreshTokenExpiresIn = 30 * 24 * 60 * 60; // Refresh token expiry time in seconds
 	}
 
+	// Generate an access token using the payload and secret key
+	// Set the expiration time for the token using accessTokenExpiresIn
 	generateAccessToken(payload: any): string {
-		const secretKey = process.env.JWT_SECRET_KEY;
-		const accessToken = jwt.sign(payload, secretKey, {
+		const accessToken = jwt.sign(payload, this.jwtSecretKey, {
 			expiresIn: this.accessTokenExpiresIn,
 		});
 		console.log('generate access token:', accessToken);
 		return accessToken;
 	}
 
+	// Generate a refresh token using the payload and secret key
+	// Set the expiration time for the token using refreshTokenExpiresIn
 	generateRefreshToken(payload: any): string {
-		const secretKey = process.env.JWT_SECRET_KEY;
-		const refreshToken = jwt.sign(payload, secretKey, {
+		const refreshToken = jwt.sign(payload, this.jwtSecretKey, {
 			expiresIn: this.refreshTokenExpiresIn,
 		});
 		console.log('generate refresh token:', refreshToken);
@@ -38,7 +39,6 @@ export class TokenService {
 	// Method to verify a token and return the payload
 	verifyToken(token: string): any {
 		return jwt.verify(token, this.jwtSecretKey) as jwt.JwtPayload;
-		// return jwt.verify(token);
 	}
 
 	// Method to attach a token as a cookie with specified settings
@@ -57,7 +57,7 @@ export class TokenService {
 		});
 	}
 
-	// Method to attach an access token as a cookie
+	// Method to attach an access token as a cookie in request
 	attachAccessTokenCookie(res: Response, accessToken: string): void {
 		this.attachTokenAsCookie(
 			res,
@@ -67,7 +67,7 @@ export class TokenService {
 		);
 	}
 
-	// Method to attach a refresh token as a cookie
+	// Method to attach a refresh token as a cookie in request
 	attachRefreshTokenCookie(res: Response, refreshToken: string): void {
 		this.attachTokenAsCookie(
 			res,
@@ -77,39 +77,30 @@ export class TokenService {
 		);
 	}
 
-	async storeRefreshToken(userId: number, refreshToken: string) {
-		const createdRefreshToken = await this.prisma.refreshToken.create({
-			data: {
-				id: userId, // Associate with the user
-				userId: userId,
-				token: refreshToken,
-				createdAt: Date(),
-				updatedAt: Date(),
-			},
-		});
-	}
-
+	// After refresh token and userId are verified,
+	// generate a new access token
 	async refreshToken(@Req() req: Request): Promise<string> {
-		const refreshToken = req.cookies['refreshToken'];
-
-		// if (!refreshToken) {
-		// throw new Error('No refresh token provided');
-		// }
-
+		console.log('-- REFRESH TOKEN --');
 		try {
+			// retrieve refreshToken from cookies in request
+			const refreshToken = req.cookies['refreshToken'];
+
 			// Verify the refresh token
 			const decodedRefreshToken = this.verifyToken(refreshToken);
 
-			// You can fetch the user from the database based on the decoded data
+			// Extract userId from the decoded refresh token
 			const userId = decodedRefreshToken.userId;
 
 			// Fetch the user from the database based on userId
+			const user = await this.prisma.findUserById(userId);
 
-			// Generate a new access token
-			const accessToken = jwt.sign({ userId }, this.jwtSecretKey, {
-				expiresIn: this.accessTokenExpiresIn,
-			});
-			return accessToken;
+			// If user not found in db, user is invalid then throw error
+			if (!user) throw new Error('user does not exist');
+
+			// If user is valid, generate a new access token
+			const newAccessToken = this.generateAccessToken({ userId });
+
+			return newAccessToken;
 		} catch (error) {
 			throw new Error('Invalid or expired refresh token');
 		}

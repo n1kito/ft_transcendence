@@ -9,9 +9,10 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import { NextFunction, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { AuthService } from 'src/auth/auth.service';
+import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { TokenService } from 'src/token/token.service';
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 // TODO: Here I should use the same interface type for request as the once I put in user.controller.ts,
 // interface CustomRequest extends Request {
@@ -22,33 +23,26 @@ const prisma = new PrismaClient();
 // We use @Injectable decorator provided by NestJS here to mark this class as a provider that can be managed by the NestJS's dependency injection system.
 @Injectable()
 export class AuthMiddleWare implements NestMiddleware {
-	constructor(private readonly tokenService: TokenService) {}
+	constructor(
+		private readonly tokenService: TokenService,
+		private readonly prisma: PrismaService,
+	) {}
 	// The use method is what we implement as part of the NestMiddleware interface. It gets executed when a middleware function is invoked.
 	// This method has three parameters: req (which represents the request object), res (which represents the response object), and next (which is a callback to invoke the next middleware function).
 	async use(req: any, res: Response, next: NextFunction) {
-		console.log('\n\n--------------AUTH MIDDLEWARE--------------------\n\n');
 		// Here, we extract the JWT from the cookies sent with the request.
 		const accessToken = req.cookies['accessToken'];
-		// const refreshToken = req.cookies['refreshToken'];
-
-		console.log('access token:', accessToken);
-		// console.log('refresh token:', refreshToken);
+		const refreshToken = req.cookies['refreshToken'];
 
 		try {
 			// Now, we verify the JWT using the secret key.
 			// If the token is valid, jwt.verify returns the payload of the token (the data that was initially stored in the token when it was signed).
 			// If the token is not valid (maybe it was tampered with, or it's expired), jwt.verify throws an error.
 			const decodedAccessToken = this.tokenService.verifyToken(accessToken);
-
-			// if (!refreshToken) throw new Error('refresh token not found');
-			// // verify if refresh token is valid
-			// const decodedRefreshToken = jwt.verify(
-			// 	refreshToken,
-			// 	process.env.JWT_SECRET_KEY,
-			// ) as jwt.JwtPayload;
+			const decodedRefreshToken = this.tokenService.verifyToken(refreshToken);
 
 			// Check that the user is indeed part of our database (maybe they are using an old cookie, should not happen but does not hurt to check)
-			const userPromise = prisma.user.findUnique({
+			const userPromise = this.prisma.user.findUnique({
 				where: { id: decodedAccessToken.userId },
 			});
 
@@ -63,46 +57,7 @@ export class AuthMiddleWare implements NestMiddleware {
 				.catch((error) => {
 					throw new Error(error);
 				});
-			// return next();
 		} catch (error) {
-			console.log('error: ', error);
-			// console.log('\n\n----------- middleware error -----------\n\n', error);
-			// console.log('error name', error.name);
-			// if (
-			// 	error.name === 'TokenExpiredError' ||
-			// 	error.name === 'JsonWebTokenError'
-			// ) {
-			// 	const decodedRefreshToken = jwt.verify(
-			// 		refreshToken,
-			// 		process.env.JWT_SECRET_KEY,
-			// 	) as jwt.JwtPayload;
-
-			// 	const user = await prisma.user.findUnique({
-			// 		where: { id: decodedRefreshToken.userId },
-			// 	});
-			// 	if (!user) {
-			// 		throw new Error('Request coming from unknown user');
-			// 	}
-			// 	const payload = {
-			// 		userId: user.id,
-			// 	};
-
-			// 	//token has expired then generate a new access token
-			// 	const newAccessToken = this.tokenService.generateAccessToken(payload);
-
-			// 	// send the new access token as a cookie
-			// 	res.cookie('accessToken', newAccessToken, {
-			// 		httpOnly: true,
-			// 	});
-
-			// 	req.accessToken = newAccessToken;
-			// 	req.userId = decodedRefreshToken.userId;
-			// 	console.log('expired access token has been replaced by a new one!');
-			// 	next();
-			// }
-
-			// res.status(401).json({ message: 'Authentication failed :(' + error });
-			// throw new Error(error);
 			throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 		}
 	}
