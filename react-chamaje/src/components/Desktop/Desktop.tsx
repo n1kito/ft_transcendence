@@ -26,7 +26,7 @@ const Desktop = () => {
 			try {
 				console.log('\n\n DESKTOP: trying to fetch');
 				// user/me
-				const response = await fetch('http://localhost:3000/user/me', {
+				const response = await fetch('api/user/me', {
 					method: 'GET',
 					credentials: 'include',
 				});
