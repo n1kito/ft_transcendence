@@ -19,6 +19,8 @@ services:
     ports:
       - '3000:3000'
       - '5555:5555'
+    networks:
+      - chamaje
 
   postgres:
     image: postgres
@@ -41,6 +43,8 @@ services:
       - '5432:5432'
     volumes:
       - postgresql:/var/lib/postgresql/data
+    networks:
+      - chamaje
 
   react:
     build:
@@ -55,6 +59,20 @@ services:
       - api
     volumes:
       - ${PWD}/react-chamaje:/usr/src/app
+    networks:
+      - chamaje
+
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf # Mount the nginx.conf file
+    ports:
+      - '8080:80' # Expose Nginx on port 8080
+    depends_on:
+      - react
+      - api
+    networks:
+      - chamaje
 
 volumes:
   postgresql:
@@ -63,3 +81,7 @@ volumes:
       o: bind
       type: none
       device: ${PWD}/postgresql
+
+networks:
+  chamaje:
+    driver: bridge
