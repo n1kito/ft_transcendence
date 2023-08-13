@@ -17,6 +17,10 @@ RUN  mkdir -p /app && chown -R node:node /app
 # User the node user for the image (instead of root)
 # USER node
 
+# Copying the entrypoint script and make it executable
+# COPY entrypoint.sh ./app/entrypoint.sh
+# RUN chmod  +x /app/entrypoint.sh
+# RUN chown node:node /app/entrypoint.sh
 
 # Create app directory
 WORKDIR /app
@@ -25,13 +29,10 @@ WORKDIR /app
 # This copies both package.json and package-lock.json (if available)
 # Copying this now prevents re-running `npm install` on every code change
 # The --chown flag is used to set the ownership of the files to user and groupe `node` inside the container.
-COPY --chown=node:node ./package*.json ./
+# COPY --chown=node:node ./package*.json ./
 
 
-COPY entrypoint.sh ./app/entrypoint.sh
-RUN chmod  +x /app/entrypoint.sh
-# RUN chown node:node /app/entrypoint.sh
-ENTRYPOINT ["sh", "/app/entrypoint.sh"]
+# ENTRYPOINT ["sh", "/app/entrypoint.sh"]
 
 # Instal app dependencies using the `npm ci` (clean install) command instead of `npm install`
 # RUN npm install

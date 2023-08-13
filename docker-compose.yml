@@ -7,14 +7,14 @@ services:
       # Only use the development stage from our Dockerfile
       target: development
     volumes:
-      - ./nestjs:/app
+      - ${PWD}/nestjs:/app
       # - /usr/src/app/node_modules # creates an anonymous volume for node_modules which does not mount any directory from the host machine, thus it does not overwrite the node_modules that you've built in your Dockerfile.
     env_file:
       - .env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
     # Run a command against the development stage of the image
-    # command: npm run start:dev
+    command: ["sh", "-c", "chmod +x /app/entrypoint.sh && ./entrypoint.sh"]
     depends_on:
       - postgres
     ports:
@@ -50,14 +50,15 @@ services:
       dockerfile: Dockerfile 
       context: ./react-chamaje
       target: development
-    command: npm start
-    # restart: unless-stopped
+    # command: npm start
+    restart: unless-stopped
+    command: ["sh", "-c", "chmod +x /app/entrypoint.sh && ./entrypoint.sh"]
     ports:
       - '3001:3000'
     depends_on:
       - api
     volumes:
-      - ${PWD}/react-chamaje:/usr/src/app
+      - ${PWD}/react-chamaje:/app
 
 volumes:
   postgresql:
