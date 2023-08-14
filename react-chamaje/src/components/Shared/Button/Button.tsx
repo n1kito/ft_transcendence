@@ -42,8 +42,6 @@ const Button: React.FC<MyButtonProps> = ({
 		// '--marginTop': disabled ? '0.5rem' : 'initial',
 	} as React.CSSProperties;
 
-	console.log(buttonStyle.backgroundColor);
-
 	const handleClick = () => {
 		console.log('Button clicked');
 		if (onClick) {

@@ -12,7 +12,7 @@ export class TokenService {
 
 	constructor(private readonly prisma: PrismaService) {
 		this.jwtSecretKey = process.env.JWT_SECRET_KEY;
-		this.accessTokenExpiresIn = 10; // Access token expiry time in seconds
+		this.accessTokenExpiresIn = 10 * 60; // Access token expiry time in seconds
 		this.refreshTokenExpiresIn = 30 * 24 * 60 * 60; // Refresh token expiry time in seconds
 	}
 

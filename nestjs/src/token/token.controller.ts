@@ -12,15 +12,11 @@ export class TokenController {
 		try {
 			// generate a new access token
 			const newAccessToken = await this.tokenService.refreshToken(req);
-			// Send the new access token as a cookie
-			this.tokenService.attachAccessTokenCookie(res, newAccessToken);
-			return res
-				.status(200)
-				.json({ message: 'Access token refreshed successfully' });
+			res.status(200);
+			console.log('Finished refreshing, returning new access token');
+			res.send({ accessToken: newAccessToken });
 		} catch (error) {
-			return res
-				.status(401)
-				.json({ error: 'Invalid or expired refresh token' });
+			throw new Error('Could not refresh token: ' + error);
 		}
 	}
 }

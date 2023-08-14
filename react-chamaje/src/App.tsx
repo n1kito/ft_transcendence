@@ -20,6 +20,7 @@ import {
 	showComponentIfLoggedIn,
 	showComponentIfNotLoggedIn,
 } from './utils/authUtils';
+import RetrieveAccessToken from './components/RetrieveAccessToken/RetrieveAccessToken';
 
 // These are functions that will return a component passed as parameter depending on user authentification status
 const ProtectedLogin = showComponentIfNotLoggedIn(Login);
@@ -36,6 +37,10 @@ function App() {
 								<Route path="/" element={<ProtectedLogin />} />
 								<Route path="/desktop" element={<ProtectedDesktop />} />
 								<Route path="/friends" element={<ProtectedDesktop />} />
+								<Route
+									path="/retrieve-token"
+									element={<RetrieveAccessToken />}
+								/>
 								{/* <Route path="/" element={<Login />} />
 								<Route path="/desktop" element={<Desktop />} />
 								<Route path="/friends" element={<Desktop />} /> */}

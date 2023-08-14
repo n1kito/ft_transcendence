@@ -8,13 +8,14 @@ import FriendsList from '../Friends/Components/FriendsList/FriendsList';
 import { UserContext } from '../../contexts/UserContext';
 import useAuth from '../../hooks/userAuth';
 import ProfileSettings from '../Profile/Components/ProfileSettings/ProfileSettings';
+import { AuthContext } from '../../contexts/AuthContext';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
 	const { userData, setUserData } = useContext(UserContext);
 	const [openFriendsWindow, setOpenedFriendsWindows] = useState(false);
 	const navigate = useNavigate();
-	const { isAuthentificated, refreshToken, logOut } = useAuth();
+	const { isAuthentificated, refreshToken, logOut, accessToken } = useAuth();
 
 	if (isAuthentificated) {
 		console.log('user is authentificated');
@@ -24,14 +25,19 @@ const Desktop = () => {
 		const fetchUserData = async () => {
 			// Feth the user data from the server
 			try {
+				console.log({ accessToken });
 				console.log('\n\n DESKTOP: trying to fetch');
 				// user/me
-				const response = await fetch('api/user/me', {
+				const response = await fetch('http://localhost:8080/api/user/me', {
 					method: 'GET',
 					credentials: 'include',
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
 				});
 				if (response.ok) {
 					const data = await response.json();
+					console.log(data);
 					// Set the user data in the context
 					setUserData(data);
 				} else {

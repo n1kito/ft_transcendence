@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
+import { access } from 'fs';
 
 interface IAuthContext {
 	isAuthentificated: boolean;
 	logOut: () => void; // function that will log out the user
 	refreshToken: () => Promise<void>;
+	updateAccessToken: (generatedAccessToken: string) => void;
+	accessToken: string;
 }
 
 // Create the AuthContext using React's createContext
@@ -22,17 +25,25 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 	children,
 }: AuthProviderProps) => {
 	const [isAuthentificated, setIsAuthentificated] = useState(false);
+	const [accessToken, setAccessToken] = useState('');
+
 	// Effect to check authentication status when component mounts
 	useEffect(() => {
 		const checkAuth = async () => {
 			try {
+				console.log('Authentification fetch request');
+				console.log({ accessToken });
 				// Fetch the authentication status from the server
-				const response = await fetch('/api/auth-check', {
+				const response = await fetch('http://localhost:8080/api/auth-check', {
 					method: 'GET',
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
 					credentials: 'include',
 				});
 				// If authenticated, update state accordingly
 				if (response.ok) {
+					console.log('AUTHENTIFICATION SUCCESS');
 					const data = await response.json();
 					setIsAuthentificated(data.isAuthentificated);
 				} else if (response.status === 401) {
@@ -56,36 +67,57 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 
 	// Log the user out by removing cookies and updating state
 	const logOut = () => {
-		Cookies.remove('accessToken');
 		Cookies.remove('refreshToken');
 		setIsAuthentificated(false);
 	};
 
 	// Function to refresh the token by making a request to the server
 	const refreshToken = async () => {
+		console.log('Trying to refresh token');
 		try {
 			const response = await fetch(
-				'http://localhost:3000/token/refresh-token',
+				'http://localhost:8080/api/token/refresh-token',
 				{
 					method: 'POST',
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
 					credentials: 'include',
 				},
 			);
-
 			if (response.ok) {
-				// Update authentication status if token refresh is successful
-				setIsAuthentificated(true);
+				const data = await response.json();
+				if (data.accessToken) {
+					updateAccessToken(data.accessToken);
+					// Update authentication status if token refresh is successful
+					setIsAuthentificated(true);
+				}
+			} else {
+				console.log('Refresh response is NOT ok');
 			}
 		} catch (error) {
+			console.log('Refresh token failed, logging out');
 			// Log the user out if token refresh fails
 			logOut();
 			console.log('Error occurred while refreshing token:', error);
 		}
 	};
 
+	const updateAccessToken = (generatedAccessToken: string) => {
+		setAccessToken(generatedAccessToken);
+	};
+
 	// Provide the authentication context to children components
 	return (
-		<AuthContext.Provider value={{ isAuthentificated, logOut, refreshToken }}>
+		<AuthContext.Provider
+			value={{
+				isAuthentificated,
+				logOut,
+				refreshToken,
+				updateAccessToken,
+				accessToken,
+			}}
+		>
 			{children}
 		</AuthContext.Provider>
 	);

@@ -1,4 +1,5 @@
 import {
+	Headers,
 	HttpException,
 	HttpStatus,
 	Injectable,
@@ -31,10 +32,28 @@ export class AuthMiddleWare implements NestMiddleware {
 	// This method has three parameters: req (which represents the request object), res (which represents the response object), and next (which is a callback to invoke the next middleware function).
 	async use(req: any, res: Response, next: NextFunction) {
 		// Here, we extract the JWT from the cookies sent with the request.
-		const accessToken = req.cookies['accessToken'];
+		const authorization = req.headers['authorization'];
 		const refreshToken = req.cookies['refreshToken'];
-		console.log('GOT TO THE MIDDLEWARE 🎉');
 		try {
+			// Check that an authorization header was included
+			if (!authorization) {
+				throw new HttpException(
+					'No authorization header',
+					HttpStatus.UNAUTHORIZED,
+				);
+			}
+			// Split the Authorization header value
+			const split = authorization.split(' ');
+			console.log('Middleware split: ', split);
+			// Check that the Authorization format is correct
+			if (split.length !== 2 || split[0] !== 'Bearer') {
+				throw new HttpException(
+					'Invalid authorization format',
+					HttpStatus.BAD_REQUEST,
+				);
+			}
+			// Extract the token
+			const accessToken = split[1];
 			// Now, we verify the JWT using the secret key.
 			// If the token is valid, jwt.verify returns the payload of the token (the data that was initially stored in the token when it was signed).
 			// If the token is not valid (maybe it was tampered with, or it's expired), jwt.verify throws an error.

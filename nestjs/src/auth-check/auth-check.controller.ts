@@ -1,6 +1,7 @@
 import {
 	Controller,
 	Get,
+	Headers,
 	HttpException,
 	HttpStatus,
 	Post,
@@ -18,11 +19,28 @@ export class AuthCheckController {
 	@Get()
 	// This method checks if the user is authenticated by verifying the access token
 	async checkAuth(
-		@Req() req: Request,
+		@Headers('Authorization') authorization: string,
 	): Promise<{ isAuthentificated: boolean }> {
 		try {
-			// Get the access token from cookies in the request
-			const accessToken = req.cookies['accessToken'];
+			// Check that an authorization header was included
+			if (!authorization) {
+				throw new HttpException(
+					'No authorization header',
+					HttpStatus.UNAUTHORIZED,
+				);
+			}
+			// Split the Authorization header value
+			const split = authorization.split(' ');
+			console.log('SPLIT: ', split);
+			// Check that the Authorization format is correct
+			if (split.length !== 2 || split[0] !== 'Bearer') {
+				throw new HttpException(
+					'Invalid authorization format',
+					HttpStatus.BAD_REQUEST,
+				);
+			}
+			// Extract the token
+			const accessToken = split[1];
 			// Verify the access token and decode its content
 			const decodedToken = jwt.verify(accessToken);
 			// Determine if the user is authenticated based on the presence of a decoded token
@@ -33,9 +51,10 @@ export class AuthCheckController {
 			// Handle specific token verification errors and unauthorized cases
 			if (
 				error.name === 'JsonWebTokenError' ||
-				error.name === 'TokenExpiredError'
+				error.name === 'TokenExpiredError' ||
+				error instanceof HttpException // Catch our custom exceptions
 			) {
-				console.log('accessed auth-check');
+				console.log('There was an error with auth-check: ' + error);
 				// If the token is invalid or expired, throw an Unauthorized exception
 				throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 			}
