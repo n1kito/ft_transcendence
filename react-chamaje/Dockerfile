@@ -4,32 +4,7 @@
 
 FROM node:latest As development
 
-# Create app directory
-
-# Copying the entrypoint script and make it executable
-# COPY entrypoint.sh ./usr/src/app/entrypoint.sh
-# RUN chmod  +x /usr/src/app/entrypoint.sh
-
-
 WORKDIR /app
-
-# Copy the package files into the container like we did for nestJs
-# COPY --chown=node:node package*.json ./
-# COPY ./package*.json ./
-
-# ENTRYPOINT ["sh", "/usr/src/app/entrypoint.sh"]
-# Install app dependencies using clean install
-# RUN npm install
-
-# Copy the rest of the app source
-# COPY . .
-# COPY --chown=node:node . .
-
-# Set user to node instead of root
-# USER node
-
-# Build the app
-# RUN npm run build
 
 # this is jst the development part, for production implement other stages
 ## EXAMPLE

@@ -33,12 +33,12 @@ function App() {
 					<BrowserRouter>
 						<Layout>
 							<Routes>
-								{/* <Route path="/" element={<ProtectedLogin />} />
+								<Route path="/" element={<ProtectedLogin />} />
 								<Route path="/desktop" element={<ProtectedDesktop />} />
-								<Route path="/friends" element={<ProtectedDesktop />} /> */}
-								<Route path="/" element={<Login />} />
+								<Route path="/friends" element={<ProtectedDesktop />} />
+								{/* <Route path="/" element={<Login />} />
 								<Route path="/desktop" element={<Desktop />} />
-								<Route path="/friends" element={<Desktop />} />
+								<Route path="/friends" element={<Desktop />} /> */}
 								<Route
 									path="*"
 									element={
