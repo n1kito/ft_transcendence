@@ -28,8 +28,25 @@ model User {
     isDefaultProfile Boolean @default(false)
 
     // Will be set to true if our user manually updated the corresponding values from their profiles
-    login_is_locked     Boolean @default(false)
-    email_is_locked     Boolean @default(false)
-    image_is_locked     Boolean @default(false)
-    userId              Int?
+    login_is_locked Boolean @default(false)
+    email_is_locked Boolean @default(false)
+    image_is_locked Boolean @default(false)
+    userId          Int?
+
+    // Games logic
+    gamesPlayed Game[]
+
+    // Profile variables
+    killCount    Int    @default(0)
+    winRate      Int    @default(0)
+    bestFriendId Int?
+}
+
+model Game {
+    id        Int      @id @default(autoincrement())
+    playedAt  DateTime @default(now())
+    player1Id Int
+    player2Id Int
+    winner    User     @relation(fields: [winnerId], references: [id])
+    winnerId  Int
 }

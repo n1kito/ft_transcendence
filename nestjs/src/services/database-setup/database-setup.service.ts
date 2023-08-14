@@ -12,10 +12,10 @@ export class DatabaseSetupService implements OnModuleInit {
 	async seedDatabase() {
 		let userCount;
 		try {
-			const userCount = await this.prisma.user.count();
-		  } catch (error) {
+			userCount = await this.prisma.user.count();
+		} catch (error) {
 			console.error('Error counting users:', error);
-		  }
+		}
 		// TODO: they will also need to have detault friends
 		if (userCount === 0) {
 			console.log('Populating database with default profiles...');
@@ -60,7 +60,9 @@ export class DatabaseSetupService implements OnModuleInit {
 				],
 			});
 		} else {
-			console.log('Database was not empty, not populating it !');
+			console.log(
+				`Database was not empty (${userCount} entries), not populating it !`,
+			);
 		}
 	}
 }

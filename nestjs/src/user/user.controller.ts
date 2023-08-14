@@ -120,6 +120,13 @@ export class UserController {
 			where: { id: request.userId },
 		});
 		const userRequestingLogin = userRequesting?.login;
+		// get how many games the player has played by counting the games where user
+		// was user player1 or player2
+		const gamesCount = await this.prisma.game.count({
+			where: {
+				OR: [{ player1Id: user.id }, { player2Id: user.id }],
+			},
+		});
 		// if the login of the user who sent the request is the same as the login of the user they want the info of,
 		// we return more information
 		if (userRequestingLogin && userRequestingLogin === login)
@@ -128,12 +135,20 @@ export class UserController {
 				email: user.email,
 				createdAt: user.createdAt,
 				image: user.image,
+				// TODO: I bet this should be able to be stored in a separate object and just expanding into the return object
+				// add profile information
+				killCount: user.killCount,
+				winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
+				gamesCount: gamesCount,
 			};
 		else
 			return {
 				login: user.login,
 				image: user.image,
-				// add more options to return here
+				// add profile information
+				killCount: user.killCount,
+				winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
+				gamesCount: gamesCount,
 			};
 	}
 }

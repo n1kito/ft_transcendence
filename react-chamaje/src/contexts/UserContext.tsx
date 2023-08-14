@@ -11,6 +11,8 @@ interface UserData {
 	image: string;
 	login: string;
 	email: string;
+	killCount: number;
+	
 	// ... other properties
 }
 
