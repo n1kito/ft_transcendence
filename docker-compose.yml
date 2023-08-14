@@ -41,8 +41,6 @@ services:
       start_period: 5s
     ports:
       - '5432:5432'
-    # volumes:
-    #   - postgresql:/var/lib/postgresql/data
 
   react:
     container_name: react-container
@@ -50,7 +48,6 @@ services:
       dockerfile: Dockerfile 
       context: ./react-chamaje
       target: development
-    # command: npm start
     restart: unless-stopped
     command: ["sh", "-c", "chmod +x /app/entrypoint.sh && ./entrypoint.sh"]
     ports:
