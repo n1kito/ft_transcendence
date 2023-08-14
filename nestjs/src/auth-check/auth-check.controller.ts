@@ -35,6 +35,7 @@ export class AuthCheckController {
 				error.name === 'JsonWebTokenError' ||
 				error.name === 'TokenExpiredError'
 			) {
+				console.log('accessed auth-check');
 				// If the token is invalid or expired, throw an Unauthorized exception
 				throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
 			}

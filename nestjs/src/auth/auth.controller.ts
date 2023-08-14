@@ -56,20 +56,51 @@ export class AuthController {
 				userId: this.authService.getUserId(),
 			};
 
+			// Generate a temporary code that the front will use to get the access token
+			const temporaryAuthCode = this.authService.generateTemporaryAuthCode();
+
 			// Generate a new access token and a refresh token based on the payload
-			const accessToken = this.tokenService.generateAccessToken(payload);
+			// const accessToken = this.tokenService.generateAccessToken(payload);
 			const refreshToken = this.tokenService.generateRefreshToken(payload);
 
 			// Attach the generated access and refresh tokens as cookies in the response
-			this.tokenService.attachAccessTokenCookie(res, accessToken);
+			// this.tokenService.attachAccessTokenCookie(res, accessToken);
 			this.tokenService.attachRefreshTokenCookie(res, refreshToken);
 
 			// Define the URL to redirect the user after successful authentication
-			const redirectURL = `http://localhost:3001/desktop`;
+			const redirectURL =
+				`http://localhost:3001/retrieve-token` + '?code=' + temporaryAuthCode;
 			return { url: redirectURL };
 		} catch (error) {
 			return { url: 'login-failed' }; // TODO: return error URl and find out how to customize the error message if we want to
 		}
+	}
+
+	@Post('retrieve-access-token')
+	async retrieveAccessToken(@Body() body: { code: string }): Promise<{
+		accessToken: string;
+	}> {
+		// Retrieve the code
+		const { code } = body;
+		console.log(code);
+		// Check the code
+		// if (!this.authService.checkTemporaryAuthCode(code))
+		// 	throw new Error('Code is invalid, could not generate access token');
+		// Generate the access token
+		// Prepare the payload for generating tokens
+		const payload = {
+			userId: this.authService.getUserId(),
+		};
+		if (!payload.userId) throw new Error('User Id is empty');
+		// Check that the user exists in our database
+		const userExists = await this.authService.checkUserExists(payload.userId);
+		if (!userExists) throw new Error('User not found in our database');
+		// Generate access token
+		const accessToken = this.tokenService.generateAccessToken(payload);
+		// Delete the temporary authorization code
+		this.authService.deleteTemporaryAuthCode();
+		// Return the token
+		return { accessToken: accessToken };
 	}
 
 	@Get('success')

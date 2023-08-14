@@ -27,7 +27,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 		const checkAuth = async () => {
 			try {
 				// Fetch the authentication status from the server
-				const response = await fetch('http://localhost:3000/auth-check', {
+				const response = await fetch('/api/auth-check', {
 					method: 'GET',
 					credentials: 'include',
 				});

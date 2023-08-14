@@ -33,7 +33,7 @@ export class AuthMiddleWare implements NestMiddleware {
 		// Here, we extract the JWT from the cookies sent with the request.
 		const accessToken = req.cookies['accessToken'];
 		const refreshToken = req.cookies['refreshToken'];
-
+		console.log('GOT TO THE MIDDLEWARE 🎉');
 		try {
 			// Now, we verify the JWT using the secret key.
 			// If the token is valid, jwt.verify returns the payload of the token (the data that was initially stored in the token when it was signed).

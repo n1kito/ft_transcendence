@@ -21,9 +21,11 @@ export class AuthService {
 	private readonly ftApiTokenUrl: string;
 	private readonly ftApiFetchUrl: string;
 	private readonly stateRandomString: string;
+	private temporaryAuthCode: string;
 	private token: string;
 	private userId: number; // TODO: do we need this ? Added so we could add it to JWT token
 	private userData: UserData;
+	private temporaryCode: string;
 
 	private readonly prisma: PrismaClient;
 
@@ -197,6 +199,34 @@ export class AuthService {
 		} catch (error) {
 			console.error('Could not add default users as friends: ', error);
 		}
+	}
+
+	generateTemporaryAuthCode(): string {
+		this.temporaryAuthCode = randomBytes(16).toString('hex');
+		return this.temporaryAuthCode;
+	}
+
+	deleteTemporaryAuthCode() {
+		this.temporaryAuthCode = '';
+	}
+
+	checkTemporaryAuthCode(codeToCheck: string): boolean {
+		if (!codeToCheck.length || codeToCheck != this.temporaryAuthCode)
+			return false;
+		return true;
+	}
+
+	async checkUserExists(userId: number): Promise<boolean> {
+		// Check that the userId is not undefined
+		if (!userId) return false;
+		// Check that the userId corresponds to an actual user in our databse
+		const userInDb = await this.prisma.user.findUnique({
+			where: { id: userId },
+		});
+		// If not, return false
+		if (!userInDb) return false;
+		// Else
+		return true;
 	}
 }
 
