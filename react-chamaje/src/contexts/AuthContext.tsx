@@ -34,7 +34,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 				console.log('Authentification fetch request');
 				console.log({ accessToken });
 				// Fetch the authentication status from the server
-				const response = await fetch('http://localhost:8080/api/auth-check', {
+				const response = await fetch('/api/auth-check', {
 					method: 'GET',
 					headers: {
 						Authorization: `Bearer ${accessToken}`,
@@ -76,7 +76,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 		console.log('Trying to refresh token');
 		try {
 			const response = await fetch(
-				'http://localhost:8080/api/token/refresh-token',
+				'/api/token/refresh-token',
 				{
 					method: 'POST',
 					headers: {

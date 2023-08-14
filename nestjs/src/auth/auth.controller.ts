@@ -68,8 +68,7 @@ export class AuthController {
 			this.tokenService.attachRefreshTokenCookie(res, refreshToken);
 
 			// Define the URL to redirect the user after successful authentication
-			const redirectURL =
-				`http://localhost:3001/retrieve-token` + '?code=' + temporaryAuthCode;
+			const redirectURL = `/retrieve-token` + '?code=' + temporaryAuthCode;
 			return { url: redirectURL };
 		} catch (error) {
 			return { url: 'login-failed' }; // TODO: return error URl and find out how to customize the error message if we want to

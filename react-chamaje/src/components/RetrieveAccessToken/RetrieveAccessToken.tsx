@@ -19,7 +19,7 @@ const RetrieveAccessToken = () => {
 			if (code) {
 				try {
 					const response = await fetch(
-						'http://localhost:8080/api/login/retrieve-access-token',
+						'/api/login/retrieve-access-token',
 						{
 							method: 'POST',
 							headers: {

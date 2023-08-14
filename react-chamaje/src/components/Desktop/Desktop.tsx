@@ -28,7 +28,7 @@ const Desktop = () => {
 				console.log({ accessToken });
 				console.log('\n\n DESKTOP: trying to fetch');
 				// user/me
-				const response = await fetch('http://localhost:8080/api/user/me', {
+				const response = await fetch('/api/user/me', {
 					method: 'GET',
 					credentials: 'include',
 					headers: {
