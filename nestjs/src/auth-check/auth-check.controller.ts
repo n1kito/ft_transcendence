@@ -31,7 +31,6 @@ export class AuthCheckController {
 			}
 			// Split the Authorization header value
 			const split = authorization.split(' ');
-			console.log('SPLIT: ', split);
 			// Check that the Authorization format is correct
 			if (split.length !== 2 || split[0] !== 'Bearer') {
 				throw new HttpException(

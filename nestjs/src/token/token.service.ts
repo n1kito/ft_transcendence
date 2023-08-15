@@ -80,7 +80,6 @@ export class TokenService {
 	// After refresh token and userId are verified,
 	// generate a new access token
 	async refreshToken(@Req() req: Request): Promise<string> {
-		console.log('-- REFRESH TOKEN --');
 		try {
 			// retrieve refreshToken from cookies in request
 			const refreshToken = req.cookies['refreshToken'];

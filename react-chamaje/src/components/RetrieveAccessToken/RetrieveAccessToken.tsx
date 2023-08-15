@@ -13,9 +13,7 @@ const RetrieveAccessToken = () => {
 		async function fetchAccessToken() {
 			// Retrieve the code from the current URL
 			const urlParameters = new URLSearchParams(location.search);
-			console.log({ urlParameters });
 			const code = urlParameters.get('code');
-			console.log({ code });
 			if (code) {
 				try {
 					const response = await fetch('/api/login/retrieve-access-token', {
@@ -28,7 +26,6 @@ const RetrieveAccessToken = () => {
 					});
 					const data = await response.json();
 					if (data.accessToken) {
-						console.log('Successfully retrieved access token');
 						// Store token in AuthContext
 						updateAccessToken(data.accessToken);
 						// Redirect user to desktop

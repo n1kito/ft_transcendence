@@ -31,8 +31,6 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 	useEffect(() => {
 		const checkAuth = async () => {
 			try {
-				console.log('Authentification fetch request');
-				console.log({ accessToken });
 				// Fetch the authentication status from the server
 				const response = await fetch('/api/auth-check', {
 					method: 'GET',
@@ -43,7 +41,6 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 				});
 				// If authenticated, update state accordingly
 				if (response.ok) {
-					console.log('AUTHENTIFICATION SUCCESS');
 					const data = await response.json();
 					setIsAuthentificated(data.isAuthentificated);
 				} else if (response.status === 401) {
@@ -73,7 +70,6 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 
 	// Function to refresh the token by making a request to the server
 	const refreshToken = async () => {
-		console.log('Trying to refresh token');
 		try {
 			const response = await fetch('/api/token/refresh-token', {
 				method: 'POST',
@@ -100,6 +96,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 		}
 	};
 
+	// if access token is found store it in access token state
 	const updateAccessToken = (generatedAccessToken: string) => {
 		setAccessToken(generatedAccessToken);
 	};

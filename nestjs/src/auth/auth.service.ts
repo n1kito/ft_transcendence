@@ -36,7 +36,6 @@ export class AuthService {
 
 	// initialize the variables
 	constructor() {
-		console.log();
 		this.clientID = process.env.FT_UID;
 		this.secret = process.env.FT_SECRET;
 		this.redirectUri = 'http://localhost:8080/api/login/callback';

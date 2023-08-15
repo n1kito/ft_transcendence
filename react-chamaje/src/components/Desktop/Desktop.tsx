@@ -25,8 +25,6 @@ const Desktop = () => {
 		const fetchUserData = async () => {
 			// Feth the user data from the server
 			try {
-				console.log({ accessToken });
-				console.log('\n\n DESKTOP: trying to fetch');
 				// user/me
 				const response = await fetch('/api/user/me', {
 					method: 'GET',

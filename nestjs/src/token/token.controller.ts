@@ -13,7 +13,6 @@ export class TokenController {
 			// generate a new access token
 			const newAccessToken = await this.tokenService.refreshToken(req);
 			res.status(200);
-			console.log('Finished refreshing, returning new access token');
 			res.send({ accessToken: newAccessToken });
 		} catch (error) {
 			throw new Error('Could not refresh token: ' + error);
