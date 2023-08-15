@@ -11,8 +11,13 @@ interface UserData {
 	image: string;
 	login: string;
 	email: string;
-	killCount: number;
-	
+	killCount?: number;
+	// TODO: the killcount was set as optional here to remove a compiling error with ProfileSettings.tsx but need to check it's ok
+	// same for the other properties below
+	winRate?: number;
+	gamesCount?: number;
+	bestie?: string;
+	rank?: number;
 	// ... other properties
 }
 

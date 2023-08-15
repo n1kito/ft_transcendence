@@ -31,7 +31,7 @@ const Desktop = () => {
 					credentials: 'include',
 				});
 				const data = await response.json();
-				console.log(data);
+				console.log('User data', data);
 				// Set the user data in the context
 				setUserData(data);
 			} catch (error) {

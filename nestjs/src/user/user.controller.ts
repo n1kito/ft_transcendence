@@ -44,11 +44,39 @@ export class UserController {
 			return { message: 'User not found' };
 		}
 
+		// Get user games count
+		const gamesCount = await this.prisma.game.count({
+			where: {
+				OR: [{ player1Id: user.id }, { player2Id: user.id }],
+			},
+		});
+
+		// Find the user's bestie
+		// Is it better to do it each time we fetch the user's info, or when it is updated instead ? Like if they play a new game we update the bestie at the same time
+
+		// get user's rank
+		const usersWithHigherKillCountThanOurUser = await this.prisma.user.count({
+			where: {
+				killCount: {
+					gt: await this.prisma.user
+						.findUnique({
+							where: { id: user.id },
+							select: { killCount: true },
+						})
+						.then((user) => user?.killCount || 0),
+				},
+			},
+		});
+		const userRank = usersWithHigherKillCountThanOurUser + 1;
 		// Return the user information
 		return {
 			login: user.login,
 			email: user.email,
 			image: user.image,
+			killCount: user.killCount,
+			gamesCount: gamesCount,
+			winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
+			rank: userRank,
 		};
 	}
 
@@ -101,6 +129,7 @@ export class UserController {
 		return friends;
 	}
 
+	// TODO: why do we have this and the /me endpoint ?
 	// TODO: switch this endpoint to userID
 	// TODO: move the logics to user.service.ts ?
 	@Get(':login')
@@ -127,6 +156,20 @@ export class UserController {
 				OR: [{ player1Id: user.id }, { player2Id: user.id }],
 			},
 		});
+		// get user's rank
+		const usersWithHigherKillCountThanOurUser = await this.prisma.user.count({
+			where: {
+				killCount: {
+					gt: await this.prisma.user
+						.findUnique({
+							where: { id: user.id },
+							select: { killCount: true },
+						})
+						.then((user) => user?.killCount || 0),
+				},
+			},
+		});
+		const userRank = usersWithHigherKillCountThanOurUser + 1;
 		// if the login of the user who sent the request is the same as the login of the user they want the info of,
 		// we return more information
 		if (userRequestingLogin && userRequestingLogin === login)
@@ -140,6 +183,7 @@ export class UserController {
 				killCount: user.killCount,
 				winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
 				gamesCount: gamesCount,
+				rank: userRank,
 			};
 		else
 			return {
@@ -149,6 +193,7 @@ export class UserController {
 				killCount: user.killCount,
 				winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
 				gamesCount: gamesCount,
+				rank: userRank,
 			};
 	}
 }

@@ -82,6 +82,8 @@ const ProfileSettings: React.FC = () => {
 					login: username,
 					email: email,
 					image: userData?.image || '',
+					winRate: userData?.winRate || 0,
+					gamescount: userData?.gamesCount || 0,
 				};
 				setUserData(updatedUserData);
 				// alert('User data updated successfully!');
