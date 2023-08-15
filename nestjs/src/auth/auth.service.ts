@@ -39,7 +39,7 @@ export class AuthService {
 		console.log();
 		this.clientID = process.env.FT_UID;
 		this.secret = process.env.FT_SECRET;
-		this.redirectUri = 'http://localhost:3000/login/callback';
+		this.redirectUri = 'http://localhost:8080/api/login/callback';
 		this.ftApiAuthUrl = 'https://api.intra.42.fr/oauth/authorize';
 		this.ftApiTokenUrl = 'https://api.intra.42.fr/oauth/token';
 		this.ftApiFetchUrl = 'https://api.intra.42.fr/v2/me';

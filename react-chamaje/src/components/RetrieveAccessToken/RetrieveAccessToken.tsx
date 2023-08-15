@@ -18,17 +18,14 @@ const RetrieveAccessToken = () => {
 			console.log({ code });
 			if (code) {
 				try {
-					const response = await fetch(
-						'/api/login/retrieve-access-token',
-						{
-							method: 'POST',
-							headers: {
-								'Content-Type': 'application/json',
-							},
-							credentials: 'include',
-							body: JSON.stringify({ code }),
+					const response = await fetch('/api/login/retrieve-access-token', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
 						},
-					);
+						credentials: 'include',
+						body: JSON.stringify({ code }),
+					});
 					const data = await response.json();
 					if (data.accessToken) {
 						console.log('Successfully retrieved access token');

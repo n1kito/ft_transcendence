@@ -75,16 +75,13 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 	const refreshToken = async () => {
 		console.log('Trying to refresh token');
 		try {
-			const response = await fetch(
-				'/api/token/refresh-token',
-				{
-					method: 'POST',
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-					},
-					credentials: 'include',
+			const response = await fetch('/api/token/refresh-token', {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
 				},
-			);
+				credentials: 'include',
+			});
 			if (response.ok) {
 				const data = await response.json();
 				if (data.accessToken) {

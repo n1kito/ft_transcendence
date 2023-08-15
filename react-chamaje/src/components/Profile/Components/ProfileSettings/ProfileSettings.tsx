@@ -66,7 +66,7 @@ const ProfileSettings: React.FC = () => {
 		}
 
 		try {
-			const response = await fetch('http://localhost:3000/user/me/update', {
+			const response = await fetch('/api/user/me/update', {
 				method: 'PUT',
 				credentials: 'include',
 				headers: {
