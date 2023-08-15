@@ -9,6 +9,7 @@ import { DatabaseSetupModule } from './services/database-setup/database-setup.mo
 import { PrismaModule } from './services/prisma-service/prisma.module';
 import { PrismaService } from './services/prisma-service/prisma.service';
 import { TokenModule } from './token/token.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
 	imports: [
@@ -18,6 +19,7 @@ import { TokenModule } from './token/token.module';
 		DatabaseSetupModule,
 		PrismaModule,
 		TokenModule,
+		EventsModule,
 	],
 	controllers: [AppController],
 	providers: [AppService, PrismaService],

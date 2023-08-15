@@ -61,6 +61,8 @@ services:
       - ${PWD}/react-chamaje:/usr/src/app
     networks:
       - chamaje
+    environment:
+      WDS_SOCKET_PORT: 0
 
   nginx:
     image: nginx

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './App.css';
 import Login from './components/Login/Login';
 import Layout from './components/Layout/Layout';
+import io from 'socket.io-client';
 import {
 	BrowserRouter,
 	// createBrowserRouter,
@@ -27,6 +28,31 @@ const ProtectedLogin = showComponentIfNotLoggedIn(Login);
 const ProtectedDesktop = showComponentIfLoggedIn(Desktop);
 
 function App() {
+	// TODO: this is a test when using websockets, it will not stay here
+	useEffect(() => {
+		console.log('trying to setup socket connection');
+		const socket = io('http://localhost:3000', {
+			reconnection: false,
+		});
+
+		socket.on('connect', () => {
+			console.log('Connected to server ! 🔌🟢 ');
+		});
+		socket.on('connect_error', (error) => {
+			console.error('Connection Error:', error);
+		});
+		socket.on('connect_timeout', () => {
+			console.error('Connection Timeout');
+		});
+		socket.emit('message', { message: 'Hellow from React !' });
+		socket.on('message', (data) => {
+			console.log('Response from server: ', data);
+		});
+		return () => {
+			socket.disconnect();
+		};
+	}, []);
+	// end of the websocket test
 	return (
 		<AuthContextProvider>
 			<UserProvider>
