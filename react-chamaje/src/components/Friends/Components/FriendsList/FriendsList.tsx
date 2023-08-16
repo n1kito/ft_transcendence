@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './FriendsList.css';
 import FriendBadge from '../FriendBadge/FriendBadge';
+import useAuth from '../../../../hooks/userAuth';
 
 interface IFriendStruct {
 	login: string;
@@ -9,12 +10,16 @@ interface IFriendStruct {
 
 const FriendsList = () => {
 	const [friends, setFriends] = useState<IFriendStruct[]>([]);
+	const { accessToken } = useAuth();
 
 	useEffect(() => {
 		// TODO: instead of just storing them in a State, the user context should simply be updated so all other components that use it can be re-rendered (I think)
 		// TODO: if the user is not auth the map method cannot iterate since the friends variable is not an array. Should not be an issue since only logged in users can access the desktop but it might be better to think ahead for this
-		fetch('http://localhost:3000/user/friends', {
+		fetch('/api/user/friends', {
 			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
 			credentials: 'include',
 		})
 			.then((response) => response.json())

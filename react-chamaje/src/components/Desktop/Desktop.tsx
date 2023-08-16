@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import FriendsList from '../Friends/Components/FriendsList/FriendsList';
 import { UserContext } from '../../contexts/UserContext';
 import useAuth from '../../hooks/userAuth';
+import ProfileSettings from '../Profile/Components/ProfileSettings/ProfileSettings';
+import { AuthContext } from '../../contexts/AuthContext';
 import Profile from '../Profile/Profile';
 
 const Desktop = () => {
@@ -15,7 +17,7 @@ const Desktop = () => {
 	const { userData, setUserData } = useContext(UserContext);
 	const [openFriendsWindow, setOpenedFriendsWindows] = useState(false);
 	const navigate = useNavigate();
-	const { isAuthentificated } = useAuth();
+	const { isAuthentificated, refreshToken, logOut, accessToken } = useAuth();
 
 	if (isAuthentificated) {
 		console.log('user is authentificated');
@@ -25,16 +27,22 @@ const Desktop = () => {
 		const fetchUserData = async () => {
 			// Feth the user data from the server
 			try {
-				console.log('trying to fetch');
 				// user/me
-				const response = await fetch('http://localhost:3000/user/me', {
+				const response = await fetch('/api/user/me', {
 					method: 'GET',
 					credentials: 'include',
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
 				});
-				const data = await response.json();
-				console.log(data);
-				// Set the user data in the context
-				setUserData(data);
+				if (response.ok) {
+					const data = await response.json();
+					console.log(data);
+					// Set the user data in the context
+					setUserData(data);
+				} else {
+					logOut();
+				}
 			} catch (error) {
 				console.log('Error: ', error);
 			}
@@ -47,14 +55,6 @@ const Desktop = () => {
 		setOpenedFriendsWindows(true);
 		navigate('/friends');
 	};
-
-	// const location = useLocation();
-	// const searchParams = new URLSearchParams(location.search);
-	// const parameterValue = searchParams.get('login');
-
-	// setUserData({
-	// 	login: parameterValue || ''
-	// });
 
 	return (
 		<div className="desktopWrapper">
@@ -76,17 +76,6 @@ const Desktop = () => {
 				id={++iconId}
 				onDoubleClick={friendsClickHandler}
 			/>
-			{/* {openFriendsWindow && <Window windowTitle="Friends"><FriendsList /></Window>}*/}
-			{/* <Window
-				windowTitle="Friends"
-				links={[
-					{ name: 'Add friend', url: '#' },
-					{ name: 'See online friends', url: '#' },
-					{ name: 'Do something', url: '#' },
-				]}
-			>
-				<FriendsList />
-			</Window> */}
 			<Window
 				windowTitle={userData?.login || 'window title'}
 				links={[

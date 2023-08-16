@@ -7,6 +7,11 @@ export class PrismaService extends PrismaClient implements OnApplicationShutdown
     super(); // calls the constructor of the super class 'PrismaClient'
   }
 
+	async findUserById(userId: number) {
+		return this.user.findUnique({
+			where: { id: userId },
+		});
+	}
   async onApplicationBootstrap() {
     try {
       await this.$connect();

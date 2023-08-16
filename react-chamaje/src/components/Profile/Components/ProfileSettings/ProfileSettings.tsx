@@ -39,7 +39,7 @@ const ProfileSettings: React.FC = () => {
 		setUsername(newUsername);
 
 		const usernameRegex = /^[A-Za-z0-9-_\\.]*$/;
-
+    
 		if (!newUsername) setUsernameError('Username cannot be empty');
 		else if (newUsername.length > 8)
 			setUsernameError('Username must not exceed 8 characters');
@@ -80,7 +80,7 @@ const ProfileSettings: React.FC = () => {
 				console.log('No changes to update.');
 				return;
 			}
-			const response = await fetch('http://localhost:3000/user/me/update', {
+			const response = await fetch('/api/user/me/update', {
 				method: 'PUT',
 				credentials: 'include',
 				headers: {
