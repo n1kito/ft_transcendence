@@ -1,3 +1,4 @@
+import { Http2ServerRequest } from 'http2';
 import React, { useContext, useEffect, useState } from 'react';
 import { UserContext } from '../../../../contexts/UserContext';
 import Button from '../../../Shared/Button/Button';
@@ -7,23 +8,29 @@ import Title from '../Title/Title';
 import './ProfileSettings.css';
 
 // TODO: cursor not allowed
+type ValidationError = {
+	property: string;
+	constraints: {
+		[key: string]: string;
+	};
+};
 
 const ProfileSettings: React.FC = () => {
 	// Access userData from the UserContext
 	const { userData, setUserData } = useContext(UserContext);
 
 	// States to hold username and email values
-	const [username, setUsername] = useState('');
-	const [email, setEmail] = useState('');
+	const [username, setUsername] = useState(userData?.login || ''); // Provide an empty string as the fallback value
+	const [email, setEmail] = useState(userData?.email || ''); // Provide an empty string as the fallback value
 
 	// States to store validation errors
 	const [usernameError, setUsernameError] = useState<string | null>(null);
-	const [emailError, SetEmailError] = useState<string | null>(null);
+	const [emailError, setEmailError] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (userData) {
-			setUsername(userData.login);
-			setEmail(userData.email);
+			setUsername(userData.login || '');
+			setEmail(userData.email || '');
 		}
 	}, [userData]);
 
@@ -31,20 +38,19 @@ const ProfileSettings: React.FC = () => {
 	const handleUsernameChange = (newUsername: string) => {
 		setUsername(newUsername);
 
-		const allowedCharactersRegex = /^[A-Za-z0-9-_\.]*$/;
+		const usernameRegex = /^[A-Za-z0-9-_\.]*$/;
 
 		if (!newUsername) setUsernameError('Username cannot be empty');
 		else if (newUsername.length > 8)
 			setUsernameError('Username must not exceed 8 characters');
 		else if (newUsername.length < 4)
 			setUsernameError('Username must be at least 4 characters');
-		else if (!allowedCharactersRegex.test(newUsername))
-			setUsernameError(
-				'Username can only contain letters, numbers, "-", "_", and "."',
-			);
+		else if (!usernameRegex.test(newUsername))
+			setUsernameError('Username can be letters, numbers, "-", "_", and "."');
 		else {
 			setUsernameError(null);
 		}
+		console.log(usernameError);
 	};
 
 	// Handle email state when it is changed in the inputfield
@@ -52,31 +58,41 @@ const ProfileSettings: React.FC = () => {
 		setEmail(newEmail);
 		const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
-		if (!newEmail) SetEmailError('Email cannot be empty');
+		if (!newEmail) setEmailError('Email cannot be empty');
 		else if (!emailRegex.test(newEmail))
-			SetEmailError('Email format is invalid');
-		else SetEmailError(null);
+			setEmailError('Email format is invalid');
+		else setEmailError(null);
 	};
 
 	const handleSaveButtonClick = async () => {
-		// send a request to update username and/or email on the server
-		if (usernameError || emailError) {
-			alert('Invalid username or email');
-			return;
-		}
-
 		try {
+			// Check if there are any changes in the username or email
+			const updatedFields: { [key: string]: string } = {};
+			if (userData?.login !== username) {
+				updatedFields.login = username;
+			}
+			if (userData?.email !== email) {
+				updatedFields.email = email;
+			}
+
+			// If there are no changes, there's nothing to update
+			if (Object.keys(updatedFields).length === 0) {
+				console.log('No changes to update.');
+				return;
+			}
 			const response = await fetch('http://localhost:3000/user/me/update', {
 				method: 'PUT',
 				credentials: 'include',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ login: username, email: email }),
+				body: JSON.stringify(updatedFields),
 			});
 
+			console.log('response status:', response.status);
+
+			// Update the userData in the context with the updated user data
 			if (response.ok) {
-				// Update the userData in the context with the updated user data
 				const updatedUserData = {
 					...userData,
 					login: username,
@@ -84,15 +100,20 @@ const ProfileSettings: React.FC = () => {
 					image: userData?.image || '',
 				};
 				setUserData(updatedUserData);
-				// alert('User data updated successfully!');
-			} else {
-				// alert('Failed to update user data. Please try again.');
-				setUsernameError('username already exists');
-				console.log('Failed to update ');
+			}
+			const responseData = await response.clone().json();
+			console.log(responseData);
+			if (response.status === 409 || response.status === 400) {
+				responseData.errors.forEach((error: any) => {
+					if (error.field === 'login') {
+						setUsernameError(error.message);
+					} else if (error.field === 'email') {
+						setEmailError(error.message);
+					}
+				});
 			}
 		} catch (error) {
 			console.error('Error updating user data:', error);
-			alert('An error occrred while updating user data. Please try again');
 		}
 	};
 
