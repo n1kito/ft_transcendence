@@ -38,7 +38,7 @@ const ProfileSettings: React.FC = () => {
 	const handleUsernameChange = (newUsername: string) => {
 		setUsername(newUsername);
 
-		const usernameRegex = /^[A-Za-z0-9-_\.]*$/;
+		const usernameRegex = /^[A-Za-z0-9-_\\.]*$/;
 
 		if (!newUsername) setUsernameError('Username cannot be empty');
 		else if (newUsername.length > 8)
