@@ -47,10 +47,14 @@ const Profile: React.FC<ProfileProps> = (props) => {
 					<img src={rocketIcon} />
 				</TitleList>
 				{userData && userData.login == props.login && <ProfileSettings />}
-				
+
 				<div className="profile-buttons">
-					{userData && userData.login == props.login && <Button baseColor={[308, 80, 92]}>change password</Button>}
-					{userData && !(userData.login == props.login) && <Button baseColor={[308, 80, 92]}>add friend</Button>}
+					{userData && userData.login == props.login && (
+						<Button baseColor={[308, 80, 92]}>change password</Button>
+					)}
+					{userData && !(userData.login == props.login) && (
+						<Button baseColor={[308, 80, 92]}>add friend</Button>
+					)}
 					<Button baseColor={[0, 80, 92]}>
 						<svg
 							className="trashcan-sgv"
