@@ -12,7 +12,7 @@ export interface MyButtonProps {
 
 const Button: React.FC<MyButtonProps> = ({
 	baseColor = [57, 92, 66],
-	onClick, // Set the default value to an empty function
+	onClick,
 	disabled = false,
 	children,
 }) => {
@@ -56,7 +56,11 @@ const Button: React.FC<MyButtonProps> = ({
 			className={`buttonWrapper ${disabled ? 'disabled-button' : ''}`}
 			style={buttonStyle}
 		>
-			<button className="coloredButton" onClick={handleClick} disabled={disabled}>
+			<button
+				className="coloredButton"
+				onClick={handleClick}
+				disabled={disabled}
+			>
 				{children}
 			</button>
 		</div>
