@@ -12,15 +12,14 @@ datasource db {
 }
 
 model User {
-    id            Int      @id @unique @default(autoincrement())
-    ft_id         Int?     @unique
-    hash          String?
-    login         String   @unique
-    email         String   @unique
-    image         String?
-    createdAt     DateTime @default(now())
-    token         String?
-    refresh_token String?
+    id        Int      @id @unique @default(autoincrement())
+    ft_id     Int?     @unique
+    hash      String?
+    login     String   @unique
+    email     String   @unique
+    image     String?
+    createdAt DateTime @default(now())
+    token     String?
 
     // Friendship system
     friends          User[]  @relation("Friendship")
@@ -32,15 +31,4 @@ model User {
     email_is_locked Boolean @default(false)
     image_is_locked Boolean @default(false)
     userId          Int?
-
-    refreshTokens RefreshToken[]
-}
-
-model RefreshToken {
-    id        Int      @id @unique @default(autoincrement())
-    userId    Int
-    token     String   @unique
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    User      User     @relation(fields: [userId], references: [id])
 }
