@@ -35,7 +35,7 @@ export class UserController {
 		}
 
 		// Fetch the user information from the database using the userId
-		const user = await this.prisma.user.findUnique({
+		const user = await this.prisma.user.findUnique({ 
 			where: { id: request.userId },
 		});
 
