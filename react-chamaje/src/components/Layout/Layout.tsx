@@ -20,7 +20,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 				<Outlet />
 			</div>
 			{/* </div> */}
-			<Background />
+			{/* <Background /> */}
 		</div>
 	);
 };

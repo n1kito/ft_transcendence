@@ -27,7 +27,7 @@ const LoginForm = () => {
 					</div>
 					{/* <h1>login</h1> */}
 					<div className="submitRow">
-						<Button buttonText="login" baseColor={[308, 80, 92]} />
+						<Button baseColor={[308, 80, 92]}>Login</Button>
 						{/* <Button buttonText="42" baseColor={[309, 0, 71]}/> */}
 						{/* <p>login with 42</p> */}
 					</div>

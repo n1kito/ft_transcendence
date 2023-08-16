@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import FriendsList from '../Friends/Components/FriendsList/FriendsList';
 import { UserContext } from '../../contexts/UserContext';
 import useAuth from '../../hooks/userAuth';
-import ProfileSettings from '../Profile/Components/ProfileSettings/ProfileSettings';
+import Profile from '../Profile/Profile';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -77,7 +77,7 @@ const Desktop = () => {
 				onDoubleClick={friendsClickHandler}
 			/>
 			{/* {openFriendsWindow && <Window windowTitle="Friends"><FriendsList /></Window>}*/}
-			<Window
+			{/* <Window
 				windowTitle="Friends"
 				links={[
 					{ name: 'Add friend', url: '#' },
@@ -85,7 +85,19 @@ const Desktop = () => {
 					{ name: 'Do something', url: '#' },
 				]}
 			>
-				<ProfileSettings />
+				<FriendsList />
+			</Window> */}
+			<Window
+				windowTitle={userData?.login || 'window title'}
+				links={[
+					{ name: 'Link1', url: '#' },
+					{ name: 'Link2', url: '#' },
+					{ name: 'Link3', url: '#' },
+				]}
+				useBeigeBackground={true}
+			>
+				<Profile login={userData ? userData.login : 'random'} />
+				{/* <Profile login='randomLg'/> */}
 			</Window>
 		</div>
 	);

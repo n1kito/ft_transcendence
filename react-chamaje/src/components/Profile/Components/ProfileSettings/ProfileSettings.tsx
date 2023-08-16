@@ -120,12 +120,7 @@ const ProfileSettings: React.FC = () => {
 	return (
 		<ShadowWrapper shadow={true} backgroundColor="#D5B1F9">
 			<div className="ProfileForm">
-				<Title
-					title="My Profile"
-					highlight={true}
-					highlightColor="#F8EF57"
-					fontSize="1.5rem"
-				/>
+				<Title highlightColor="#F8EF57">My Profile</Title>
 				<InputField
 					value={username}
 					onChange={handleUsernameChange}
@@ -137,10 +132,12 @@ const ProfileSettings: React.FC = () => {
 					error={emailError}
 				/>
 				<Button
-					buttonText="Save"
 					onClick={handleSaveButtonClick}
 					disabled={!!usernameError || !!emailError}
-				/>
+					baseColor={[57, 92, 66]}
+				>
+					save
+				</Button>
 			</div>
 		</ShadowWrapper>
 	);

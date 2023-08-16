@@ -52,12 +52,12 @@
 .desktopIconWrapper:active img,
 .selected-icon img {
 	filter: drop-shadow(var(--stroke-pos) var(--stroke-pos) 0 black)
-	drop-shadow(var(--stroke-neg) var(--stroke-pos) 0 black)
-	drop-shadow(var(--stroke-pos) var(--stroke-neg) 0 black)
-	drop-shadow(var(--stroke-neg) var(--stroke-neg) 0 black)
-	drop-shadow(var(--stroke-pos) var(--stroke-pos) 0 yellow)
-	drop-shadow(var(--stroke-neg) var(--stroke-pos) 0 yellow)
-	drop-shadow(var(--stroke-pos) var(--stroke-neg) 0 yellow)
-	drop-shadow(var(--stroke-neg) var(--stroke-neg) 0 yellow)
-	drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8));
+		drop-shadow(var(--stroke-neg) var(--stroke-pos) 0 black)
+		drop-shadow(var(--stroke-pos) var(--stroke-neg) 0 black)
+		drop-shadow(var(--stroke-neg) var(--stroke-neg) 0 black)
+		drop-shadow(var(--stroke-pos) var(--stroke-pos) 0 yellow)
+		drop-shadow(var(--stroke-neg) var(--stroke-pos) 0 yellow)
+		drop-shadow(var(--stroke-pos) var(--stroke-neg) 0 yellow)
+		drop-shadow(var(--stroke-neg) var(--stroke-neg) 0 yellow)
+		drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8));
 }
