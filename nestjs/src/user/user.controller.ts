@@ -1,19 +1,23 @@
 import {
+	BadRequestException,
 	Body,
+	ConflictException,
 	Controller,
 	Get,
+	HttpException,
 	HttpStatus,
+	NotFoundException,
 	Param,
 	Put,
 	Req,
-	Response,
+	Res,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { PrismaClient } from '@prisma/client';
-import { Request } from 'express';
+import { Request, response, Response } from 'express';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
-
+import { validate } from 'class-validator';
 export interface CustomRequest extends Request {
 	userId: number;
 }
@@ -27,20 +31,15 @@ export class UserController {
 
 	@Get('me')
 	async getMyinfo(@Req() request: CustomRequest) {
-		console.log('GET MY INFO\n request.userId: ' + request.userId);
-		const userId = request.userId;
-		if (!userId) {
-			// If request.userId is not available, return an error or appropriate response
-			return { error: 'Authentication required' };
-		}
+		const userId = this.userService.authenticateUser(request);
 
 		// Fetch the user information from the database using the userId
-		const user = await this.prisma.user.findUnique({
+		const user = await this.prisma.user.findUnique({ 
 			where: { id: request.userId },
 		});
 
+		// Handle case when user is not found
 		if (!user) {
-			// Handle case when user is not found
 			return { message: 'User not found' };
 		}
 
@@ -56,29 +55,14 @@ export class UserController {
 	async updateMyUser(
 		@Body() updateUserDto: UpdateUserDto,
 		@Req() request: CustomRequest,
-		@Response() res: any,
+		@Res() response: Response,
 	) {
 		const userId = this.userService.authenticateUser(request);
 
-		const { login } = updateUserDto;
-		if (login) {
-			const usernameTaken = await this.userService.isUsernameTaken(login);
-			if (usernameTaken) {
-				console.log('username is already taken');
-				res
-					.status(HttpStatus.BAD_REQUEST)
-					.json({ error: 'Username is already taken' });
-				return;
-			}
-		}
-
-		try {
-			await this.userService.updateUser(userId, updateUserDto);
-
-			return { message: 'User updated successfully' };
-		} catch (error) {
-			return { error: 'Failed to update user' };
-		}
+		await this.userService.updateUser(userId, updateUserDto);
+		response
+			.status(HttpStatus.OK)
+			.json({ message: 'User updated successfully' });
 	}
 
 	// TODO: change route to user/me/friends or something, I just created a separate one to avoid with the /user/me routes Jee created

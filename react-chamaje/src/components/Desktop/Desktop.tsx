@@ -11,6 +11,7 @@ import Profile from '../Profile/Profile';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
+	let iconId = 0;
 	const { userData, setUserData } = useContext(UserContext);
 	const [openFriendsWindow, setOpenedFriendsWindows] = useState(false);
 	const navigate = useNavigate();
@@ -60,16 +61,19 @@ const Desktop = () => {
 			<DesktopIcon
 				name="Game"
 				iconSrc={cupcakeIcon}
+				id={++iconId}
 				onDoubleClick={friendsClickHandler}
 			/>
 			<DesktopIcon
 				name="Friends"
 				iconSrc={cupcakeIcon}
+				id={++iconId}
 				onDoubleClick={friendsClickHandler}
 			/>
 			<DesktopIcon
 				name="Chat"
 				iconSrc={cupcakeIcon}
+				id={++iconId}
 				onDoubleClick={friendsClickHandler}
 			/>
 			{/* {openFriendsWindow && <Window windowTitle="Friends"><FriendsList /></Window>}*/}
@@ -92,7 +96,8 @@ const Desktop = () => {
 				]}
 				useBeigeBackground={true}
 			>
-				<Profile />
+				<Profile login={userData ? userData.login : 'random'} />
+				{/* <Profile login='randomLg'/> */}
 			</Window>
 		</div>
 	);

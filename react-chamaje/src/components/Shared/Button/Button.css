@@ -1,6 +1,9 @@
 /* Styling the Button component */
 
-.coloredButton {
+#coloredButton {
+	/* width: 5rem; */
+	/* height: 2rem; */
+	/* flex-shrink: 1; */
 	border-radius: 0.5rem;
 	background: var(--btnBgColor);
 	padding: 0.5rem 1rem !important;
@@ -17,25 +20,45 @@
 	margin: 0;
 	padding: 0;
 	border: 0;
+
+	/* box-shadow: 0 0.5rem 0 0 var(--btnShadowColor); */
+	/* opacity: 0.8; */
+	/* position: relative; */
+	/* top: -0.5rem; */
+
+	/* border: 1px solid var(--btnBorderColor); */
 }
 
-.coloredButton:hover {
+/* #coloredButton:active {
+	position: relative;
+	top: 0rem;
+	box-shadow: none;
+} */
+
+#coloredButton:hover {
 	opacity: 1;
 }
 
-.buttonWrapper {
+#buttonWrapper {
 	background-color: var(--btnShadowColor);
 	padding-bottom: 0.5rem;
 	border: 2px solid var(--btnBorderColor);
 	border-radius: 0.7rem;
 	width: fit-content;
+	/* display: inline-block; */
 }
 
-.buttonWrapper:active {
+#coloredButton:disabled {
+	cursor: not-allowed;
+}
+
+#buttonWrapper:not(.disabled):active {
 	padding-bottom: 0;
 	margin-top: 0.5rem;
+	cursor: not-allowed;
 }
 
-.disabled-button {
-	pointer-events: none;
+/* Styles for the disabled button */
+#buttonWrapper.disabled {
+	padding-bottom: 0.5rem;
 }
