@@ -36,16 +36,16 @@ function App() {
 						<Layout>
 							<IconContextProvider>
 								<Routes>
-									{/* <Route path="/" element={<ProtectedLogin />} />
-								<Route path="/desktop" element={<ProtectedDesktop />} />
-								<Route path="/friends" element={<ProtectedDesktop />} /> */}
-									<Route path="/" element={<Login />} />
+									<Route path="/" element={<ProtectedLogin />} />
+									<Route path="/desktop" element={<ProtectedDesktop />} />
+									<Route path="/friends" element={<ProtectedDesktop />} />
+									{/* <Route path="/" element={<Login />} />
 									<Route path="/desktop" element={<Desktop />} />
-									<Route path="/friends" element={<Desktop />} />
-                  <Route
-									path="/retrieve-token"
-									element={<RetrieveAccessToken />}
-								/>
+									<Route path="/friends" element={<Desktop />} /> */}
+									<Route
+										path="/retrieve-token"
+										element={<RetrieveAccessToken />}
+									/>
 									<Route
 										path="*"
 										element={
