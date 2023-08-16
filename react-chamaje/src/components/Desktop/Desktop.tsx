@@ -81,7 +81,6 @@ const Desktop = () => {
 				]}
 			>
 				{/* <FriendsList /> */}
-				<ProfileSettings />
 			</Window>
 		</div>
 	);
