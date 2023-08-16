@@ -46,8 +46,8 @@ const Desktop = () => {
 			}
 		};
 
-		fetchUserData();
-	}, [setUserData]);
+		if (isAuthentificated) fetchUserData();
+	}, [setUserData, isAuthentificated]);
 
 	const friendsClickHandler = () => {
 		setOpenedFriendsWindows(true);
