@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './MatchHistoryBadge.css';
-import FriendBadge from '../../../Friends/Components/FriendBadge/FriendBadge';
-import BlackBadge from '../Shared/BlackBadge/BlackBadge';
+import FriendBadge from '../../../../../Friends/Components/FriendBadge/FriendBadge';
+import BlackBadge from '../../../Shared/BlackBadge/BlackBadge';
 
 interface IMatchHistoryBadgeProps {
 	badgeTitle: string;

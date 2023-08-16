@@ -9,9 +9,11 @@ import { UserContext } from '../../contexts/UserContext';
 import useAuth from '../../hooks/userAuth';
 import ProfileSettings from '../Profile/Components/ProfileSettings/ProfileSettings';
 import { AuthContext } from '../../contexts/AuthContext';
+import Profile from '../Profile/Profile';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
+	let iconId = 0;
 	const { userData, setUserData } = useContext(UserContext);
 	const [openFriendsWindow, setOpenedFriendsWindows] = useState(false);
 	const navigate = useNavigate();
@@ -59,28 +61,32 @@ const Desktop = () => {
 			<DesktopIcon
 				name="Game"
 				iconSrc={cupcakeIcon}
+				id={++iconId}
 				onDoubleClick={friendsClickHandler}
 			/>
 			<DesktopIcon
 				name="Friends"
 				iconSrc={cupcakeIcon}
+				id={++iconId}
 				onDoubleClick={friendsClickHandler}
 			/>
 			<DesktopIcon
 				name="Chat"
 				iconSrc={cupcakeIcon}
+				id={++iconId}
 				onDoubleClick={friendsClickHandler}
 			/>
-			{/* {openFriendsWindow && <Window windowTitle="Friends"><FriendsList /></Window>}*/}
 			<Window
-				windowTitle="Friends"
+				windowTitle={userData?.login || 'window title'}
 				links={[
-					{ name: 'Add friend', url: '#' },
-					{ name: 'See online friends', url: '#' },
-					{ name: 'Do something', url: '#' },
+					{ name: 'Link1', url: '#' },
+					{ name: 'Link2', url: '#' },
+					{ name: 'Link3', url: '#' },
 				]}
+				useBeigeBackground={true}
 			>
-				{/* <FriendsList /> */}
+				<Profile login={userData ? userData.login : 'random'} />
+				{/* <Profile login='randomLg'/> */}
 			</Window>
 		</div>
 	);

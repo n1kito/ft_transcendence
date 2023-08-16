@@ -17,7 +17,7 @@ const OnlineStatusFriendBadge: React.FC<IOnlineStatusFriendsBadgeProps> = ({
 			<FriendBadge
 				badgeTitle={badgeTitle}
 				badgeImageUrl={badgeImageUrl}
-				clickable={true}
+				isClickable={true}
 				onlineIndicator={true}
 			/>
 		</div>

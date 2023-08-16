@@ -11,6 +11,7 @@
 	flex-direction: column;
 	align-items: center;
 	gap: 0.5rem;
+	z-index: 1;
 }
 
 .desktopIconWrapper:hover {
@@ -25,6 +26,7 @@
 	padding: 0 0.5rem;
 	text-transform: capitalize;
 	font-size: 1.2rem;
+	border: 1px solid transparent;
 }
 
 .desktopIconWrapper img {
@@ -42,6 +44,21 @@
 		drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8));
 }
 
-.desktopIconWrapper:active span {
+.desktopIconWrapper:active span,
+.selected-icon span {
 	background-color: yellow;
+	border: 1px dashed black;
+}
+
+.desktopIconWrapper:active img,
+.selected-icon img {
+	filter: drop-shadow(var(--stroke-pos) var(--stroke-pos) 0 black)
+		drop-shadow(var(--stroke-neg) var(--stroke-pos) 0 black)
+		drop-shadow(var(--stroke-pos) var(--stroke-neg) 0 black)
+		drop-shadow(var(--stroke-neg) var(--stroke-neg) 0 black)
+		drop-shadow(var(--stroke-pos) var(--stroke-pos) 0 yellow)
+		drop-shadow(var(--stroke-neg) var(--stroke-pos) 0 yellow)
+		drop-shadow(var(--stroke-pos) var(--stroke-neg) 0 yellow)
+		drop-shadow(var(--stroke-neg) var(--stroke-neg) 0 yellow)
+		drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8));
 }

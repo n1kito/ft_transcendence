@@ -4,7 +4,6 @@ import Clock from '../components/Layout/Components/NavBar/Components/Clock/Clock
 import './Desktop.css';
 
 const Desktop = () => {
-	console.log('desktop component in the house');
 	return (
 		<div id="desktop">
 			<div id="navBar">

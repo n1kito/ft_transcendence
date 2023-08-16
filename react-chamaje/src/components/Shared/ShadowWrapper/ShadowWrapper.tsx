@@ -4,22 +4,25 @@ import './ShadowWrapper.css';
 export interface ShadowWrapperProps {
 	children?: ReactNode;
 	shadow?: boolean;
-	clickable?: boolean;
+	isClickable?: boolean;
 	backgroundColor?: string;
+	onClick?: () => void;
 }
 
 const ShadowWrapper: React.FC<ShadowWrapperProps> = ({
 	children,
-	shadow = false,
-	clickable = false,
+	isClickable = false,
+	shadow = isClickable,
 	backgroundColor = '',
+	onClick,
 }) => {
 	return (
 		<div
 			className={`shadow-wrapper ${shadow ? 'shadow' : ''} ${
-				clickable ? 'clickable' : ''
+				isClickable ? 'clickable' : ''
 			}`}
 			style={{ backgroundColor: backgroundColor }}
+			onClick={isClickable ? onClick : undefined}
 		>
 			{children}
 		</div>

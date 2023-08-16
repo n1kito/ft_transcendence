@@ -1,21 +1,21 @@
 /* Styling the ProfilePicBadge component */
 
-.ProfilePicBadgeWrapper {
+.profile-pic-badge-wrapper {
 	position: relative;
 }
 
-.pictureContainer {
-	height: 7rem;
+.picture-container {
+	min-height: 7rem;
 	aspect-ratio: 1/1;
 }
 
-.modifyButton {
+.modify-button {
 	position: absolute;
 	bottom: -1.2rem;
 	left: -1.2rem;
 }
 
-.modifyButton .shadow-wrapper {
+.modify-button .shadow-wrapper {
 	background-color: #f8ef57;
 	width: 2.4rem;
 	aspect-ratio: 1/1;
@@ -26,7 +26,7 @@
 	justify-content: center;
 }
 
-.modifyButton .shadow-wrapper img {
+.modify-button .shadow-wrapper img {
 	width: 1.3rem;
 	aspect-ratio: 1/1;
 }

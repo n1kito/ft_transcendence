@@ -1,4 +1,4 @@
-.titleWrapper {
+.title-wrapper {
 	position: relative;
 	display: flex;
 	gap: 1rem;
@@ -36,4 +36,8 @@
 	letter-spacing: 0rem;
 	margin-bottom: -0.5rem;
 	margin-left: 0rem;
+}
+
+.tooltip:hover {
+	cursor: help;
 }

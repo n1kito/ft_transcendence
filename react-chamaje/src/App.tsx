@@ -21,6 +21,7 @@ import {
 	showComponentIfNotLoggedIn,
 } from './utils/authUtils';
 import RetrieveAccessToken from './components/RetrieveAccessToken/RetrieveAccessToken';
+import IconContextProvider from './contexts/IconContext';
 
 // These are functions that will return a component passed as parameter depending on user authentification status
 const ProtectedLogin = showComponentIfNotLoggedIn(Login);
@@ -33,24 +34,33 @@ function App() {
 				<div className="App">
 					<BrowserRouter>
 						<Layout>
-							<Routes>
-								<Route path="/" element={<ProtectedLogin />} />
+							<IconContextProvider>
+								<Routes>
+									{/* <Route path="/" element={<ProtectedLogin />} />
 								<Route path="/desktop" element={<ProtectedDesktop />} />
-								<Route path="/friends" element={<ProtectedDesktop />} />
-								<Route
+								<Route path="/friends" element={<ProtectedDesktop />} /> */}
+									<Route path="/" element={<Login />} />
+									<Route path="/desktop" element={<Desktop />} />
+									<Route path="/friends" element={<Desktop />} />
+                  <Route
 									path="/retrieve-token"
 									element={<RetrieveAccessToken />}
 								/>
-								{/* <Route path="/" element={<Login />} />
-								<Route path="/desktop" element={<Desktop />} />
-								<Route path="/friends" element={<Desktop />} /> */}
-								<Route
-									path="*"
-									element={
-										<DesktopIcon name="Error :(" iconSrc={roadconeIcon} />
-									}
-								/>
-							</Routes>
+									<Route
+										path="*"
+										element={
+											<DesktopIcon
+												name="Error :("
+												id={-1}
+												iconSrc={roadconeIcon}
+												onDoubleClick={() => {
+													/* TODO: redirect to the homepage ? */
+												}}
+											/>
+										}
+									/>
+								</Routes>
+							</IconContextProvider>
 						</Layout>
 					</BrowserRouter>
 				</div>

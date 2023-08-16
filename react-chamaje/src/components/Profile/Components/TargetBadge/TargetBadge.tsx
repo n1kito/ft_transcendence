@@ -98,7 +98,7 @@ const TargetBadge = () => {
 			}`}
 		>
 			<FriendBadge
-				clickable={true}
+				isClickable={true}
 				badgeTitle={badgeTitle}
 				badgeImageUrl={badgeImage}
 				onlineIndicator={targetHasBeenAssigned}

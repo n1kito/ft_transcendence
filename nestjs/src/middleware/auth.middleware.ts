@@ -13,8 +13,6 @@ import { AuthService } from 'src/auth/auth.service';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { TokenService } from 'src/token/token.service';
 
-// const prisma = new PrismaClient();
-
 // TODO: Here I should use the same interface type for request as the once I put in user.controller.ts,
 // interface CustomRequest extends Request {
 // 	userId: number;

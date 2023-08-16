@@ -1,10 +1,8 @@
 .ProfileForm {
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
 	align-items: center;
-	/* padding-top: 0.6rem; */
-	/* padding-left: 1rem; */
-	padding: 1rem;
-	gap: 1rem;
+	justify-content: space-between;
+	padding: 1rem 2rem;
+	gap: 2rem;
 }

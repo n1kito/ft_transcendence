@@ -7,6 +7,7 @@
 	border-radius: 0.5rem;
 	background: var(--btnBgColor);
 	padding: 0.5rem 1rem !important;
+	width: 100%;
 
 	color: var(--btnTxtColor);
 	text-align: center;
@@ -47,7 +48,17 @@
 	/* display: inline-block; */
 }
 
-#buttonWrapper:not([disabled])active {
+#coloredButton:disabled {
+	cursor: not-allowed;
+}
+
+#buttonWrapper:not(.disabled):active {
 	padding-bottom: 0;
 	margin-top: 0.5rem;
+	cursor: not-allowed;
+}
+
+/* Styles for the disabled button */
+#buttonWrapper.disabled {
+	padding-bottom: 0.5rem;
 }

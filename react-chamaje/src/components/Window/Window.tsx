@@ -12,6 +12,7 @@ export interface MenuLinks {
 export interface WindowProps {
 	windowTitle?: string;
 	links?: MenuLinks[];
+	useBeigeBackground?: boolean;
 	children?: ReactNode;
 	constraintRef?: React.RefObject<HTMLDivElement>;
 }
@@ -20,6 +21,7 @@ const Window: React.FC<WindowProps> = ({
 	windowTitle = 'Title',
 	children,
 	links = [],
+	useBeigeBackground = false,
 	constraintRef,
 }) => {
 	const dragControls = useDragControls();
@@ -58,7 +60,9 @@ const Window: React.FC<WindowProps> = ({
 			dragControls={dragControls}
 			dragListener={false}
 			dragConstraints={constraintRef}
-			style={{ position: isDragged ? 'absolute' : 'static' }}
+			style={{
+				position: isDragged ? 'absolute' : 'static',
+			}}
 		>
 			{/* TODO: I had to put the title bar in a div to give it the onPointerDown property, ideally this would be inclded in the component itself*/}
 			<div onPointerDown={triggerDragOnElem}>
@@ -71,7 +75,12 @@ const Window: React.FC<WindowProps> = ({
 					</a>
 				))}
 			</WindowMenu>
-			<div id="windowContent">{children}</div>
+			<div
+				id="windowContent"
+				style={{ backgroundColor: useBeigeBackground ? '#FFFBEC' : '' }}
+			>
+				{children}
+			</div>
 		</motion.div>
 	);
 };
