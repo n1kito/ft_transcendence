@@ -5,7 +5,7 @@ import Profile from './Profile';
 
 describe('<Profile />', () => {
 	test('it should mount', () => {
-		render(<Profile />);
+		render(<Profile login='testerlg'/>);
 
 		const profile = screen.getByTestId('Profile');
 
