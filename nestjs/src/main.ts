@@ -18,7 +18,7 @@ async function bootstrap() {
 	// 	optionsSuccessStatus: 204,
 	// };
 	app.enableCors({
-		origin: 'http://localhost:3001', // Allow requests from this origin
+		origin: ['http://localhost:3001', 'http://localhost:8080'], // Allow requests from this origin
 		credentials: true, // Allow credentials (cookies, for us)
 	});
 	app.use(cookieParser());
@@ -35,6 +35,8 @@ async function bootstrap() {
 			),
 		),
 	);
-	await app.listen(3000);
+	await app.listen(3000, '0.0.0.0').catch((error) => {
+		console.error('Error starting the application:', error);
+	  });
 }
 bootstrap();

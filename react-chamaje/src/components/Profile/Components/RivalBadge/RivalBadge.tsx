@@ -7,7 +7,11 @@ import OnlineIndicator from '../Shared/OnlineIndicator/OnlineIndicator';
 const RivalBadge = () => {
 	return (
 		<div className="rival-badge">
-			<FriendBadge badgeTitle="Rival" clickable={true} onlineIndicator={true} />
+			<FriendBadge
+				badgeTitle="Rival"
+				isClickable={true}
+				onlineIndicator={true}
+			/>
 			<BlackBadge>@megan</BlackBadge>
 		</div>
 	);

@@ -37,6 +37,8 @@ WORKDIR /app
 # Instal app dependencies using the `npm ci` (clean install) command instead of `npm install`
 # RUN npm install
 
+# RUN npm install -g @nestjs/cli
+
 # Bundle app source
 # COPY --chown=node:node . .
 

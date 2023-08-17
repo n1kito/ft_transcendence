@@ -5,7 +5,7 @@ import Title from './Title';
 
 describe('<Title />', () => {
 	test('it should mount', () => {
-		render(<Title />);
+		render(<Title>Title</Title>);
 
 		const title = screen.getByTestId('Title');
 

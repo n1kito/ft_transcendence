@@ -1,59 +1,73 @@
 /* Styling the Background component */
 
-.paths {
-	fill: none;
-	/* stroke: black; */
-	stroke-miterlimit: 1;
-}
-
 #bgWrapper {
 	position: fixed;
 	top: 0;
 	left: 0;
 	padding: 0;
-	/* margin: 0 !important; */
 	overflow: hidden;
 	width: 100dvw;
 	height: 100dvh;
-	/* background-color: rgba(148, 187, 233, 1); */
-	background-color: black;
+	background: linear-gradient(rgba(148, 187, 233, 1), rgb(255, 193, 252));
 	pointer-events: none;
-	z-index: -1;
 }
 
 #blur {
 	position: absolute;
-	z-index: 0;
 	height: 100%;
 	width: 100%;
 	backdrop-filter: blur(350px);
 }
 
-#noise {
-	position: fixed;
-	z-index: 1;
+.background-dot {
+	position: absolute;
+	z-index: -1;
 	top: 0;
 	left: 0;
-	width: 100vw;
-	height: 100vh;
-	background-size: 10%;
-	background-blend-mode: soft-light;
-	opacity: 0.2;
-	pointer-events: none;
-	animation: background-noise 0.3s infinite;
+	width: 70rem;
+	aspect-ratio: 1/1;
+	border-radius: 50%;
+	background-color: aliceblue;
+	animation: dot-move 100s infinite linear;
 }
 
-@keyframes background-noise {
+.dot-1 {
+	background-color: #a757f8;
+	motion-path: path(
+		'm86.46,984.7C-2.75,864.52-167.87,279.23,491.41,330.97c659.28,51.73,223.46,585.54,592.61,734.86,369.15,149.32,803.73,82.3,886.45-210.46,0,0,116.05-467.96,55.56-590.24-60.5-122.28-623.48-475.01-853.11,123.46C943.28,987.05,411.16,1422.09,86.46,984.7Z'
+	);
+	offset-path: path(
+		'm86.46,984.7C-2.75,864.52-167.87,279.23,491.41,330.97c659.28,51.73,223.46,585.54,592.61,734.86,369.15,149.32,803.73,82.3,886.45-210.46,0,0,116.05-467.96,55.56-590.24-60.5-122.28-623.48-475.01-853.11,123.46C943.28,987.05,411.16,1422.09,86.46,984.7Z'
+	);
+}
+
+.dot-2 {
+	background-color: #f8576a;
+	motion-path: path(
+		'm540.03,51.62C711.39-1.44,1545.97-99.63,1472.2,292.45c-73.77,392.08-834.93,132.9-1047.85,352.43-212.92,219.54-117.36,477.99,300.11,527.18,0,0,667.27,69.02,841.64,33.04,174.36-35.98,677.33-370.79-176.04-507.36C536.67,561.18-83.66,244.73,540.03,51.62Z'
+	);
+	offset-path: path(
+		'm540.03,51.62C711.39-1.44,1545.97-99.63,1472.2,292.45c-73.77,392.08-834.93,132.9-1047.85,352.43-212.92,219.54-117.36,477.99,300.11,527.18,0,0,667.27,69.02,841.64,33.04,174.36-35.98,677.33-370.79-176.04-507.36C536.67,561.18-83.66,244.73,540.03,51.62Z'
+	);
+}
+
+.dot-3 {
+	background-color: #f8ef57;
+	motion-path: path(
+		'm1939.96,978.2c11.55,129.94-139.67,618.35-622.79,229.57-483.11-388.78,106.4-519.86-106.86-819.78C997.05,88.07,630.49-99.11,427.54,56.58c0,0-311.94,257.52-323.51,373.5-11.57,115.98,254.22,658.79,715.71,372.99,461.49-285.8,1078.19-297.77,1120.22,175.14Z'
+	);
+	offset-path: path(
+		'm1939.96,978.2c11.55,129.94-139.67,618.35-622.79,229.57-483.11-388.78,106.4-519.86-106.86-819.78C997.05,88.07,630.49-99.11,427.54,56.58c0,0-311.94,257.52-323.51,373.5-11.57,115.98,254.22,658.79,715.71,372.99,461.49-285.8,1078.19-297.77,1120.22,175.14Z'
+	);
+}
+
+@keyframes dot-move {
 	0% {
-		background-image: url('./images/grain1.png');
-	}
-	33% {
-		background-image: url('./images/grain2.png');
-	}
-	66% {
-		background-image: url('./images/grain3.png');
+		motion-offset: 0%;
+		offset-distance: 0%;
 	}
 	100% {
-		background-image: url('./images/grain1.png');
+		motion-offset: 100%;
+		offset-distance: 100%;
 	}
 }

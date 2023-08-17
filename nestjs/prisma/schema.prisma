@@ -3,7 +3,7 @@
 
 generator client {
     provider      = "prisma-client-js"
-    binaryTargets = ["native", "linux-musl", "linux-musl-openssl-3.0.x"]
+    binaryTargets = ["native", "linux-musl", "linux-musl-openssl-3.0.x", "linux-musl-arm64-openssl-3.0.x", "linux-arm64-openssl-3.0.x"]
 }
 
 datasource db {
@@ -12,15 +12,14 @@ datasource db {
 }
 
 model User {
-    id            Int      @id @unique @default(autoincrement())
-    ft_id         Int?     @unique
-    hash          String?
-    login         String   @unique
-    email         String   @unique
-    image         String?
-    createdAt     DateTime @default(now())
-    token         String?
-    refresh_token String?
+    id        Int      @id @unique @default(autoincrement())
+    ft_id     Int?     @unique
+    hash      String?
+    login     String   @unique
+    email     String   @unique
+    image     String?
+    createdAt DateTime @default(now())
+    token     String?
 
     // Friendship system
     friends          User[]  @relation("Friendship")
@@ -28,8 +27,8 @@ model User {
     isDefaultProfile Boolean @default(false)
 
     // Will be set to true if our user manually updated the corresponding values from their profiles
-    login_is_locked     Boolean @default(false)
-    email_is_locked     Boolean @default(false)
-    image_is_locked     Boolean @default(false)
-    userId              Int?
+    login_is_locked Boolean @default(false)
+    email_is_locked Boolean @default(false)
+    image_is_locked Boolean @default(false)
+    userId          Int?
 }
