@@ -44,7 +44,6 @@ export class AuthMiddleWare implements NestMiddleware {
 			}
 			// Split the Authorization header value
 			const split = authorization.split(' ');
-			console.log('Middleware split: ', split);
 			// Check that the Authorization format is correct
 			if (split.length !== 2 || split[0] !== 'Bearer') {
 				throw new HttpException(

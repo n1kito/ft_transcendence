@@ -22,6 +22,7 @@ import {
 	showComponentIfNotLoggedIn,
 } from './utils/authUtils';
 import RetrieveAccessToken from './components/RetrieveAccessToken/RetrieveAccessToken';
+import { UserSocket } from './services/UserSocket';
 
 // These are functions that will return a component passed as parameter depending on user authentification status
 const ProtectedLogin = showComponentIfNotLoggedIn(Login);
@@ -29,28 +30,25 @@ const ProtectedDesktop = showComponentIfLoggedIn(Desktop);
 
 function App() {
 	// TODO: this is a test when using websockets, it will not stay here
-	useEffect(() => {
-		console.log('trying to setup socket connection');
-		const socket = io('http://localhost:3000', {
-			reconnection: false,
-		});
+	// useEffect(() => {
+	// 	console.log('trying to setup socket connection');
+	// 	const socket = io({ path: '/ws/' });
 
-		socket.on('connect', () => {
-			console.log('Connected to server ! 🔌🟢 ');
-		});
-		socket.on('connect_error', (error) => {
-			console.error('Connection Error:', error);
-		});
-		socket.on('connect_timeout', () => {
-			console.error('Connection Timeout');
-		});
-		socket.emit('message', { message: 'Hellow from React !' });
-		socket.on('message', (data) => {
-			console.log('Response from server: ', data);
-		});
-		return () => {
-			socket.disconnect();
-		};
+	// 	socket.on('connect', () => {
+	// 		console.log('Connected to server ! 🔌🟢 ');
+	// 		socket.emit('message', { message: 'Hellow from React !' });
+	// 	});
+
+	// 	socket.on('message', (data) => {
+	// 		console.log('Response from server: ', data);
+	// 	});
+	// 	return () => {
+	// 		socket.disconnect();
+	// 	};
+	// }, []);
+	useEffect(() => {
+		const statusUpdate = new UserSocket();
+		statusUpdate.updateOnlineStatus(false);
 	}, []);
 	// end of the websocket test
 	return (

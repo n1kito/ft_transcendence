@@ -18,13 +18,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 	return (
 		<div className="layoutWrapper">
 			<NavBar isLoggedIn={isAuthentificated} />
-			{/* <div class="layoutContent"> */}
 			<div className="layoutChildren">
 				{children}
 				<Outlet />
 			</div>
-			{/* </div> */}
-			{/* <Background /> */}
+			<Background />
 		</div>
 	);
 };

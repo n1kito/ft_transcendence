@@ -35,7 +35,7 @@ const Desktop = () => {
 				});
 				if (response.ok) {
 					const data = await response.json();
-					console.log(data);
+					// console.log(data);
 					// Set the user data in the context
 					setUserData(data);
 				} else {

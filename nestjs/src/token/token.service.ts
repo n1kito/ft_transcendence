@@ -22,7 +22,7 @@ export class TokenService {
 		const accessToken = jwt.sign(payload, this.jwtSecretKey, {
 			expiresIn: this.accessTokenExpiresIn,
 		});
-		console.log('generate access token:', accessToken);
+		// console.log('generate access token:', accessToken);
 		return accessToken;
 	}
 
