@@ -8,7 +8,10 @@ export class PrismaService
 {
 	constructor() {
 		super(); // calls the constructor of super class 'PrismaClient'
-		this.$connect(); // establish a connection to the database
+	}
+
+	async connectToDatabase() {
+		await this.$connect(); // establish a connection to the database
 	}
 
 	async onApplicationShutdown() {

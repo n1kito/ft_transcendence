@@ -47,7 +47,7 @@ function App() {
 	// 	};
 	// }, []);
 	useEffect(() => {
-		const statusUpdate = new UserSocket();
+		const statusUpdate = new UserSocket(123);
 		statusUpdate.updateOnlineStatus(false);
 	}, []);
 	// end of the websocket test

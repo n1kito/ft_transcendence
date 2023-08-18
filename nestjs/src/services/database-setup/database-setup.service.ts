@@ -6,6 +6,7 @@ export class DatabaseSetupService implements OnModuleInit {
 	constructor(private readonly prisma: PrismaService) {}
 
 	async onModuleInit() {
+		await this.prisma.connectToDatabase();
 		await this.seedDatabase();
 	}
 

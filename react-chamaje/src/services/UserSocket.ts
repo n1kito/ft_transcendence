@@ -21,7 +21,7 @@ export class UserSocket {
 		this.connectionSocket.on('connect', () => {
 			console.log('Connected to server ! 🔌🟢 ');
 		});
-		this.connectionSocket.on('connect_error', (error) => {
+		this.connectionSocket.on('connect_error', (error: Error) => {
 			console.error('Connection Error:', error);
 		});
 		this.connectionSocket.on('connect_timeout', () => {
