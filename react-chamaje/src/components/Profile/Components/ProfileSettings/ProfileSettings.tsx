@@ -1,6 +1,7 @@
 import { Http2ServerRequest } from 'http2';
 import React, { useContext, useEffect, useState } from 'react';
 import { UserContext } from '../../../../contexts/UserContext';
+import useAuth from '../../../../hooks/userAuth';
 import Button from '../../../Shared/Button/Button';
 import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import InputField from '../InputField/InputField';
@@ -18,6 +19,7 @@ type ValidationError = {
 const ProfileSettings: React.FC = () => {
 	// Access userData from the UserContext
 	const { userData, setUserData } = useContext(UserContext);
+	const { accessToken } = useAuth();
 
 	// States to hold username and email values
 	const [username, setUsername] = useState(userData?.login || ''); // Provide an empty string as the fallback value
@@ -39,7 +41,7 @@ const ProfileSettings: React.FC = () => {
 		setUsername(newUsername);
 
 		const usernameRegex = /^[A-Za-z0-9-_\\.]*$/;
-    
+
 		if (!newUsername) setUsernameError('Username cannot be empty');
 		else if (newUsername.length > 8)
 			setUsernameError('Username must not exceed 8 characters');
@@ -85,6 +87,7 @@ const ProfileSettings: React.FC = () => {
 				credentials: 'include',
 				headers: {
 					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${accessToken}`,
 				},
 				body: JSON.stringify(updatedFields),
 			});
