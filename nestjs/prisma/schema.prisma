@@ -12,15 +12,14 @@ datasource db {
 }
 
 model User {
-    id            Int      @id @unique @default(autoincrement())
-    ft_id         Int?     @unique
-    hash          String?
-    login         String   @unique
-    email         String   @unique
-    image         String?
-    createdAt     DateTime @default(now())
-    token         String?
-    refresh_token String?
+    id        Int      @id @unique @default(autoincrement())
+    ft_id     Int?     @unique
+    hash      String?
+    login     String   @unique
+    email     String   @unique
+    image     String?
+    createdAt DateTime @default(now())
+    token     String?
 
     // Friendship system
     friends          User[]  @relation("Friendship")

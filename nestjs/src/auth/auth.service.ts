@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { PrismaClient, User } from '@prisma/client';
+import * as jwt from 'jsonwebtoken';
 
 interface UserData {
 	ft_id: number;
@@ -20,9 +21,11 @@ export class AuthService {
 	private readonly ftApiTokenUrl: string;
 	private readonly ftApiFetchUrl: string;
 	private readonly stateRandomString: string;
+	private temporaryAuthCode: string;
 	private token: string;
 	private userId: number; // TODO: do we need this ? Added so we could add it to JWT token
 	private userData: UserData;
+	private temporaryCode: string;
 
 	private readonly prisma: PrismaClient;
 
@@ -33,10 +36,10 @@ export class AuthService {
 
 	// initialize the variables
 	constructor() {
-		console.log();
 		this.clientID = process.env.FT_UID;
 		this.secret = process.env.FT_SECRET;
-		this.redirectUri = 'http://localhost:3000/login/callback';
+		this.redirectUri =
+			'http://' + process.env.IP_ADDRESS + ':8080/api/login/callback';
 		this.ftApiAuthUrl = 'https://api.intra.42.fr/oauth/authorize';
 		this.ftApiTokenUrl = 'https://api.intra.42.fr/oauth/token';
 		this.ftApiFetchUrl = 'https://api.intra.42.fr/v2/me';
@@ -197,4 +200,34 @@ export class AuthService {
 			console.error('Could not add default users as friends: ', error);
 		}
 	}
+
+	generateTemporaryAuthCode(): string {
+		this.temporaryAuthCode = randomBytes(16).toString('hex');
+		return this.temporaryAuthCode;
+	}
+
+	deleteTemporaryAuthCode() {
+		this.temporaryAuthCode = '';
+	}
+
+	checkTemporaryAuthCode(codeToCheck: string): boolean {
+		if (!codeToCheck.length || codeToCheck != this.temporaryAuthCode)
+			return false;
+		return true;
+	}
+
+	async checkUserExists(userId: number): Promise<boolean> {
+		// Check that the userId is not undefined
+		if (!userId) return false;
+		// Check that the userId corresponds to an actual user in our databse
+		const userInDb = await this.prisma.user.findUnique({
+			where: { id: userId },
+		});
+		// If not, return false
+		if (!userInDb) return false;
+		// Else
+		return true;
+	}
 }
+
+export default AuthService;

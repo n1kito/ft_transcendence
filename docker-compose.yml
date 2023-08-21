@@ -1,27 +1,31 @@
 services:
   api:
+    container_name: nestjs-container
     build:
       dockerfile: Dockerfile
       context: ./nestjs
       # Only use the development stage from our Dockerfile
       target: development
     volumes:
-      - ${PWD}/nestjs:/usr/src/app
+      - ${PWD}/nestjs:/app
       # - /usr/src/app/node_modules # creates an anonymous volume for node_modules which does not mount any directory from the host machine, thus it does not overwrite the node_modules that you've built in your Dockerfile.
     env_file:
       - .env
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
     # Run a command against the development stage of the image
-    command: npm run start:dev
+    command: ["sh", "-c", "chmod +x /app/entrypoint.sh && ./entrypoint.sh"]
     depends_on:
       - postgres
     ports:
       - '3000:3000'
       - '5555:5555'
+    networks:
+      - chamaje
 
   postgres:
-    image: 'postgres'
+    container_name: postgres-container
+    image: postgres
     restart: always
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -32,29 +36,46 @@ services:
       && exec docker-entrypoint.sh postgres"
     # pg_isready checks whether postgres is ready to accept connections
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER}']
       interval: 10s
       timeout: 30s
       retries: 5
       start_period: 5s
     ports:
-      - '5434:5432'
-    volumes:
-      - postgresql:/var/lib/postgresql/data
+      - '5432:5432'
+    # volumes:
+    #   - postgresql:/var/lib/postgresql/data
+    networks:
+      - chamaje
 
   react:
+    container_name: react-container
     build:
-      dockerfile: Dockerfile 
+      dockerfile: Dockerfile
       context: ./react-chamaje
       target: development
-    command: npm start
     restart: unless-stopped
+    command: ["sh", "-c", "chmod +x /app/entrypoint.sh && ./entrypoint.sh"]
     ports:
       - '3001:3000'
     depends_on:
       - api
     volumes:
-      - ${PWD}/react-chamaje:/usr/src/app
+      - ${PWD}/react-chamaje:/app
+    networks:
+      - chamaje
+
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf # Mount the nginx.conf file
+    ports:
+      - '8080:80' # Expose Nginx on port 8080
+    depends_on:
+      - react
+      - api
+    networks:
+      - chamaje
 
 volumes:
   postgresql:
@@ -63,3 +84,7 @@ volumes:
       o: bind
       type: none
       device: ${PWD}/postgresql
+
+networks:
+  chamaje:
+    driver: bridge

@@ -71,6 +71,11 @@ else
 	echo -e "${GREEN_CHECKMARK} ${BOLD}SECRET KEY${END_C}:		${JWT_SECRET_KEY}"
 fi
 echo
+if [[ -z "${IP_ADDRESS}" ]]; then
+read -p "> ${BOLD}IP ADDRESS${END_C}:		" IP_ADDRESS
+else
+	echo -e "${GREEN_CHECKMARK} ${BOLD}IP ADDRESS${END_C}:		${IP_ADDRESS}"
+fi
 
 # Create the .env files
 > "$root_dir"/.env printf "\
@@ -91,6 +96,9 @@ FT_SECRET=\"$FT_SECRET\"
 
 # JWT SECRET KEY
 JWT_SECRET_KEY=\"$JWT_SECRET_KEY\"
+
+# IP ADDRESS
+IP_ADDRESS=\"$IP_ADDRESS\"
 "
 
 echo

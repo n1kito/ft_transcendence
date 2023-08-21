@@ -16,7 +16,7 @@ const ProfileStats = () => {
 			<Title>Stats</Title>
 			<div className="profile-stats">
 				<StatBadge title="Rank" isClickable={true}>
-					#{userData?.rank}
+					#149
 				</StatBadge>
 				<StatBadge title="Win Rate">{userData?.winRate}%</StatBadge>
 				<StatBadge title="Played">{userData?.gamesCount}</StatBadge>
