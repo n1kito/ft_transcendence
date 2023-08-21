@@ -2,7 +2,6 @@ import React from 'react';
 import './Title.css';
 
 interface TitleProps {
-	title?: string;
 	bigTitle?: boolean;
 	highlight?: boolean;
 	highlightColor?: string;
@@ -12,7 +11,6 @@ interface TitleProps {
 }
 
 const Title: React.FC<TitleProps> = ({
-	title = '',
 	bigTitle = false,
 	highlight = bigTitle ? false : true,
 	highlightColor = highlight ? '#FBD9F6' : '',
