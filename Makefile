@@ -1,5 +1,9 @@
-run:
+all: run
+
+down:
 	docker compose down -v;\
+
+run: down
 	rm -rf nestjs/prisma/migrations;\
 	docker compose up --build;\
 
