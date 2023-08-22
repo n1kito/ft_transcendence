@@ -44,9 +44,9 @@ const Desktop = () => {
 					const socket = io({ path: '/ws/' });
 					socket.on('connect', () => {
 						console.log('\nConnected to server ! 🔌🟢\n ');
-						socket.emit('startedConnection', data.login);
+						socket.emit('connectionToServer', data.login);
 					});
-					
+
 					// socket.on('startedConnection', (data) => {
 					// 	console.log(data);
 					// })
@@ -56,7 +56,7 @@ const Desktop = () => {
 					});
 
 					return () => {
-						socket.emit('endedConnection', data.login)
+						socket.emit('endedConnection', data.login);
 						socket.disconnect();
 					};
 				} else {

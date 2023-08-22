@@ -30,13 +30,20 @@ export class ConnectionStatusGateway implements OnGatewayInit, OnGatewayConnecti
 		client.emit('response', 'hi from nest');
 	}
 
-	@SubscribeMessage('startedConnection')
-	handleStartedConnection(
+	@SubscribeMessage('connectionToServer')
+	handleConnectionToServer(
+		@MessageBody() data: string,
+	) : void {
+		this.server.emit('userLoggedIn', data);
+		console.log('\n🟢🟢' + data + ' just arrived!🟢🟢\n')
+	}
+
+	@SubscribeMessage('userLoggedInResponse')
+	handleUserLoggedInResponse(
 		@MessageBody() data: string,
 		@ConnectedSocket() client: Socket,
 	) : void {
-		this.server.emit('startedConnection', data);
-		console.log('\n🟢🟢' + data + ' just arrived!🟢🟢\n')
+		this.server.emit('userLoggedInResponse', data);
 	}
 
 	@SubscribeMessage('endedConnection')

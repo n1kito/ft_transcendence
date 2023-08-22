@@ -14,7 +14,7 @@ interface IFriendStruct {
 const FriendsList = () => {
 	const [friends, setFriends] = useState<IFriendStruct[]>([]);
 	const { accessToken } = useAuth();
-	const userContext = useContext(UserContext);
+	const { userData } = useContext(UserContext);
 
 	useEffect(() => {
 		// TODO: instead of just storing them in a State, the user context should simply be updated so all other components that use it can be re-rendered (I think)
@@ -28,25 +28,43 @@ const FriendsList = () => {
 		})
 			.then((response) => response.json())
 			.then((data) => setFriends(data));
+	}, []);
 
-		}, []);
+	const socket = io({ path: '/ws/' });
+	useEffect(() => {
+
+		const handleLoggedIn = (data: string) => {
+			setFriends((prevFriends) =>
+				prevFriends.map((friend) =>
+					friend.login === data ? { ...friend, onlineStatus: true } : friend,
+				),
+			);
+			socket.emit('userLoggedInResponse', userData?.login);
+			console.log('\n handleLoggedIn emit: ' + userData?.login + '\n');
+		};
+
+
+		socket.on('userLoggedIn', handleLoggedIn);
+		return () => {
+			socket.off('userLoggedIn', handleLoggedIn);
+		};
+	}, [userData]);
 
 	useEffect(() => {
-		const socket = io({ path: '/ws/'});
-		socket.on('startedConnection', (data) => {
-			console.log(friends);
-			friends.map( (friend) => {
-				console.log('🟢friend.login: ' + friend.login + 'VS data : ' + data);
-				if (friend.login === data)
-				{
-					console.log('YOU FOUND YOUR FRIEND');
-					friend.onlineStatus = true;
-					setFriends(friends);
-				}
-			})
-		})
-	}, [friends])	
 
+		const handleLoggedInResponse = (data: string) => {
+			setFriends((prevFriends) =>
+				prevFriends.map((friend) =>
+					friend.login === data ? { ...friend, onlineStatus: true } : friend,
+				),
+			);
+		};
+
+		socket.on('userLoggedInResponse', handleLoggedInResponse);
+		return () => {
+			socket.off('userLoggedInResponse', handleLoggedInResponse);
+		};
+	}, [userData])
 	return (
 		<div>
 			<div className="friendsList">
