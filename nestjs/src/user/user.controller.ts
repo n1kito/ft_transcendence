@@ -36,6 +36,9 @@ export class UserController {
 		// Fetch the user information from the database using the userId
 		const user = await this.prisma.user.findUnique({ 
 			where: { id: request.userId },
+			include: {
+				friends: true,
+			}
 		});
 
 		// Handle case when user is not found
@@ -48,6 +51,7 @@ export class UserController {
 			login: user.login,
 			email: user.email,
 			image: user.image,
+			friends: user.friends,
 		};
 	}
 

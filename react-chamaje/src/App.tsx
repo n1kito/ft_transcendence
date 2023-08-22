@@ -29,25 +29,25 @@ const ProtectedLogin = showComponentIfNotLoggedIn(Login);
 const ProtectedDesktop = showComponentIfLoggedIn(Desktop);
 
 function App() {
-
 	// const socket: Socket = io() ;
 	// const [isConnected, setIsConnected] = useState(socket.connected);
-	useEffect(() => {
-		console.log('trying to setup socket connection');
-		const socket = io({ path: '/ws/' });
+	// useEffect(() => {
+	// 	console.log('trying to setup socket connection');
+	// 	const socket = io({ path: '/ws/' });
 
-		socket.on('connect', () => {
-			console.log('Connected to server ! 🔌🟢 ');
-			socket.emit('message', { message: 'Hellow from React !' });
-		});
+	// 	socket.on('connect', () => {
+	// 		console.log('\nConnected to server ! 🔌🟢\n ');
+	// 		socket.emit('message', 'Hello from React !');
+	// 	});
 
-		socket.on('message', (data) => {
-			console.log('Response from server: ', data);
-		});
-		return () => {
-			socket.disconnect();
-		};
-	}, []);
+	// 	socket.on('message', (data) => {
+	// 		console.log('Response from server: ', data);
+	// 	});
+	// 	return () => {
+	// 		socket.disconnect();
+	// 	};
+	// }, []);
+
 	return (
 		<AuthContextProvider>
 			<UserProvider>

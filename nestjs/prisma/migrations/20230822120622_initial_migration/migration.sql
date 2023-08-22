@@ -8,6 +8,7 @@ CREATE TABLE "User" (
     "image" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "token" TEXT,
+    "onlineStatus" BOOLEAN NOT NULL DEFAULT false,
     "isDefaultProfile" BOOLEAN NOT NULL DEFAULT false,
     "login_is_locked" BOOLEAN NOT NULL DEFAULT false,
     "email_is_locked" BOOLEAN NOT NULL DEFAULT false,

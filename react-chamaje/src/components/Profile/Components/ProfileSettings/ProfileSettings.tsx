@@ -101,6 +101,7 @@ const ProfileSettings: React.FC = () => {
 					login: username,
 					email: email,
 					image: userData?.image || '',
+					friends: userData?.friends || [],
 				};
 				setUserData(updatedUserData);
 			}

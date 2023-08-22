@@ -10,6 +10,7 @@ import useAuth from '../../hooks/userAuth';
 import ProfileSettings from '../Profile/Components/ProfileSettings/ProfileSettings';
 import { AuthContext } from '../../contexts/AuthContext';
 import Profile from '../Profile/Profile';
+import { io } from 'socket.io-client';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -40,6 +41,24 @@ const Desktop = () => {
 					console.log(data);
 					// Set the user data in the context
 					setUserData(data);
+					const socket = io({ path: '/ws/' });
+					socket.on('connect', () => {
+						console.log('\nConnected to server ! 🔌🟢\n ');
+						socket.emit('startedConnection', data.login);
+					});
+					
+					// socket.on('startedConnection', (data) => {
+					// 	console.log(data);
+					// })
+
+					socket.on('message', (data) => {
+						console.log('Response from server: ', data);
+					});
+
+					return () => {
+						socket.emit('endedConnection', data.login)
+						socket.disconnect();
+					};
 				} else {
 					logOut();
 				}

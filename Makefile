@@ -1,11 +1,20 @@
 all: run
 
+build:
+	docker compose up --build;\
+
 down:
 	docker compose down -v;\
 
 run: down
 	rm -rf nestjs/prisma/migrations;\
-	docker compose up --build;\
+	docker compose up;\
+
+back:
+	docker exec -it nestjs-container sh;\
+
+front:
+	docker exec -it react-container sh;\
 
 clean:
 	docker system prune --force;\

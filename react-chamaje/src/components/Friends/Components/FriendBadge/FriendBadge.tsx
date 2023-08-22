@@ -1,9 +1,10 @@
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useContext, useState } from 'react';
 import './FriendBadge.css';
 import m3ganAvatar from './images/m3gan.jpg';
 import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import { ShadowWrapperProps } from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import OnlineIndicator from '../../../Profile/Components/Shared/OnlineIndicator/OnlineIndicator';
+import { UserContext } from 'src/contexts/UserContext';
 
 export interface IFriendBadgeProps extends ShadowWrapperProps {
 	badgeTitle: string;
@@ -20,7 +21,8 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 	toolTip = '',
 	onlineIndicator = false,
 }) => {
-	const [friendIsOnline, setFriendIsOnline] = useState(true); // TODO: this should not be done this way, it should be linked to the user's actual status
+	const userContext = useContext(UserContext);
+	const [friends, setFriends] = useState(userContext.userData?.friends); // TODO: this should not be done this way, it should be linked to the user's actual status
 	const [friendIsPlaying, setFriendIsPlaying] = useState(false);
 
 	return (
@@ -33,7 +35,7 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 				<span className="friend-name">{badgeTitle}</span>
 				{onlineIndicator && (
 					<OnlineIndicator
-						isOnline={friendIsOnline}
+						isOnline={onlineIndicator}
 						isPlaying={friendIsPlaying}
 					/>
 				)}
