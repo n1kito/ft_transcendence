@@ -42,6 +42,10 @@ const Desktop = () => {
 					// Set the user data in the context
 					setUserData(data);
 					const socket = io({ path: '/ws/' });
+
+					// On connection, sends to the server a 'connectionToServer'
+					// message with its login so the server tells everyone a new
+					// user just connected
 					socket.on('connect', () => {
 						console.log('\nConnected to server ! 🔌🟢\n ');
 						socket.emit('connectionToServer', data.login);

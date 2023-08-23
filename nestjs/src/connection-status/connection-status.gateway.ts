@@ -30,6 +30,9 @@ export class ConnectionStatusGateway implements OnGatewayInit, OnGatewayConnecti
 		client.emit('response', 'hi from nest');
 	}
 
+	// when a client connects to the server, the server emits to all connected
+	// clients the login of this user
+	// TODO: It should also verify the jwt of this user before emitting
 	@SubscribeMessage('connectionToServer')
 	handleConnectionToServer(
 		@MessageBody() data: string,
@@ -38,6 +41,9 @@ export class ConnectionStatusGateway implements OnGatewayInit, OnGatewayConnecti
 		console.log('\n🟢🟢' + data + ' just arrived!🟢🟢\n')
 	}
 
+	// when a client received a 'userLoggedIn' message, it sends back a 
+	// response to make itself known to other clients
+	// TODO: It should also verify the jwt of this user before emitting
 	@SubscribeMessage('userLoggedInResponse')
 	handleUserLoggedInResponse(
 		@MessageBody() data: string,

@@ -31,6 +31,11 @@ const FriendsList = () => {
 	}, []);
 
 	const socket = io({ path: '/ws/' });
+
+	// listens for a 'userLoggedIn' message and compares its login with the login
+	// of its friends to know which ones are connected
+	// emits back a response so the friend that just connected knows the current
+	// current user is connected too
 	useEffect(() => {
 
 		const handleLoggedIn = (data: string) => {
@@ -50,6 +55,8 @@ const FriendsList = () => {
 		};
 	}, [userData]);
 
+	// listens for a 'userLoggedInResponse' to check on connection which friends
+	// were connected
 	useEffect(() => {
 
 		const handleLoggedInResponse = (data: string) => {
@@ -65,6 +72,7 @@ const FriendsList = () => {
 			socket.off('userLoggedInResponse', handleLoggedInResponse);
 		};
 	}, [userData])
+
 	return (
 		<div>
 			<div className="friendsList">
