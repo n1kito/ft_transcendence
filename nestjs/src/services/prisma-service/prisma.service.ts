@@ -19,6 +19,23 @@ export class PrismaService
 			where: { id: userId },
 		});
 	}
+
+	async findRandomUserExcept(userId: number) {
+		// count how many users there are except our userId
+		const totalUsers = await this.user.count({
+			where: { NOT: { id: userId } },
+		});
+		// generate a random number in that range
+		const randomUserIndex = Math.floor(Math.random() * totalUsers);
+		// retrieve that user from the database
+		const randomUser = await this.user.findMany({
+			where: { NOT: { id: userId } },
+			skip: randomUserIndex,
+			take: 1,
+		});
+		return randomUser[0];
+	}
+
 	async onApplicationBootstrap() {
 		try {
 			await this.$connect();

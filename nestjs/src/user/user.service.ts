@@ -112,4 +112,46 @@ export class UserService {
 			this.pushError(field, `${field} already exists`, HttpStatus.CONFLICT);
 		}
 	}
+
+	// finds a user's rival
+	async findUserRival(
+		userId: number,
+	): Promise<{ rivalLogin: string; rivalImage: string }> {
+		// Get the games our user has been apart of
+		const userGames = await this.prisma.player.findMany({
+			where: { userId: userId },
+		});
+		// Create an object to tally up how many times our user has lost againt each foe
+		const rivalScores: { [key: number]: number } = {};
+
+		// Iterate through games and count our losses against each enemy
+		for (const game of userGames) {
+			// If we lost
+			if (!game.isWinner) {
+				// Find the winner
+				const winner = await this.prisma.player.findFirst({
+					where: { gameId: game.gameId, isWinner: true },
+				});
+				// Increment the count for this rival
+				if (winner)
+					rivalScores[winner.userId] = (rivalScores[winner.userId] || 0) + 1;
+			}
+		}
+
+		// Identify the rival
+		let rival;
+		const keys = Object.keys(rivalScores);
+		if (keys.length !== 0) {
+			const rivalId = keys.reduce(
+				(a, b) => (rivalScores[a] > rivalScores[b] ? a : b),
+				keys[0],
+			);
+			// Retrieve the full User record for this rival
+			rival = await this.prisma.user.findUnique({
+				where: { id: parseInt(rivalId) },
+			});
+		}
+
+		return { rivalLogin: rival?.login || '', rivalImage: rival?.image || '' };
+	}
 }

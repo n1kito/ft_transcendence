@@ -18,6 +18,10 @@ interface UserData {
 	gamesCount?: number;
 	bestFriendLogin?: string;
 	rank?: number;
+	targetLogin: string;
+	targetImage: string;
+	rivalLogin: string;
+	rivalImage: string;
 	// ... other properties
 }
 

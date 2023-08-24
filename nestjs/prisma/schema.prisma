@@ -32,25 +32,30 @@ model User {
     image_is_locked Boolean @default(false)
 
     // Games logic
-    gamesPlayed Game[]
-
-    // Bestie logic
-    // The bestie should be stored as a User reference, because if we only store the user's login for example,
-    // and that users updates their login, it could break profiles.
-    bestFriend      User?   @relation("Bestie", fields: [bestFriendLogin], references: [login])
-    bestFriendLogin String?
-    bestFriendedBy  User[]  @relation("Bestie")
+    gamesPlayed Player[]
 
     // Profile variables
     // These could be resolved upon fetch requests, but more efficient to store them directly
     killCount Int @default(0)
+
+	// Target logic
+	target User? @relation("Target", fields: [targetId], references: [id])
+	targetId Int?
+	targetedBy User[] @relation("Target")
 }
 
 model Game {
     id        Int      @id @default(autoincrement())
     playedAt  DateTime @default(now())
-    player1Id Int
-    player2Id Int
-    winner    User     @relation(fields: [winnerId], references: [id])
-    winnerId  Int
+	players Player[]
+}
+
+model Player {
+	id Int @id @default(autoincrement())
+	userId Int
+	user User @relation(fields: [userId], references: [id])
+	game Game @relation(fields: [gameId], references: [id])
+	gameId Int
+	score Int
+	isWinner Boolean
 }

@@ -36,6 +36,7 @@ export class UserController {
 		// Fetch the user information from the database using the userId
 		const user = await this.prisma.user.findUnique({
 			where: { id: request.userId },
+			include: { gamesPlayed: true, target: true }, // Include the gamesPlayed relation
 		});
 
 		// Handle case when user is not found
@@ -44,11 +45,23 @@ export class UserController {
 		}
 
 		// Get user games count
-		const gamesCount = await this.prisma.game.count({
-			where: {
-				OR: [{ player1Id: user.id }, { player2Id: user.id }],
-			},
-		});
+		const gamesCount = user.gamesPlayed.length;
+		// await this.prisma.game.count({
+		// 	where: {
+		// 		OR: [{ player1Id: user.id }, { player2Id: user.id }],
+		// 	},
+		// });
+
+		// Bestie logic
+		// const bestieUser =
+
+		// Target logic
+		const targetLogin = user.target.login;
+		const targetImage = user.target.image;
+		// Rival logic
+		const { rivalLogin, rivalImage } = await this.userService.findUserRival(
+			user.id,
+		);
 
 		// get user's rank
 		const usersWithHigherKillCountThanOurUser = await this.prisma.user.count({
@@ -64,11 +77,14 @@ export class UserController {
 			},
 		});
 		const userRank = usersWithHigherKillCountThanOurUser + 1;
-
 		// Return the user information
 		return {
 			...user,
-			gamesCount: gamesCount,
+			targetLogin,
+			targetImage,
+			gamesCount,
+			rivalLogin,
+			rivalImage,
 			killCount: user.killCount,
 			winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
 			rank: userRank,
@@ -119,6 +135,7 @@ export class UserController {
 	) {
 		const user = await this.prisma.user.findUnique({
 			where: { login },
+			include: { gamesPlayed: true },
 		});
 		if (!user) {
 			// Handle case when user is not found
@@ -131,11 +148,7 @@ export class UserController {
 		const userRequestingLogin = userRequesting?.login;
 		// get how many games the player has played by counting the games where user
 		// was user player1 or player2
-		const gamesCount = await this.prisma.game.count({
-			where: {
-				OR: [{ player1Id: user.id }, { player2Id: user.id }],
-			},
-		});
+		const gamesCount = user.gamesPlayed.length;
 		// get user's rank
 		const usersWithHigherKillCountThanOurUser = await this.prisma.user.count({
 			where: {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import './TargetBadge.css';
 import FriendBadge from '../../../Friends/Components/FriendBadge/FriendBadge';
 import mysteryBox from './images/mysteryBox.png';
@@ -11,17 +11,19 @@ import xavier from './images/roulette/xavier.jpg';
 import jee from './images/jee.jpeg';
 import BlackBadge from '../Shared/BlackBadge/BlackBadge';
 import OnlineIndicator from '../Shared/OnlineIndicator/OnlineIndicator';
+import { UserContext } from '../../../../contexts/UserContext';
 
 const rouletteImages = [chucky, norminet, scream, sophie, theRing, xavier];
 
 const TargetBadge = () => {
 	const [imageIndex, setImageIndex] = useState(0);
-	const [badgeImage, setBadgeImage] = useState(mysteryBox);
+	const [badgeImage, setBadgeImage] = useState<string | undefined>(mysteryBox);
 	const [badgeTitle, setBadgeTitle] = useState('Target');
 	const [isAnimationRunning, setIsAnimationRunning] = useState(false);
 	const [targetHasBeenAssigned, setTargetHasBeenAssigned] = useState(false);
 	const [hasStartedRoulette, setHasStartedRoulette] = useState(false);
 	const [isShaking, setIsShaking] = useState(false);
+	const { userData } = useContext(UserContext);
 
 	// const rouletteImages = Object.values(rouletteImageImports);
 
@@ -42,7 +44,7 @@ const TargetBadge = () => {
 			} else {
 				// Roulette animation is complete, change badgeImage to your desired image here
 				setTimeout(() => {
-					setBadgeImage(jee);
+					setBadgeImage(userData?.targetImage || undefined);
 					setBadgeTitle('Target');
 					setIsAnimationRunning(false);
 					setTargetHasBeenAssigned(true);
@@ -103,7 +105,9 @@ const TargetBadge = () => {
 				badgeImageUrl={badgeImage}
 				onlineIndicator={targetHasBeenAssigned}
 			/>
-			{targetHasBeenAssigned && <BlackBadge>@jeepark</BlackBadge>}
+			{targetHasBeenAssigned && (
+				<BlackBadge>{userData?.targetLogin}</BlackBadge>
+			)}
 		</div>
 	);
 };
