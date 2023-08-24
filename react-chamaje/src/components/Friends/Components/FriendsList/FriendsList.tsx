@@ -50,6 +50,7 @@ const FriendsList = () => {
 
 
 		socket.on('userLoggedIn', handleLoggedIn);
+		// Do we want to stop listening to this event when not on friends list ?
 		return () => {
 			socket.off('userLoggedIn', handleLoggedIn);
 		};
@@ -68,6 +69,7 @@ const FriendsList = () => {
 		};
 
 		socket.on('userLoggedInResponse', handleLoggedInResponse);
+		// Do we want to stop listening to this event when not on friends list ?
 		return () => {
 			socket.off('userLoggedInResponse', handleLoggedInResponse);
 		};

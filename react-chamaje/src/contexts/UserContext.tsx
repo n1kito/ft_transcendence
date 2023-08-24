@@ -4,6 +4,7 @@ import React, {
 	createContext,
 	useState,
 } from 'react';
+import WebSocketService from 'src/services/WebSocketService';
 
 // import { UserData } from '../../shared-types/user-types';
 interface UserData {
@@ -13,6 +14,7 @@ interface UserData {
 	login: string;
 	email: string;
 	friends: [];
+	chatSocket: WebSocketService;
 	// ... other properties
 }
 

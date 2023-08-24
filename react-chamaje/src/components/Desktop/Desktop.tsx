@@ -11,6 +11,7 @@ import ProfileSettings from '../Profile/Components/ProfileSettings/ProfileSettin
 import { AuthContext } from '../../contexts/AuthContext';
 import Profile from '../Profile/Profile';
 import { io } from 'socket.io-client';
+import WebSocketService from 'src/services/WebSocketService';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -40,7 +41,13 @@ const Desktop = () => {
 					const data = await response.json();
 					console.log(data);
 					// Set the user data in the context
-					setUserData(data);
+					const mySocket = new WebSocketService(accessToken);
+					const updatedData = {
+						...data,
+						chatSocket: mySocket,
+					}
+					setUserData(updatedData);
+
 					const socket = io({ path: '/ws/' });
 
 					// On connection, sends to the server a 'connectionToServer'
