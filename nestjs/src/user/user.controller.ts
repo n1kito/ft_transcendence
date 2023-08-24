@@ -34,7 +34,7 @@ export class UserController {
 		const userId = this.userService.authenticateUser(request);
 
 		// Fetch the user information from the database using the userId
-		const user = await this.prisma.user.findUnique({ 
+		const user = await this.prisma.user.findUnique({
 			where: { id: request.userId },
 		});
 
@@ -50,9 +50,6 @@ export class UserController {
 			},
 		});
 
-		// Find the user's bestie
-		// Is it better to do it each time we fetch the user's info, or when it is updated instead ? Like if they play a new game we update the bestie at the same time
-
 		// get user's rank
 		const usersWithHigherKillCountThanOurUser = await this.prisma.user.count({
 			where: {
@@ -67,13 +64,12 @@ export class UserController {
 			},
 		});
 		const userRank = usersWithHigherKillCountThanOurUser + 1;
+
 		// Return the user information
 		return {
-			login: user.login,
-			email: user.email,
-			image: user.image,
-			killCount: user.killCount,
+			...user,
 			gamesCount: gamesCount,
+			killCount: user.killCount,
 			winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
 			rank: userRank,
 		};
@@ -158,15 +154,10 @@ export class UserController {
 		// we return more information
 		if (userRequestingLogin && userRequestingLogin === login)
 			return {
-				login: user.login,
-				email: user.email,
-				createdAt: user.createdAt,
-				image: user.image,
-				// TODO: I bet this should be able to be stored in a separate object and just expanding into the return object
-				// add profile information
+				...user,
+				gamesCount: gamesCount,
 				killCount: user.killCount,
 				winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
-				gamesCount: gamesCount,
 				rank: userRank,
 			};
 		else
@@ -174,9 +165,10 @@ export class UserController {
 				login: user.login,
 				image: user.image,
 				// add profile information
+				bestFriendLogin: user.bestFriendLogin,
+				gamesCount: gamesCount,
 				killCount: user.killCount,
 				winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
-				gamesCount: gamesCount,
 				rank: userRank,
 			};
 	}

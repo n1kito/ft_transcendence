@@ -16,7 +16,7 @@ interface UserData {
 	// same for the other properties below
 	winRate?: number;
 	gamesCount?: number;
-	bestie?: string;
+	bestFriendLogin?: string;
 	rank?: number;
 	// ... other properties
 }

@@ -30,16 +30,20 @@ model User {
     login_is_locked Boolean @default(false)
     email_is_locked Boolean @default(false)
     image_is_locked Boolean @default(false)
-	// TODO: what is this userId again ?
-    userId          Int?
 
     // Games logic
     gamesPlayed Game[]
 
+    // Bestie logic
+    // The bestie should be stored as a User reference, because if we only store the user's login for example,
+    // and that users updates their login, it could break profiles.
+    bestFriend      User?   @relation("Bestie", fields: [bestFriendLogin], references: [login])
+    bestFriendLogin String?
+    bestFriendedBy  User[]  @relation("Bestie")
+
     // Profile variables
-    killCount    Int    @default(0)
-    winRate      Int    @default(0)
-    bestFriendId Int?
+    // These could be resolved upon fetch requests, but more efficient to store them directly
+    killCount Int @default(0)
 }
 
 model Game {

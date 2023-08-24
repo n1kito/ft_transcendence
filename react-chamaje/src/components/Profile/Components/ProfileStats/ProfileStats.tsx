@@ -8,27 +8,27 @@ const ProfileStats = () => {
 	const { userData } = useContext(UserContext);
 
 	// TODO: this should open Jee's profile
-	const logSomething = () => {
-		console.log('You just had to click this button...');
+	const openBestfriendProfile = (bestFriendLogin: string | undefined) => {
+		console.log('Open profile for ' + bestFriendLogin);
 	};
 	return (
 		<div className="profile-stats-wrapper">
 			<Title>Stats</Title>
 			<div className="profile-stats">
 				<StatBadge title="Rank" isClickable={true}>
-					#149
+					#{userData?.rank}
 				</StatBadge>
 				<StatBadge title="Win Rate">{userData?.winRate}%</StatBadge>
 				<StatBadge title="Played">{userData?.gamesCount}</StatBadge>
 				<StatBadge title="Killcount">{userData?.killCount}</StatBadge>
-				{userData?.bestie && (
+				{userData?.bestFriendLogin && (
 					<StatBadge
 						isTextContent={true}
 						title="Bestie ♥️"
 						isClickable={true}
-						onClick={logSomething}
+						onClick={() => openBestfriendProfile(userData?.bestFriendLogin)}
 					>
-						@jeepark
+						@{userData?.bestFriendLogin}
 					</StatBadge>
 				)}
 			</div>
