@@ -102,6 +102,7 @@ const ProfileSettings: React.FC = () => {
 					email: email,
 					image: userData?.image || '',
 					friends: userData?.friends || [],
+					chatSocket: userData?.chatSocket || null,
 				};
 				setUserData(updatedUserData);
 			}

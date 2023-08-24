@@ -12,6 +12,9 @@ import { AuthContext } from '../../contexts/AuthContext';
 import Profile from '../Profile/Profile';
 import { io } from 'socket.io-client';
 import WebSocketService from 'src/services/WebSocketService';
+import  Button from './../Shared/Button/Button'
+import { unmountComponentAtNode, render } from "react-dom";
+import { createRoot } from 'react-dom/client';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -41,34 +44,36 @@ const Desktop = () => {
 					const data = await response.json();
 					console.log(data);
 					// Set the user data in the context
-					const mySocket = new WebSocketService(accessToken);
+					const mySocket = new WebSocketService(data.login);
 					const updatedData = {
 						...data,
 						chatSocket: mySocket,
-					}
+					};
 					setUserData(updatedData);
 
-					const socket = io({ path: '/ws/' });
+					// const socket = io({ path: '/ws/' });
 
 					// On connection, sends to the server a 'connectionToServer'
 					// message with its login so the server tells everyone a new
 					// user just connected
-					socket.on('connect', () => {
-						console.log('\nConnected to server ! 🔌🟢\n ');
-						socket.emit('connectionToServer', data.login);
-					});
+					// socket.on('connect', () => {
+					// 	console.log('\nConnected to server ! 🔌🟢\n ');
+					// 	socket.emit('connectionToServer', data.login);
+					// });
 
 					// socket.on('startedConnection', (data) => {
 					// 	console.log(data);
 					// })
 
-					socket.on('message', (data) => {
-						console.log('Response from server: ', data);
-					});
+					// socket.on('message', (data) => {
+					// 	console.log('Response from server: ', data);
+					// });
 
 					return () => {
-						socket.emit('endedConnection', data.login);
-						socket.disconnect();
+						userData?.chatSocket?.endConnection(data.login);
+						console.log('ending connection in desktop');
+						// socket.emit('endedConnection', data.login);
+						// socket.disconnect();
 					};
 				} else {
 					logOut();
@@ -86,7 +91,13 @@ const Desktop = () => {
 		navigate('/friends');
 	};
 
+    const handleClick = () => {
+		logOut();
+		userData?.chatSocket?.endConnection(userData.login);
+	}
+
 	return (
+		<div id= "desktop">
 		<div className="desktopWrapper">
 			<DesktopIcon
 				name="Game"
@@ -116,10 +127,13 @@ const Desktop = () => {
 				useBeigeBackground={true}
 			>
 				<FriendsList />
+				<Button baseColor={[308, 80, 92]} onClick={handleClick}>add friend</Button>
 				{/* <Profile login={userData ? userData.login : 'random'} /> */}
 				{/* <Profile login='randomLg'/> */}
 			</Window>
 		</div>
+		</div>
+
 	);
 };
 

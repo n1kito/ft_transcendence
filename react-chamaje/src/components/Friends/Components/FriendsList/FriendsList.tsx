@@ -30,37 +30,31 @@ const FriendsList = () => {
 			.then((data) => setFriends(data));
 	}, []);
 
-	const socket = io({ path: '/ws/' });
-
 	// listens for a 'userLoggedIn' message and compares its login with the login
 	// of its friends to know which ones are connected
 	// emits back a response so the friend that just connected knows the current
 	// current user is connected too
 	useEffect(() => {
-
 		const handleLoggedIn = (data: string) => {
 			setFriends((prevFriends) =>
 				prevFriends.map((friend) =>
 					friend.login === data ? { ...friend, onlineStatus: true } : friend,
 				),
 			);
-			socket.emit('userLoggedInResponse', userData?.login);
-			console.log('\n handleLoggedIn emit: ' + userData?.login + '\n');
 		};
-
-
-		socket.on('userLoggedIn', handleLoggedIn);
+		
+		userData?.chatSocket?.onUserLoggedIn(handleLoggedIn, userData.login);
 		// Do we want to stop listening to this event when not on friends list ?
-		return () => {
-			socket.off('userLoggedIn', handleLoggedIn);
-		};
+		// return () => {
+		// 	socket.off('userLoggedIn', handleLoggedIn);
+		// };
 	}, [userData]);
 
 	// listens for a 'userLoggedInResponse' to check on connection which friends
 	// were connected
 	useEffect(() => {
-
 		const handleLoggedInResponse = (data: string) => {
+			console.log('handleLoggedInResponse: ', data);
 			setFriends((prevFriends) =>
 				prevFriends.map((friend) =>
 					friend.login === data ? { ...friend, onlineStatus: true } : friend,
@@ -68,12 +62,24 @@ const FriendsList = () => {
 			);
 		};
 
-		socket.on('userLoggedInResponse', handleLoggedInResponse);
+		userData?.chatSocket?.onUserLoggedInResponse(handleLoggedInResponse);
 		// Do we want to stop listening to this event when not on friends list ?
-		return () => {
-			socket.off('userLoggedInResponse', handleLoggedInResponse);
-		};
+		// return () => {
+		// 	socket.off('userLoggedInResponse', handleLoggedInResponse);
+		// };
+	}, [userData]);
+
+	useEffect(() => {
+		const handleLoggedOut = (data: string) => {
+			console.log('handleLoggedOUt', data);
+			setFriends((prevFriends) =>
+			prevFriends.map((friend) =>
+			friend.login === data ? { ...friend, onlineStatus: false} : friend))
+		}
+		userData?.chatSocket?.onLogOut(handleLoggedOut);
 	}, [userData])
+
+
 
 	return (
 		<div>

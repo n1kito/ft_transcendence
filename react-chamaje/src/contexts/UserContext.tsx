@@ -14,7 +14,7 @@ interface UserData {
 	login: string;
 	email: string;
 	friends: [];
-	chatSocket: WebSocketService;
+	chatSocket: WebSocketService | null;
 	// ... other properties
 }
 

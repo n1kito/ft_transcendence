@@ -18,6 +18,8 @@ export class ConnectionStatusGateway implements OnGatewayInit, OnGatewayConnecti
 	handleConnection(client: any, ...args: any[]) {
 		console.log(`\n🟢Client connected : ${client.id}🟢`)
 	}
+
+
 	@WebSocketServer()
 	server: Server;
 
@@ -50,6 +52,7 @@ export class ConnectionStatusGateway implements OnGatewayInit, OnGatewayConnecti
 		@ConnectedSocket() client: Socket,
 	) : void {
 		this.server.emit('userLoggedInResponse', data);
+		console.log('🔴🔴 userLoggedInResponse: ' + data)
 	}
 
 	@SubscribeMessage('endedConnection')
@@ -58,5 +61,19 @@ export class ConnectionStatusGateway implements OnGatewayInit, OnGatewayConnecti
 		@ConnectedSocket() client: Socket,
 	) : void {
 		console.log('\n🔴🔴' + data + ' just left!🔴🔴\n')
+		this.server.emit('onLogOut', data);
 	}
+
+	@SubscribeMessage('disconnect')
+	handleDisconnect(
+		@ConnectedSocket() client: Socket,
+	) : void {
+		console.log('message: disconnect')
+		client.disconnect();
+		client.off('handleLoggedIn', () => {console.log('coucoude')})
+		client.off('handleLoggedInResponse', () => {console.log('coucoudeResponse')})
+		// client.off('handleLoggedIn');
+	}
+
+
 }

@@ -66,6 +66,8 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 	const logOut = () => {
 		Cookies.remove('refreshToken');
 		setIsAuthentificated(false);
+		// close socket
+		
 	};
 
 	// Function to refresh the token by making a request to the server
