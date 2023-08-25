@@ -1,0 +1,30 @@
+server {
+    listen 80;                        # listen on port 80 (http)
+    server_name localhost;           
+    # Specify the error log location and the log level
+    error_log /var/log/nginx/error.log debug;
+
+    location / {
+        proxy_pass http://react:3000/; # Forward requests to the React app
+    }
+
+	location /api/ {
+        proxy_pass http://api:3000/;   # Forward requests to the NestJS app running on port 3000
+        proxy_set_header Host $host;  # Forward the original host header to the backend
+        proxy_set_header X-Real-IP $remote_addr;  # Forward the client's real IP address
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;  # Forward client IP address through proxies
+        proxy_set_header X-Forwarded-Proto $scheme;  # Forward the original protocol (http/https)
+    }
+    
+    # WebSocket configuration
+    location /ws/ {
+        proxy_pass http://api:3000/ws/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

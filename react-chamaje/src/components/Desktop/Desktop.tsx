@@ -69,12 +69,12 @@ const Desktop = () => {
 					// 	console.log('Response from server: ', data);
 					// });
 
-					return () => {
-						userData?.chatSocket?.endConnection(data.login);
-						console.log('ending connection in desktop');
-						// socket.emit('endedConnection', data.login);
-						// socket.disconnect();
-					};
+					// return () => {
+					// 	userData?.chatSocket?.endConnection(data.login);
+					// 	console.log('ending connection in desktop');
+					// 	// socket.emit('endedConnection', data.login);
+					// 	// socket.disconnect();
+					// };
 				} else {
 					logOut();
 				}
@@ -84,7 +84,15 @@ const Desktop = () => {
 		};
 
 		fetchUserData();
-	}, [setUserData]);
+		return (() => {
+			userData?.chatSocket?.endConnection(userData.login);
+						console.log('ending connection in desktop');
+						// socket.emit('endedConnection', data.login);
+						// socket.disconnect();
+						// prompt();
+		})
+		
+	}, []);
 
 	const friendsClickHandler = () => {
 		setOpenedFriendsWindows(true);
