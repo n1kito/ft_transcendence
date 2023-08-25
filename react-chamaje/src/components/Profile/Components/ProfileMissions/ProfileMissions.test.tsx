@@ -5,7 +5,9 @@ import ProfileMissions from './ProfileMissions';
 
 describe('<ProfileMissions />', () => {
 	test('it should mount', () => {
-		render(<ProfileMissions />);
+		render(
+			<ProfileMissions profileLogin="myLogin" targetLogin="targetLogin" />,
+		);
 
 		const profileMissions = screen.getByTestId('ProfileMissions');
 

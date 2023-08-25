@@ -2,33 +2,39 @@ import React, { useContext } from 'react';
 import './ProfileStats.css';
 import StatBadge from '../StatBadge/StatBadge';
 import Title from '../Title/Title';
-import { UserContext } from '../../../../contexts/UserContext';
+import { UserContext, UserData } from '../../../../contexts/UserContext';
 
-const ProfileStats = () => {
-	const { userData } = useContext(UserContext);
+interface ProfileStatsProps {
+	profileData: UserData;
+}
 
+const ProfileStats: React.FC<ProfileStatsProps> = ({ profileData }) => {
 	// TODO: this should open Jee's profile
-	const openBestfriendProfile = (bestFriendLogin: string | undefined) => {
-		console.log('Open profile for ' + bestFriendLogin);
+	const openBestieProfile = (bestieLogin: string | undefined) => {
+		console.log('Open profile for ' + bestieLogin);
 	};
+	const openLeaderboard = () => {
+		console.log('This should just open the leaderboard');
+	};
+	// console.log('Profile data', profileData);
 	return (
 		<div className="profile-stats-wrapper">
 			<Title>Stats</Title>
 			<div className="profile-stats">
-				<StatBadge title="Rank" isClickable={true}>
-					#{userData?.rank}
+				<StatBadge title="Rank" isClickable={true} onClick={openLeaderboard}>
+					#{profileData.rank}
 				</StatBadge>
-				<StatBadge title="Win Rate">{userData?.winRate}%</StatBadge>
-				<StatBadge title="Played">{userData?.gamesCount}</StatBadge>
-				<StatBadge title="Killcount">{userData?.killCount}</StatBadge>
-				{userData?.bestFriendLogin && (
+				<StatBadge title="Win Rate">{profileData.winRate}%</StatBadge>
+				<StatBadge title="Played">{profileData.gamesCount}</StatBadge>
+				<StatBadge title="Killcount">{profileData.killCount}</StatBadge>
+				{profileData.bestieLogin && (
 					<StatBadge
 						isTextContent={true}
 						title="Bestie ♥️"
 						isClickable={true}
-						onClick={() => openBestfriendProfile(userData?.bestFriendLogin)}
+						onClick={() => openBestieProfile(profileData.bestieLogin)}
 					>
-						@{userData?.bestFriendLogin}
+						@{profileData.bestieLogin}
 					</StatBadge>
 				)}
 			</div>

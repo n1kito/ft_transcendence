@@ -34,7 +34,7 @@
 }
 
 .profile-content {
-	justify-content: space-between;
+	justify-content: flex-start;
 }
 
 .profile-buttons {

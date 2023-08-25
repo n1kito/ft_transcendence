@@ -1,4 +1,4 @@
-import { Http2ServerRequest } from 'http2';
+// import { Http2ServerRequest } from 'http2';
 import React, { useContext, useEffect, useState } from 'react';
 import { UserContext } from '../../../../contexts/UserContext';
 import useAuth from '../../../../hooks/userAuth';
@@ -101,8 +101,9 @@ const ProfileSettings: React.FC = () => {
 					login: username,
 					email: email,
 					image: userData?.image || '',
-					winRate: userData?.winRate || 0,
-					gamescount: userData?.gamesCount || 0,
+					targetHasBeenAssigned: false,
+					// winRate: userData?.winRate || 0,
+					// gamesCount: userData?.gamesCount || 0,
 				};
 				setUserData(updatedUserData);
 			}

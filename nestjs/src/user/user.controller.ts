@@ -53,11 +53,11 @@ export class UserController {
 		// });
 
 		// Bestie logic
-		// const bestieUser =
+		const bestieUser = await this.userService.findUserBestie(user.id);
 
 		// Target logic
-		const targetLogin = user.target.login;
-		const targetImage = user.target.image;
+		const targetLogin = user?.target?.login;
+		const targetImage = user?.target?.image;
 		// Rival logic
 		const { rivalLogin, rivalImage } = await this.userService.findUserRival(
 			user.id,
@@ -83,6 +83,8 @@ export class UserController {
 			targetLogin,
 			targetImage,
 			gamesCount,
+			bestieLogin: bestieUser.bestieLogin,
+			bestieImage: bestieUser.bestieImage,
 			rivalLogin,
 			rivalImage,
 			killCount: user.killCount,
@@ -162,7 +164,21 @@ export class UserController {
 				},
 			},
 		});
+		// Bestie logic
+		const bestieUser = await this.userService.findUserBestie(user.id);
+		// Rank logic
 		const userRank = usersWithHigherKillCountThanOurUser + 1;
+		// Target logic
+		const targetUser = await this.prisma.user.findUnique({
+			where: { id: user.targetId },
+		});
+		// Match history logic
+		let matchHistory;
+		try {
+			matchHistory = await this.userService.getUserMatchHistory(user.id);
+		} catch (error) {
+			console.log('Error retrieving match history: ', error);
+		}
 		// if the login of the user who sent the request is the same as the login of the user they want the info of,
 		// we return more information
 		if (userRequestingLogin && userRequestingLogin === login)
@@ -172,17 +188,26 @@ export class UserController {
 				killCount: user.killCount,
 				winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
 				rank: userRank,
+				targetLogin: targetUser.login,
+				targetImage: targetUser.image,
+				bestieLogin: bestieUser.bestieLogin,
+				bestieImage: bestieUser.bestieImage,
+				matchHistory: matchHistory,
 			};
+		// else, we only return what is needed for the profile component
 		else
 			return {
 				login: user.login,
 				image: user.image,
 				// add profile information
-				bestFriendLogin: user.bestFriendLogin,
 				gamesCount: gamesCount,
 				killCount: user.killCount,
 				winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
 				rank: userRank,
+				targetLogin: targetUser.login,
+				targetImage: targetUser.image,
+				bestieLogin: bestieUser.bestieLogin,
+				bestieImage: bestieUser.bestieImage,
 			};
 	}
 }

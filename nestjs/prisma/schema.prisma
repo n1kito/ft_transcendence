@@ -32,7 +32,7 @@ model User {
     image_is_locked Boolean @default(false)
 
     // Games logic
-    gamesPlayed Player[]
+    gamesPlayed gameSession[]
 
     // Profile variables
     // These could be resolved upon fetch requests, but more efficient to store them directly
@@ -47,13 +47,13 @@ model User {
 model Game {
     id        Int      @id @default(autoincrement())
     playedAt  DateTime @default(now())
-	players Player[]
+	players gameSession[]
 }
 
-model Player {
+model gameSession {
 	id Int @id @default(autoincrement())
-	userId Int
 	user User @relation(fields: [userId], references: [id])
+	userId Int
 	game Game @relation(fields: [gameId], references: [id])
 	gameId Int
 	score Int

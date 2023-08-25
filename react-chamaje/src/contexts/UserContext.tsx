@@ -5,7 +5,16 @@ import React, {
 	useState,
 } from 'react';
 
-interface UserData {
+export interface IMatchHistory {
+	player1Login: string;
+	player1Score: number;
+	player1Image: string;
+	player2Login: string;
+	player2Score: number;
+	player2Image: string;
+}
+
+export interface UserData {
 	// Define the structure of your user data
 	// For example:
 	image: string;
@@ -18,10 +27,14 @@ interface UserData {
 	gamesCount?: number;
 	bestFriendLogin?: string;
 	rank?: number;
-	targetLogin: string;
-	targetImage: string;
-	rivalLogin: string;
-	rivalImage: string;
+	targetLogin?: string;
+	targetImage?: string;
+	rivalLogin?: string;
+	rivalImage?: string;
+	bestieLogin?: string;
+	bestieImage?: string;
+	matchHistory?: IMatchHistory[];
+	targetHasBeenAssigned: boolean;
 	// ... other properties
 }
 

@@ -5,7 +5,9 @@ export default {
 	title: 'ProfileMissions',
 };
 
-export const Default = () => <ProfileMissions />;
+export const Default = () => (
+	<ProfileMissions profileLogin="login" targetLogin="tlogin" />
+);
 
 Default.story = {
 	name: 'default',

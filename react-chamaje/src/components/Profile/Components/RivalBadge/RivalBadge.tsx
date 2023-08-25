@@ -5,16 +5,25 @@ import FriendBadge from '../../../Friends/Components/FriendBadge/FriendBadge';
 import OnlineIndicator from '../Shared/OnlineIndicator/OnlineIndicator';
 import { UserContext } from '../../../../contexts/UserContext';
 
-const RivalBadge = () => {
+interface IRivalBadgeProps {
+	rivalLogin: string;
+}
+
+const RivalBadge: React.FC<IRivalBadgeProps> = ({ rivalLogin }) => {
 	const { userData } = useContext(UserContext);
+	const openRivalProfile = () => {
+		// TODO:
+		console.log(`This should open ${rivalLogin}'s profile`);
+	};
 	return (
 		<div className="rival-badge">
 			<FriendBadge
 				badgeTitle="Rival"
 				isClickable={true}
 				onlineIndicator={true}
+				onClick={openRivalProfile}
 			/>
-			<BlackBadge>@{userData?.rivalLogin}</BlackBadge>
+			<BlackBadge>@{rivalLogin}</BlackBadge>
 		</div>
 	);
 };

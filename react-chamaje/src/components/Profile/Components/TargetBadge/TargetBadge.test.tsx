@@ -5,7 +5,7 @@ import TargetBadge from './TargetBadge';
 
 describe('<TargetBadge />', () => {
 	test('it should mount', () => {
-		render(<TargetBadge />);
+		render(<TargetBadge isOwnProfile={false} targetLogin="login" />);
 
 		const targetBadge = screen.getByTestId('TargetBadge');
 

@@ -15,7 +15,15 @@ import { UserContext } from '../../../../contexts/UserContext';
 
 const rouletteImages = [chucky, norminet, scream, sophie, theRing, xavier];
 
-const TargetBadge = () => {
+interface ITargetBadgeProps {
+	isOwnProfile: boolean;
+	targetLogin: string;
+}
+
+const TargetBadge: React.FC<ITargetBadgeProps> = ({
+	isOwnProfile,
+	targetLogin,
+}) => {
 	const [imageIndex, setImageIndex] = useState(0);
 	const [badgeImage, setBadgeImage] = useState<string | undefined>(mysteryBox);
 	const [badgeTitle, setBadgeTitle] = useState('Target');
@@ -23,7 +31,7 @@ const TargetBadge = () => {
 	const [targetHasBeenAssigned, setTargetHasBeenAssigned] = useState(false);
 	const [hasStartedRoulette, setHasStartedRoulette] = useState(false);
 	const [isShaking, setIsShaking] = useState(false);
-	const { userData } = useContext(UserContext);
+	const { userData, setUserData } = useContext(UserContext);
 
 	// const rouletteImages = Object.values(rouletteImageImports);
 
@@ -48,6 +56,12 @@ const TargetBadge = () => {
 					setBadgeTitle('Target');
 					setIsAnimationRunning(false);
 					setTargetHasBeenAssigned(true);
+					// TODO: update user context to say the target has been already assigned
+					// and the effect should not run again. But this does not work.
+					// setUserData({
+					// 	...userData,
+					// 	targetHasBeenAssigned: true,
+					// });
 				}, 1000);
 			}
 		};
@@ -92,11 +106,13 @@ const TargetBadge = () => {
 
 	return (
 		<div
-			onClick={targetHasBeenAssigned ? openUserProfile : handleClick}
+			onClick={
+				targetHasBeenAssigned || !isOwnProfile ? openUserProfile : handleClick
+			}
 			className={`target-badge ${
 				isAnimationRunning ? 'animationRunning' : ''
 			} ${isShaking ? 'shake' : ''} ${
-				targetHasBeenAssigned ? 'black-badge-visible' : ''
+				targetHasBeenAssigned || !isOwnProfile ? 'black-badge-visible' : ''
 			}`}
 		>
 			<FriendBadge
@@ -105,9 +121,7 @@ const TargetBadge = () => {
 				badgeImageUrl={badgeImage}
 				onlineIndicator={targetHasBeenAssigned}
 			/>
-			{targetHasBeenAssigned && (
-				<BlackBadge>{userData?.targetLogin}</BlackBadge>
-			)}
+			{targetHasBeenAssigned && <BlackBadge>{targetLogin}</BlackBadge>}
 		</div>
 	);
 };
