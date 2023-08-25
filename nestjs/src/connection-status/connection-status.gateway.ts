@@ -53,6 +53,7 @@ export class ConnectionStatusGateway implements OnGatewayInit, OnGatewayConnecti
 	) : void {
 		this.server.emit('userLoggedInResponse', data);
 		console.log('🔴🔴 userLoggedInResponse: ' + data)
+
 	}
 
 	@SubscribeMessage('endedConnection')
@@ -62,16 +63,20 @@ export class ConnectionStatusGateway implements OnGatewayInit, OnGatewayConnecti
 	) : void {
 		console.log('\n🔴🔴' + data + ' just left!🔴🔴\n')
 		this.server.emit('onLogOut', data);
+		client.disconnect();
 	}
 
-	@SubscribeMessage('disconnect')
+	// @SubscribeMessage('disconnect')
 	handleDisconnect(
+		@MessageBody() data: string,
 		@ConnectedSocket() client: Socket,
 	) : void {
-		console.log('message: disconnect')
-		client.disconnect();
-		client.off('handleLoggedIn', () => {console.log('coucoude')})
-		client.off('handleLoggedInResponse', () => {console.log('coucoudeResponse')})
+		console.log('\n\n🔴PLOP handleDisconnect🔴\n\n')
+		// client.emit('listenDisconnect', "io client disconnect");
+		// this.server.emit('onLogOut', data);
+		// client.disconnect();
+		// client.off('handleLoggedIn', () => {console.log('coucoude')})
+		// client.off('handleLoggedInResponse', () => {console.log('coucoudeResponse')})
 		// client.off('handleLoggedIn');
 	}
 

@@ -12,8 +12,8 @@ import { AuthContext } from '../../contexts/AuthContext';
 import Profile from '../Profile/Profile';
 import { io } from 'socket.io-client';
 import WebSocketService from 'src/services/WebSocketService';
-import  Button from './../Shared/Button/Button'
-import { unmountComponentAtNode, render } from "react-dom";
+import Button from './../Shared/Button/Button';
+import { unmountComponentAtNode, render } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 
 const Desktop = () => {
@@ -23,16 +23,12 @@ const Desktop = () => {
 	const [openFriendsWindow, setOpenedFriendsWindows] = useState(false);
 	const navigate = useNavigate();
 	const { isAuthentificated, refreshToken, logOut, accessToken } = useAuth();
-
-	if (isAuthentificated) {
-		console.log('user is authentificated');
-	} else console.log('user is not authentificated');
+	
 	useEffect(() => {
-		// fetch request
+		if (!isAuthentificated) return;
 		const fetchUserData = async () => {
 			// Feth the user data from the server
 			try {
-				// user/me
 				const response = await fetch('/api/user/me', {
 					method: 'GET',
 					credentials: 'include',
@@ -43,105 +39,82 @@ const Desktop = () => {
 				if (response.ok) {
 					const data = await response.json();
 					console.log(data);
-					// Set the user data in the context
 					const mySocket = new WebSocketService(data.login);
 					const updatedData = {
 						...data,
 						chatSocket: mySocket,
 					};
+					// Set the user data in the context
 					setUserData(updatedData);
-
-					// const socket = io({ path: '/ws/' });
-
-					// On connection, sends to the server a 'connectionToServer'
-					// message with its login so the server tells everyone a new
-					// user just connected
-					// socket.on('connect', () => {
-					// 	console.log('\nConnected to server ! 🔌🟢\n ');
-					// 	socket.emit('connectionToServer', data.login);
-					// });
-
-					// socket.on('startedConnection', (data) => {
-					// 	console.log(data);
-					// })
-
-					// socket.on('message', (data) => {
-					// 	console.log('Response from server: ', data);
-					// });
-
-					// return () => {
-					// 	userData?.chatSocket?.endConnection(data.login);
-					// 	console.log('ending connection in desktop');
-					// 	// socket.emit('endedConnection', data.login);
-					// 	// socket.disconnect();
-					// };
-				} else {
-					logOut();
-				}
+				} else { logOut(); }
 			} catch (error) {
 				console.log('Error: ', error);
 			}
 		};
-
-		fetchUserData();
-		return (() => {
-			userData?.chatSocket?.endConnection(userData.login);
-						console.log('ending connection in desktop');
-						// socket.emit('endedConnection', data.login);
-						// socket.disconnect();
-						// prompt();
-		})
 		
+		fetchUserData();
+		return () => {
+			// userData?.chatSocket?.endConnection(userData.login);
+			console.log('ending connection in desktop');
+			setUserData(null);
+			// alert(userData?.login || 'no login');
+			// socket.emit('endedConnection', data.login);
+			// socket.disconnect();
+			// prompt();
+		};
 	}, []);
-
+	
 	const friendsClickHandler = () => {
 		setOpenedFriendsWindows(true);
 		navigate('/friends');
 	};
-
-    const handleClick = () => {
+	
+	const handleClick = () => {
 		logOut();
 		userData?.chatSocket?.endConnection(userData.login);
-	}
-
+		// setUserData(null);
+		alert(userData?.login || 'no login');
+	};
+	
 	return (
-		<div id= "desktop">
-		<div className="desktopWrapper">
-			<DesktopIcon
-				name="Game"
-				iconSrc={cupcakeIcon}
-				id={++iconId}
-				onDoubleClick={friendsClickHandler}
-			/>
-			<DesktopIcon
-				name="Friends"
-				iconSrc={cupcakeIcon}
-				id={++iconId}
-				onDoubleClick={friendsClickHandler}
-			/>
-			<DesktopIcon
-				name="Chat"
-				iconSrc={cupcakeIcon}
-				id={++iconId}
-				onDoubleClick={friendsClickHandler}
-			/>
-			<Window
-				windowTitle={userData?.login || 'window title'}
-				links={[
-					{ name: 'Link1', url: '#' },
-					{ name: 'Link2', url: '#' },
-					{ name: 'Link3', url: '#' },
-				]}
-				useBeigeBackground={true}
-			>
-				<FriendsList />
-				<Button baseColor={[308, 80, 92]} onClick={handleClick}>add friend</Button>
-				{/* <Profile login={userData ? userData.login : 'random'} /> */}
-				{/* <Profile login='randomLg'/> */}
-			</Window>
+		<div id="desktop">
+			<div className="desktopWrapper">
+				<DesktopIcon
+					name="Game"
+					iconSrc={cupcakeIcon}
+					id={++iconId}
+					onDoubleClick={friendsClickHandler}
+					/>
+				<DesktopIcon
+					name="Friends"
+					iconSrc={cupcakeIcon}
+					id={++iconId}
+					onDoubleClick={friendsClickHandler}
+					/>
+				<DesktopIcon
+					name="Chat"
+					iconSrc={cupcakeIcon}
+					id={++iconId}
+					onDoubleClick={friendsClickHandler}
+					/>
+				<Window
+					windowTitle={userData?.login || 'window title'}
+					links={[
+						{ name: 'Link1', url: '#' },
+						{ name: 'Link2', url: '#' },
+						{ name: 'Link3', url: '#' },
+					]}
+					useBeigeBackground={true}
+				>
+					<FriendsList />
+					<Button baseColor={[308, 80, 92]} onClick={handleClick}>
+						add friend
+					</Button>
+					{/* <Profile login={userData ? userData.login : 'random'} /> */}
+					{/* <Profile login='randomLg'/> */}
+				</Window>
+			</div>
 		</div>
-		</div>
-
 	);
 };
 

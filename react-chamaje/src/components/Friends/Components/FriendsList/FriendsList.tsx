@@ -42,7 +42,7 @@ const FriendsList = () => {
 				),
 			);
 		};
-		
+
 		userData?.chatSocket?.onUserLoggedIn(handleLoggedIn, userData.login);
 		// Do we want to stop listening to this event when not on friends list ?
 		// return () => {
@@ -71,15 +71,15 @@ const FriendsList = () => {
 
 	useEffect(() => {
 		const handleLoggedOut = (data: string) => {
-			console.log('handleLoggedOUt', data);
+			console.log('handleLoggedOUt hihihi', data);
 			setFriends((prevFriends) =>
-			prevFriends.map((friend) =>
-			friend.login === data ? { ...friend, onlineStatus: false} : friend))
-		}
+				prevFriends.map((friend) =>
+					friend.login === data ? { ...friend, onlineStatus: false } : friend,
+				),
+			);
+		};
 		userData?.chatSocket?.onLogOut(handleLoggedOut);
-	}, [userData])
-
-
+	}, [userData]);
 
 	return (
 		<div>
