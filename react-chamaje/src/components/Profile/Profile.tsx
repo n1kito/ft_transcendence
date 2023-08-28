@@ -35,28 +35,39 @@ const Profile: React.FC<ProfileProps> = ({ login }) => {
 	const isOwnProfile = login == userData?.login;
 
 	// TODO: fetch profile data should be a separate service so we don't rewrite the function in multiple components
-	useEffect(() => {
-		const fetchProfileData = async () => {
-			try {
-				const response = await fetch(`/api/user/${login}`, {
-					method: 'GET',
-					credentials: 'include',
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-					},
-				});
-				if (response.ok) {
-					setProfileData(await response.json());
-					console.log('Profile data:', profileData);
-				}
-			} catch (error) {
-				console.error('Error: ', error);
+	const fetchProfileData = async () => {
+		try {
+			const response = await fetch(`/api/user/${login}`, {
+				method: 'GET',
+				credentials: 'include',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+			});
+			if (response.ok) {
+				const tempProfileData = await response.json();
+				setProfileData(tempProfileData);
 			}
-		};
+		} catch (error) {
+			console.error('Error: ', error);
+		}
+	};
+
+	useEffect(() => {
 		// If we're not on our own profile, fetch our friend's information
-		if (!isOwnProfile) fetchProfileData();
-		else setProfileData(userData);
+		Promise.resolve().then(async () => {
+			if (!isOwnProfile) {
+				await fetchProfileData();
+			} else {
+				setProfileData(userData);
+			}
+		});
 	}, []);
+
+	// useEffect(() => {
+	// 	console.log('Profile data is: ', profileData);
+	// }, [profileData]);
+
 	return (
 		<div className="profile-wrapper">
 			{profileData ? (
@@ -67,7 +78,7 @@ const Profile: React.FC<ProfileProps> = ({ login }) => {
 							isModifiable={isOwnProfile}
 						/>
 						<Title bigTitle={true}>{profileData.login}</Title>
-						<TitleList />
+						<TitleList profileData={profileData} />
 						{isOwnProfile && <ProfileSettings />}
 
 						{isOwnProfile && (
@@ -97,6 +108,9 @@ const Profile: React.FC<ProfileProps> = ({ login }) => {
 							profileLogin={profileData.login}
 							targetLogin={profileData.targetLogin || ''}
 							rivalLogin={profileData.rivalLogin || ''}
+							targetDiscoveredByUser={
+								profileData.targetDiscoveredByUser || false
+							}
 						/>
 						<MatchHistory profileData={profileData} />
 					</div>

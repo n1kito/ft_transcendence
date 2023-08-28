@@ -6,7 +6,11 @@ export default {
 };
 
 export const Default = () => (
-	<ProfileMissions profileLogin="login" targetLogin="tlogin" />
+	<ProfileMissions
+		profileLogin="login"
+		targetLogin="tlogin"
+		targetDiscoveredByUser={false}
+	/>
 );
 
 Default.story = {

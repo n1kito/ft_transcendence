@@ -9,19 +9,21 @@ interface IProfileMissionsProps {
 	profileLogin: string;
 	rivalLogin?: string;
 	targetLogin?: string;
+	targetDiscoveredByUser: boolean;
 }
 
 const ProfileMissions: React.FC<IProfileMissionsProps> = ({
 	profileLogin,
 	rivalLogin = '',
 	targetLogin,
+	targetDiscoveredByUser,
 }) => {
 	const { userData } = useContext(UserContext);
 	const isOwnProfile = profileLogin == userData?.login;
 
-	return (
+	return isOwnProfile || (rivalLogin && rivalLogin.length > 0) ? (
 		<div className="profile-missions-wrapper">
-			<Title toolTip="Do not think of them as people, think of them as things.">
+			<Title toolTip="Your rival is the person who's beat you the most 💀\nYour target is a random person you should destroy 🔫">
 				Missions
 			</Title>
 			<div className="profile-missions">
@@ -29,12 +31,18 @@ const ProfileMissions: React.FC<IProfileMissionsProps> = ({
 				{rivalLogin && rivalLogin.length > 0 && (
 					<RivalBadge rivalLogin={rivalLogin} />
 				)}
-				{targetLogin && targetLogin.length > 0 && (
-					<TargetBadge targetLogin={targetLogin} isOwnProfile={isOwnProfile} />
-				)}
+				{(isOwnProfile || targetDiscoveredByUser) &&
+				targetLogin &&
+				targetLogin.length > 0 ? (
+					<TargetBadge
+						targetLogin={targetLogin}
+						isOwnProfile={isOwnProfile}
+						targetDiscoveredByUser={targetDiscoveredByUser}
+					/>
+				) : null}
 			</div>
 		</div>
-	);
+	) : null;
 };
 
 export default ProfileMissions;

@@ -6,7 +6,11 @@ export default {
 };
 
 export const Default = () => (
-	<TargetBadge isOwnProfile={false} targetLogin="login" />
+	<TargetBadge
+		isOwnProfile={false}
+		targetLogin="login"
+		targetDiscoveredByUser={false}
+	/>
 );
 
 Default.story = {

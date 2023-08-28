@@ -6,9 +6,13 @@ import burgerIcon from './icons/burger-icon.svg';
 import { UserContext, UserData } from '../../../../contexts/UserContext';
 import AchievementBadge from '../AchievementBadge/AchievementBadge';
 
-const TitleList = () => {
-	const { userData } = useContext(UserContext);
-	console.log(userData);
+interface ITitleListProps {
+	profileData: UserData;
+}
+
+const TitleList: React.FC<ITitleListProps> = ({ profileData }) => {
+	// const { userData } = useContext(UserContext);
+	console.log({ profileData });
 	return (
 		<div className="title-list-wrapper">
 			<ShadowWrapper shadow={true}>
@@ -19,49 +23,49 @@ const TitleList = () => {
 							name="Rookie 🐤"
 							description="You played your first game ! 🗡️"
 							icon={burgerIcon}
-							achieved={(userData?.gamesCount ?? 0) > 0}
+							achieved={(profileData?.gamesCount ?? 0) > 0}
 						></AchievementBadge>
 						<AchievementBadge
 							name="Terminator 🦾"
 							description="You have never lost a single game. 👁️👄👁️"
 							icon={burgerIcon}
-							achieved={(userData?.winRate ?? 0) == 100}
+							achieved={(profileData?.winRate ?? 0) == 100}
 						></AchievementBadge>
 						<AchievementBadge
 							name="Tough cookie 🍪"
 							description="You are hard to defeat, your killrate is insane !"
 							icon={burgerIcon}
-							achieved={(userData?.winRate ?? 0) >= 100}
+							achieved={(profileData?.winRate ?? 0) >= 100}
 						></AchievementBadge>
 						<AchievementBadge
 							name="Padawan ✨"
 							description="You have already won 10 games,\nthe force is obviously with you. 💅"
 							icon={burgerIcon}
-							achieved={(userData?.killCount ?? 0) >= 10}
+							achieved={(profileData?.killCount ?? 0) >= 10}
 						></AchievementBadge>
 						<AchievementBadge
 							name="Are you not entertained ? ⚔️"
 							description="You have won 100 games, wow,\nI mean, come on now. 💪"
 							icon={burgerIcon}
-							achieved={(userData?.killCount ?? 0) >= 100}
+							achieved={(profileData?.killCount ?? 0) >= 100}
 						></AchievementBadge>
 						<AchievementBadge
 							name="Thick as thieves 💖"
 							description="You have made a bestie 👯"
 							icon={burgerIcon}
-							achieved={(userData?.bestieLogin?.length ?? 0) > 0}
+							achieved={(profileData?.bestieLogin?.length ?? 0) > 0}
 						></AchievementBadge>
 						<AchievementBadge
 							name="Kill Bill 💀"
 							description="You have made an enemy. A mortal enemy 🤺"
 							icon={burgerIcon}
-							achieved={(userData?.rivalLogin?.length ?? 0) > 0}
+							achieved={(profileData?.rivalLogin?.length ?? 0) > 0}
 						></AchievementBadge>
 						<AchievementBadge
 							name="John Wick"
 							description="You have located your first target.\nYour mission is to beat that target. 🎯"
 							icon={burgerIcon}
-							achieved={userData?.targetDiscoveredByUser || false}
+							achieved={profileData?.targetDiscoveredByUser || false}
 						></AchievementBadge>
 					</div>
 				</div>

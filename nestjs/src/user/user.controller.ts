@@ -195,6 +195,10 @@ export class UserController {
 		const targetUser = await this.prisma.user.findUnique({
 			where: { id: user.targetId },
 		});
+		// Rival logic
+		const { rivalLogin, rivalImage } = await this.userService.findUserRival(
+			user.id,
+		);
 		// Match history logic
 		let matchHistory;
 		try {
@@ -216,6 +220,8 @@ export class UserController {
 				bestieLogin: bestieUser.bestieLogin,
 				bestieImage: bestieUser.bestieImage,
 				matchHistory: matchHistory,
+				rivalLogin,
+				rivalImage,
 			};
 		// else, we only return what is needed for the profile component
 		else
@@ -229,8 +235,12 @@ export class UserController {
 				rank: userRank,
 				targetLogin: targetUser.login,
 				targetImage: targetUser.image,
+				targetDiscoveredByUser: user.targetDiscoveredByUser,
 				bestieLogin: bestieUser.bestieLogin,
 				bestieImage: bestieUser.bestieImage,
+				matchHistory: matchHistory,
+				rivalLogin,
+				rivalImage,
 			};
 	}
 }

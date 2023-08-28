@@ -20,11 +20,13 @@ const rouletteImages = [chucky, norminet, scream, sophie, theRing, xavier];
 interface ITargetBadgeProps {
 	isOwnProfile: boolean;
 	targetLogin: string;
+	targetDiscoveredByUser: boolean;
 }
 
 const TargetBadge: React.FC<ITargetBadgeProps> = ({
 	isOwnProfile,
 	targetLogin,
+	targetDiscoveredByUser,
 }) => {
 	const [imageIndex, setImageIndex] = useState(0);
 	const [badgeTitle, setBadgeTitle] = useState('Target');
@@ -34,12 +36,32 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 	const { accessToken } = useAuth();
 	const { userData, setUserData } = useContext(UserContext);
 	const [targetHasBeenAssigned, setTargetHasBeenAssigned] = useState(
-		userData?.targetDiscoveredByUser || false,
+		targetDiscoveredByUser,
 	);
 	const [badgeImage, setBadgeImage] = useState<string | undefined>(mysteryBox);
 
 	const updateBackgroundImage = () => {
 		setImageIndex((prevIndex) => (prevIndex + 1) % rouletteImages.length);
+	};
+
+	const updateTargetStatus = async () => {
+		try {
+			console.log('trying to fucking update the target update status');
+			const response = await fetch('/api/user/me/updateTargetStatus', {
+				method: 'PUT',
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${accessToken}`,
+				},
+			});
+			if (!response.ok) {
+				const errorMessage = await response.text();
+				console.error('Error: ', errorMessage);
+			}
+		} catch (error) {
+			console.error('Target badge fetch error: ', error);
+		}
 	};
 
 	const startRoulette = () => {
@@ -54,34 +76,12 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 				setTimeout(updateLoop, interval);
 			} else {
 				// Roulette animation is complete, change badgeImage to your desired image here
-				setTimeout(async () => {
+				setTimeout(() => {
 					setBadgeImage(userData?.targetImage || undefined);
 					setBadgeTitle('Target');
 					setIsAnimationRunning(false);
 					setTargetHasBeenAssigned(true);
-					if (userData) {
-						setUserData({
-							...userData,
-							targetDiscoveredByUser: true,
-						});
-					}
-					try {
-						console.log('trying to fucking update the target update status');
-						const response = await fetch('/api/user/me/updateTargetStatus', {
-							method: 'PUT',
-							credentials: 'include',
-							headers: {
-								'Content-Type': 'application/json',
-								'Authorization': `Bearer ${accessToken}`,
-							},
-						});
-						if (!response.ok) {
-							const errorMessage = await response.text();
-							console.error('Error: ', errorMessage);
-						}
-					} catch (error) {
-						console.error('Target badge fetch error: ', error);
-					}
+					updateTargetStatus();
 				}, 1000);
 			}
 		};
@@ -141,7 +141,7 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 				badgeImageUrl={badgeImage}
 				onlineIndicator={targetHasBeenAssigned}
 			/>
-			{targetHasBeenAssigned && <BlackBadge>{targetLogin}</BlackBadge>}
+			{targetHasBeenAssigned && <BlackBadge>@{targetLogin}</BlackBadge>}
 		</div>
 	);
 };

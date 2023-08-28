@@ -5,6 +5,7 @@ import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import MatchHistoryBadge from './Components/MatchHistoryBadge/MatchHistoryBadge';
 import m3gan from '../../../../images/m3gan.jpg';
 import { UserContext, UserData } from '../../../../contexts/UserContext';
+import { profile } from 'console';
 
 interface IMatchHistoryProps {
 	profileData: UserData;
@@ -20,7 +21,7 @@ const MatchHistory: React.FC<IMatchHistoryProps> = ({ profileData }) => {
 				{matchHistory && matchHistory.length > 0 ? (
 					<div className="history-badges">
 						{matchHistory.map((match, index) => {
-							const userIsPlayer1 = userData?.login === match.player1Login;
+							const userIsPlayer1 = profileData?.login === match.player1Login;
 							const adversaryLogin = userIsPlayer1
 								? match.player2Login
 								: match.player1Login;
