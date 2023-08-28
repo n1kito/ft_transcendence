@@ -34,7 +34,7 @@ export interface UserData {
 	bestieLogin?: string;
 	bestieImage?: string;
 	matchHistory?: IMatchHistory[];
-	targetHasBeenAssigned: boolean;
+	targetDiscoveredByUser: boolean;
 	// ... other properties
 }
 

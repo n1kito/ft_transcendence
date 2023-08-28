@@ -8,6 +8,10 @@
 	gap: 3rem;
 }
 
+.profile-sidebar {
+	max-width: 33.33%;
+}
+
 .profile-sidebar .picture-container {
 	width: 10rem;
 }

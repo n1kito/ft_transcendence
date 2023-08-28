@@ -12,6 +12,8 @@ import jee from './images/jee.jpeg';
 import BlackBadge from '../Shared/BlackBadge/BlackBadge';
 import OnlineIndicator from '../Shared/OnlineIndicator/OnlineIndicator';
 import { UserContext } from '../../../../contexts/UserContext';
+import { AuthContext } from '../../../../contexts/AuthContext';
+import useAuth from '../../../../hooks/userAuth';
 
 const rouletteImages = [chucky, norminet, scream, sophie, theRing, xavier];
 
@@ -31,6 +33,7 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 	const [targetHasBeenAssigned, setTargetHasBeenAssigned] = useState(false);
 	const [hasStartedRoulette, setHasStartedRoulette] = useState(false);
 	const [isShaking, setIsShaking] = useState(false);
+	const { accessToken } = useAuth();
 	const { userData, setUserData } = useContext(UserContext);
 
 	// const rouletteImages = Object.values(rouletteImageImports);
@@ -51,17 +54,29 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 				setTimeout(updateLoop, interval);
 			} else {
 				// Roulette animation is complete, change badgeImage to your desired image here
-				setTimeout(() => {
+				setTimeout(async () => {
 					setBadgeImage(userData?.targetImage || undefined);
 					setBadgeTitle('Target');
 					setIsAnimationRunning(false);
 					setTargetHasBeenAssigned(true);
-					// TODO: update user context to say the target has been already assigned
-					// and the effect should not run again. But this does not work.
-					// setUserData({
-					// 	...userData,
-					// 	targetHasBeenAssigned: true,
-					// });
+					if (userData) {
+						setUserData({
+							...userData,
+							targetDiscoveredByUser: true,
+						});
+					}
+					// TODO: here we also need a fetch request to let our backend know that the user has found its target
+					const response = await fetch('/api/targetfound', {
+						method: 'PUT',
+						credentials: 'include',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': `Bearer ${accessToken}`,
+						},
+					});
+					if (!response.ok) {
+						console.error("Could not let the server know that the target had been discovered");
+					}
 				}, 1000);
 			}
 		};

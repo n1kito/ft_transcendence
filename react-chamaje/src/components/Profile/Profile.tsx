@@ -9,7 +9,7 @@ import ProfileSettings from './Components/ProfileSettings/ProfileSettings';
 import ProfileStats from './Components/ProfileStats/ProfileStats';
 import ProfileMissions from './Components/ProfileMissions/ProfileMissions';
 import MatchHistory from './Components/MatchHistory/MatchHistory';
-import TitleList from '../TitleList/TitleList';
+import TitleList from './Components/TitleList/TitleList';
 import burgerIcon from './icons/burger-icon.svg';
 import cdIcon from './icons/cd-icon.svg';
 import coinsIcon from './icons/coins-icon.svg';
@@ -21,6 +21,7 @@ import rocketIcon from './icons/rocket-icon.svg';
 import Button from '../Shared/Button/Button';
 import useAuth from '../../hooks/userAuth';
 import { profile } from 'console';
+import AchievementBadge from './Components/AchievementBadge/AchievementBadge';
 
 // TODO: find a way to make the shaddow wrapper widht's 100% so if fills the sidebar
 export interface ProfileProps {
@@ -66,16 +67,7 @@ const Profile: React.FC<ProfileProps> = ({ login }) => {
 							isModifiable={isOwnProfile}
 						/>
 						<Title bigTitle={true}>{profileData.login}</Title>
-						<TitleList>
-							<img src={burgerIcon} />
-							<img src={cdIcon} />
-							<img src={coinsIcon} />
-							<img src={computerIcon} />
-							<img src={friesIcon} />
-							<img src={giftIcon} />
-							<img src={moneyIcon} />
-							<img src={rocketIcon} />
-						</TitleList>
+						<TitleList />
 						{isOwnProfile && <ProfileSettings />}
 
 						{isOwnProfile && (
