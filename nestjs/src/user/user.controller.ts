@@ -48,6 +48,7 @@ export class UserController {
 
 		// Return the user information
 		return {
+			id: user.id,
 			login: user.login,
 			email: user.email,
 			image: user.image,
@@ -83,6 +84,7 @@ export class UserController {
 		// TODO: select more fields
 		// Only select some fields for each friend
 		const friends = userRequesting.friends.map((currentFriend) => ({
+			id: currentFriend.id,
 			login: currentFriend.login,
 			image: currentFriend.image,
 		}));

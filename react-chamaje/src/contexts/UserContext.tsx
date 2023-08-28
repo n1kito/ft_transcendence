@@ -10,6 +10,7 @@ import WebSocketService from 'src/services/WebSocketService';
 interface UserData {
 	// Define the structure of your user data
 	// For example:
+	id: number | undefined;
 	image: string;
 	login: string;
 	email: string;

@@ -39,7 +39,7 @@ const Desktop = () => {
 				if (response.ok) {
 					const data = await response.json();
 					console.log(data);
-					const mySocket = new WebSocketService(accessToken, data.login);
+					const mySocket = new WebSocketService(accessToken, data.id);
 					const updatedData = {
 						...data,
 						chatSocket: mySocket,
@@ -56,29 +56,24 @@ const Desktop = () => {
 
 		if (isAuthentificated) fetchUserData();
 		return () => {
-			userData?.chatSocket?.endConnection(userData.login);
-			console.log('ending connection in desktop');
+			userData?.chatSocket?.endConnection();
 			// when unmounting desktop component, reset userData
 			setUserData(null);
-			// alert(userData?.login || 'no login');
-			// socket.emit('endedConnection', data.login);
-			// socket.disconnect();
-			// prompt();
 		};
 	}, []);
 
 	useEffect(() => {
-		window.addEventListener('unload', handleTabClosing)
+		window.addEventListener('unload', handleTabClosing);
 		return () => {
-			window.removeEventListener('unload', handleTabClosing)
-		}
-	})
-	
+			window.removeEventListener('unload', handleTabClosing);
+		};
+	});
+
 	const handleTabClosing = () => {
-		userData?.chatSocket?.endConnection(userData.login);
+		userData?.chatSocket?.endConnection();
 		logOut();
 		setUserData(null);
-	}
+	};
 
 	const friendsClickHandler = () => {
 		setOpenedFriendsWindows(true);
@@ -87,7 +82,7 @@ const Desktop = () => {
 
 	const handleClick = () => {
 		logOut();
-		userData?.chatSocket?.endConnection(userData.login);
+		userData?.chatSocket?.endConnection();
 		// alert(userData?.login || 'no login');
 	};
 
@@ -123,7 +118,7 @@ const Desktop = () => {
 				>
 					<FriendsList />
 					<Button baseColor={[308, 80, 92]} onClick={handleClick}>
-						add friend
+						log out 
 					</Button>
 					{/* <Profile login={userData ? userData.login : 'random'} /> */}
 					{/* <Profile login='randomLg'/> */}

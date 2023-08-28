@@ -6,10 +6,12 @@ import { UserContext } from '../../../../contexts/UserContext';
 import { io } from 'socket.io-client';
 
 interface IFriendStruct {
+	id: number;
 	login: string;
 	image: string;
 	onlineStatus: boolean;
 }
+let nbOnline: number = 0;
 
 const FriendsList = () => {
 	const [friends, setFriends] = useState<IFriendStruct[]>([]);
@@ -30,52 +32,56 @@ const FriendsList = () => {
 			.then((data) => setFriends(data));
 	}, []);
 
-	// listens for a 'userLoggedIn' message and compares its login with the login
+	// listens for a 'userLoggedIn' message and compares its id with the id
 	// of its friends to know which ones are connected
-	// emits back a response so the friend that just connected knows the current
+	// emits back a response so the friend that just connected knows the
 	// current user is connected too
 	useEffect(() => {
-		const handleLoggedIn = (data: string) => {
+		const handleLoggedIn = (data: number) => {
 			setFriends((prevFriends) =>
-				prevFriends.map((friend) =>
-					friend.login === data ? { ...friend, onlineStatus: true } : friend,
-				),
+				prevFriends.map((friend) => {
+					if (friend.id === data && (friend.onlineStatus === false || friend.onlineStatus === undefined)) {
+						nbOnline++;
+						return { ...friend, onlineStatus: true };
+					} else {
+						return friend;
+					}
+				}),
 			);
 		};
-
-		userData?.chatSocket?.onUserLoggedIn(handleLoggedIn, userData.login);
-		// Do we want to stop listening to this event when not on friends list ?
-		// return () => {
-		// 	socket.off('userLoggedIn', handleLoggedIn);
-		// };
+		userData?.chatSocket?.onClientLogIn(handleLoggedIn);
 	}, [userData]);
 
-	// listens for a 'userLoggedInResponse' to check on connection which friends
+	// listens for a 'ClientLogInResponse' to check on connection which friends
 	// were connected
 	useEffect(() => {
-		const handleLoggedInResponse = (data: string) => {
-			console.log('handleLoggedInResponse: ', data);
+		const handleLoggedInResponse = (data: number) => {
 			setFriends((prevFriends) =>
-				prevFriends.map((friend) =>
-					friend.login === data ? { ...friend, onlineStatus: true } : friend,
-				),
+				prevFriends.map((friend) => {
+					if (friend.id === data && (friend.onlineStatus === false  || friend.onlineStatus === undefined)) {
+						nbOnline++;
+						return { ...friend, onlineStatus: true };
+					} else {
+						return friend;
+					}
+				}),
 			);
 		};
-
-		userData?.chatSocket?.onUserLoggedInResponse(handleLoggedInResponse);
-		// Do we want to stop listening to this event when not on friends list ?
-		// return () => {
-		// 	socket.off('userLoggedInResponse', handleLoggedInResponse);
-		// };
+		userData?.chatSocket?.onClientLogInResponse(handleLoggedInResponse);
 	}, [userData]);
 
+	// listen for a `ClientLogOut` to
 	useEffect(() => {
-		const handleLoggedOut = (data: string) => {
-			console.log('handleLoggedOUt', data);
+		const handleLoggedOut = (data: number) => {
 			setFriends((prevFriends) =>
-				prevFriends.map((friend) =>
-					friend.login === data ? { ...friend, onlineStatus: false } : friend,
-				),
+				prevFriends.map((friend) => {
+					if (friend.id === data && friend.onlineStatus === true) {
+						nbOnline--;
+						return { ...friend, onlineStatus: false };
+					} else {
+						return friend;
+					}
+				}),
 			);
 		};
 		userData?.chatSocket?.onLogOut(handleLoggedOut);
@@ -95,7 +101,10 @@ const FriendsList = () => {
 					/>
 				))}
 			</div>
-			<div className="bottomInfo">3 friends, 1 online</div>
+			<div className="bottomInfo">
+				{' '}
+				{userData?.friends.length} friends, {nbOnline} online{' '}
+			</div>
 		</div>
 	);
 };

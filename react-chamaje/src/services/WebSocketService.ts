@@ -7,40 +7,32 @@ interface callbackInterface {
 }
 class WebSocketService {
 	private socket: Socket;
-	// private userId: number;
-	// private jwt: string;
+	private userId: number;
 
-	constructor(accessToken: string, login: string) {
-		console.log('\n\n CREATING SOCKET FOR ', login);
+	constructor(accessToken: string, userId: number) {
+		this.userId = userId;
 		this.socket = io({
 			path: '/ws/',
 			reconnection: false,
 			auth: { accessToken },
 		});
-		// const { accessToken }  = useAuth();
-		// this.jwt = accessToken;
 		try {
 			// Listen for the 'connect' event
 			this.socket.on('connect', () => {
-				console.log('connected ! ', this.socket);
-				this.sendConnectionToServer(login);
+				this.sendServerConnection();
 			});
-
+			// Listen for the 'disconnect' event prevent reconnection from wanted disconnection
 			this.socket.on('disconnect', (reason) => {
-				console.log('REASON:', reason);
 				if (
 					reason != 'io client disconnect' &&
-					reason != 'io server disconnect' 
+					reason != 'io server disconnect'
 				) {
 					// the disconnection was initiated by the server, you need to reconnect manually
 					this.socket.connect();
 				} else {
-					// this.endConnection(login);
+					// this.endConnection(this.userId);
 					this.socket.disconnect();
 				}
-				// else the socket will automatically try to reconnect
-
-				// this.socket.disconnect();
 			});
 		} catch (e) {
 			console.error(e, ': WebSocketService Constructor');
@@ -51,40 +43,31 @@ class WebSocketService {
 		return this.socket;
 	}
 
-	// Does this need to be in constructor ?
-	sendConnectionToServer(data: string) {
+	sendServerConnection() {
 		try {
-			this.socket.emit('connectionToServer', data);
+			this.socket.emit('ServerConnection', this.userId);
 		} catch (e) {
-			console.error(e, ': WebSocketService sendConnectionToServer');
+			console.error(e, ': WebSocketService sendServerConnection');
 		}
 	}
 
-	onUserLoggedIn(callback: callbackInterface, login: string) {
-		this.socket.on('userLoggedIn', (data: string) => {
+	onClientLogIn(callback: callbackInterface) {
+		this.socket.on('ClientLogIn', (data: number) => {
 			callback(data);
-			this.socket.emit('userLoggedInResponse', login);
+			this.socket.emit('ServerLogInResponse', this.userId);
 		});
-		console.log('onUserLoggedIn - login: ' + login);
 	}
 
-	onUserLoggedInResponse(callback: callbackInterface) {
-		console.log('onUserLoggedInResponse');
-		console.log('🔴🔴 SOCKET: ', this.socket);
-
-		this.socket.on('userLoggedInResponse', callback);
+	onClientLogInResponse(callback: callbackInterface) {
+		this.socket.on('ClientLogInResponse', callback);
 	}
 
-	endConnection(data: string) {
-		console.log('endConnection ', data);
-		this.socket.emit('endedConnection', data);
-		// this.socket.off('handleLoggedIn');
-		// this.socket.off('handleLoggedInResponse');
-		// this.socket.disconnect();
+	endConnection() {
+		this.socket.emit('ServerEndedConnection', this.userId);
 	}
 
 	onLogOut(callback: callbackInterface) {
-		this.socket.on('onLogOut', callback);
+		this.socket.on('ClientLogOut', callback);
 	}
 }
 export default WebSocketService;
