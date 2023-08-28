@@ -27,16 +27,16 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 	targetLogin,
 }) => {
 	const [imageIndex, setImageIndex] = useState(0);
-	const [badgeImage, setBadgeImage] = useState<string | undefined>(mysteryBox);
 	const [badgeTitle, setBadgeTitle] = useState('Target');
 	const [isAnimationRunning, setIsAnimationRunning] = useState(false);
-	const [targetHasBeenAssigned, setTargetHasBeenAssigned] = useState(false);
 	const [hasStartedRoulette, setHasStartedRoulette] = useState(false);
 	const [isShaking, setIsShaking] = useState(false);
 	const { accessToken } = useAuth();
 	const { userData, setUserData } = useContext(UserContext);
-
-	// const rouletteImages = Object.values(rouletteImageImports);
+	const [targetHasBeenAssigned, setTargetHasBeenAssigned] = useState(
+		userData?.targetDiscoveredByUser || false,
+	);
+	const [badgeImage, setBadgeImage] = useState<string | undefined>(mysteryBox);
 
 	const updateBackgroundImage = () => {
 		setImageIndex((prevIndex) => (prevIndex + 1) % rouletteImages.length);
@@ -65,17 +65,22 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 							targetDiscoveredByUser: true,
 						});
 					}
-					// TODO: here we also need a fetch request to let our backend know that the user has found its target
-					const response = await fetch('/api/targetfound', {
-						method: 'PUT',
-						credentials: 'include',
-						headers: {
-							'Content-Type': 'application/json',
-							'Authorization': `Bearer ${accessToken}`,
-						},
-					});
-					if (!response.ok) {
-						console.error("Could not let the server know that the target had been discovered");
+					try {
+						console.log('trying to fucking update the target update status');
+						const response = await fetch('/api/user/me/updateTargetStatus', {
+							method: 'PUT',
+							credentials: 'include',
+							headers: {
+								'Content-Type': 'application/json',
+								'Authorization': `Bearer ${accessToken}`,
+							},
+						});
+						if (!response.ok) {
+							const errorMessage = await response.text();
+							console.error('Error: ', errorMessage);
+						}
+					} catch (error) {
+						console.error('Target badge fetch error: ', error);
 					}
 				}, 1000);
 			}
@@ -101,8 +106,8 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 
 	// Set the default badgeImage state when the component mounts
 	useEffect(() => {
-		setBadgeImage(mysteryBox);
-	}, []);
+		setBadgeImage(targetHasBeenAssigned ? userData?.targetImage : mysteryBox);
+	}, [userData, targetHasBeenAssigned]);
 
 	useEffect(() => {
 		if (!hasStartedRoulette) {
@@ -126,7 +131,7 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 			}
 			className={`target-badge ${
 				isAnimationRunning ? 'animationRunning' : ''
-			} ${isShaking ? 'shake' : ''} ${
+			} ${!targetHasBeenAssigned && isShaking ? 'shake' : ''} ${
 				targetHasBeenAssigned || !isOwnProfile ? 'black-badge-visible' : ''
 			}`}
 		>

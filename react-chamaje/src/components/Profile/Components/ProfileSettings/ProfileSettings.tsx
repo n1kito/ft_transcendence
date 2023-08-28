@@ -101,7 +101,6 @@ const ProfileSettings: React.FC = () => {
 					login: username,
 					email: email,
 					image: userData?.image || '',
-					targetHasBeenAssigned: false,
 					// winRate: userData?.winRate || 0,
 					// gamesCount: userData?.gamesCount || 0,
 				};

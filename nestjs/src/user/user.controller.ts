@@ -107,6 +107,28 @@ export class UserController {
 			.json({ message: 'User updated successfully' });
 	}
 
+	@Put('me/updateTargetStatus')
+	async updateTargetStatus(
+		@Req() request: CustomRequest,
+		@Res() response: Response,
+	) {
+		try {
+			console.log('\n🞋 UPDATING TARGET STATUS 🞋\n');
+			const userId = this.userService.authenticateUser(request);
+			const user = await this.prisma.user.update({
+				where: { id: userId },
+				data: { targetDiscoveredByUser: true },
+			});
+			response
+				.status(200)
+				.json({ message: 'Target status updated successfully' });
+		} catch (error) {
+			response
+				.status(500)
+				.json({ error: 'Could not update target discovery status.' });
+		}
+	}
+
 	// TODO: change route to user/me/friends or something, I just created a separate one to avoid with the /user/me routes Jee created
 	// TODO: move the logic to the service file
 	@Get('friends')
@@ -130,6 +152,7 @@ export class UserController {
 	// TODO: why do we have this and the /me endpoint ?
 	// TODO: switch this endpoint to userID
 	// TODO: move the logics to user.service.ts ?
+	// TODO: Is this correctly authenticated ?
 	@Get(':login')
 	async getUserInfo(
 		@Param('login') login: string,

@@ -5,7 +5,9 @@ import AchievementBadge from './AchievementBadge';
 
 describe('<AchievementBadge />', () => {
 	test('it should mount', () => {
-		render(<AchievementBadge name='Title' description='Some description' icon=''/>);
+		render(
+			<AchievementBadge name="Title" description="Some description" icon="" />,
+		);
 
 		const achievementBadge = screen.getByTestId('AchievementBadge');
 

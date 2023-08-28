@@ -17,7 +17,7 @@ describe('<ProfileStats />', () => {
 			rank: 0,
 			targetLogin: '',
 			targetImage: '',
-			targetHasBeenAssigned: false,
+			targetDiscoveredByUser: false,
 			// other default values...
 		};
 		render(<ProfileStats profileData={testProfileData} />);
