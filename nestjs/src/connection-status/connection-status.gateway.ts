@@ -6,6 +6,7 @@ import {
 	ConnectedSocket,
 	OnGatewayInit,
 	OnGatewayConnection,
+	OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import * as jwt from 'jsonwebtoken';
@@ -15,7 +16,7 @@ function decodeToken(client: Socket): any {
 }
 
 @WebSocketGateway({ path: '/ws/' })
-export class ConnectionStatusGateway implements OnGatewayInit, OnGatewayConnection {
+export class ConnectionStatusGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	afterInit(server: any) {
 		console.log('\nwebsocket opened 🚇\n');
 	}
@@ -29,11 +30,9 @@ export class ConnectionStatusGateway implements OnGatewayInit, OnGatewayConnecti
 		}
 	}
 	
-	handleDisconnect(
-		@MessageBody() data: string,
-		@ConnectedSocket() client: Socket,
-	) : void {
+	handleDisconnect(client: Socket) : void {
 		console.log('\n\n🔴handleDisconnect🔴\n\n')
+		
 	}
 	
 	@WebSocketServer()

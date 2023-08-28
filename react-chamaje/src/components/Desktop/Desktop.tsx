@@ -67,6 +67,19 @@ const Desktop = () => {
 		};
 	}, []);
 
+	useEffect(() => {
+		window.addEventListener('unload', handleTabClosing)
+		return () => {
+			window.removeEventListener('unload', handleTabClosing)
+		}
+	})
+	
+	const handleTabClosing = () => {
+		userData?.chatSocket?.endConnection(userData.login);
+		logOut();
+		setUserData(null);
+	}
+
 	const friendsClickHandler = () => {
 		setOpenedFriendsWindows(true);
 		navigate('/friends');

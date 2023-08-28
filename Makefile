@@ -16,6 +16,18 @@ back:
 front:
 	docker exec -it react-container sh;\
 
+logs-back:
+	docker logs nestjs-container;\
+
+logs-front:
+	docker logs react-container;\
+
+restart-back:
+	docker restart nestjs-container;\
+
+restart-front:
+	docker restart react-container;\
+
 clean:
 	docker system prune --force;\
 
