@@ -23,9 +23,9 @@ const Desktop = () => {
 	const [openFriendsWindow, setOpenedFriendsWindows] = useState(false);
 	const navigate = useNavigate();
 	const { isAuthentificated, refreshToken, logOut, accessToken } = useAuth();
-	
+
 	useEffect(() => {
-		if (!isAuthentificated) return;
+		// if (!isAuthentificated) return;
 		const fetchUserData = async () => {
 			// Feth the user data from the server
 			try {
@@ -39,23 +39,26 @@ const Desktop = () => {
 				if (response.ok) {
 					const data = await response.json();
 					console.log(data);
-					const mySocket = new WebSocketService(data.login);
+					const mySocket = new WebSocketService(accessToken, data.login);
 					const updatedData = {
 						...data,
 						chatSocket: mySocket,
 					};
 					// Set the user data in the context
 					setUserData(updatedData);
-				} else { logOut(); }
+				} else {
+					logOut();
+				}
 			} catch (error) {
 				console.log('Error: ', error);
 			}
 		};
-		
-		fetchUserData();
+
+		if (isAuthentificated) fetchUserData();
 		return () => {
-			// userData?.chatSocket?.endConnection(userData.login);
+			userData?.chatSocket?.endConnection(userData.login);
 			console.log('ending connection in desktop');
+			// when unmounting desktop component, reset userData
 			setUserData(null);
 			// alert(userData?.login || 'no login');
 			// socket.emit('endedConnection', data.login);
@@ -63,19 +66,18 @@ const Desktop = () => {
 			// prompt();
 		};
 	}, []);
-	
+
 	const friendsClickHandler = () => {
 		setOpenedFriendsWindows(true);
 		navigate('/friends');
 	};
-	
+
 	const handleClick = () => {
 		logOut();
 		userData?.chatSocket?.endConnection(userData.login);
-		// setUserData(null);
-		alert(userData?.login || 'no login');
+		// alert(userData?.login || 'no login');
 	};
-	
+
 	return (
 		<div id="desktop">
 			<div className="desktopWrapper">
@@ -84,19 +86,19 @@ const Desktop = () => {
 					iconSrc={cupcakeIcon}
 					id={++iconId}
 					onDoubleClick={friendsClickHandler}
-					/>
+				/>
 				<DesktopIcon
 					name="Friends"
 					iconSrc={cupcakeIcon}
 					id={++iconId}
 					onDoubleClick={friendsClickHandler}
-					/>
+				/>
 				<DesktopIcon
 					name="Chat"
 					iconSrc={cupcakeIcon}
 					id={++iconId}
 					onDoubleClick={friendsClickHandler}
-					/>
+				/>
 				<Window
 					windowTitle={userData?.login || 'window title'}
 					links={[

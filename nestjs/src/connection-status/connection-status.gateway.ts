@@ -8,20 +8,37 @@ import {
 	OnGatewayConnection,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import * as jwt from 'jsonwebtoken';
+
+function decodeToken(client: Socket): any {
+	return jwt.verify(client.handshake.auth.accessToken, process.env.JWT_SECRET_KEY) as jwt.JwtPayload
+}
 
 @WebSocketGateway({ path: '/ws/' })
 export class ConnectionStatusGateway implements OnGatewayInit, OnGatewayConnection {
 	afterInit(server: any) {
 		console.log('\nwebsocket opened 🚇\n');
 	}
-
+	
 	handleConnection(client: any, ...args: any[]) {
-		console.log(`\n🟢Client connected : ${client.id}🟢`)
+		console.log(`\n🟢Client connected : ${client.id}🟢`);
+		try {
+			console.log(decodeToken(client));
+		} catch (e) {
+			console.error('Verify token failed:', e);
+		}
 	}
-
-
+	
+	handleDisconnect(
+		@MessageBody() data: string,
+		@ConnectedSocket() client: Socket,
+	) : void {
+		console.log('\n\n🔴handleDisconnect🔴\n\n')
+	}
+	
 	@WebSocketServer()
 	server: Server;
+	userId: number;
 
 	@SubscribeMessage('message')
 	handleMessage(
@@ -52,7 +69,7 @@ export class ConnectionStatusGateway implements OnGatewayInit, OnGatewayConnecti
 		@ConnectedSocket() client: Socket,
 	) : void {
 		this.server.emit('userLoggedInResponse', data);
-		console.log('🔴🔴 userLoggedInResponse: ' + data)
+		console.log('🟢 userLoggedInResponse: ' + data)
 
 	}
 
@@ -64,21 +81,10 @@ export class ConnectionStatusGateway implements OnGatewayInit, OnGatewayConnecti
 		console.log('\n🔴🔴' + data + ' just left!🔴🔴\n')
 		this.server.emit('onLogOut', data);
 		client.disconnect();
+
+		// client.disconnect();
 	}
 
-	// @SubscribeMessage('disconnect')
-	handleDisconnect(
-		@MessageBody() data: string,
-		@ConnectedSocket() client: Socket,
-	) : void {
-		console.log('\n\n🔴PLOP handleDisconnect🔴\n\n')
-		// client.emit('listenDisconnect', "io client disconnect");
-		// this.server.emit('onLogOut', data);
-		// client.disconnect();
-		// client.off('handleLoggedIn', () => {console.log('coucoude')})
-		// client.off('handleLoggedInResponse', () => {console.log('coucoudeResponse')})
-		// client.off('handleLoggedIn');
-	}
 
 
 }

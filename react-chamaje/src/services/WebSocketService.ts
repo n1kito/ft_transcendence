@@ -7,15 +7,16 @@ interface callbackInterface {
 }
 class WebSocketService {
 	private socket: Socket;
-	
+	// private userId: number;
 	// private jwt: string;
 
-	constructor(login: string) {
+	constructor(accessToken: string, login: string) {
 		console.log('\n\n CREATING SOCKET FOR ', login);
 		this.socket = io({
 			path: '/ws/',
-			reconnection: false }) 
-
+			reconnection: false,
+			auth: { accessToken },
+		});
 		// const { accessToken }  = useAuth();
 		// this.jwt = accessToken;
 		try {
@@ -25,18 +26,22 @@ class WebSocketService {
 				this.sendConnectionToServer(login);
 			});
 
-			this.socket.on("disconnect", (reason) => {
-
+			this.socket.on('disconnect', (reason) => {
 				console.log('REASON:', reason);
-				if (reason != "io client disconnect" && reason != "io server disconnect") {
-				
-				  // the disconnection was initiated by the server, you need to reconnect manually
-				  this.socket.connect();
-				}
-				else
+				if (
+					reason != 'io client disconnect' &&
+					reason != 'io server disconnect' 
+				) {
+					// the disconnection was initiated by the server, you need to reconnect manually
+					this.socket.connect();
+				} else {
+					// this.endConnection(login);
 					this.socket.disconnect();
+				}
 				// else the socket will automatically try to reconnect
-			  });
+
+				// this.socket.disconnect();
+			});
 		} catch (e) {
 			console.error(e, ': WebSocketService Constructor');
 		}
@@ -73,25 +78,13 @@ class WebSocketService {
 	endConnection(data: string) {
 		console.log('endConnection ', data);
 		this.socket.emit('endedConnection', data);
-		this.socket.off('handleLoggedIn');
-		this.socket.off('handleLoggedInResponse');
+		// this.socket.off('handleLoggedIn');
+		// this.socket.off('handleLoggedInResponse');
 		// this.socket.disconnect();
 	}
-	
+
 	onLogOut(callback: callbackInterface) {
 		this.socket.on('onLogOut', callback);
 	}
-	
-	// listenDisconnect(reason: string){
-	// this.socket.on("disconnect", (reason) => {
-
-	// 	console.log('REASON:', reason);
-	// 	if (reason != "io client disconnect") {
-	// 	  // the disconnection was initiated by the server, you need to reconnect manually
-	// 	  this.socket.connect();
-	// 	}
-	// 	// else the socket will automatically try to reconnect
-	//   });
-	// }
 }
 export default WebSocketService;

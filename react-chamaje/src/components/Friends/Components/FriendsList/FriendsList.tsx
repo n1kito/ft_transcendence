@@ -71,7 +71,7 @@ const FriendsList = () => {
 
 	useEffect(() => {
 		const handleLoggedOut = (data: string) => {
-			console.log('handleLoggedOUt hihihi', data);
+			console.log('handleLoggedOUt', data);
 			setFriends((prevFriends) =>
 				prevFriends.map((friend) =>
 					friend.login === data ? { ...friend, onlineStatus: false } : friend,

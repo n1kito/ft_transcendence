@@ -16,7 +16,6 @@ const Button: React.FC<MyButtonProps> = ({
 	disabled = false,
 	children,
 }) => {
-	console.log('Button: disabled:', { disabled });
 	const buttonClass = disabled ? 'disabled' : '';
 
 	// Convert the baseColor array to an rgb color string
