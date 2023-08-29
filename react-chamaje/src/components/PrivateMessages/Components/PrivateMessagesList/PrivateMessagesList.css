@@ -1,0 +1,14 @@
+/* Styling the PrivateMessagesList component */
+
+.private-messages-list-wrapper {
+	padding: 1rem;
+	display: grid;
+	grid-template-columns: repeat(
+		4,
+		1fr
+	); /* Replace 100px with your minimum item width */
+	gap: 1rem;
+	max-height: 75vh;
+	overflow-y: auto;
+	overflow-x: hidden;
+}

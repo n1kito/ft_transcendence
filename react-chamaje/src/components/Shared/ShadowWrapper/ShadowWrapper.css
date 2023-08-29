@@ -23,3 +23,7 @@
 .clickable:hover {
 	cursor: pointer;
 }
+
+.dashed-border {
+	border: 2px dashed black;
+}

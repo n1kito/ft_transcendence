@@ -5,7 +5,7 @@ export default {
 	title: 'Components/Window/WindowTitleBar',
 };
 
-export const Default = () => <WindowTitleBar />;
+export const Default = () => <WindowTitleBar onCloseClick={() => null}/>;
 
 Default.story = {
 	name: 'default',

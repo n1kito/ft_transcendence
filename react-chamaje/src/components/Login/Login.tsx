@@ -32,7 +32,7 @@ const Login = () => {
 				<div id="prompt"></div>
 				{passkey === 'omer' ? (
 					<>
-						<Window windowTitle="Login">
+						<Window windowTitle="Login" onCloseClick={() => null}>
 							{/* <Window windowTitle="Charlotte" links={links}> */}
 							<Terminal />
 						</Window>

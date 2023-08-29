@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import './Desktop.css';
 import DesktopIcon from './Components/DesktopIcon/DesktopIcon';
 import cupcakeIcon from './Components/DesktopIcon/images/CUPCAKE.svg';
@@ -10,14 +10,18 @@ import useAuth from '../../hooks/userAuth';
 import ProfileSettings from '../Profile/Components/ProfileSettings/ProfileSettings';
 import { AuthContext } from '../../contexts/AuthContext';
 import Profile from '../Profile/Profile';
+import PrivateMessages from '../PrivateMessages/PrivateMessages';
+import { AnimatePresence } from 'framer-motion';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
 	let iconId = 0;
 	const { userData, setUserData } = useContext(UserContext);
 	const [openFriendsWindow, setOpenedFriendsWindows] = useState(false);
+	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
 	const navigate = useNavigate();
 	const { isAuthentificated, refreshToken, logOut, accessToken } = useAuth();
+	const windowDragConstraintRef = useRef(null);
 
 	// if (isAuthentificated) {
 	// 	console.log('user is authentificated');
@@ -56,7 +60,7 @@ const Desktop = () => {
 	};
 
 	return (
-		<div className="desktopWrapper">
+		<div className="desktopWrapper" ref={windowDragConstraintRef}>
 			<DesktopIcon
 				name="Game"
 				iconSrc={cupcakeIcon}
@@ -64,7 +68,7 @@ const Desktop = () => {
 				onDoubleClick={friendsClickHandler}
 			/>
 			<DesktopIcon
-				name="Friends"
+				name="Profile"
 				iconSrc={cupcakeIcon}
 				id={++iconId}
 				onDoubleClick={friendsClickHandler}
@@ -73,21 +77,23 @@ const Desktop = () => {
 				name="Chat"
 				iconSrc={cupcakeIcon}
 				id={++iconId}
-				onDoubleClick={friendsClickHandler}
+				onDoubleClick={() => setChatWindowIsOpen(true)}
 			/>
-			<Window
-				windowTitle={userData?.login || 'window title'}
-				links={[
-					{ name: 'Link1', url: '#' },
-					{ name: 'Link2', url: '#' },
-					{ name: 'Link3', url: '#' },
-				]}
-				useBeigeBackground={true}
-			>
-				{/* <Profile login={userData ? userData.login : 'random'} /> */}
-				<Profile login="mjallada" />
-				{/* <Profile login='randomLg'/> */}
-			</Window>
+			<AnimatePresence>
+				{openFriendsWindow && (
+					<Profile
+						login="mjallada"
+						onCloseClick={() => setOpenedFriendsWindows(false)}
+						windowDragConstraintRef={windowDragConstraintRef}
+					/>
+				)}
+				{chatWindowIsOpen && (
+					<PrivateMessages
+						onCloseClick={() => setChatWindowIsOpen(false)}
+						windowDragConstraintRef={windowDragConstraintRef}
+					/>
+				)}
+			</AnimatePresence>
 		</div>
 	);
 };

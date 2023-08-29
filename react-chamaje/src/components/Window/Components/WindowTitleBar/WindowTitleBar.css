@@ -49,4 +49,5 @@
 #windowTitle span {
 	background-color: white;
 	padding: 0.5rem 1rem;
+	white-space: nowrap;
 }

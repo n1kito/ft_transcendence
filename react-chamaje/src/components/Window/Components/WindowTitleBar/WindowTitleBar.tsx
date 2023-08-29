@@ -6,16 +6,18 @@ import WindowTitle from '../WindowTitle/WindowTitle';
 interface TitleBarProps {
 	windowTitle?: string;
 	onMouseDown?: (event: React.MouseEvent<HTMLDivElement>) => void;
+	onCloseClick: () => void;
 }
 
 const WindowTitleBar: React.FC<TitleBarProps> = ({
 	windowTitle,
 	onMouseDown,
+	onCloseClick,
 }) => {
 	return (
 		<div id="titleBarWrapper" onMouseDown={onMouseDown}>
 			<span>
-				<WindowCloseSquare />
+				<WindowCloseSquare onCloseClick={onCloseClick} />
 			</span>
 			<div id="windowTitle">
 				<WindowTitle windowTitle={windowTitle} />

@@ -6,6 +6,7 @@ export interface ShadowWrapperProps {
 	shadow?: boolean;
 	isClickable?: boolean;
 	backgroundColor?: string;
+	dashedBorder?: boolean;
 	onClick?: () => void;
 }
 
@@ -14,13 +15,14 @@ const ShadowWrapper: React.FC<ShadowWrapperProps> = ({
 	isClickable = false,
 	shadow = isClickable,
 	backgroundColor = '',
+	dashedBorder = false,
 	onClick,
 }) => {
 	return (
 		<div
 			className={`shadow-wrapper ${shadow ? 'shadow' : ''} ${
 				isClickable ? 'clickable' : ''
-			}`}
+			} ${dashedBorder ? 'dashed-border' : ''}`}
 			style={{ backgroundColor: backgroundColor }}
 			onClick={isClickable ? onClick : undefined}
 		>

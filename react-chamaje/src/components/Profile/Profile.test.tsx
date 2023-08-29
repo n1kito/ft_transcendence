@@ -5,7 +5,14 @@ import Profile from './Profile';
 
 describe('<Profile />', () => {
 	test('it should mount', () => {
-		render(<Profile login="testerlg" />);
+		const mockRef = { current: null }; // Mock ref object
+		render(
+			<Profile
+				login="testerlg"
+				onCloseClick={() => null}
+				windowDragConstraintRef={mockRef}
+			/>,
+		);
 
 		const profile = screen.getByTestId('Profile');
 
