@@ -1,0 +1,58 @@
+/* Styling the ChatBubble component */
+
+.chat-bubble-wrapper {
+	display: flex;
+	flex-direction: row;
+	gap: 0.5rem;
+
+	max-width: 50%;
+}
+
+.chat-bubble-content {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+
+	background-color: white;
+	font-family: 'Fredoka', sans-serif;
+
+	border: 2px solid black;
+	border-radius: 8px;
+	padding: 0.5rem 1rem;
+}
+
+.chat-bubble-info {
+	color: grey;
+	font-size: 0.8rem;
+	white-space: nowrap;
+}
+
+/* Avatar styling */
+
+.chat-bubble-wrapper img {
+	/* aspect-ratio: 1/1; */
+	height: 2rem;
+	width: 2rem;
+	border-radius: 50%;
+	border: 2px solid black;
+	position: relative;
+}
+
+.chat-bubble-wrapper img:hover {
+	box-shadow: 2px 2px black;
+}
+
+.chat-bubble-wrapper img:active {
+	bottom: -2px;
+	right: -2px;
+	box-shadow: none;
+}
+
+.green-bubble {
+	background-color: rgba(87, 248, 171, 0.21);
+	border-color: #57f8ab;
+}
+
+.bubble-align-right {
+	align-self: end;
+}

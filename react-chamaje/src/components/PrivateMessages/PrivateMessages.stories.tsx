@@ -7,7 +7,12 @@ export default {
 
 const mockRef = { current: null }; // Mock ref object
 
-export const Default = () => <PrivateMessages onCloseClick={() => null} windowDragConstraintRef={mockRef}/>;
+export const Default = () => (
+	<PrivateMessages
+		onCloseClick={() => null}
+		windowDragConstraintRef={mockRef}
+	/>
+);
 
 Default.story = {
 	name: 'default',

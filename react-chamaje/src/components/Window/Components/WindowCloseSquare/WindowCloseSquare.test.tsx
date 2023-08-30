@@ -5,7 +5,7 @@ import WindowCloseSquare from './WindowCloseSquare';
 
 describe('<WindowCloseSquare />', () => {
 	test('it should mount', () => {
-		render(<WindowCloseSquare onCloseClick={() => null}/>);
+		render(<WindowCloseSquare onCloseClick={() => null} />);
 
 		const windowCloseSquare = screen.getByTestId('WindowCloseSquare');
 

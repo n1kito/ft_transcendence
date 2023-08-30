@@ -53,12 +53,10 @@ const Button: React.FC<MyButtonProps> = ({
 	};
 
 	return (
-		<div>
-			<div id="buttonWrapper" className={buttonClass} style={buttonStyle}>
-				<button disabled={disabled} id="coloredButton" onClick={handleClick}>
-					{children}
-				</button>
-			</div>
+		<div id="buttonWrapper" className={buttonClass} style={buttonStyle}>
+			<button disabled={disabled} id="coloredButton" onClick={handleClick}>
+				{children}
+			</button>
 		</div>
 	);
 };

@@ -12,6 +12,7 @@ import { AuthContext } from '../../contexts/AuthContext';
 import Profile from '../Profile/Profile';
 import PrivateMessages from '../PrivateMessages/PrivateMessages';
 import { AnimatePresence } from 'framer-motion';
+import ChatWindow from '../ChatWindow/ChatWindow';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -93,6 +94,7 @@ const Desktop = () => {
 						windowDragConstraintRef={windowDragConstraintRef}
 					/>
 				)}
+				<ChatWindow login="Jee" />
 			</AnimatePresence>
 		</div>
 	);

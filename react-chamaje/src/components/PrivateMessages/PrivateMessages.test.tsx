@@ -6,7 +6,12 @@ import PrivateMessages from './PrivateMessages';
 describe('<PrivateMessages />', () => {
 	test('it should mount', () => {
 		const mockRef = { current: null }; // Mock ref object
-		render(<PrivateMessages onCloseClick={() => null} windowDragConstraintRef={mockRef}/>);
+		render(
+			<PrivateMessages
+				onCloseClick={() => null}
+				windowDragConstraintRef={mockRef}
+			/>,
+		);
 
 		const privateMessages = screen.getByTestId('PrivateMessages');
 
