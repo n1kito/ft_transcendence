@@ -3,7 +3,7 @@ import * as jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 import { StringifyOptions } from 'querystring';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
-
+ 
 @Injectable()
 export class TokenService {
 	private readonly jwtSecretKey: string;
@@ -28,13 +28,15 @@ export class TokenService {
 
 	// Generate a refresh token using the payload and secret key
 	// Set the expiration time for the token using refreshTokenExpiresIn
-	generateRefreshToken(payload: any): string {
+	async generateRefreshToken(payload: any): Promise<string> {
 		const refreshToken = jwt.sign(payload, this.jwtSecretKey, {
 			expiresIn: this.refreshTokenExpiresIn,
 		});
 		console.log('generate refresh token:', refreshToken);
 		return refreshToken;
 	}
+
+	
 
 	// Method to verify a token and return the payload
 	verifyToken(token: string): any {

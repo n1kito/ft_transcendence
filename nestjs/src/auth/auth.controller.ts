@@ -9,14 +9,21 @@ import {
 	Res,
 	UnauthorizedException,
 	Req,
+	HttpCode,
+	NotFoundException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import * as jwt from 'jsonwebtoken';
 import { Response } from 'express';
 import { TokenService } from 'src/token/token.service';
+import { toDataURL } from 'qrcode';
 
 interface AuthorizationResponse {
 	url: string;
+}
+
+export interface CustomRequest extends Request {
+	userId: number;
 }
 
 // TODO: implement a middleware that checks if the JWT token received with each request is correct
@@ -61,8 +68,10 @@ export class AuthController {
 
 			// Generate a new access token and a refresh token based on the payload
 			// const accessToken = this.tokenService.generateAccessToken(payload);
-			const refreshToken = this.tokenService.generateRefreshToken(payload);
-
+			const refreshToken = await this.tokenService.generateRefreshToken(
+				payload,
+			);
+			// TODO: error 401 due to asynchron issue ?
 			// Attach the generated access and refresh tokens as cookies in the response
 			// this.tokenService.attachAccessTokenCookie(res, accessToken);
 			this.tokenService.attachRefreshTokenCookie(res, refreshToken);
@@ -98,6 +107,7 @@ export class AuthController {
 		const accessToken = this.tokenService.generateAccessToken(payload);
 		// Delete the temporary authorization code
 		this.authService.deleteTemporaryAuthCode();
+
 		// Return the token
 		return { accessToken: accessToken };
 	}
@@ -110,5 +120,44 @@ export class AuthController {
 	@Get('login-failed')
 	loginFailed(): string {
 		return 'User could not login 🛑';
+	}
+
+	@Post('2fa/turn-on')
+	async generateQrCodeDataURL(@Req() req: CustomRequest, @Body() body): Promise<any> {
+		
+		// extract access token from header, decode it and retrieve userId 
+		const authorizationHeader = req.headers['authorization'];
+		if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
+		const accessToken = authorizationHeader.slice(7); 
+		const decodedAccessToken = this.tokenService.verifyToken(accessToken);
+		if (!decodedAccessToken) {
+			throw new NotFoundException('Authentication required');
+		}
+
+		// generate a 2fa secret and stores it in database and create a qr code url
+		const otpAuthUrl = await this.authService.generate2faSecret(decodedAccessToken.userId);
+		console.log('🥎🥎🥎🥎 otpAuthUrl: ', otpAuthUrl)
+
+		const qrCodeUrl = toDataURL(otpAuthUrl);
+
+		// return qr code url
+		return qrCodeUrl;
+	}
+}
+
+	@Post('2fa/authenticate')
+	@HttpCode(200)
+	async authenticate(@Request() request, @Body() body) {
+		// const isCodeValid =
+		// 	this.authService.isTwoFactorAuthenticationCodeValid(
+		// 		body.twoFactorAuthenticationCode,
+		// 		request.user,
+		// 	);
+
+		// if (!isCodeValid) {
+		// 	throw new UnauthorizedException('Wrong authentication code');
+		// }
+
+		return this.authService.loginWith2fa(request.user);
 	}
 }

@@ -80,10 +80,25 @@ const Desktop = () => {
 		navigate('/friends');
 	};
 
-	const handleClick = () => {
-		logOut();
-		userData?.chatSocket?.endConnection();
-		// alert(userData?.login || 'no login');
+	// TEST BUTTON FOR ENABLING TWO FACTOR AUTHENTICATION 
+	const handleClick = async () => {
+
+		try {
+			const response = await fetch('api/login/2fa/turn-on' , {
+				method: 'POST',
+				credentials: 'include',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+			});
+			if (response.ok) {
+				console.log(response)
+				const data = await response.text();
+				console.log('qr code: ', data)
+			}
+		} catch (error) { 
+			console.error('2fa: ', error);
+		}
 	};
 
 	return (
@@ -117,12 +132,13 @@ const Desktop = () => {
 					useBeigeBackground={true}
 				>
 					<Button baseColor={[308, 80, 92]} onClick={handleClick}>
-						log out
+						enable 2fa
 					</Button>
 
-					
 					<Profile login={userData ? userData.login : 'random'} />
 					{/* <Profile login='randomLg'/> */}
+
+					{/* <FriendsList/> */}
 				</Window>
 			</div>
 		</div>

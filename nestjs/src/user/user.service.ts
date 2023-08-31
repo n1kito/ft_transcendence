@@ -112,4 +112,5 @@ export class UserService {
 			this.pushError(field, `${field} already exists`, HttpStatus.CONFLICT);
 		}
 	}
+
 }

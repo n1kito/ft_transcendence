@@ -14,6 +14,7 @@ const RetrieveAccessToken = () => {
 			// Retrieve the code from the current URL
 			const urlParameters = new URLSearchParams(location.search);
 			const code = urlParameters.get('code');
+			console.log('CODE: ', code);
 			if (code) {
 				try {
 					const response = await fetch('/api/login/retrieve-access-token', {
@@ -31,6 +32,7 @@ const RetrieveAccessToken = () => {
 						// Redirect user to desktop
 						navigate('/desktop');
 					}
+					
 				} catch (error) {
 					console.error('Error fetching access token: ', error);
 					//TODO: make an actual error page OR better make the login terminal display an error message

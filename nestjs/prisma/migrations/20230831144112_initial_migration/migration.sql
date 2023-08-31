@@ -39,9 +39,6 @@ CREATE UNIQUE INDEX "User_login_key" ON "User"("login");
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_twoFactorAuthenticationSecret_key" ON "User"("twoFactorAuthenticationSecret");
-
--- CreateIndex
 CREATE UNIQUE INDEX "_Friendship_AB_unique" ON "_Friendship"("A", "B");
 
 -- CreateIndex
