@@ -9,6 +9,7 @@ interface UserData {
 	email: string;
 	hash: string;
 	image: string;
+	twoFactorAuthenticationSecret: string;
 }
 
 @Injectable()
@@ -113,6 +114,7 @@ export class AuthService {
 				email: responseData.email,
 				hash: 'temporary password',
 				image: responseData.image.versions.small,
+				twoFactorAuthenticationSecret: ''
 			};
 
 			// TODO: add try/catch around this if we want to have more precise error logs ?

@@ -116,11 +116,12 @@ const Desktop = () => {
 					]}
 					useBeigeBackground={true}
 				>
-					<FriendsList />
 					<Button baseColor={[308, 80, 92]} onClick={handleClick}>
-						log out 
+						log out
 					</Button>
-					{/* <Profile login={userData ? userData.login : 'random'} /> */}
+
+					
+					<Profile login={userData ? userData.login : 'random'} />
 					{/* <Profile login='randomLg'/> */}
 				</Window>
 			</div>

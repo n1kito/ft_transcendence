@@ -3,11 +3,10 @@ import './Lock.css';
 import { UserContext } from 'src/contexts/UserContext';
 import useAuth from 'src/hooks/userAuth';
 
-
 const Lock = () => {
 	const { userData } = useContext(UserContext);
 	const { logOut } = useAuth();
-	
+
 	const handleClick = () => {
 		logOut();
 		userData?.chatSocket?.endConnection();
