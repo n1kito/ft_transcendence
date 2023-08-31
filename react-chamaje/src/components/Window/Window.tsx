@@ -6,7 +6,7 @@ import { motion, useDragControls } from 'framer-motion';
 
 export interface MenuLinks {
 	name: string;
-	url: string;
+	onClick?: () => void;
 }
 
 export interface WindowProps {
@@ -56,9 +56,9 @@ const Window: React.FC<WindowProps> = ({
 			</div>
 			<WindowMenu>
 				{links.map((linkElem, index) => (
-					<a href={linkElem.url} key={index}>
+					<span onClick={linkElem.onClick} key={index}>
 						{linkElem.name}
-					</a>
+					</span>
 				))}
 			</WindowMenu>
 			<div

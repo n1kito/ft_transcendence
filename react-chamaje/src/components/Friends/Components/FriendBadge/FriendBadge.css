@@ -54,6 +54,6 @@
 	transform: translate(-50%, -50%);
 }
 
-.wide-badge {
-	width: 10rem;
+.channel-badge {
+	padding: 0.5rem 1.5rem;
 }

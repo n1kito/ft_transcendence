@@ -20,6 +20,7 @@
 	cursor: default;
 	/* overflow: hidden; */
 	overflow: hidden;
+	position: relative;
 }
 
 .windowContent {
@@ -27,4 +28,5 @@
 	/* padding: 1rem 1.3rem; */
 	text-align: left;
 	border-radius: 10px;
+	position: relative;
 }

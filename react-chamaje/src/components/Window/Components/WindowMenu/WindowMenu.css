@@ -23,6 +23,7 @@
 	/* cursor: default; */
 }
 
-.windowMenu a:hover {
+.windowMenu span:hover {
 	cursor: default;
+	color: cyan;
 }

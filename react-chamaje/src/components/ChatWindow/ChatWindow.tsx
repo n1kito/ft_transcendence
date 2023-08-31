@@ -6,6 +6,9 @@ import ChatBubble from './Components/ChatBubble/ChatBubble';
 import { UserContext } from '../../contexts/UserContext';
 import ChattNotification from './Components/ChattNotification/ChattNotification';
 import ChatGameInvite from './Components/ChatGameInvite/ChatGameInvite';
+import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/SettingsWindow';
+import Title from '../Profile/Components/Title/Title';
+import InputField from '../Profile/Components/InputField/InputField';
 
 export interface IChatWindowProps {
 	login: string;
@@ -17,6 +20,9 @@ const ChatWindow: React.FC<IChatWindowProps> = ({ login }) => {
 	const [textareaIsFocused, setTextareaIsFocused] = useState(false);
 	const [textareaIsEmpty, setTextareaIsEmpty] = useState(true);
 	const [textareaContent, setTextareaContent] = useState('');
+
+	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
+	const [channelIsPrivate, setChannelIsPrivate] = useState(false);
 
 	const { userData } = useContext(UserContext);
 	const chatContentRef = useRef<HTMLDivElement>(null);
@@ -35,15 +41,20 @@ const ChatWindow: React.FC<IChatWindowProps> = ({ login }) => {
 		}
 	}, []); // TODO: this should track the state of the messages passed to the component, so when new messages are added they appear at the bottom of the div
 
+	const openSettingsPanel = () => {
+		setSettingsPanelIsOpen(!settingsPanelIsOpen);
+	};
+
 	return (
 		<Window
 			windowTitle={`Chat with ${login}`}
 			onCloseClick={() => doNothing()}
 			links={[
-				{ name: 'Profile', url: '#' },
-				{ name: 'Play', url: '#' },
-				{ name: 'Block', url: '#' },
-				{ name: 'Delete chat', url: '#' },
+				{ name: 'Profile', onClick: () => null },
+				{ name: 'Play', onClick: () => null },
+				{ name: 'Block', onClick: () => null },
+				{ name: 'Delete chat', onClick: () => null },
+				{ name: 'Settings', onClick: openSettingsPanel },
 			]}
 			useBeigeBackground={true}
 		>
@@ -137,6 +148,25 @@ const ChatWindow: React.FC<IChatWindowProps> = ({ login }) => {
 					</Button>
 				</div>
 			</div>
+			{settingsPanelIsOpen && (
+				<SettingsWindow
+					windowTitle="Settings"
+					settingsWindowVisible={setSettingsPanelIsOpen}
+				>
+					<Title highlightColor="yellow">Visibility</Title>
+					<Button
+						baseColor={channelIsPrivate ? [111, 60, 84] : [40, 100, 80]}
+						onClick={() => setChannelIsPrivate(!channelIsPrivate)}
+					>
+						make {channelIsPrivate ? 'public' : 'private'}
+					</Button>
+					<Title highlightColor="yellow">Channel password</Title>
+					<div className="settings-form">
+						<InputField value="password"></InputField>
+						<Button>update</Button>
+					</div>
+				</SettingsWindow>
+			)}
 		</Window>
 	);
 };

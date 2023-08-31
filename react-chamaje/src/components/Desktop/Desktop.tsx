@@ -18,6 +18,7 @@ import ProfileIcon from './Icons/CARD.svg';
 import ChatIcon from './Icons/PC.svg';
 import FriendsIcon from './Icons/NOTEBOOK.svg';
 import GameIcon from './Icons/CD.svg';
+import Channels from '../Channels/Channels';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -26,6 +27,8 @@ const Desktop = () => {
 	const [openFriendsWindow, setFriendsWindowIsOpen] = useState(false);
 	const [openProfileWindow, setProfileWindowIsOpen] = useState(false);
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
+	const [channelsWindowIsOpen, setChannelsWindowIsOpen] = useState(false);
+
 	const navigate = useNavigate();
 	const { isAuthentificated, refreshToken, logOut, accessToken } = useAuth();
 	const windowDragConstraintRef = useRef(null);
@@ -87,6 +90,12 @@ const Desktop = () => {
 				onDoubleClick={() => setChatWindowIsOpen(true)}
 			/>
 			<DesktopIcon
+				name="Channels"
+				iconSrc={ChatIcon}
+				id={++iconId}
+				onDoubleClick={() => setChannelsWindowIsOpen(true)}
+			/>
+			<DesktopIcon
 				name="Friends"
 				iconSrc={FriendsIcon}
 				id={++iconId}
@@ -106,7 +115,13 @@ const Desktop = () => {
 						windowDragConstraintRef={windowDragConstraintRef}
 					/>
 				)}
-				<ChatWindow login="Jee" />
+				{channelsWindowIsOpen && (
+					<Channels
+						onCloseClick={() => setChannelsWindowIsOpen(false)}
+						windowDragConstraintRef={windowDragConstraintRef}
+					/>
+				)}
+				{/* <ChatWindow login="Jee" /> */}
 			</AnimatePresence>
 		</div>
 	);
