@@ -107,6 +107,7 @@
 
 .tooltip-visible {
 	opacity: 1;
+	pointer-events: initial;
 }
 
 div.tooltip-visible.tooltip-top {

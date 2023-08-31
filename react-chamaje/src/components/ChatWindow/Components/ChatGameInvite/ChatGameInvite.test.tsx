@@ -5,7 +5,7 @@ import ChatGameInvite from './ChatGameInvite';
 
 describe('<ChatGameInvite />', () => {
 	test('it should mount', () => {
-		render(<ChatGameInvite />);
+		render(<ChatGameInvite recipient="" sender="" />);
 
 		const chatGameInvite = screen.getByTestId('ChatGameInvite');
 

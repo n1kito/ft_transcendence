@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import './ChatWindow.css';
 import Window from '../Window/Window';
 import Button from '../Shared/Button/Button';
@@ -14,8 +14,18 @@ export interface IChatWindowProps {
 const ChatWindow: React.FC<IChatWindowProps> = ({ login }) => {
 	// TODO: remove this
 	const doNothing = () => {};
+	const [textareaIsFocused, setTextareaIsFocused] = useState(false);
+	const [textareaIsEmpty, setTextareaIsEmpty] = useState(true);
+	const [textareaContent, setTextareaContent] = useState('');
+
 	const { userData } = useContext(UserContext);
 	const chatContentRef = useRef<HTMLDivElement>(null);
+
+	const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+		const newValue = event.target.value;
+		setTextareaContent(newValue);
+		setTextareaIsEmpty(newValue === '');
+	};
 
 	useEffect(() => {
 		const container = chatContentRef.current;
@@ -112,9 +122,19 @@ const ChatWindow: React.FC<IChatWindowProps> = ({ login }) => {
 						Je suis très mal à l'aise
 					</ChatBubble>
 				</div>
-				<div className="chat-input">
-					<textarea></textarea>
-					<Button baseColor={[151, 51, 91]}>send</Button>
+				<div
+					className={`chat-input ${
+						textareaIsFocused || !textareaIsEmpty ? 'chat-input--focus' : ''
+					}`}
+				>
+					<textarea
+						onFocus={() => setTextareaIsFocused(true)}
+						onBlur={() => setTextareaIsFocused(false)}
+						onChange={handleInputChange}
+					></textarea>
+					<Button baseColor={[151, 51, 91]} disabled={textareaIsEmpty}>
+						send
+					</Button>
 				</div>
 			</div>
 		</Window>

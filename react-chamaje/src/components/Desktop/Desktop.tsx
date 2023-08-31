@@ -14,11 +14,17 @@ import PrivateMessages from '../PrivateMessages/PrivateMessages';
 import { AnimatePresence } from 'framer-motion';
 import ChatWindow from '../ChatWindow/ChatWindow';
 
+import ProfileIcon from './Icons/CARD.svg';
+import ChatIcon from './Icons/PC.svg';
+import FriendsIcon from './Icons/NOTEBOOK.svg';
+import GameIcon from './Icons/CD.svg';
+
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
 	let iconId = 0;
 	const { userData, setUserData } = useContext(UserContext);
-	const [openFriendsWindow, setOpenedFriendsWindows] = useState(false);
+	const [openFriendsWindow, setFriendsWindowIsOpen] = useState(false);
+	const [openProfileWindow, setProfileWindowIsOpen] = useState(false);
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
 	const navigate = useNavigate();
 	const { isAuthentificated, refreshToken, logOut, accessToken } = useAuth();
@@ -56,7 +62,7 @@ const Desktop = () => {
 	}, [setUserData]);
 
 	const friendsClickHandler = () => {
-		setOpenedFriendsWindows(true);
+		setFriendsWindowIsOpen(true);
 		navigate('/friends');
 	};
 
@@ -64,27 +70,33 @@ const Desktop = () => {
 		<div className="desktopWrapper" ref={windowDragConstraintRef}>
 			<DesktopIcon
 				name="Game"
-				iconSrc={cupcakeIcon}
+				iconSrc={GameIcon}
 				id={++iconId}
 				onDoubleClick={friendsClickHandler}
 			/>
 			<DesktopIcon
 				name="Profile"
-				iconSrc={cupcakeIcon}
+				iconSrc={ProfileIcon}
 				id={++iconId}
-				onDoubleClick={friendsClickHandler}
+				onDoubleClick={() => setProfileWindowIsOpen}
 			/>
 			<DesktopIcon
 				name="Chat"
-				iconSrc={cupcakeIcon}
+				iconSrc={ChatIcon}
 				id={++iconId}
 				onDoubleClick={() => setChatWindowIsOpen(true)}
 			/>
+			<DesktopIcon
+				name="Friends"
+				iconSrc={FriendsIcon}
+				id={++iconId}
+				onDoubleClick={() => setFriendsWindowIsOpen(true)}
+			/>
 			<AnimatePresence>
-				{openFriendsWindow && (
+				{openProfileWindow && (
 					<Profile
 						login="mjallada"
-						onCloseClick={() => setOpenedFriendsWindows(false)}
+						onCloseClick={() => setProfileWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
 					/>
 				)}

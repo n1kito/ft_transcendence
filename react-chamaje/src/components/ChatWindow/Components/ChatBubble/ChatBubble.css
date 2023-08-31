@@ -38,11 +38,16 @@
 	position: relative;
 }
 
-.chat-bubble-wrapper img:hover {
+.chat-bubble-avatar {
+	position: relative;
+	height: fit-content;
+}
+
+.chat-bubble-avatar img:hover {
 	box-shadow: 2px 2px black;
 }
 
-.chat-bubble-wrapper img:active {
+.chat-bubble-avatar img:active {
 	bottom: -2px;
 	right: -2px;
 	box-shadow: none;
@@ -55,4 +60,14 @@
 
 .bubble-align-right {
 	align-self: end;
+}
+
+.chat-bubble-tooltip-content {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 0.5rem;
+}
+
+.chat-bubble-tooltip-content > * {
+	width: initial !important;
 }

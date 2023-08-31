@@ -5,7 +5,7 @@ import ChattNotification from './ChattNotification';
 
 describe('<ChattNotification />', () => {
 	test('it should mount', () => {
-		render(<ChattNotification />);
+		render(<ChattNotification recipient="" sender="" type="" />);
 
 		const chattNotification = screen.getByTestId('ChattNotification');
 

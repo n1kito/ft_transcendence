@@ -5,7 +5,9 @@ export default {
 	title: 'ChattNotification',
 };
 
-export const Default = () => <ChattNotification />;
+export const Default = () => (
+	<ChattNotification recipient="" sender="" type="" />
+);
 
 Default.story = {
 	name: 'default',
