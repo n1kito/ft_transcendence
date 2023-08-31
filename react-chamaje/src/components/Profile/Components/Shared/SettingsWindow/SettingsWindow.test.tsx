@@ -5,7 +5,12 @@ import SettingsWindow from './SettingsWindow';
 
 describe('<SettingsWindow />', () => {
 	test('it should mount', () => {
-		render(<SettingsWindow />);
+		const mockSetState = jest.fn();
+		render(
+			<SettingsWindow settingsWindowVisible={mockSetState}>
+				Settings content
+			</SettingsWindow>,
+		);
 
 		const settingsWindow = screen.getByTestId('SettingsWindow');
 

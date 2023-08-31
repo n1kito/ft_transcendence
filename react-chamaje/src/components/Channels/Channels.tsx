@@ -12,7 +12,7 @@ const Channels: React.FC<IPrivateMessagesProps> = ({
 	onCloseClick,
 	windowDragConstraintRef,
 }) => {
-	const chatsList = [];
+	const chatsList = [''];
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [settingsMode, setSettingsMode] = useState('');
 

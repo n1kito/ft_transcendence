@@ -79,9 +79,9 @@ const Profile: React.FC<ProfileProps> = ({
 		<Window
 			windowTitle={login || 'window title'}
 			links={[
-				{ name: 'Link1', url: '#' },
-				{ name: 'Link2', url: '#' },
-				{ name: 'Link3', url: '#' },
+				{ name: 'Link1', onClick: () => null },
+				{ name: 'Link2', onClick: () => null },
+				{ name: 'Link3', onClick: () => null },
 			]}
 			useBeigeBackground={true}
 			onCloseClick={onCloseClick}

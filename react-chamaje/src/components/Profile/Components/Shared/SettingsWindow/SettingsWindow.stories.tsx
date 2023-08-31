@@ -5,7 +5,11 @@ export default {
 	title: 'SettingsWindow',
 };
 
-export const Default = () => <SettingsWindow />;
+const mockSetState = jest.fn();
+
+export const Default = () => (
+	<SettingsWindow settingsWindowVisible={mockSetState}>Settings</SettingsWindow>
+);
 
 Default.story = {
 	name: 'default',
