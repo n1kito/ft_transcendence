@@ -28,9 +28,9 @@ const Login = () => {
 	}, [passkey]);
 
 	useEffect(() => {
-		console.log('User is authenticated: ', isAuthentificated);
-		console.log('2FA has been enabled', isTwoFAEnabled)
-		console.log('2FA has been verified: ', TwoFAVerified);
+		console.log('\n\n👩🏽‍💻 User is authenticated: ', isAuthentificated);
+		console.log('👩🏽‍💻 2FA has been enabled: ', isTwoFAEnabled)
+		console.log('👩🏽‍💻 2FA has been verified: ', TwoFAVerified);
 	}, [isAuthentificated, TwoFAVerified, isTwoFAEnabled]);
 
 	return (

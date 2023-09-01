@@ -5,7 +5,7 @@ import { AuthContext } from '../../contexts/AuthContext';
 import useAuth from '../../hooks/userAuth';
 
 const RetrieveAccessToken = () => {
-	const { updateAccessToken } = useAuth();
+	const { updateAccessToken, isTwoFAEnabled, setIsTwoFAEnabled } = useAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
 
@@ -33,7 +33,10 @@ const RetrieveAccessToken = () => {
 						console.log('2fa status: ', data.twofa);
 						if (!data.twofa) navigate('/desktop');
 						// Redirect user to desktop
-						else navigate('/');
+						else {
+							setIsTwoFAEnabled(true);
+							navigate('/');
+						}
 					}
 				} catch (error) {
 					console.error('Error fetching access token: ', error);

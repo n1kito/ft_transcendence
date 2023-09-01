@@ -57,6 +57,7 @@ const Desktop = () => {
 					};
 					// Set the user data in the context
 					setUserData(updatedData);
+					// setIsTwoFAEnabled(true);
 				} else {
 					logOut();
 				}
@@ -108,6 +109,7 @@ const Desktop = () => {
 				setQrcode(data);
 				setIsTwoFAEnabled(true);
 				setTwoFAVerified(false);
+				// logOut();
 			}
 		} catch (error) {
 			console.error('2fa: ', error);
@@ -116,7 +118,7 @@ const Desktop = () => {
 	useEffect(() => {}, [qrcode]);
 
 	useEffect(() => {
-		console.log('Desktop: is two fa enabled ', isTwoFAEnabled);
+		console.log('\n\n Desktop: is two fa enabled ?', isTwoFAEnabled);
 	}, [isTwoFAEnabled]);
 
 	const handleClickDisable = async () => {
