@@ -1,0 +1,9 @@
+/* Styling the LeaderboardCard component */
+
+.leaderboard-card-wrapper {
+	padding: 1rem;
+}
+
+.leaderboard-card-wrapper .shadow-wrapper {
+	width: 100%;
+}

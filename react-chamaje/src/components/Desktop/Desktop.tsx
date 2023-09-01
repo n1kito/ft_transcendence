@@ -13,12 +13,14 @@ import Profile from '../Profile/Profile';
 import PrivateMessages from '../PrivateMessages/PrivateMessages';
 import { AnimatePresence } from 'framer-motion';
 import ChatWindow from '../ChatWindow/ChatWindow';
+import Leaderboard from '../Leaderboard/Leaderboard';
+import Channels from '../Channels/Channels';
 
 import ProfileIcon from './Icons/CARD.svg';
 import ChatIcon from './Icons/PC.svg';
 import FriendsIcon from './Icons/NOTEBOOK.svg';
 import GameIcon from './Icons/CD.svg';
-import Channels from '../Channels/Channels';
+import LeaderboardIcon from './Icons/PLANET.svg';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -28,6 +30,7 @@ const Desktop = () => {
 	const [openProfileWindow, setProfileWindowIsOpen] = useState(false);
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
 	const [channelsWindowIsOpen, setChannelsWindowIsOpen] = useState(false);
+	const [leaderboardWindowIsOpen, setLeaderboardWindowIsOpen] = useState(true);
 
 	const navigate = useNavigate();
 	const { isAuthentificated, refreshToken, logOut, accessToken } = useAuth();
@@ -101,6 +104,12 @@ const Desktop = () => {
 				id={++iconId}
 				onDoubleClick={() => setFriendsWindowIsOpen(true)}
 			/>
+			<DesktopIcon
+				name="Board"
+				iconSrc={LeaderboardIcon}
+				id={++iconId}
+				onDoubleClick={() => setLeaderboardWindowIsOpen(true)}
+			/>
 			<AnimatePresence>
 				{openProfileWindow && (
 					<Profile
@@ -121,7 +130,13 @@ const Desktop = () => {
 						windowDragConstraintRef={windowDragConstraintRef}
 					/>
 				)}
-				<ChatWindow login="Jee" />
+				{/* <ChatWindow login="Jee" /> */}
+				{leaderboardWindowIsOpen && (
+					<Leaderboard
+						onCloseClick={() => setLeaderboardWindowIsOpen(false)}
+						windowDragConstraintRef={windowDragConstraintRef}
+					/>
+				)}
 			</AnimatePresence>
 		</div>
 	);
