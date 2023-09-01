@@ -22,7 +22,18 @@ const Desktop = () => {
 	const { userData, setUserData } = useContext(UserContext);
 	const [openFriendsWindow, setOpenedFriendsWindows] = useState(false);
 	const navigate = useNavigate();
-	const { isAuthentificated, refreshToken, logOut, accessToken } = useAuth();
+	const {
+		isAuthentificated,
+		refreshToken,
+		logOut,
+		accessToken,
+		setIsTwoFAEnabled,
+		isTwoFAEnabled,
+		TwoFAVerified,
+		setTwoFAVerified,
+	} = useAuth();
+
+	let [qrcode, setQrcode] = useState('');
 
 	useEffect(() => {
 		// if (!isAuthentificated) return;
@@ -80,11 +91,10 @@ const Desktop = () => {
 		navigate('/friends');
 	};
 
-	// TEST BUTTON FOR ENABLING TWO FACTOR AUTHENTICATION 
+	// TEST BUTTON FOR ENABLING TWO FACTOR AUTHENTICATION
 	const handleClick = async () => {
-
 		try {
-			const response = await fetch('api/login/2fa/turn-on' , {
+			const response = await fetch('api/login/2fa/turn-on', {
 				method: 'POST',
 				credentials: 'include',
 				headers: {
@@ -92,11 +102,39 @@ const Desktop = () => {
 				},
 			});
 			if (response.ok) {
-				console.log(response)
+				console.log(response);
 				const data = await response.text();
-				console.log('qr code: ', data)
+				console.log('qr code: ', data);
+				setQrcode(data);
+				setIsTwoFAEnabled(true);
+				setTwoFAVerified(false);
 			}
-		} catch (error) { 
+		} catch (error) {
+			console.error('2fa: ', error);
+		}
+	};
+	useEffect(() => {}, [qrcode]);
+
+	useEffect(() => {
+		console.log('Desktop: is two fa enabled ', isTwoFAEnabled);
+	}, [isTwoFAEnabled]);
+
+	const handleClickDisable = async () => {
+		try {
+			const response = await fetch('api/login/2fa/turn-off', {
+				method: 'POST',
+				credentials: 'include',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+			});
+			if (response.ok) {
+				console.log('is oke');
+				setQrcode('');
+				setIsTwoFAEnabled(false);
+				setTwoFAVerified(false);
+			}
+		} catch (error) {
 			console.error('2fa: ', error);
 		}
 	};
@@ -134,7 +172,10 @@ const Desktop = () => {
 					<Button baseColor={[308, 80, 92]} onClick={handleClick}>
 						enable 2fa
 					</Button>
-
+					{qrcode && <img src={qrcode} />}
+					<Button baseColor={[308, 80, 92]} onClick={handleClickDisable}>
+						disable 2fa
+					</Button>
 					<Profile login={userData ? userData.login : 'random'} />
 					{/* <Profile login='randomLg'/> */}
 

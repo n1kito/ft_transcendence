@@ -5,7 +5,7 @@ import Terminal from './Terminal';
 
 describe('<Terminal />', () => {
 	test('it should mount', () => {
-		render(<Terminal />);
+		render(<Terminal instruction="" type="" />);
 
 		const terminal = screen.getByTestId('Terminal');
 

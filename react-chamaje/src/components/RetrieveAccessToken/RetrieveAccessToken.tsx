@@ -29,10 +29,12 @@ const RetrieveAccessToken = () => {
 					if (data.accessToken) {
 						// Store token in AuthContext
 						updateAccessToken(data.accessToken);
+						// if 2fa is enabled redirect back to login page
+						console.log('2fa status: ', data.twofa);
+						if (!data.twofa) navigate('/desktop');
 						// Redirect user to desktop
-						navigate('/desktop');
+						else navigate('/');
 					}
-					
 				} catch (error) {
 					console.error('Error fetching access token: ', error);
 					//TODO: make an actual error page OR better make the login terminal display an error message

@@ -5,10 +5,15 @@ import { UserContext } from './UserContext';
 
 interface IAuthContext {
 	isAuthentificated: boolean;
+	isTwoFAEnabled: boolean;
+	setIsTwoFAEnabled: (status: boolean) => void;
 	logOut: () => void; // function that will log out the user
 	refreshToken: () => Promise<void>;
 	updateAccessToken: (generatedAccessToken: string) => void;
 	accessToken: string;
+
+	TwoFAVerified: boolean;
+	setTwoFAVerified: (status: boolean) => void;
 }
 
 // Create the AuthContext using React's createContext
@@ -26,6 +31,8 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 	children,
 }: AuthProviderProps) => {
 	const [isAuthentificated, setIsAuthentificated] = useState(false);
+	const [isTwoFAEnabled, setIsTwoFAEnabled] = useState(false);
+	const [TwoFAVerified, setTwoFAVerified] = useState(false);
 	const [accessToken, setAccessToken] = useState('');
 	// Effect to check authentication status when component mounts
 	useEffect(() => {
@@ -107,10 +114,14 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 		<AuthContext.Provider
 			value={{
 				isAuthentificated,
+				isTwoFAEnabled,
+				setIsTwoFAEnabled,
 				logOut,
 				refreshToken,
 				updateAccessToken,
 				accessToken,
+				TwoFAVerified,
+				setTwoFAVerified,
 			}}
 		>
 			{children}

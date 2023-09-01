@@ -85,8 +85,8 @@ export class AuthController {
 	}
 
 	@Post('retrieve-access-token')
-	async retrieveAccessToken(@Body() body: { code: string }): Promise<{
-		accessToken: string;
+	async retrieveAccessTokenAndTwoFAStatus(@Body() body: { code: string }): Promise<{
+		accessToken: string, twofa: boolean;
 	}> {
 		// Retrieve the code
 		const { code } = body;
@@ -108,8 +108,11 @@ export class AuthController {
 		// Delete the temporary authorization code
 		this.authService.deleteTemporaryAuthCode();
 
-		// Return the token
-		return { accessToken: accessToken };
+		// verify if 2fa is enabled if so return true;
+		const response = await this.authService.istwofaEnabled(payload.userId);
+
+		console.log('\n\n\n 2fa', response.isTwoFactorAuthenticationEnabled)
+		return { accessToken: accessToken, twofa: response.isTwoFactorAuthenticationEnabled}
 	}
 
 	@Get('success')
@@ -128,22 +131,41 @@ export class AuthController {
 		// extract access token from header, decode it and retrieve userId 
 		const authorizationHeader = req.headers['authorization'];
 		if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
-		const accessToken = authorizationHeader.slice(7); 
-		const decodedAccessToken = this.tokenService.verifyToken(accessToken);
-		if (!decodedAccessToken) {
-			throw new NotFoundException('Authentication required');
+			const accessToken = authorizationHeader.slice(7); 
+			const decodedAccessToken = this.tokenService.verifyToken(accessToken);
+			if (!decodedAccessToken) {
+				throw new NotFoundException('Authentication required');
+			}
+
+			// generate a 2fa secret and stores it in database and create a qr code url
+			const otpAuthUrl = await this.authService.generate2faSecret(decodedAccessToken.userId);
+			console.log('🥎🥎🥎🥎 otpAuthUrl: ', otpAuthUrl)
+
+			const qrCodeUrl = toDataURL(otpAuthUrl);
+
+			// return qr code url
+			return qrCodeUrl;
+		}
+	}
+
+	@Post('2fa/turn-off')
+	async turnOff2fa(@Req() req: CustomRequest) {
+
+		const authorizationHeader = req.headers['authorization'];
+		if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
+			const accessToken = authorizationHeader.slice(7); 
+			const decodedAccessToken = this.tokenService.verifyToken(accessToken);
+			if (!decodedAccessToken) {
+				throw new NotFoundException('Authentication required');
+			}
+			//turning off the 2fa
+			try {
+				await this.authService.turnOffTwoFactorAuthentication(decodedAccessToken.userId);
+			} catch (e) { console.error('Could not turn off 2fa: ', e); }
+			
 		}
 
-		// generate a 2fa secret and stores it in database and create a qr code url
-		const otpAuthUrl = await this.authService.generate2faSecret(decodedAccessToken.userId);
-		console.log('🥎🥎🥎🥎 otpAuthUrl: ', otpAuthUrl)
-
-		const qrCodeUrl = toDataURL(otpAuthUrl);
-
-		// return qr code url
-		return qrCodeUrl;
 	}
-}
 
 	@Post('2fa/authenticate')
 	@HttpCode(200)
