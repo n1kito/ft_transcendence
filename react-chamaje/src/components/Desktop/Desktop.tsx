@@ -24,6 +24,7 @@ const Desktop = () => {
 	const navigate = useNavigate();
 	const {
 		isAuthentificated,
+		setIsAuthentificated,
 		refreshToken,
 		logOut,
 		accessToken,
@@ -57,7 +58,7 @@ const Desktop = () => {
 					};
 					// Set the user data in the context
 					setUserData(updatedData);
-					// setIsTwoFAEnabled(true);
+					setIsTwoFAEnabled(data.isTwoFaEnabled);
 				} else {
 					logOut();
 				}
@@ -68,9 +69,13 @@ const Desktop = () => {
 
 		if (isAuthentificated) fetchUserData();
 		return () => {
+			// alert();
 			userData?.chatSocket?.endConnection();
 			// when unmounting desktop component, reset userData
 			setUserData(null);
+			setIsTwoFAEnabled(false);
+			setIsAuthentificated(false);
+			setIsTwoFAEnabled(false);
 		};
 	}, []);
 

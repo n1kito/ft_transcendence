@@ -111,7 +111,6 @@ export class AuthController {
 		// verify if 2fa is enabled if so return true;
 		const response = await this.authService.istwofaEnabled(payload.userId);
 
-		console.log('\n\n\n 2fa', response.isTwoFactorAuthenticationEnabled)
 		return { accessToken: accessToken, twofa: response.isTwoFactorAuthenticationEnabled}
 	}
 

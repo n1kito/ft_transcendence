@@ -53,6 +53,7 @@ export class UserController {
 			email: user.email,
 			image: user.image,
 			friends: user.friends,
+			isTwoFaEnabled: user.isTwoFactorAuthenticationEnabled,
 		};
 	}
 

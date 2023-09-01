@@ -11,7 +11,11 @@ const Login = () => {
 	const constraintRef = useRef(null);
 
 	const [passkey, setPasskey] = useState('');
-	const { isAuthentificated, TwoFAVerified, isTwoFAEnabled } = useAuth();
+	const {
+		isAuthentificated,
+		TwoFAVerified,
+		isTwoFAEnabled,
+	} = useAuth();
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
 			const updatedPasskey = passkey.slice(-3) + event.key;
@@ -27,12 +31,6 @@ const Login = () => {
 		};
 	}, [passkey]);
 
-	useEffect(() => {
-		console.log('\n\n👩🏽‍💻 User is authenticated: ', isAuthentificated);
-		console.log('👩🏽‍💻 2FA has been enabled: ', isTwoFAEnabled)
-		console.log('👩🏽‍💻 2FA has been verified: ', TwoFAVerified);
-	}, [isAuthentificated, TwoFAVerified, isTwoFAEnabled]);
-
 	return (
 		<div id="wrapper">
 			{/* <NavBar /> */}
@@ -41,7 +39,6 @@ const Login = () => {
 
 				{passkey === 'omer' && !isAuthentificated && (
 					<Window windowTitle="Login">
-						{/* <Window windowTitle="Charlotte" links={links}> */}
 						<Terminal
 							instruction="Would you like to login with 42 ? (Y/n)"
 							type="bool"
@@ -49,9 +46,8 @@ const Login = () => {
 					</Window>
 				)}
 
-				{ isAuthentificated && isTwoFAEnabled &&  !TwoFAVerified && (
+				{isAuthentificated && isTwoFAEnabled && !TwoFAVerified && (
 					<Window windowTitle="Login">
-						{/* <Window windowTitle="Charlotte" links={links}> */}
 						<Terminal instruction="Enter you Google code" type="input" />
 					</Window>
 				)}

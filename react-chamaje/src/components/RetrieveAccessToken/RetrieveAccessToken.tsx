@@ -29,14 +29,14 @@ const RetrieveAccessToken = () => {
 					if (data.accessToken) {
 						// Store token in AuthContext
 						updateAccessToken(data.accessToken);
-						// if 2fa is enabled redirect back to login page
-						console.log('2fa status: ', data.twofa);
-						if (!data.twofa) navigate('/desktop');
-						// Redirect user to desktop
-						else {
+						
+						// Redirect user back to login page to continue login process with google authenticator
+						if (data.twofa) {
 							setIsTwoFAEnabled(true);
 							navigate('/');
 						}
+						// else redirect to desktop page
+						else navigate('/desktop');
 					}
 				} catch (error) {
 					console.error('Error fetching access token: ', error);

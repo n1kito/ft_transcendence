@@ -5,6 +5,7 @@ import { UserContext } from './UserContext';
 
 interface IAuthContext {
 	isAuthentificated: boolean;
+	setIsAuthentificated: (status: boolean) => void;
 	isTwoFAEnabled: boolean;
 	setIsTwoFAEnabled: (status: boolean) => void;
 	logOut: () => void; // function that will log out the user
@@ -74,6 +75,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 		Cookies.remove('refreshToken');
 		setAccessToken('');
 		setIsAuthentificated(false);
+		
 	};
 
 	// Function to refresh the token by making a request to the server
@@ -114,6 +116,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 		<AuthContext.Provider
 			value={{
 				isAuthentificated,
+				setIsAuthentificated,
 				isTwoFAEnabled,
 				setIsTwoFAEnabled,
 				logOut,

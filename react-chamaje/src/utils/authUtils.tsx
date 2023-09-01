@@ -23,7 +23,7 @@ export function showComponentIfNotLoggedIn<P extends object>(
 			) {
 				navigate('/desktop');
 			}
-		}, [isAuthentificated, navigate]);
+		}, [isAuthentificated, navigate, isTwoFAEnabled, TwoFAVerified]);
 		return <Component {...props} />;
 	};
 
