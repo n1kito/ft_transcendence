@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import './TargetBadge.css';
 import FriendBadge from '../../../Friends/Components/FriendBadge/FriendBadge';
 import mysteryBox from './images/mysteryBox.png';
@@ -10,22 +10,58 @@ import theRing from './images/roulette/the-ring.jpg';
 import xavier from './images/roulette/xavier.jpg';
 import jee from './images/jee.jpeg';
 import BlackBadge from '../Shared/BlackBadge/BlackBadge';
+import OnlineIndicator from '../Shared/OnlineIndicator/OnlineIndicator';
+import { UserContext } from '../../../../contexts/UserContext';
+import { AuthContext } from '../../../../contexts/AuthContext';
+import useAuth from '../../../../hooks/userAuth';
 
 const rouletteImages = [chucky, norminet, scream, sophie, theRing, xavier];
 
-const TargetBadge = () => {
+interface ITargetBadgeProps {
+	isOwnProfile: boolean;
+	targetLogin: string;
+	targetDiscoveredByUser: boolean;
+}
+
+const TargetBadge: React.FC<ITargetBadgeProps> = ({
+	isOwnProfile,
+	targetLogin,
+	targetDiscoveredByUser,
+}) => {
 	const [imageIndex, setImageIndex] = useState(0);
-	const [badgeImage, setBadgeImage] = useState(mysteryBox);
 	const [badgeTitle, setBadgeTitle] = useState('Target');
 	const [isAnimationRunning, setIsAnimationRunning] = useState(false);
-	const [targetHasBeenAssigned, setTargetHasBeenAssigned] = useState(false);
 	const [hasStartedRoulette, setHasStartedRoulette] = useState(false);
 	const [isShaking, setIsShaking] = useState(false);
-
-	// const rouletteImages = Object.values(rouletteImageImports);
+	const { accessToken } = useAuth();
+	const { userData, setUserData } = useContext(UserContext);
+	const [targetHasBeenAssigned, setTargetHasBeenAssigned] = useState(
+		targetDiscoveredByUser,
+	);
+	const [badgeImage, setBadgeImage] = useState<string | undefined>(mysteryBox);
 
 	const updateBackgroundImage = () => {
 		setImageIndex((prevIndex) => (prevIndex + 1) % rouletteImages.length);
+	};
+
+	const updateTargetStatus = async () => {
+		try {
+			console.log('trying to fucking update the target update status');
+			const response = await fetch('/api/user/me/updateTargetStatus', {
+				method: 'PUT',
+				credentials: 'include',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${accessToken}`,
+				},
+			});
+			if (!response.ok) {
+				const errorMessage = await response.text();
+				console.error('Error: ', errorMessage);
+			}
+		} catch (error) {
+			console.error('Target badge fetch error: ', error);
+		}
 	};
 
 	const startRoulette = () => {
@@ -41,10 +77,11 @@ const TargetBadge = () => {
 			} else {
 				// Roulette animation is complete, change badgeImage to your desired image here
 				setTimeout(() => {
-					setBadgeImage(jee);
+					setBadgeImage(userData?.targetImage || undefined);
 					setBadgeTitle('Target');
 					setIsAnimationRunning(false);
 					setTargetHasBeenAssigned(true);
+					updateTargetStatus();
 				}, 1000);
 			}
 		};
@@ -69,8 +106,8 @@ const TargetBadge = () => {
 
 	// Set the default badgeImage state when the component mounts
 	useEffect(() => {
-		setBadgeImage(mysteryBox);
-	}, []);
+		setBadgeImage(targetHasBeenAssigned ? userData?.targetImage : mysteryBox);
+	}, [userData, targetHasBeenAssigned]);
 
 	useEffect(() => {
 		if (!hasStartedRoulette) {
@@ -89,11 +126,13 @@ const TargetBadge = () => {
 
 	return (
 		<div
-			onClick={targetHasBeenAssigned ? openUserProfile : handleClick}
+			onClick={
+				targetHasBeenAssigned || !isOwnProfile ? openUserProfile : handleClick
+			}
 			className={`target-badge ${
 				isAnimationRunning ? 'animationRunning' : ''
-			} ${isShaking ? 'shake' : ''} ${
-				targetHasBeenAssigned ? 'black-badge-visible' : ''
+			} ${!targetHasBeenAssigned && isShaking ? 'shake' : ''} ${
+				targetHasBeenAssigned || !isOwnProfile ? 'black-badge-visible' : ''
 			}`}
 		>
 			<FriendBadge
@@ -102,7 +141,7 @@ const TargetBadge = () => {
 				badgeImageUrl={badgeImage}
 				onlineIndicator={targetHasBeenAssigned}
 			/>
-			{targetHasBeenAssigned && <BlackBadge>@jeepark</BlackBadge>}
+			{targetHasBeenAssigned && <BlackBadge>@{targetLogin}</BlackBadge>}
 		</div>
 	);
 };

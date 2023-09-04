@@ -6,7 +6,7 @@ export default {
 };
 
 export const Default = () => (
-	<MatchHistoryBadge userScore={5} adversaryScore={7} badgeTitle="Title" />
+	<MatchHistoryBadge userScore={5} adversaryScore={7} adversaryLogin="Login" />
 );
 
 Default.story = {

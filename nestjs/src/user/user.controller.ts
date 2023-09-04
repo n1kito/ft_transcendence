@@ -34,8 +34,9 @@ export class UserController {
 		const userId = this.userService.authenticateUser(request);
 
 		// Fetch the user information from the database using the userId
-		const user = await this.prisma.user.findUnique({ 
+		const user = await this.prisma.user.findUnique({
 			where: { id: request.userId },
+			include: { gamesPlayed: true, target: true }, // Include the gamesPlayed relation
 		});
 
 		// Handle case when user is not found
@@ -43,11 +44,52 @@ export class UserController {
 			return { message: 'User not found' };
 		}
 
+		// Get user games count
+		const gamesCount = user.gamesPlayed.length;
+		// await this.prisma.game.count({
+		// 	where: {
+		// 		OR: [{ player1Id: user.id }, { player2Id: user.id }],
+		// 	},
+		// });
+
+		// Bestie logic
+		const bestieUser = await this.userService.findUserBestie(user.id);
+
+		// Target logic
+		const targetLogin = user?.target?.login;
+		const targetImage = user?.target?.image;
+		// Rival logic
+		const { rivalLogin, rivalImage } = await this.userService.findUserRival(
+			user.id,
+		);
+
+		// get user's rank
+		const usersWithHigherKillCountThanOurUser = await this.prisma.user.count({
+			where: {
+				killCount: {
+					gt: await this.prisma.user
+						.findUnique({
+							where: { id: user.id },
+							select: { killCount: true },
+						})
+						.then((user) => user?.killCount || 0),
+				},
+			},
+		});
+		const userRank = usersWithHigherKillCountThanOurUser + 1;
 		// Return the user information
 		return {
-			login: user.login,
-			email: user.email,
-			image: user.image,
+			...user,
+			targetLogin,
+			targetImage,
+			gamesCount,
+			bestieLogin: bestieUser.bestieLogin,
+			bestieImage: bestieUser.bestieImage,
+			rivalLogin,
+			rivalImage,
+			killCount: user.killCount,
+			winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
+			rank: userRank,
 		};
 	}
 
@@ -63,6 +105,28 @@ export class UserController {
 		response
 			.status(HttpStatus.OK)
 			.json({ message: 'User updated successfully' });
+	}
+
+	@Put('me/updateTargetStatus')
+	async updateTargetStatus(
+		@Req() request: CustomRequest,
+		@Res() response: Response,
+	) {
+		try {
+			console.log('\n🞋 UPDATING TARGET STATUS 🞋\n');
+			const userId = this.userService.authenticateUser(request);
+			const user = await this.prisma.user.update({
+				where: { id: userId },
+				data: { targetDiscoveredByUser: true },
+			});
+			response
+				.status(200)
+				.json({ message: 'Target status updated successfully' });
+		} catch (error) {
+			response
+				.status(500)
+				.json({ error: 'Could not update target discovery status.' });
+		}
 	}
 
 	// TODO: change route to user/me/friends or something, I just created a separate one to avoid with the /user/me routes Jee created
@@ -85,8 +149,10 @@ export class UserController {
 		return friends;
 	}
 
+	// TODO: why do we have this and the /me endpoint ?
 	// TODO: switch this endpoint to userID
 	// TODO: move the logics to user.service.ts ?
+	// TODO: Is this correctly authenticated ?
 	@Get(':login')
 	async getUserInfo(
 		@Param('login') login: string,
@@ -94,6 +160,7 @@ export class UserController {
 	) {
 		const user = await this.prisma.user.findUnique({
 			where: { login },
+			include: { gamesPlayed: true },
 		});
 		if (!user) {
 			// Handle case when user is not found
@@ -104,20 +171,76 @@ export class UserController {
 			where: { id: request.userId },
 		});
 		const userRequestingLogin = userRequesting?.login;
+		// get how many games the player has played by counting the games where user
+		// was user player1 or player2
+		const gamesCount = user.gamesPlayed.length;
+		// get user's rank
+		const usersWithHigherKillCountThanOurUser = await this.prisma.user.count({
+			where: {
+				killCount: {
+					gt: await this.prisma.user
+						.findUnique({
+							where: { id: user.id },
+							select: { killCount: true },
+						})
+						.then((user) => user?.killCount || 0),
+				},
+			},
+		});
+		// Bestie logic
+		const bestieUser = await this.userService.findUserBestie(user.id);
+		// Rank logic
+		const userRank = usersWithHigherKillCountThanOurUser + 1;
+		// Target logic
+		const targetUser = await this.prisma.user.findUnique({
+			where: { id: user.targetId },
+		});
+		// Rival logic
+		const { rivalLogin, rivalImage } = await this.userService.findUserRival(
+			user.id,
+		);
+		// Match history logic
+		let matchHistory;
+		try {
+			matchHistory = await this.userService.getUserMatchHistory(user.id);
+		} catch (error) {
+			console.log('Error retrieving match history: ', error);
+		}
 		// if the login of the user who sent the request is the same as the login of the user they want the info of,
 		// we return more information
 		if (userRequestingLogin && userRequestingLogin === login)
 			return {
-				login: user.login,
-				email: user.email,
-				createdAt: user.createdAt,
-				image: user.image,
+				...user,
+				gamesCount: gamesCount,
+				killCount: user.killCount,
+				winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
+				rank: userRank,
+				targetLogin: targetUser.login,
+				targetImage: targetUser.image,
+				bestieLogin: bestieUser.bestieLogin,
+				bestieImage: bestieUser.bestieImage,
+				matchHistory: matchHistory,
+				rivalLogin,
+				rivalImage,
 			};
+		// else, we only return what is needed for the profile component
 		else
 			return {
 				login: user.login,
 				image: user.image,
-				// add more options to return here
+				// add profile information
+				gamesCount: gamesCount,
+				killCount: user.killCount,
+				winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
+				rank: userRank,
+				targetLogin: targetUser.login,
+				targetImage: targetUser.image,
+				targetDiscoveredByUser: user.targetDiscoveredByUser,
+				bestieLogin: bestieUser.bestieLogin,
+				bestieImage: bestieUser.bestieImage,
+				matchHistory: matchHistory,
+				rivalLogin,
+				rivalImage,
 			};
 	}
 }

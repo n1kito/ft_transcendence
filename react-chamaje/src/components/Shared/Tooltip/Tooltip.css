@@ -1,0 +1,126 @@
+/* Styling the Tooltip component */
+
+.tooltip-wrapper {
+	border-radius: 9px;
+	background: #7757f8;
+	filter: drop-shadow(0.5rem 0.5rem 0px #5c38eb);
+
+	display: inline-flex;
+	padding: 1rem;
+	flex-direction: column;
+	justify-content: center;
+	align-items: flex-start;
+	gap: 0.5rem;
+
+	color: #fff;
+	font-family: 'Fredoka', sans-serif;
+	font-size: 0.9rem;
+	letter-spacing: 0.075px;
+
+	position: absolute;
+	z-index: 5;
+	width: fit-content;
+	opacity: 0;
+	transition: all 0.2s linear;
+
+	white-space: nowrap;
+	text-align: left;
+
+	pointer-events: none;
+}
+
+/* ARROW STYLING */
+
+.arrow {
+	aspect-ratio: 1/1;
+	height: 0.8rem;
+	background-color: #7757f8;
+	position: absolute;
+}
+
+.arrow-tooltip-top,
+.arrow-tooltip-bottom {
+	left: 50%;
+	transform: translateX(-50%) rotate(45deg);
+}
+
+.arrow-tooltip-left,
+.arrow-tooltip-right {
+	top: 50%;
+	transform: translateY(-50%) rotate(45deg);
+}
+
+.arrow-tooltip-top {
+	bottom: -0.4rem;
+}
+
+.arrow-tooltip-right {
+	left: -0.4rem;
+}
+
+.arrow-tooltip-bottom {
+	top: -0.4rem;
+}
+
+.arrow-tooltip-left {
+	right: -0.4rem;
+}
+
+/* DIFFERENT TOOLTIP POSITIONS */
+
+.tooltip-top,
+.tooltip-bottom {
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+.tooltip-left,
+.tooltip-right {
+	top: 50%;
+	transform: translateY(-50%);
+}
+
+.tooltip-top {
+	bottom: calc(100% + 1rem);
+}
+
+.tooltip-right {
+	left: calc(100% + 1rem);
+}
+
+.tooltip-bottom {
+	top: calc(100% + 0.5rem);
+}
+
+.tooltip-left {
+	right: calc(100% + 1rem);
+}
+
+/* USED FOR FADE IN TRANSITIONS */
+
+.tooltip-title {
+	font-weight: 700;
+	color: white;
+	white-space: nowrap;
+	font-size: 1.2rem;
+}
+
+.tooltip-visible {
+	opacity: 1;
+}
+
+div.tooltip-visible.tooltip-top {
+	bottom: calc(100% + 1.5rem);
+}
+
+div.tooltip-visible.tooltip-right {
+	left: calc(100% + 1.5rem);
+}
+
+div.tooltip-visible.tooltip-bottom {
+	top: calc(100% + 1rem);
+}
+
+div.tooltip-visible.tooltip-left {
+	right: calc(100% + 1.5rem);
+}

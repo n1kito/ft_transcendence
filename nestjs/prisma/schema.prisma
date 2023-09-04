@@ -30,5 +30,33 @@ model User {
     login_is_locked Boolean @default(false)
     email_is_locked Boolean @default(false)
     image_is_locked Boolean @default(false)
-    userId          Int?
+
+    // Games logic
+    gamesPlayed gameSession[]
+
+    // Profile variables
+    // These could be resolved upon fetch requests, but more efficient to store them directly
+    killCount Int @default(0)
+
+    // Target logic
+    target                 User?   @relation("Target", fields: [targetId], references: [id])
+    targetId               Int?
+    targetedBy             User[]  @relation("Target")
+    targetDiscoveredByUser Boolean @default(false)
+}
+
+model Game {
+    id       Int           @id @default(autoincrement())
+    playedAt DateTime      @default(now())
+    players  gameSession[]
+}
+
+model gameSession {
+    id       Int     @id @default(autoincrement())
+    user     User    @relation(fields: [userId], references: [id])
+    userId   Int
+    game     Game    @relation(fields: [gameId], references: [id])
+    gameId   Int
+    score    Int
+    isWinner Boolean
 }

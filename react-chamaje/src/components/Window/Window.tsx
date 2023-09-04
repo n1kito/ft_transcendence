@@ -52,7 +52,7 @@ const Window: React.FC<WindowProps> = ({
 				dragEnded ? { scale: 1, opacity: 1 } : { scale: 1, opacity: 1, y: '0%' }
 			}
 			transition={{ duration: 0.5 }}
-			id="windowWrapper"
+			className="windowWrapper"
 			drag
 			onDragStart={startDrag}
 			onDragEnd={endDrag}
@@ -76,7 +76,7 @@ const Window: React.FC<WindowProps> = ({
 				))}
 			</WindowMenu>
 			<div
-				id="windowContent"
+				className="windowContent"
 				style={{ backgroundColor: useBeigeBackground ? '#FFFBEC' : '' }}
 			>
 				{children}

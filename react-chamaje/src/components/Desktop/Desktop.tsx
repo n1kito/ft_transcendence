@@ -19,9 +19,9 @@ const Desktop = () => {
 	const navigate = useNavigate();
 	const { isAuthentificated, refreshToken, logOut, accessToken } = useAuth();
 
-	if (isAuthentificated) {
-		console.log('user is authentificated');
-	} else console.log('user is not authentificated');
+	// if (isAuthentificated) {
+	// 	console.log('user is authentificated');
+	// } else console.log('user is not authentificated');
 	useEffect(() => {
 		// fetch request
 		const fetchUserData = async () => {
@@ -37,7 +37,6 @@ const Desktop = () => {
 				});
 				if (response.ok) {
 					const data = await response.json();
-					console.log(data);
 					// Set the user data in the context
 					setUserData(data);
 				} else {
@@ -85,7 +84,8 @@ const Desktop = () => {
 				]}
 				useBeigeBackground={true}
 			>
-				<Profile login={userData ? userData.login : 'random'} />
+				{/* <Profile login={userData ? userData.login : 'random'} /> */}
+				<Profile login="mjallada" />
 				{/* <Profile login='randomLg'/> */}
 			</Window>
 		</div>
