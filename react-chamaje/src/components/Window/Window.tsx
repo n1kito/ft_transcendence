@@ -98,7 +98,7 @@ const Window: React.FC<WindowProps> = ({
 			ref={windowRef}
 			onAnimationComplete={() => {
 				// Once the div has transitionned in, store its initial dimensions in the corresponding state
-				if (windowRef.current) {
+				if (resizable && windowRef.current) {
 					const { width, height } = windowRef.current.getBoundingClientRect();
 					setDimensions({ width, height });
 				}
