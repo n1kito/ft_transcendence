@@ -14,7 +14,7 @@ services:
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
     # Run a command against the development stage of the image
-    command: ["sh", "-c", "chmod +x /app/entrypoint.sh && ./entrypoint.sh"]
+    command: ['sh', '-c', 'chmod +x /app/entrypoint.sh && ./entrypoint.sh']
     depends_on:
       - postgres
     ports:
@@ -55,7 +55,7 @@ services:
       context: ./react-chamaje
       target: development
     restart: unless-stopped
-    command: ["sh", "-c", "chmod +x /app/entrypoint.sh && ./entrypoint.sh"]
+    command: ['sh', '-c', 'chmod +x /app/entrypoint.sh && ./entrypoint.sh']
     ports:
       - '3001:3000'
     depends_on:

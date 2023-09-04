@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Title.css';
+import Tooltip from '../../../Shared/Tooltip/Tooltip';
 
 interface TitleProps {
-	title?: string;
 	bigTitle?: boolean;
 	highlight?: boolean;
 	highlightColor?: string;
@@ -12,7 +12,6 @@ interface TitleProps {
 }
 
 const Title: React.FC<TitleProps> = ({
-	title = '',
 	bigTitle = false,
 	highlight = bigTitle ? false : true,
 	highlightColor = highlight ? '#FBD9F6' : '',
@@ -20,6 +19,8 @@ const Title: React.FC<TitleProps> = ({
 	toolTip = '',
 	children,
 }) => {
+	const [isHovered, setIsHovered] = useState(false);
+
 	return (
 		<div
 			className="title-wrapper"
@@ -35,7 +36,18 @@ const Title: React.FC<TitleProps> = ({
 					></div>
 				)}
 			</div>
-			{toolTip ? <div className="tooltip">(?)</div> : null}
+			{toolTip ? (
+				<div
+					className="tooltip-trigger"
+					onMouseEnter={() => setIsHovered(true)}
+					onMouseLeave={() => setIsHovered(false)}
+				>
+					(?)
+					<Tooltip position="bottom" isVisible={isHovered}>
+						{toolTip}
+					</Tooltip>
+				</div>
+			) : null}
 		</div>
 	);
 };

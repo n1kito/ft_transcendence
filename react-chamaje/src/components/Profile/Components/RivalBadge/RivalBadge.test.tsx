@@ -5,7 +5,7 @@ import RivalBadge from './RivalBadge';
 
 describe('<RivalBadge />', () => {
 	test('it should mount', () => {
-		render(<RivalBadge />);
+		render(<RivalBadge rivalLogin="login" />);
 
 		const rivalBadge = screen.getByTestId('RivalBadge');
 

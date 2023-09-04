@@ -40,7 +40,10 @@ const FriendsList = () => {
 		const handleLoggedIn = (data: number) => {
 			setFriends((prevFriends) =>
 				prevFriends.map((friend) => {
-					if (friend.id === data && (friend.onlineStatus === false || friend.onlineStatus === undefined)) {
+					if (
+						friend.id === data &&
+						(friend.onlineStatus === false || friend.onlineStatus === undefined)
+					) {
 						nbOnline++;
 						return { ...friend, onlineStatus: true };
 					} else {
@@ -58,7 +61,10 @@ const FriendsList = () => {
 		const handleLoggedInResponse = (data: number) => {
 			setFriends((prevFriends) =>
 				prevFriends.map((friend) => {
-					if (friend.id === data && (friend.onlineStatus === false  || friend.onlineStatus === undefined)) {
+					if (
+						friend.id === data &&
+						(friend.onlineStatus === false || friend.onlineStatus === undefined)
+					) {
 						nbOnline++;
 						return { ...friend, onlineStatus: true };
 					} else {

@@ -1,7 +1,5 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
-import { access } from 'fs';
-import { UserContext } from './UserContext';
 
 interface IAuthContext {
 	isAuthentificated: boolean;

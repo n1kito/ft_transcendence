@@ -4,7 +4,7 @@
 	border-radius: 0.71838rem;
 	border: 2px solid #000;
 	background: #fff;
-	overflow: hidden;
+	/* overflow: hidden; */
 	height: fit-content;
 	width: fit-content;
 }
@@ -22,4 +22,8 @@
 
 .clickable:hover {
 	cursor: pointer;
+}
+
+.dashed-border {
+	border: 2px dashed black;
 }

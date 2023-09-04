@@ -1,0 +1,24 @@
+/* Styling the Channels component */
+
+.channels-list-wrapper {
+	padding: 1rem;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	gap: 1rem;
+
+	min-height: 20vh;
+	max-height: 70vh;
+	overflow: auto;
+}
+
+.channels-list-wrapper > * {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.channels-list-wrapper > *:not(.dashed-border) {
+	width: 100%;
+}

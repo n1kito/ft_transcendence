@@ -59,9 +59,9 @@ function App() {
 									<Route path="/" element={<ProtectedLogin />} />
 									<Route path="/desktop" element={<ProtectedDesktop />} />
 									<Route path="/friends" element={<ProtectedDesktop />} />
-									{/* <Route path="/" element={<Login />} />
-									<Route path="/desktop" element={<Desktop />} />
-									<Route path="/friends" element={<Desktop />} /> */}
+									{/* <Route path="/" element={<Login />} /> */}
+									{/* <Route path="/desktop" element={<Desktop />} /> */}
+									{/* <Route path="/friends" element={<Desktop />} /> */}
 									<Route
 										path="/retrieve-token"
 										element={<RetrieveAccessToken />}
