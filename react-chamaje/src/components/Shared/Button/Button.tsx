@@ -16,7 +16,6 @@ const Button: React.FC<MyButtonProps> = ({
 	disabled = false,
 	children,
 }) => {
-	console.log('Button: disabled:', { disabled });
 	const buttonClass = disabled ? 'disabled' : '';
 
 	// Convert the baseColor array to an rgb color string
@@ -46,19 +45,21 @@ const Button: React.FC<MyButtonProps> = ({
 	} as React.CSSProperties;
 
 	const handleClick = () => {
-		console.log('Button clicked');
 		if (!disabled && onClick) {
 			onClick();
 		}
 	};
 
 	return (
-		<div>
-			<div id="buttonWrapper" className={buttonClass} style={buttonStyle}>
-				<button disabled={disabled} id="coloredButton" onClick={handleClick}>
-					{children}
-				</button>
-			</div>
+		<div
+			className={`button-wrapper ${buttonClass} ${
+				disabled ? 'button-disabled' : ''
+			}`}
+			style={buttonStyle}
+		>
+			<button className="colored-button" onClick={handleClick}>
+				{children}
+			</button>
 		</div>
 	);
 };

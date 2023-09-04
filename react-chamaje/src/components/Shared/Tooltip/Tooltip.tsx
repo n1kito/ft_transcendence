@@ -1,5 +1,10 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import './Tooltip.css';
+
+// [ HOW TO USE ]
+// The tooltip should be in a common div with the element it's "tooltiping"
+// That parent div would have onMouseEnter set 	a isHovered state to true, and to false onMouseLeave
+// The Tooltip's isVisible prop would be set to isHovered, so it will only appear when the sibling element is hovered.
 
 interface ITooltipProps {
 	children: ReactNode;
@@ -14,11 +19,18 @@ const Tooltip: React.FC<ITooltipProps> = ({
 	isVisible = false,
 	position = 'right',
 }) => {
+	const [isHovered, setIsHovered] = useState(false);
+
 	return (
 		<div
 			className={`tooltip-wrapper tooltip-${position} ${
-				isVisible ? 'tooltip-visible' : ''
+				isHovered || isVisible ? 'tooltip-visible' : ''
 			}`}
+			onMouseEnter={() => {
+				console.log('tooltip is hovered');
+				setIsHovered(true);
+			}}
+			onMouseLeave={() => setIsHovered(false)}
 		>
 			<div className={`arrow arrow-tooltip-${position}`}></div>
 			{tooltipTitle ? (

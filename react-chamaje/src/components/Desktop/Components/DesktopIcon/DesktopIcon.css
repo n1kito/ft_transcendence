@@ -10,7 +10,7 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 0.5rem;
+	gap: 1.5rem;
 	z-index: 1;
 }
 
@@ -30,7 +30,7 @@
 }
 
 .desktopIconWrapper img {
-	width: 6rem;
+	width: 4rem;
 	--stroke-pos: 2px;
 	--stroke-neg: -2px;
 	filter: drop-shadow(var(--stroke-pos) var(--stroke-pos) 0 black)

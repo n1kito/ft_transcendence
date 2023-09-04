@@ -19,7 +19,7 @@ describe('<TitleList />', () => {
 			targetDiscoveredByUser: false,
 			// other default values...
 		};
-		render(<TitleList profileData={testProfileData}/>);
+		render(<TitleList profileData={testProfileData} />);
 
 		const titleList = screen.getByTestId('TitleList');
 

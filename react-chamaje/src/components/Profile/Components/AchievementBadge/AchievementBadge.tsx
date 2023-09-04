@@ -23,7 +23,6 @@ const AchievementBadge: React.FC<IAchievementBadgeProps> = ({
 			<img
 				src={icon}
 				onMouseEnter={() => {
-					console.log('HOVER');
 					setIsHovered(true);
 				}}
 				onMouseLeave={() => setIsHovered(false)}

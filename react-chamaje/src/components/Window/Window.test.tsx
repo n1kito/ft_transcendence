@@ -5,7 +5,7 @@ import Window from './Window';
 
 describe('<Window />', () => {
 	test('it should mount', () => {
-		render(<Window />);
+		render(<Window onCloseClick={() => null} />);
 
 		const window = screen.getByTestId('Window');
 

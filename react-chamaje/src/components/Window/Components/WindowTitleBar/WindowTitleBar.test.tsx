@@ -5,7 +5,7 @@ import WindowTitleBar from './WindowTitleBar';
 
 describe('<WindowTitleBar />', () => {
 	test('it should mount', () => {
-		render(<WindowTitleBar />);
+		render(<WindowTitleBar onCloseClick={() => null} />);
 
 		const windowTitleBar = screen.getByTestId('WindowTitleBar');
 

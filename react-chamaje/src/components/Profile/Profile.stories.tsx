@@ -5,7 +5,15 @@ export default {
 	title: 'Profile',
 };
 
-export const Default = () => <Profile login="testerlg" />;
+const mockRef = { current: null }; // Mock ref object
+
+export const Default = () => (
+	<Profile
+		login="testerlg"
+		onCloseClick={() => null}
+		windowDragConstraintRef={mockRef}
+	/>
+);
 
 Default.story = {
 	name: 'default',
