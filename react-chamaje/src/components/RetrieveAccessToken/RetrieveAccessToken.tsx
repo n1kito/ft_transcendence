@@ -1,7 +1,6 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import './RetrieveAccessToken.css';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../contexts/AuthContext';
 import useAuth from '../../hooks/userAuth';
 
 const RetrieveAccessToken = () => {
@@ -29,7 +28,7 @@ const RetrieveAccessToken = () => {
 					if (data.accessToken) {
 						// Store token in AuthContext
 						updateAccessToken(data.accessToken);
-						
+
 						// Redirect user back to login page to continue login process with google authenticator
 						if (data.twofa) {
 							setIsTwoFAEnabled(true);

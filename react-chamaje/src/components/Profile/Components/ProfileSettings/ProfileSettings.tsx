@@ -1,4 +1,3 @@
-import { Http2ServerRequest } from 'http2';
 import React, { useContext, useEffect, useState } from 'react';
 import { UserContext } from '../../../../contexts/UserContext';
 import useAuth from '../../../../hooks/userAuth';
@@ -104,6 +103,8 @@ const ProfileSettings: React.FC = () => {
 					image: userData?.image || '',
 					friends: userData?.friends || [],
 					chatSocket: userData?.chatSocket || null,
+					// winRate: userData?.winRate || 0,
+					// gamesCount: userData?.gamesCount || 0,
 				};
 				setUserData(updatedUserData);
 			}
@@ -124,28 +125,30 @@ const ProfileSettings: React.FC = () => {
 	};
 
 	return (
-		<ShadowWrapper shadow={true} backgroundColor="#D5B1F9">
-			<div className="ProfileForm">
-				<Title highlightColor="#F8EF57">My Profile</Title>
-				<InputField
-					value={username}
-					onChange={handleUsernameChange}
-					error={usernameError}
-				/>
-				<InputField
-					value={email}
-					onChange={handleEmailChange}
-					error={emailError}
-				/>
-				<Button
-					onClick={handleSaveButtonClick}
-					disabled={!!usernameError || !!emailError}
-					baseColor={[57, 92, 66]}
-				>
-					save
-				</Button>
-			</div>
-		</ShadowWrapper>
+		<div className="profile-settings-wrapper">
+			<ShadowWrapper shadow={true} backgroundColor="#D5B1F9">
+				<div className="profile-form">
+					<Title highlightColor="#F8EF57">My Profile</Title>
+					<InputField
+						value={username}
+						onChange={handleUsernameChange}
+						error={usernameError}
+					/>
+					<InputField
+						value={email}
+						onChange={handleEmailChange}
+						error={emailError}
+					/>
+					<Button
+						onClick={handleSaveButtonClick}
+						disabled={!!usernameError || !!emailError}
+						baseColor={[57, 92, 66]}
+					>
+						save
+					</Button>
+				</div>
+			</ShadowWrapper>
+		</div>
 	);
 };
 

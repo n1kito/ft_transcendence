@@ -1,9 +1,6 @@
 /* Styling the Button component */
 
-#coloredButton {
-	/* width: 5rem; */
-	/* height: 2rem; */
-	/* flex-shrink: 1; */
+.colored-button {
 	border-radius: 0.5rem;
 	background: var(--btnBgColor);
 	padding: 0.5rem 1rem !important;
@@ -11,35 +8,15 @@
 
 	color: var(--btnTxtColor);
 	text-align: center;
-	font-size: 0.8rem;
-	font-family: 'Courier New', Courier, monospace;
-	font-style: normal;
-	font-weight: 600;
-	line-height: normal;
-	letter-spacing: 0.00625rem;
+	font-size: 1.3rem;
+	font-family: 'VT323', monospace;
+
 	margin: 0;
 	padding: 0;
 	border: 0;
-
-	/* box-shadow: 0 0.5rem 0 0 var(--btnShadowColor); */
-	/* opacity: 0.8; */
-	/* position: relative; */
-	/* top: -0.5rem; */
-
-	/* border: 1px solid var(--btnBorderColor); */
 }
 
-/* #coloredButton:active {
-	position: relative;
-	top: 0rem;
-	box-shadow: none;
-} */
-
-#coloredButton:hover {
-	opacity: 1;
-}
-
-#buttonWrapper {
+.button-wrapper {
 	background-color: var(--btnShadowColor);
 	padding-bottom: 0.5rem;
 	border: 2px solid var(--btnBorderColor);
@@ -48,17 +25,26 @@
 	/* display: inline-block; */
 }
 
-#coloredButton:disabled {
+.button-disabled {
+	filter: grayscale();
+	padding-bottom: 0.5rem;
+	opacity: 0.8;
+}
+
+.button-disabled:hover {
 	cursor: not-allowed;
 }
 
-#buttonWrapper:not(.disabled):active {
+.button-disabled button {
+	pointer-events: none;
+}
+
+.button-wrapper:active:not(.button-disabled) {
 	padding-bottom: 0;
 	margin-top: 0.5rem;
-	cursor: not-allowed;
 }
 
-/* Styles for the disabled button */
-#buttonWrapper.disabled {
+/* Styles for the disabled button
+.button-wrapper.disabled {
 	padding-bottom: 0.5rem;
-}
+} */

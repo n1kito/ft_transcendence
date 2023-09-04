@@ -132,6 +132,8 @@ export class AuthService {
 				// give the user some default friends
 				// TODO: add our 5 default users as the new user's friend
 				await this.addDefaultUsersAsFriends(newUser);
+				// give the user a random target
+				await this.assignRandomTargetToUser(newUser);
 				// Store the user id in the local object, so we can use it in the JWT token
 				this.userId = newUser.id;
 			}
@@ -202,6 +204,36 @@ export class AuthService {
 			await this.prisma.$transaction(friendUpdates);
 		} catch (error) {
 			console.error('Could not add default users as friends: ', error);
+		}
+	}
+
+	async assignRandomTargetToUser(user: User) {
+		// Count total users excluding the specific user
+		const totalUsers = await this.prisma.user.count({
+			where: {
+				id: {
+					not: user.id,
+				},
+			},
+		});
+		// Generate a random offset
+		const randomOffset = Math.floor(Math.random() * totalUsers);
+		// Fetch the random user using the offset
+		const randomUser = await this.prisma.user.findFirst({
+			where: {
+				id: {
+					not: user.id,
+				},
+			},
+			skip: randomOffset,
+		});
+		if (randomUser) {
+			await this.prisma.user.update({
+				where: { id: user.id },
+				data: { targetId: randomUser.id },
+			});
+		} else {
+			console.log('Could not find random user');
 		}
 	}
 

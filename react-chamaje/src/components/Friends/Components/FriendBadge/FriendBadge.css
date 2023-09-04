@@ -1,6 +1,6 @@
 /* Styling the FriendBadge component */
 
-.friendBadge {
+.badge-wrapper {
 	position: relative;
 	display: flex;
 	flex-direction: column;
@@ -8,9 +8,11 @@
 	align-items: center;
 	padding: 0;
 	width: fit-content;
+	overflow: hidden;
+	border-radius: 0.6rem;
 }
 
-.badgeAvatar {
+.badge-avatar {
 	margin: 0;
 	padding: 0;
 	width: 6rem;
@@ -19,7 +21,7 @@
 	position: relative;
 }
 
-.badgeAvatar img {
+.badge-avatar img {
 	margin: 0;
 	height: 100%;
 	position: absolute;
@@ -29,8 +31,29 @@
 	object-fit: cover;
 }
 
-.friendBadge span {
+.badge-wrapper span {
 	font-size: 1.1rem;
 	padding: 0.3rem 0 0.5rem 0;
 	font-family: 'Fredoka', sans-serif;
+}
+
+.is-empty-badge {
+	width: 6rem;
+	height: 7rem;
+	background-color: #fffbec;
+	position: relative;
+}
+
+.is-empty-badge::after {
+	content: '+';
+	font-family: 'VT323', monospace;
+	font-size: 2rem;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.channel-badge {
+	padding: 0.5rem 1.5rem;
 }

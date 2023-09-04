@@ -1,0 +1,24 @@
+/* Styling the TitleList component */
+
+.title-box-wrapper {
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+	gap: 1rem;
+	padding: 0.75rem 1rem;
+	max-width: 100%;
+	/* overflow: hidden; */
+}
+
+.titles-container {
+	position: relative;
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	width: 90%;
+	align-items: center;
+	justify-items: center;
+}
+
+.titles-container img {
+	max-width: 2rem;
+}

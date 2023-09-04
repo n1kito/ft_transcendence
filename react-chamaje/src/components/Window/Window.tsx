@@ -6,7 +6,7 @@ import { motion, useDragControls } from 'framer-motion';
 
 export interface MenuLinks {
 	name: string;
-	url: string;
+	onClick?: () => void;
 }
 
 export interface WindowProps {
@@ -14,7 +14,8 @@ export interface WindowProps {
 	links?: MenuLinks[];
 	useBeigeBackground?: boolean;
 	children?: ReactNode;
-	constraintRef?: React.RefObject<HTMLDivElement>;
+	windowDragConstraintRef?: React.RefObject<HTMLDivElement>;
+	onCloseClick: () => void;
 }
 
 const Window: React.FC<WindowProps> = ({
@@ -22,61 +23,46 @@ const Window: React.FC<WindowProps> = ({
 	children,
 	links = [],
 	useBeigeBackground = false,
-	constraintRef,
+	windowDragConstraintRef,
+	onCloseClick,
 }) => {
 	const dragControls = useDragControls();
-	const [isDragged, setIsDragged] = useState(false);
-	const [dragEnded, setDragEnded] = useState(false);
-	const [hasMounted, setHasMounted] = useState(false);
 
 	function triggerDragOnElem(event: React.PointerEvent<HTMLDivElement>) {
 		dragControls.start(event, {});
 	}
 
-	function startDrag() {
-		setIsDragged(true);
-	}
-
-	const endDrag = () => {
-		setDragEnded(true);
-	};
-
-	useEffect(() => {
-		setHasMounted(true);
-	}, []);
-
 	return (
 		<motion.div
-			initial={!hasMounted ? { opacity: 0, scale: 0, y: '300%' } : {}}
-			animate={
-				dragEnded ? { scale: 1, opacity: 1 } : { scale: 1, opacity: 1, y: '0%' }
-			}
-			transition={{ duration: 0.5 }}
-			id="windowWrapper"
-			drag
-			onDragStart={startDrag}
-			onDragEnd={endDrag}
-			whileDrag={{ scale: 0.9, opacity: 0.5 }}
+			initial={{ opacity: 0, scale: 0 }}
+			animate={{ scale: 1, opacity: 1 }}
+			exit={{ opacity: 0, scale: 0 }}
+			transition={{ duration: 0.2 }}
+			className="windowWrapper"
+			drag={true}
+			// onDragStart={startDrag}
+			// onDragEnd={endDrag}
+			whileDrag={{ scale: 0.9, opacity: 0.85 }}
 			dragControls={dragControls}
 			dragListener={false}
-			dragConstraints={constraintRef}
-			style={{
-				position: isDragged ? 'absolute' : 'static',
-			}}
+			dragConstraints={windowDragConstraintRef}
+			// style={{
+			// 	position: isDragged ? 'absolute' : 'static',
+			// }}
 		>
 			{/* TODO: I had to put the title bar in a div to give it the onPointerDown property, ideally this would be inclded in the component itself*/}
 			<div onPointerDown={triggerDragOnElem}>
-				<WindowTitleBar windowTitle={windowTitle} />
+				<WindowTitleBar windowTitle={windowTitle} onCloseClick={onCloseClick} />
 			</div>
 			<WindowMenu>
 				{links.map((linkElem, index) => (
-					<a href={linkElem.url} key={index}>
+					<span onClick={linkElem.onClick} key={index}>
 						{linkElem.name}
-					</a>
+					</span>
 				))}
 			</WindowMenu>
 			<div
-				id="windowContent"
+				className="windowContent"
 				style={{ backgroundColor: useBeigeBackground ? '#FFFBEC' : '' }}
 			>
 				{children}

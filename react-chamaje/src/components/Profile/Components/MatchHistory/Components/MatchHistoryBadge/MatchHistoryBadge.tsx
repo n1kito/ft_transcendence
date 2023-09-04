@@ -4,14 +4,14 @@ import FriendBadge from '../../../../../Friends/Components/FriendBadge/FriendBad
 import BlackBadge from '../../../Shared/BlackBadge/BlackBadge';
 
 interface IMatchHistoryBadgeProps {
-	badgeTitle: string;
+	adversaryLogin: string;
 	badgeImageUrl?: string;
 	userScore: number;
 	adversaryScore: number;
 }
 
 const MatchHistoryBadge: React.FC<IMatchHistoryBadgeProps> = ({
-	badgeTitle,
+	adversaryLogin,
 	badgeImageUrl,
 	userScore,
 	adversaryScore,
@@ -32,7 +32,7 @@ const MatchHistoryBadge: React.FC<IMatchHistoryBadgeProps> = ({
 			>
 				YOU {`${playerWon ? 'WON' : 'LOST'}`}
 			</div>
-			<FriendBadge badgeTitle={badgeTitle} badgeImageUrl={badgeImageUrl} />
+			<FriendBadge badgeTitle={adversaryLogin} badgeImageUrl={badgeImageUrl} />
 			<BlackBadge>
 				Score: {userScore}/{adversaryScore}
 			</BlackBadge>

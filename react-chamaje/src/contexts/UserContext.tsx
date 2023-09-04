@@ -6,8 +6,16 @@ import React, {
 } from 'react';
 import WebSocketService from 'src/services/WebSocketService';
 
-// import { UserData } from '../../shared-types/user-types';
-interface UserData {
+export interface IMatchHistory {
+	player1Login: string;
+	player1Score: number;
+	player1Image: string;
+	player2Login: string;
+	player2Score: number;
+	player2Image: string;
+}
+
+export interface UserData {
 	// Define the structure of your user data
 	// For example:
 	id: number | undefined;
@@ -16,6 +24,21 @@ interface UserData {
 	email: string;
 	friends: [];
 	chatSocket: WebSocketService | null;
+	killCount?: number;
+	// TODO: the killcount was set as optional here to remove a compiling error with ProfileSettings.tsx but need to check it's ok
+	// same for the other properties below
+	winRate?: number;
+	gamesCount?: number;
+	bestFriendLogin?: string;
+	rank?: number;
+	targetLogin?: string;
+	targetImage?: string;
+	rivalLogin?: string;
+	rivalImage?: string;
+	bestieLogin?: string;
+	bestieImage?: string;
+	matchHistory?: IMatchHistory[];
+	targetDiscoveredByUser?: boolean;
 	// ... other properties
 }
 

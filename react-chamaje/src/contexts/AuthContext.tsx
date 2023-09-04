@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import { access } from 'fs';
 import { UserContext } from './UserContext';
@@ -75,7 +75,6 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 		Cookies.remove('refreshToken');
 		setAccessToken('');
 		setIsAuthentificated(false);
-		
 	};
 
 	// Function to refresh the token by making a request to the server

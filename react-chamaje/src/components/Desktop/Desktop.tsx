@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import './Desktop.css';
 import DesktopIcon from './Components/DesktopIcon/DesktopIcon';
 import cupcakeIcon from './Components/DesktopIcon/images/CUPCAKE.svg';
@@ -10,6 +10,15 @@ import useAuth from '../../hooks/userAuth';
 import ProfileSettings from '../Profile/Components/ProfileSettings/ProfileSettings';
 import { AuthContext } from '../../contexts/AuthContext';
 import Profile from '../Profile/Profile';
+import PrivateMessages from '../PrivateMessages/PrivateMessages';
+import { AnimatePresence } from 'framer-motion';
+import ChatWindow from '../ChatWindow/ChatWindow';
+
+import ProfileIcon from './Icons/CARD.svg';
+import ChatIcon from './Icons/PC.svg';
+import FriendsIcon from './Icons/NOTEBOOK.svg';
+import GameIcon from './Icons/CD.svg';
+import Channels from '../Channels/Channels';
 import { io } from 'socket.io-client';
 import WebSocketService from 'src/services/WebSocketService';
 import Button from './../Shared/Button/Button';
@@ -20,7 +29,11 @@ const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
 	let iconId = 0;
 	const { userData, setUserData } = useContext(UserContext);
-	const [openFriendsWindow, setOpenedFriendsWindows] = useState(false);
+	const [openFriendsWindow, setFriendsWindowIsOpen] = useState(false);
+	const [openProfileWindow, setProfileWindowIsOpen] = useState(false);
+	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
+	const [channelsWindowIsOpen, setChannelsWindowIsOpen] = useState(false);
+
 	const navigate = useNavigate();
 	const {
 		isAuthentificated,
@@ -35,6 +48,7 @@ const Desktop = () => {
 	} = useAuth();
 
 	let [qrcode, setQrcode] = useState('');
+	const windowDragConstraintRef = useRef(null);
 
 	useEffect(() => {
 		// if (!isAuthentificated) return;
@@ -93,7 +107,7 @@ const Desktop = () => {
 	};
 
 	const friendsClickHandler = () => {
-		setOpenedFriendsWindows(true);
+		setFriendsWindowIsOpen(true);
 		navigate('/friends');
 	};
 
@@ -147,48 +161,59 @@ const Desktop = () => {
 	};
 
 	return (
-		<div id="desktop">
-			<div className="desktopWrapper">
-				<DesktopIcon
-					name="Game"
-					iconSrc={cupcakeIcon}
-					id={++iconId}
-					onDoubleClick={friendsClickHandler}
-				/>
-				<DesktopIcon
-					name="Friends"
-					iconSrc={cupcakeIcon}
-					id={++iconId}
-					onDoubleClick={friendsClickHandler}
-				/>
-				<DesktopIcon
-					name="Chat"
-					iconSrc={cupcakeIcon}
-					id={++iconId}
-					onDoubleClick={friendsClickHandler}
-				/>
-				<Window
-					windowTitle={userData?.login || 'window title'}
-					links={[
-						{ name: 'Link1', url: '#' },
-						{ name: 'Link2', url: '#' },
-						{ name: 'Link3', url: '#' },
-					]}
-					useBeigeBackground={true}
-				>
-					<Button baseColor={[308, 80, 92]} onClick={handleClick}>
-						enable 2fa
-					</Button>
-					{qrcode && <img src={qrcode} />}
-					<Button baseColor={[308, 80, 92]} onClick={handleClickDisable}>
-						disable 2fa
-					</Button>
-					<Profile login={userData ? userData.login : 'random'} />
-					{/* <Profile login='randomLg'/> */}
-
-					{/* <FriendsList/> */}
-				</Window>
-			</div>
+		<div className="desktopWrapper" ref={windowDragConstraintRef}>
+			<DesktopIcon
+				name="Game"
+				iconSrc={GameIcon}
+				id={++iconId}
+				onDoubleClick={friendsClickHandler}
+			/>
+			<DesktopIcon
+				name="Profile"
+				iconSrc={ProfileIcon}
+				id={++iconId}
+				onDoubleClick={() => setProfileWindowIsOpen}
+			/>
+			<DesktopIcon
+				name="Chat"
+				iconSrc={ChatIcon}
+				id={++iconId}
+				onDoubleClick={() => setChatWindowIsOpen(true)}
+			/>
+			<DesktopIcon
+				name="Channels"
+				iconSrc={ChatIcon}
+				id={++iconId}
+				onDoubleClick={() => setChannelsWindowIsOpen(true)}
+			/>
+			<DesktopIcon
+				name="Friends"
+				iconSrc={FriendsIcon}
+				id={++iconId}
+				onDoubleClick={() => setFriendsWindowIsOpen(true)}
+			/>
+			<AnimatePresence>
+				{openProfileWindow && (
+					<Profile
+						login="mjallada"
+						onCloseClick={() => setProfileWindowIsOpen(false)}
+						windowDragConstraintRef={windowDragConstraintRef}
+					/>
+				)}
+				{chatWindowIsOpen && (
+					<PrivateMessages
+						onCloseClick={() => setChatWindowIsOpen(false)}
+						windowDragConstraintRef={windowDragConstraintRef}
+					/>
+				)}
+				{channelsWindowIsOpen && (
+					<Channels
+						onCloseClick={() => setChannelsWindowIsOpen(false)}
+						windowDragConstraintRef={windowDragConstraintRef}
+					/>
+				)}
+				<ChatWindow login="Jee" />
+			</AnimatePresence>
 		</div>
 	);
 };

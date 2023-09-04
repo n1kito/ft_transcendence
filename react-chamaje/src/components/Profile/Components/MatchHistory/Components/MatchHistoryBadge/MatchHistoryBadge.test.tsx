@@ -6,7 +6,11 @@ import MatchHistoryBadge from './MatchHistoryBadge';
 describe('<MatchHistoryBadge />', () => {
 	test('it should mount', () => {
 		render(
-			<MatchHistoryBadge userScore={5} adversaryScore={6} badgeTitle="Title" />,
+			<MatchHistoryBadge
+				userScore={5}
+				adversaryScore={6}
+				adversaryLogin="Title"
+			/>,
 		);
 
 		const matchHistoryBadge = screen.getByTestId('MatchHistoryBadge');
