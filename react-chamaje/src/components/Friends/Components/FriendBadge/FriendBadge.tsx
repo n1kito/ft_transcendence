@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react';
+import React, { useState } from 'react';
 import './FriendBadge.css';
 import m3ganAvatar from './images/m3gan.jpg';
 import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
