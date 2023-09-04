@@ -29,8 +29,6 @@
 		"build": "react-scripts build",
 		"test": "react-scripts test",
 		"eject": "react-scripts eject",
-		"storybook": "storybook dev -p 6006",
-		"build-storybook": "storybook build",
 		"new-component": "npx generate-react-cli component $NAME && npm run format",
 		"format": "prettier --write \"**/*.+(ts|tsx|json|css)\""
 	},
@@ -53,25 +51,15 @@
 		]
 	},
 	"devDependencies": {
-		"@storybook/addon-essentials": "^7.3.1",
-		"@storybook/addon-interactions": "^7.3.1",
-		"@storybook/addon-links": "^7.3.1",
-		"@storybook/blocks": "^7.0.24",
-		"@storybook/preset-create-react-app": "^1.5.2",
-		"@storybook/react": "^7.0.24",
-		"@storybook/react-webpack5": "^7.3.1",
-		"@storybook/testing-library": "^0.0.14-next.2",
 		"@types/js-cookie": "^3.0.3",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
 		"babel-plugin-named-exports-order": "^0.0.2",
 		"eslint": "^8.47.0",
 		"eslint-plugin-react": "^7.33.2",
-		"eslint-plugin-storybook": "^0.6.13",
 		"prettier": "^2.8.8",
 		"prop-types": "^15.8.1",
 		"react-router-dom": "^6.15.0",
-		"storybook": "^7.3.1",
 		"webpack": "^5.88.2"
 	}
 }
