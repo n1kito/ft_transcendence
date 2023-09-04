@@ -1,4 +1,3 @@
-import { Http2ServerRequest } from 'http2';
 import React, { useContext, useEffect, useState } from 'react';
 import { UserContext } from '../../../../contexts/UserContext';
 import useAuth from '../../../../hooks/userAuth';

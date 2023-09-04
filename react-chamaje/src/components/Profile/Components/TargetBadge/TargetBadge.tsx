@@ -10,7 +10,6 @@ import theRing from './images/roulette/the-ring.jpg';
 import xavier from './images/roulette/xavier.jpg';
 import jee from './images/jee.jpeg';
 import BlackBadge from '../Shared/BlackBadge/BlackBadge';
-import OnlineIndicator from '../Shared/OnlineIndicator/OnlineIndicator';
 
 const rouletteImages = [chucky, norminet, scream, sophie, theRing, xavier];
 
