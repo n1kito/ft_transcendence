@@ -1,7 +1,6 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import './RetrieveAccessToken.css';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../contexts/AuthContext';
 import useAuth from '../../hooks/userAuth';
 
 const RetrieveAccessToken = () => {

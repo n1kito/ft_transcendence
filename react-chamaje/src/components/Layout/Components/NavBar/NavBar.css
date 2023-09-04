@@ -76,7 +76,7 @@
 	display: flex;
 }
 
-.loggedIn .fullscreen-trigger .cls-1 {
+.loggedIn .fullscreen-trigger .fullscreen-icon-svg-line {
 	stroke: black;
 }
 
