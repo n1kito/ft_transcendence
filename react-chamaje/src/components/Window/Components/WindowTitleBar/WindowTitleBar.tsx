@@ -5,7 +5,7 @@ import WindowTitle from '../WindowTitle/WindowTitle';
 
 interface TitleBarProps {
 	windowTitle?: string;
-	onMouseDown?: (event: React.MouseEvent<HTMLDivElement>) => void;
+	onMouseDown?: (event: React.PointerEvent<HTMLDivElement>) => void;
 	onCloseClick: () => void;
 }
 
