@@ -173,6 +173,7 @@ const Desktop = () => {
 				iconSrc={ProfileIcon}
 				id={++iconId}
 				onDoubleClick={() => setProfileWindowIsOpen}
+				
 			/>
 			<DesktopIcon
 				name="Chat"
@@ -195,7 +196,7 @@ const Desktop = () => {
 			<AnimatePresence>
 				{openProfileWindow && (
 					<Profile
-						login="mjallada"
+						login="jeepark"
 						onCloseClick={() => setProfileWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
 					/>
@@ -213,6 +214,11 @@ const Desktop = () => {
 					/>
 				)}
 				<ChatWindow login="Jee" />
+				<Profile
+					login="jeepark"
+					onCloseClick={() => setProfileWindowIsOpen(false)}
+					windowDragConstraintRef={windowDragConstraintRef}
+				/>
 			</AnimatePresence>
 		</div>
 	);

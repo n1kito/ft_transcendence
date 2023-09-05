@@ -62,7 +62,7 @@ function App() {
 									<Route path="/desktop" element={<ProtectedDesktop />} />
 									<Route path="/friends" element={<ProtectedDesktop />} />
 									{/* <Route path="/desktop" element={<Desktop />} /> */}
-									{/* <Route path="/friends" element={<Desktop />} /> */}
+									<Route path="/friends" element={<Desktop />} />
 									<Route
 										path="/retrieve-token"
 										element={<RetrieveAccessToken />}
