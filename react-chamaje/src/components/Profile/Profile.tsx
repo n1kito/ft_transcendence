@@ -23,6 +23,8 @@ import useAuth from '../../hooks/userAuth';
 import { profile } from 'console';
 import AchievementBadge from './Components/AchievementBadge/AchievementBadge';
 import Window from '../Window/Window';
+import SettingsWindow from './Components/Shared/SettingsWindow/SettingsWindow';
+import TwoFactorAuthentication from './Components/TwoFactorAuthentication/TwoFactorAuthentication';
 
 // TODO: find a way to make the shaddow wrapper widht's 100% so if fills the sidebar
 export interface ProfileProps {
@@ -36,10 +38,17 @@ const Profile: React.FC<ProfileProps> = ({
 	windowDragConstraintRef,
 	onCloseClick,
 }) => {
-	const { accessToken } = useAuth();
+	const { accessToken, isTwoFAEnabled, setIsTwoFAEnabled, setTwoFAVerified } =
+		useAuth();
 	const { userData } = useContext(UserContext);
 	const [profileData, setProfileData] = useState<UserData | null>(null); // Declare profileData state
 	const isOwnProfile = login == userData?.login;
+	let [qrcode, setQrcode] = useState('');
+
+	// panel
+	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
+	const [twoFactorAuthWindowisOpen, setTwoFactorAuthWindowIsOpen] =
+		useState(false);
 
 	// TODO: fetch profile data should be a separate service so we don't rewrite the function in multiple components
 	const fetchProfileData = async () => {
@@ -75,13 +84,62 @@ const Profile: React.FC<ProfileProps> = ({
 	// 	console.log('Profile data is: ', profileData);
 	// }, [profileData]);
 
+	const openSettingsPanel = () => {
+		setSettingsPanelIsOpen(!settingsPanelIsOpen);
+	};
+
+	// enable two-factor authentication
+	const enableTwoFactorAuthentication = async () => {
+		try {
+			const response = await fetch('api/login/2fa/turn-on', {
+				method: 'POST',
+				credentials: 'include',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+			});
+			if (response.ok) {
+				console.log(response);
+				const data = await response.text();
+				console.log('qr code: ', data);
+				setQrcode(data);
+				setIsTwoFAEnabled(!isTwoFAEnabled);
+				setTwoFAVerified(false);
+				setTwoFactorAuthWindowIsOpen(true);
+				// logOut();
+			}
+		} catch (error) {
+			console.error('2fa: ', error);
+		}
+	};
+
+	const disableTwoFactorAuthentication = async () => {
+		try {
+			const response = await fetch('api/login/2fa/turn-off', {
+				method: 'POST',
+				credentials: 'include',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+			});
+			if (response.ok) {
+				console.log('is oke');
+				setQrcode('');
+				setIsTwoFAEnabled(false);
+				setTwoFAVerified(false);
+			}
+		} catch (error) {
+			console.error('2fa: ', error);
+		}
+	};
+
 	return (
 		<Window
 			windowTitle={login || 'window title'}
 			links={[
-				{ name: 'Link1', onClick: () => null },
-				{ name: 'Link2', onClick: () => null },
-				{ name: 'Link3', onClick: () => null },
+				{ name: 'Delete profile', onClick: () => null },
+				{ name: 'Settings', onClick: openSettingsPanel },
+				// { name: 'Link3', onClick: () => null },
 			]}
 			useBeigeBackground={true}
 			onCloseClick={onCloseClick}
@@ -138,6 +196,27 @@ const Profile: React.FC<ProfileProps> = ({
 					<p>Error loading profile contents</p>
 				)}
 			</div>
+			{settingsPanelIsOpen && (
+				<SettingsWindow
+					windowTitle="Settings"
+					settingsWindowVisible={setSettingsPanelIsOpen}
+				>
+					<Title highlightColor="yellow">Two-Factor Authentication</Title>
+					<Button
+						baseColor={isTwoFAEnabled ? [40, 100, 80] : [111, 60, 84]}
+						onClick={enableTwoFactorAuthentication}
+					>
+						{isTwoFAEnabled ? 'disable' : 'enable'}
+					</Button>
+				</SettingsWindow>
+			)}
+			{twoFactorAuthWindowisOpen && (
+				<TwoFactorAuthentication
+					qrCode={qrcode}
+					onCloseClick={() => setTwoFactorAuthWindowIsOpen(false)}
+					windowDragConstraintRef={windowDragConstraintRef}
+				/>
+			)}
 		</Window>
 	);
 };

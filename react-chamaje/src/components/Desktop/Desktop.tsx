@@ -172,8 +172,7 @@ const Desktop = () => {
 				name="Profile"
 				iconSrc={ProfileIcon}
 				id={++iconId}
-				onDoubleClick={() => setProfileWindowIsOpen}
-				
+				onDoubleClick={() => setProfileWindowIsOpen(true)}
 			/>
 			<DesktopIcon
 				name="Chat"
