@@ -46,16 +46,6 @@ const Window: React.FC<WindowProps> = ({
 		dragControls.start(event, {});
 	}
 
-	// useEffect(() => {
-	// 	setTimeout(() => {
-	// 		if (windowRef.current) {
-	// 			const { width, height } = windowRef.current.getBoundingClientRect();
-	// 			console.log({ width, height });
-	// 			setDimensions({ width, height });
-	// 		}
-	// 	}, 500); // TODO: Not a huge fan of using setTimeOut be because of the "mouting" effect of framer motion we need to wait for the div to have its actual size
-	// }, []);
-
 	useEffect(() => {
 		if (resizable) {
 			// Handle resizing process
