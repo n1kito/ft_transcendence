@@ -58,7 +58,7 @@ const DesktopIcon: React.FC<IconProps> = ({
 			onClick={handleSingleClick}
 			onDoubleClick={handleDoubleClick}
 		>
-			<img src={iconSrc}></img>
+			<img src={iconSrc} draggable={false}></img>
 			<span>{displayName}</span>
 		</div>
 	);
