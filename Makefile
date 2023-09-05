@@ -22,6 +22,9 @@ logs-back:
 logs-front:
 	docker logs react-container;\
 
+restart:
+	docker compose restart
+
 restart-back:
 	docker restart nestjs-container;\
 

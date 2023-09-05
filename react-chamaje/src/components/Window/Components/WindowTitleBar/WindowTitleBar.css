@@ -30,7 +30,7 @@
 }
 
 #titleBarWrapper:hover {
-	cursor: grab;
+	cursor: move;
 }
 
 #titleBarWrapper #windowTitle {
@@ -38,7 +38,6 @@
 }
 
 #windowTitle {
-	/* outline: 1px solid purple; */
 	flex-grow: 1;
 	text-align: center;
 	z-index: 1;
