@@ -80,7 +80,6 @@ const Window: React.FC<WindowProps> = ({
 			const handleMouseUp = () => {
 				if (windowIsBeingResized) {
 					setWindowIsBeingResized(false);
-					console.log('window is not being resized no more');
 				}
 			};
 
@@ -152,7 +151,6 @@ const Window: React.FC<WindowProps> = ({
 							previousWindowSize.current.height = currentWindowSize?.height;
 							previousWindowSize.current.width = currentWindowSize?.width;
 						}
-						console.log('window is being resized');
 					}}
 				></div>
 			)}
