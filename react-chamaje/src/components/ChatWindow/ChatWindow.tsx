@@ -57,7 +57,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({ login }) => {
 				{ name: 'Settings', onClick: openSettingsPanel },
 			]}
 			useBeigeBackground={true}
-			resizable={true}
 		>
 			<div className="chat-wrapper">
 				<div className="chat-content" ref={chatContentRef}>
