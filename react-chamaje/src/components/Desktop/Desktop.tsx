@@ -121,7 +121,7 @@ const Desktop = () => {
 						windowDragConstraintRef={windowDragConstraintRef}
 					/>
 				)}
-				<ChatWindow login="Jee" />
+				{/* <ChatWindow login="Jee" /> */}
 			</AnimatePresence>
 		</div>
 	);
