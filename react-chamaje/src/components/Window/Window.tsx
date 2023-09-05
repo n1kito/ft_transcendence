@@ -125,13 +125,15 @@ const Window: React.FC<WindowProps> = ({
 				onCloseClick={onCloseClick}
 				onMouseDown={triggerDragOnElem}
 			/>
-			<WindowMenu>
-				{links.map((linkElem, index) => (
-					<span onClick={linkElem.onClick} key={index}>
-						{linkElem.name}
-					</span>
-				))}
-			</WindowMenu>
+			{links && links.length > 0 && (
+				<WindowMenu>
+					{links.map((linkElem, index) => (
+						<span onClick={linkElem.onClick} key={index}>
+							{linkElem.name}
+						</span>
+					))}
+				</WindowMenu>
+			)}
 			<div
 				className="window-content"
 				style={{ backgroundColor: useBeigeBackground ? '#FFFBEC' : '' }}

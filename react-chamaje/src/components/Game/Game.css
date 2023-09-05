@@ -1,5 +1,35 @@
 /* Styling the Game component */
 
 .game-wrapper {
-	padding: 1rem;
+	position: relative;
+	height: 100%;
+	min-width: 25vw;
+	min-height: 25vh;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	/* background-color: red; */
+}
+
+.game-waiting {
+	animation: fadeBlink 2s infinite;
+	/* transition: opacity 1s; */
+}
+
+@keyframes fadeBlink {
+	0% {
+		opacity: 0;
+	}
+	50% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
+.game-canvas {
+	background-color: red;
 }

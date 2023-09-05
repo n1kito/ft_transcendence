@@ -19,6 +19,7 @@ import ChatIcon from './Icons/PC.svg';
 import FriendsIcon from './Icons/NOTEBOOK.svg';
 import GameIcon from './Icons/CD.svg';
 import Channels from '../Channels/Channels';
+import Game from '../Game/Game';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -28,6 +29,7 @@ const Desktop = () => {
 	const [openProfileWindow, setProfileWindowIsOpen] = useState(false);
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
 	const [channelsWindowIsOpen, setChannelsWindowIsOpen] = useState(false);
+	const [gameWindowIsOpen, setGameWindowIsOpen] = useState(true);
 
 	const navigate = useNavigate();
 	const { isAuthentificated, refreshToken, logOut, accessToken } = useAuth();
@@ -75,7 +77,7 @@ const Desktop = () => {
 				name="Game"
 				iconSrc={GameIcon}
 				id={++iconId}
-				onDoubleClick={friendsClickHandler}
+				onDoubleClick={() => setGameWindowIsOpen(true)}
 			/>
 			<DesktopIcon
 				name="Profile"
@@ -121,7 +123,12 @@ const Desktop = () => {
 						windowDragConstraintRef={windowDragConstraintRef}
 					/>
 				)}
-				{/* <ChatWindow login="Jee" /> */}
+				{gameWindowIsOpen && (
+					<Game
+						onCloseClick={() => setChannelsWindowIsOpen(false)}
+						windowDragConstraintRef={windowDragConstraintRef}
+					/>
+				)}
 			</AnimatePresence>
 		</div>
 	);
