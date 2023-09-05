@@ -25,6 +25,7 @@ import AchievementBadge from './Components/AchievementBadge/AchievementBadge';
 import Window from '../Window/Window';
 import SettingsWindow from './Components/Shared/SettingsWindow/SettingsWindow';
 import TwoFactorAuthentication from './Components/TwoFactorAuthentication/TwoFactorAuthentication';
+import InputField from './Components/InputField/InputField';
 
 // TODO: find a way to make the shaddow wrapper widht's 100% so if fills the sidebar
 export interface ProfileProps {
@@ -133,6 +134,10 @@ const Profile: React.FC<ProfileProps> = ({
 		}
 	};
 
+	useEffect(() => {
+		// disableTwoFactorAuthentication();
+	}, [isTwoFAEnabled]);
+
 	return (
 		<Window
 			windowTitle={login || 'window title'}
@@ -204,18 +209,18 @@ const Profile: React.FC<ProfileProps> = ({
 					<Title highlightColor="yellow">Two-Factor Authentication</Title>
 					<Button
 						baseColor={isTwoFAEnabled ? [40, 100, 80] : [111, 60, 84]}
-						onClick={enableTwoFactorAuthentication}
+						onClick={
+							isTwoFAEnabled
+								? disableTwoFactorAuthentication
+								: enableTwoFactorAuthentication
+						}
 					>
 						{isTwoFAEnabled ? 'disable' : 'enable'}
 					</Button>
+					{/* {qrcode && <img src={qrcode} />} */}
+					{/* {qrcode && <InputField />} */}
+					{qrcode && <TwoFactorAuthentication qrCode={qrcode} />}
 				</SettingsWindow>
-			)}
-			{twoFactorAuthWindowisOpen && (
-				<TwoFactorAuthentication
-					qrCode={qrcode}
-					onCloseClick={() => setTwoFactorAuthWindowIsOpen(false)}
-					windowDragConstraintRef={windowDragConstraintRef}
-				/>
 			)}
 		</Window>
 	);

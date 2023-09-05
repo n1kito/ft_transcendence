@@ -85,8 +85,11 @@ export class AuthController {
 	}
 
 	@Post('retrieve-access-token')
-	async retrieveAccessTokenAndTwoFAStatus(@Body() body: { code: string }): Promise<{
-		accessToken: string, twofa: boolean;
+	async retrieveAccessTokenAndTwoFAStatus(
+		@Body() body: { code: string },
+	): Promise<{
+		accessToken: string;
+		twofa: boolean;
 	}> {
 		// Retrieve the code
 		const { code } = body;
@@ -111,7 +114,10 @@ export class AuthController {
 		// verify if 2fa is enabled if so return true;
 		const response = await this.authService.istwofaEnabled(payload.userId);
 
-		return { accessToken: accessToken, twofa: response.isTwoFactorAuthenticationEnabled}
+		return {
+			accessToken: accessToken,
+			twofa: response.isTwoFactorAuthenticationEnabled,
+		};
 	}
 
 	@Get('success')
@@ -125,20 +131,24 @@ export class AuthController {
 	}
 
 	@Post('2fa/turn-on')
-	async generateQrCodeDataURL(@Req() req: CustomRequest, @Body() body): Promise<any> {
-		
-		// extract access token from header, decode it and retrieve userId 
+	async generateQrCodeDataURL(
+		@Req() req: CustomRequest,
+		@Body() body,
+	): Promise<any> {
+		// extract access token from header, decode it and retrieve userId
 		const authorizationHeader = req.headers['authorization'];
 		if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
-			const accessToken = authorizationHeader.slice(7); 
+			const accessToken = authorizationHeader.slice(7);
 			const decodedAccessToken = this.tokenService.verifyToken(accessToken);
 			if (!decodedAccessToken) {
 				throw new NotFoundException('Authentication required');
 			}
 
 			// generate a 2fa secret and stores it in database and create a qr code url
-			const otpAuthUrl = await this.authService.generate2faSecret(decodedAccessToken.userId);
-			console.log('🥎🥎🥎🥎 otpAuthUrl: ', otpAuthUrl)
+			const otpAuthUrl = await this.authService.generate2faSecret(
+				decodedAccessToken.userId,
+			);
+			console.log('🥎🥎🥎🥎 otpAuthUrl: ', otpAuthUrl);
 
 			const qrCodeUrl = toDataURL(otpAuthUrl);
 
@@ -149,36 +159,49 @@ export class AuthController {
 
 	@Post('2fa/turn-off')
 	async turnOff2fa(@Req() req: CustomRequest) {
-
 		const authorizationHeader = req.headers['authorization'];
 		if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
-			const accessToken = authorizationHeader.slice(7); 
+			const accessToken = authorizationHeader.slice(7);
 			const decodedAccessToken = this.tokenService.verifyToken(accessToken);
 			if (!decodedAccessToken) {
 				throw new NotFoundException('Authentication required');
 			}
 			//turning off the 2fa
 			try {
-				await this.authService.turnOffTwoFactorAuthentication(decodedAccessToken.userId);
-			} catch (e) { console.error('Could not turn off 2fa: ', e); }
-			
+				await this.authService.turnOffTwoFactorAuthentication(
+					decodedAccessToken.userId,
+				);
+			} catch (e) {
+				console.error('Could not turn off 2fa: ', e);
+			}
 		}
-
 	}
 
+	// TODO: send res.status
+	// TODO: add verify token method with authorization header
+	// TODO: handle error
 	@Post('2fa/authenticate')
 	@HttpCode(200)
 	async authenticate(@Request() request, @Body() body) {
-		// const isCodeValid =
-		// 	this.authService.isTwoFactorAuthenticationCodeValid(
-		// 		body.twoFactorAuthenticationCode,
-		// 		request.user,
-		// 	);
+		console.log('🍉 2fa/authenticate', body.code);
+		const authorizationHeader = request.headers['authorization'];
+		if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
+			const accessToken = authorizationHeader.slice(7);
+			const decodedAccessToken = this.tokenService.verifyToken(accessToken);
+			if (!decodedAccessToken) {
+				throw new NotFoundException('Authentication required');
+			}
+			const isCodeValid =
+				await this.authService.isTwoFactorAuthenticationCodeValid(
+					body.code,
+					decodedAccessToken.userId,
+				);
 
-		// if (!isCodeValid) {
-		// 	throw new UnauthorizedException('Wrong authentication code');
-		// }
+			if (!isCodeValid) {
+				throw new UnauthorizedException('Wrong authentication code');
+			}
 
-		return this.authService.loginWith2fa(request.user);
+			return 'ok!';
+		}
 	}
 }
