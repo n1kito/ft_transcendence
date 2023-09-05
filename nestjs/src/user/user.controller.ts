@@ -36,7 +36,7 @@ export class UserController {
 		// Fetch the user information from the database using the userId
 		const user = await this.prisma.user.findUnique({
 			where: { id: request.userId },
-			include: { gamesPlayed: true, target: true }, // Include the gamesPlayed relation
+			include: { gamesPlayed: true, target: true, friends: true }, // Include the gamesPlayed relation
 		});
 
 		// Handle case when user is not found
@@ -79,7 +79,12 @@ export class UserController {
 		const userRank = usersWithHigherKillCountThanOurUser + 1;
 		// Return the user information
 		return {
-			...user,
+			id: user.id,
+			login: user.login,
+			email: user.email,
+			image: user.image,
+			friends: user.friends,
+			// ...user,
 			targetLogin,
 			targetImage,
 			gamesCount,
@@ -143,8 +148,10 @@ export class UserController {
 		// TODO: select more fields
 		// Only select some fields for each friend
 		const friends = userRequesting.friends.map((currentFriend) => ({
+			id: currentFriend.id,
 			login: currentFriend.login,
 			image: currentFriend.image,
+			onlineStatus: currentFriend.onlineStatus,
 		}));
 		return friends;
 	}

@@ -25,7 +25,6 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 }: AuthProviderProps) => {
 	const [isAuthentificated, setIsAuthentificated] = useState(false);
 	const [accessToken, setAccessToken] = useState('');
-
 	// Effect to check authentication status when component mounts
 	useEffect(() => {
 		const checkAuth = async () => {
@@ -64,6 +63,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 	// Log the user out by removing cookies and updating state
 	const logOut = () => {
 		Cookies.remove('refreshToken');
+		setAccessToken('');
 		setIsAuthentificated(false);
 	};
 

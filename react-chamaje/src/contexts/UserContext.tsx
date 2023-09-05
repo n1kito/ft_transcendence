@@ -4,6 +4,7 @@ import React, {
 	createContext,
 	useState,
 } from 'react';
+import WebSocketService from 'src/services/WebSocketService';
 
 export interface IMatchHistory {
 	player1Login: string;
@@ -17,9 +18,12 @@ export interface IMatchHistory {
 export interface UserData {
 	// Define the structure of your user data
 	// For example:
+	id: number | undefined;
 	image: string;
 	login: string;
 	email: string;
+	friends: [];
+	chatSocket: WebSocketService | null;
 	killCount?: number;
 	// TODO: the killcount was set as optional here to remove a compiling error with ProfileSettings.tsx but need to check it's ok
 	// same for the other properties below

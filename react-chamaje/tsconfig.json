@@ -14,7 +14,12 @@
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"noEmit": true,
-		"jsx": "react-jsx"
+		"jsx": "react-jsx",
+		"baseUrl": "./", // This is the base directory for module resolution
+		"paths": {
+			"shared-types": ["../shared-types/"]
+		},
+		"outDir": "./build"
 	},
 	"include": ["src"]
 }

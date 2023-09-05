@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 import Login from './components/Login/Login';
 import Layout from './components/Layout/Layout';
@@ -22,12 +22,32 @@ import {
 } from './utils/authUtils';
 import RetrieveAccessToken from './components/RetrieveAccessToken/RetrieveAccessToken';
 import IconContextProvider from './contexts/IconContext';
+import { Socket, io } from 'socket.io-client';
 
 // These are functions that will return a component passed as parameter depending on user authentification status
 const ProtectedLogin = showComponentIfNotLoggedIn(Login);
 const ProtectedDesktop = showComponentIfLoggedIn(Desktop);
 
 function App() {
+	// const socket: Socket = io() ;
+	// const [isConnected, setIsConnected] = useState(socket.connected);
+	// useEffect(() => {
+	// 	console.log('trying to setup socket connection');
+	// 	const socket = io({ path: '/ws/' });
+
+	// 	socket.on('connect', () => {
+	// 		console.log('\nConnected to server ! 🔌🟢\n ');
+	// 		socket.emit('message', 'Hello from React !');
+	// 	});
+
+	// 	socket.on('message', (data) => {
+	// 		console.log('Response from server: ', data);
+	// 	});
+	// 	return () => {
+	// 		socket.disconnect();
+	// 	};
+	// }, []);
+
 	return (
 		<AuthContextProvider>
 			<UserProvider>
@@ -37,10 +57,10 @@ function App() {
 							<IconContextProvider>
 								<Routes>
 									<Route path="/" element={<ProtectedLogin />} />
-									{/* <Route path="/desktop" element={<ProtectedDesktop />} /> */}
-									{/* <Route path="/friends" element={<ProtectedDesktop />} /> */}
+									<Route path="/desktop" element={<ProtectedDesktop />} />
+									<Route path="/friends" element={<ProtectedDesktop />} />
 									{/* <Route path="/" element={<Login />} /> */}
-									<Route path="/desktop" element={<Desktop />} />
+									{/* <Route path="/desktop" element={<Desktop />} /> */}
 									{/* <Route path="/friends" element={<Desktop />} /> */}
 									<Route
 										path="/retrieve-token"

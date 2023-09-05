@@ -1,3 +1,9 @@
+export interface UserData {
+	image: string;
+	login: string;
+	email: string;
+	ft_id: number;
+}
 export interface IMatchHistory {
 	player1Login: string;
 	player1Score: number;

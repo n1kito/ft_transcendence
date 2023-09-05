@@ -1,9 +1,10 @@
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useContext, useEffect, useState } from 'react';
 import './FriendBadge.css';
 import m3ganAvatar from './images/m3gan.jpg';
 import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import { ShadowWrapperProps } from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import OnlineIndicator from '../../../Profile/Components/Shared/OnlineIndicator/OnlineIndicator';
+import { UserContext } from 'src/contexts/UserContext';
 
 export interface IFriendBadgeProps extends ShadowWrapperProps {
 	badgeTitle?: string;
@@ -27,12 +28,13 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 	dashedBorder = isEmptyBadge || false,
 	onClick,
 }) => {
+	const userContext = useContext(UserContext);
+	const [friends, setFriends] = useState(userContext.userData?.friends); // TODO: this should not be done this way, it should be linked to the user's actual status
 	let displayTitle = badgeTitle;
 	if (isChannelBadge && badgeTitle.length > 20) {
 		displayTitle = badgeTitle.slice(0, 20) + '...';
 	}
 
-	const [friendIsOnline, setFriendIsOnline] = useState(true); // TODO: this should not be done this way, it should be linked to the user's actual status
 	const [friendIsPlaying, setFriendIsPlaying] = useState(false);
 
 	return (
@@ -60,7 +62,7 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 				)}
 				{!isEmptyBadge && onlineIndicator && (
 					<OnlineIndicator
-						isOnline={friendIsOnline}
+						isOnline={onlineIndicator}
 						isPlaying={friendIsPlaying}
 					/>
 				)}
