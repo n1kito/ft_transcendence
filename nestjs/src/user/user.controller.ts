@@ -36,7 +36,13 @@ export class UserController {
 		// Fetch the user information from the database using the userId
 		const user = await this.prisma.user.findUnique({
 			where: { id: request.userId },
-			include: { gamesPlayed: true, target: true, friends: true }, // Include the gamesPlayed relation
+			include: {
+				gamesPlayed: true,
+				target: true,
+				friends: true,
+				chatsJoined: true,
+				ownedChannels: true,
+			}, // Include the gamesPlayed relation
 		});
 
 		// Handle case when user is not found
@@ -77,6 +83,7 @@ export class UserController {
 			},
 		});
 		const userRank = usersWithHigherKillCountThanOurUser + 1;
+
 		// Return the user information
 		return {
 			id: user.id,
@@ -95,6 +102,9 @@ export class UserController {
 			killCount: user.killCount,
 			winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
 			rank: userRank,
+			// chat
+			chatsJoined: user.chatsJoined,
+			ownedChannels: user.ownedChannels,
 		};
 	}
 

@@ -40,6 +40,9 @@ export interface UserData {
 	matchHistory?: IMatchHistory[];
 	targetDiscoveredByUser?: boolean;
 	// ... other properties
+	// chat properties
+	chatsJoined?: [];
+	ownedChannels?: [];
 }
 
 interface UserContextType {

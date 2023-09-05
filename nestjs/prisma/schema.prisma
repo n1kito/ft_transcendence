@@ -12,15 +12,15 @@ datasource db {
 }
 
 model User {
-    id              Int         @id @unique @default(autoincrement())
-    ft_id           Int?        @unique
-    hash            String?
-    login           String      @unique
-    email           String      @unique
-    image           String?
-    createdAt       DateTime    @default(now())
-    token           String?
-    onlineStatus    Boolean     @default(false)    
+    id           Int      @id @unique @default(autoincrement())
+    ft_id        Int?     @unique
+    hash         String?
+    login        String   @unique
+    email        String   @unique
+    image        String?
+    createdAt    DateTime @default(now())
+    token        String?
+    onlineStatus Boolean  @default(false)
 
     // Friendship system
     friends          User[]  @relation("Friendship")
@@ -44,6 +44,11 @@ model User {
     targetId               Int?
     targetedBy             User[]  @relation("Target")
     targetDiscoveredByUser Boolean @default(false)
+
+    // Chat logic
+    // chatsJoined Chat[]
+    chatsJoined   Chat[] @relation("contributors")
+    ownedChannels Chat[] @relation("owners")
 }
 
 model Game {
@@ -60,4 +65,24 @@ model gameSession {
     gameId   Int
     score    Int
     isWinner Boolean
+}
+
+// Chat logic
+model Chat {
+    id          Int       @id @default(autoincrement())
+    Users       User?     @relation(fields: [userId], references: [id], "contributors")
+    userId      Int?
+    messages    Message[]
+    isChannel   Boolean // true if not msg between 2 users
+    isPrivate   Boolean // this will be true if it is a msg between 2 users
+    isProtected Boolean // true if password
+    password    String?
+    owner       User?     @relation(fields: [ownerId], references: [id], "owners")
+    ownerId     Int?
+}
+
+model Message {
+    id     Int   @id @default(autoincrement())
+    Chat   Chat? @relation(fields: [chatId], references: [id])
+    chatId Int?
 }

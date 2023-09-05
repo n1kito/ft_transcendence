@@ -11,6 +11,8 @@ import Title from '../Profile/Components/Title/Title';
 import InputField from '../Profile/Components/InputField/InputField';
 
 export interface IChatWindowProps {
+	onCloseClick: () => void;
+	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
 	login: string;
 }
 

@@ -14,10 +14,7 @@ interface IFriendsListProps {
 	nbFriendsOnline: number;
 }
 
-
 const FriendsList: React.FC<IFriendsListProps> = (props) => {
-	
-
 	return (
 		<Window
 			windowTitle="Friends"

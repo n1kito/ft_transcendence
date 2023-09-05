@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import './Channels.css';
-import { IPrivateMessagesProps } from '../PrivateMessages/PrivateMessages';
 import Window from '../Window/Window';
 import FriendBadge from '../Friends/Components/FriendBadge/FriendBadge';
 import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/SettingsWindow';
@@ -8,7 +7,12 @@ import Button from '../Shared/Button/Button';
 import Title from '../Profile/Components/Title/Title';
 import InputField from '../Profile/Components/InputField/InputField';
 
-const Channels: React.FC<IPrivateMessagesProps> = ({
+interface IChannelsProps {
+	onCloseClick: () => void;
+	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
+}
+
+const Channels: React.FC<IChannelsProps> = ({
 	onCloseClick,
 	windowDragConstraintRef,
 }) => {

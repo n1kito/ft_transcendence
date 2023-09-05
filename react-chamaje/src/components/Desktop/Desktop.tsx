@@ -41,6 +41,7 @@ const Desktop = () => {
 	const [openFriendsWindow, setFriendsWindowIsOpen] = useState(false);
 	const [openProfileWindow, setProfileWindowIsOpen] = useState(false);
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
+	const [privateMessageWindowIsOpen, setPrivateMessageWindowIsOpen] = useState(false);
 	const [channelsWindowIsOpen, setChannelsWindowIsOpen] = useState(false);
 
 	const navigate = useNavigate();
@@ -50,7 +51,7 @@ const Desktop = () => {
 	useEffect(() => {
 		// if (!isAuthentificated) return;
 		const fetchUserData = async () => {
-			// Feth the user data from the server
+			// Fetch the user data from the server
 			try {
 				const response = await fetch('/api/user/me', {
 					method: 'GET',
@@ -207,7 +208,7 @@ const Desktop = () => {
 				name="Chat"
 				iconSrc={ChatIcon}
 				id={++iconId}
-				onDoubleClick={() => setChatWindowIsOpen(true)}
+				onDoubleClick={() => setPrivateMessageWindowIsOpen(true)}
 			/>
 			<DesktopIcon
 				name="Channels"
@@ -237,10 +238,12 @@ const Desktop = () => {
 						nbFriendsOnline={nbFriendsOnline}
 					/>
 				)}
-				{chatWindowIsOpen && (
+				{privateMessageWindowIsOpen && (
 					<PrivateMessages
-						onCloseClick={() => setChatWindowIsOpen(false)}
+						onCloseClick={() => setPrivateMessageWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
+						friends={friends}
+						chatWindowControl={setChatWindowIsOpen}
 					/>
 				)}
 				{channelsWindowIsOpen && (
@@ -249,7 +252,13 @@ const Desktop = () => {
 						windowDragConstraintRef={windowDragConstraintRef}
 					/>
 				)}
-				{/* <ChatWindow login="Jee" /> */}
+				{chatWindowIsOpen && (
+					<ChatWindow
+						onCloseClick={() => setChannelsWindowIsOpen(false)}
+						windowDragConstraintRef={windowDragConstraintRef}
+						login="Jee"
+					/>
+				)}
 			</AnimatePresence>
 		</div>
 	);
