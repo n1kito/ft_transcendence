@@ -23,7 +23,6 @@ const WindowTitleBar: React.FC<TitleBarProps> = ({
 				<WindowTitle windowTitle={windowTitle} />
 			</div>
 			<div id="extra"></div>
-			{/* <div id="stripes"></div> */}
 		</div>
 	);
 };
