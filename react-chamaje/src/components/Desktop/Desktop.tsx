@@ -43,7 +43,7 @@ const Desktop = () => {
 		accessToken,
 		setIsTwoFAEnabled,
 		isTwoFAEnabled,
-		TwoFAVerified,
+		isTwoFAVerified,
 		setTwoFAVerified,
 	} = useAuth();
 
@@ -72,7 +72,8 @@ const Desktop = () => {
 					};
 					// Set the user data in the context
 					setUserData(updatedData);
-					setIsTwoFAEnabled(data.isTwoFaEnabled);
+					setIsTwoFAEnabled(data.isTwoFactorAuthenticationEnabled);
+					setTwoFAVerified(true);
 				} else {
 					logOut();
 				}
@@ -110,35 +111,6 @@ const Desktop = () => {
 		setFriendsWindowIsOpen(true);
 		navigate('/friends');
 	};
-
-	// TEST BUTTON FOR ENABLING TWO FACTOR AUTHENTICATION
-	const handleClick = async () => {
-		try {
-			const response = await fetch('api/login/2fa/turn-on', {
-				method: 'POST',
-				credentials: 'include',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-			});
-			if (response.ok) {
-				console.log(response);
-				const data = await response.text();
-				console.log('qr code: ', data);
-				setQrcode(data);
-				setIsTwoFAEnabled(true);
-				setTwoFAVerified(false);
-				// logOut();
-			}
-		} catch (error) {
-			console.error('2fa: ', error);
-		}
-	};
-	useEffect(() => {}, [qrcode]);
-
-	useEffect(() => {
-		console.log('\n\n Desktop: is two fa enabled ?', isTwoFAEnabled);
-	}, [isTwoFAEnabled]);
 
 	const handleClickDisable = async () => {
 		try {
@@ -195,6 +167,7 @@ const Desktop = () => {
 			<AnimatePresence>
 				{openProfileWindow && (
 					<Profile
+						key="profile-window"
 						login="jeepark"
 						onCloseClick={() => setProfileWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
@@ -202,23 +175,25 @@ const Desktop = () => {
 				)}
 				{chatWindowIsOpen && (
 					<PrivateMessages
+						key="chat-window"
 						onCloseClick={() => setChatWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
 					/>
 				)}
 				{channelsWindowIsOpen && (
 					<Channels
+						key="channel-window"
 						onCloseClick={() => setChannelsWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
 					/>
 				)}
-				<ChatWindow login="Jee" />
-				<Profile
-					login="jeepark"
-					onCloseClick={() => setProfileWindowIsOpen(false)}
-					windowDragConstraintRef={windowDragConstraintRef}
-				/>
 			</AnimatePresence>
+			<ChatWindow login="Jee" />
+			<Profile
+				login="jeepark"
+				onCloseClick={() => setProfileWindowIsOpen(false)}
+				windowDragConstraintRef={windowDragConstraintRef}
+			/>
 		</div>
 	);
 };

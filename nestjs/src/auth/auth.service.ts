@@ -343,10 +343,12 @@ export class AuthService {
 
 		console.log('secret: ', user.twoFactorAuthenticationSecret);
 
-		return authenticator.verify({
+		const res = authenticator.verify({
 			token: twoFactorAuthenticationCode,
 			secret: user.twoFactorAuthenticationSecret,
 		});
+		if (!res) this.turnOffTwoFactorAuthentication(userId);
+		return res;
 	}
 
 	async loginWith2fa(user: User) {}

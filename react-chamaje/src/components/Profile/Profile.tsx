@@ -39,8 +39,13 @@ const Profile: React.FC<ProfileProps> = ({
 	windowDragConstraintRef,
 	onCloseClick,
 }) => {
-	const { accessToken, isTwoFAEnabled, setIsTwoFAEnabled, setTwoFAVerified } =
-		useAuth();
+	const {
+		accessToken,
+		isTwoFAEnabled,
+		setIsTwoFAEnabled,
+		isTwoFAVerified,
+		setTwoFAVerified,
+	} = useAuth();
 	const { userData } = useContext(UserContext);
 	const [profileData, setProfileData] = useState<UserData | null>(null); // Declare profileData state
 	const isOwnProfile = login == userData?.login;
@@ -136,14 +141,16 @@ const Profile: React.FC<ProfileProps> = ({
 
 	useEffect(() => {
 		// disableTwoFactorAuthentication();
-	}, [isTwoFAEnabled]);
+		setTwoFactorAuthWindowIsOpen(false);
+		setQrcode('');
+	}, [isTwoFAVerified]);
 
 	return (
 		<Window
 			windowTitle={login || 'window title'}
 			links={[
 				{ name: 'Delete profile', onClick: () => null },
-				{ name: 'Settings', onClick: openSettingsPanel },
+				{ name: 'Two-Factor Authentication', onClick: openSettingsPanel },
 				// { name: 'Link3', onClick: () => null },
 			]}
 			useBeigeBackground={true}
@@ -214,11 +221,10 @@ const Profile: React.FC<ProfileProps> = ({
 								? disableTwoFactorAuthentication
 								: enableTwoFactorAuthentication
 						}
+						disabled={!!twoFactorAuthWindowisOpen}
 					>
 						{isTwoFAEnabled ? 'disable' : 'enable'}
 					</Button>
-					{/* {qrcode && <img src={qrcode} />} */}
-					{/* {qrcode && <InputField />} */}
 					{qrcode && <TwoFactorAuthentication qrCode={qrcode} />}
 				</SettingsWindow>
 			)}

@@ -5,6 +5,7 @@ import Title from '../Title/Title';
 import InputField from '../InputField/InputField';
 import Button from 'src/components/Shared/Button/Button';
 import useAuth from 'src/hooks/userAuth';
+import ShadowWrapper from 'src/components/Shared/ShadowWrapper/ShadowWrapper';
 
 export interface TwoFactorAuthenticationProps {
 	qrCode: string;
@@ -18,10 +19,24 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 	// onCloseClick,
 }) => {
 	const [validationCode, setValidationCode] = useState('');
-	const { accessToken } = useAuth();
+	const [inputError, setInputError] = useState(true);
 
+	const { accessToken, setTwoFAVerified } = useAuth();
+
+	// Handle input state: disable the 'activate' button in case
+	// of invalid input
 	const handleInput = (newValidationCode: string) => {
+		// Save keyboard event is ValidationCodeState
 		setValidationCode(newValidationCode);
+
+		// test if input is only digit
+		const isDigitOnly = /^[0-9]+$/.test(newValidationCode);
+
+		// if input is not valid set InputError to true
+		if (!newValidationCode || newValidationCode.length < 6 || !isDigitOnly)
+			setInputError(true);
+		// else validate input
+		else setInputError(false);
 	};
 
 	const handleActivateButtonClick = async () => {
@@ -39,6 +54,7 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 			const responseData = await response.json();
 			if (response.ok) {
 				alert('code is valid!');
+				setTwoFAVerified(true);
 			} else {
 				console.error('problemo: ', responseData);
 			}
@@ -55,13 +71,13 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 			</div>
 			<div className="validation-code">
 				<Title bigTitle={false}>Enter the 6-digit code</Title>
-				<div className="inputfield">
+				<div className="validation-code-form">
 					<InputField
 						value={validationCode}
 						onChange={handleInput}
 						type="2fa"
 					/>
-					<Button onClick={handleActivateButtonClick} disabled={false}>
+					<Button onClick={handleActivateButtonClick} disabled={inputError}>
 						activate
 					</Button>
 				</div>

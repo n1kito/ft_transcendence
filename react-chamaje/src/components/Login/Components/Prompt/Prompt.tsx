@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Prompt.css';
 import Typewriter from 'typewriter-effect';
 
@@ -14,6 +14,7 @@ const Prompt: React.FC<PromptProps> = ({
 	redirUrl = '',
 }) => {
 	const labelWidth = instruction.length * 0.5;
+	const [validationCode, setValidationCode] = useState('');
 
 	useEffect(() => {
 		const handleKeyPress = (event: KeyboardEvent) => {

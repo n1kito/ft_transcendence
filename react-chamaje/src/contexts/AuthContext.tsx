@@ -13,7 +13,7 @@ interface IAuthContext {
 	updateAccessToken: (generatedAccessToken: string) => void;
 	accessToken: string;
 
-	TwoFAVerified: boolean;
+	isTwoFAVerified: boolean;
 	setTwoFAVerified: (status: boolean) => void;
 }
 
@@ -33,7 +33,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 }: AuthProviderProps) => {
 	const [isAuthentificated, setIsAuthentificated] = useState(false);
 	const [isTwoFAEnabled, setIsTwoFAEnabled] = useState(false);
-	const [TwoFAVerified, setTwoFAVerified] = useState(false);
+	const [isTwoFAVerified, setTwoFAVerified] = useState(false);
 	const [accessToken, setAccessToken] = useState('');
 	// Effect to check authentication status when component mounts
 	useEffect(() => {
@@ -122,7 +122,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 				refreshToken,
 				updateAccessToken,
 				accessToken,
-				TwoFAVerified,
+				isTwoFAVerified,
 				setTwoFAVerified,
 			}}
 		>

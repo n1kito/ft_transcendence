@@ -11,7 +11,7 @@ const Login = ({}) => {
 	const constraintRef = useRef(null);
 
 	const [passkey, setPasskey] = useState('');
-	const { isAuthentificated, TwoFAVerified, isTwoFAEnabled } = useAuth();
+	const { isAuthentificated, isTwoFAVerified, isTwoFAEnabled } = useAuth();
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
 			const updatedPasskey = passkey.slice(-3) + event.key;
@@ -38,13 +38,18 @@ const Login = ({}) => {
 						<Terminal
 							instruction="Would you like to login with 42 ? (Y/n)"
 							type="bool"
+							redirUrl="api/login/auth"
 						/>
 					</Window>
 				)}
 
-				{isAuthentificated && isTwoFAEnabled && !TwoFAVerified && (
+				{isAuthentificated && isTwoFAEnabled && !isTwoFAVerified && (
 					<Window windowTitle="Login" onCloseClick={() => null}>
-						<Terminal instruction="Enter you Google code" type="input" />
+						<Terminal
+							instruction="Enter you Google code"
+							type="input"
+							redirUrl="api/login/2fa/authenticate"
+						/>
 					</Window>
 				)}
 

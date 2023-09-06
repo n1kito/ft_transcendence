@@ -131,49 +131,29 @@ export class AuthController {
 	}
 
 	@Post('2fa/turn-on')
-	async generateQrCodeDataURL(
-		@Req() req: CustomRequest,
-		@Body() body,
-	): Promise<any> {
+	async generateQrCodeDataURL(@Request() request, @Body() body): Promise<any> {
 		// extract access token from header, decode it and retrieve userId
-		const authorizationHeader = req.headers['authorization'];
-		if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
-			const accessToken = authorizationHeader.slice(7);
-			const decodedAccessToken = this.tokenService.verifyToken(accessToken);
-			if (!decodedAccessToken) {
-				throw new NotFoundException('Authentication required');
-			}
-
-			// generate a 2fa secret and stores it in database and create a qr code url
-			const otpAuthUrl = await this.authService.generate2faSecret(
-				decodedAccessToken.userId,
-			);
-			console.log('🥎🥎🥎🥎 otpAuthUrl: ', otpAuthUrl);
-
-			const qrCodeUrl = toDataURL(otpAuthUrl);
-
-			// return qr code url
-			return qrCodeUrl;
-		}
+		const userId = this.tokenService.ExtractUserId(
+			request.headers['authorization'],
+		);
+		// generate a 2fa secret and stores it in database and create a qr code url
+		const otpAuthUrl = await this.authService.generate2faSecret(userId);
+		console.log('🥎🥎🥎🥎 otpAuthUrl: ', otpAuthUrl);
+		const qrCodeUrl = toDataURL(otpAuthUrl);
+		// return qr code url
+		return qrCodeUrl;
 	}
 
 	@Post('2fa/turn-off')
-	async turnOff2fa(@Req() req: CustomRequest) {
-		const authorizationHeader = req.headers['authorization'];
-		if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
-			const accessToken = authorizationHeader.slice(7);
-			const decodedAccessToken = this.tokenService.verifyToken(accessToken);
-			if (!decodedAccessToken) {
-				throw new NotFoundException('Authentication required');
-			}
-			//turning off the 2fa
-			try {
-				await this.authService.turnOffTwoFactorAuthentication(
-					decodedAccessToken.userId,
-				);
-			} catch (e) {
-				console.error('Could not turn off 2fa: ', e);
-			}
+	async turnOff2fa(@Request() request) {
+		const userId = this.tokenService.ExtractUserId(
+			request.headers['authorization'],
+		);
+		//turning off the 2fa
+		try {
+			await this.authService.turnOffTwoFactorAuthentication(userId);
+		} catch (e) {
+			console.error('Could not turn off 2fa: ', e);
 		}
 	}
 
@@ -182,26 +162,29 @@ export class AuthController {
 	// TODO: handle error
 	@Post('2fa/authenticate')
 	@HttpCode(200)
-	async authenticate(@Request() request, @Body() body) {
+	async authenticate(@Request() request, @Body() body, @Res() res) {
 		console.log('🍉 2fa/authenticate', body.code);
-		const authorizationHeader = request.headers['authorization'];
-		if (authorizationHeader && authorizationHeader.startsWith('Bearer ')) {
-			const accessToken = authorizationHeader.slice(7);
-			const decodedAccessToken = this.tokenService.verifyToken(accessToken);
-			if (!decodedAccessToken) {
-				throw new NotFoundException('Authentication required');
-			}
+		try {
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
 			const isCodeValid =
 				await this.authService.isTwoFactorAuthenticationCodeValid(
 					body.code,
-					decodedAccessToken.userId,
+					userId,
 				);
 
+			console.log('user id:', userId, 'code is:', isCodeValid);
+
 			if (!isCodeValid) {
-				throw new UnauthorizedException('Wrong authentication code');
+				return res.status(401).json({ message: 'Wrong authentication code' });
 			}
 
-			return 'ok!';
+			return res
+				.status(200)
+				.json({ message: 'two-factor authentication enabled!' });
+		} catch (error) {
+			console.error(error);
 		}
 	}
 }
