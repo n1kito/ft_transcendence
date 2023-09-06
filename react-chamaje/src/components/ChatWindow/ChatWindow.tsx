@@ -13,12 +13,15 @@ import InputField from '../Profile/Components/InputField/InputField';
 export interface IChatWindowProps {
 	onCloseClick: () => void;
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
-	login: string;
+	userId: number;
 }
 
-const ChatWindow: React.FC<IChatWindowProps> = ({ login }) => {
+const ChatWindow: React.FC<IChatWindowProps> = ({
+	userId,
+	onCloseClick,
+	windowDragConstraintRef,
+}) => {
 	// TODO: remove this
-	const doNothing = () => {};
 	const [textareaIsFocused, setTextareaIsFocused] = useState(false);
 	const [textareaIsEmpty, setTextareaIsEmpty] = useState(true);
 	const [textareaContent, setTextareaContent] = useState('');
@@ -49,8 +52,8 @@ const ChatWindow: React.FC<IChatWindowProps> = ({ login }) => {
 
 	return (
 		<Window
-			windowTitle={`Chat with ${login}`}
-			onCloseClick={() => doNothing()}
+			windowTitle={`Chat with ${userId}`}
+			onCloseClick={onCloseClick}
 			links={[
 				{ name: 'Profile', onClick: () => null },
 				{ name: 'Play', onClick: () => null },

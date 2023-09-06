@@ -40,8 +40,8 @@ const Desktop = () => {
 	const { userData, setUserData } = useContext(UserContext);
 	const [openFriendsWindow, setFriendsWindowIsOpen] = useState(false);
 	const [openProfileWindow, setProfileWindowIsOpen] = useState(false);
-	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
-	const [privateMessageWindowIsOpen, setPrivateMessageWindowIsOpen] = useState(false);
+	const [privateMessageWindowIsOpen, setPrivateMessageWindowIsOpen] =
+		useState(false);
 	const [channelsWindowIsOpen, setChannelsWindowIsOpen] = useState(false);
 
 	const navigate = useNavigate();
@@ -243,7 +243,7 @@ const Desktop = () => {
 						onCloseClick={() => setPrivateMessageWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
 						friends={friends}
-						chatWindowControl={setChatWindowIsOpen}
+						// chatWindowControl={setChatWindowIsOpen}
 					/>
 				)}
 				{channelsWindowIsOpen && (
@@ -252,13 +252,13 @@ const Desktop = () => {
 						windowDragConstraintRef={windowDragConstraintRef}
 					/>
 				)}
-				{chatWindowIsOpen && (
+				{/* {chatWindowIsOpen && (
 					<ChatWindow
 						onCloseClick={() => setChannelsWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
 						login="Jee"
 					/>
-				)}
+				)} */}
 			</AnimatePresence>
 		</div>
 	);
