@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './PrivateMessages.css';
 import Window from '../Window/Window';
 import PrivateMessagesList from './Components/PrivateMessagesList/PrivateMessagesList';
 import FriendBadge from '../Friends/Components/FriendBadge/FriendBadge';
 import { IFriendStruct } from '../Desktop/Desktop';
 import ChatWindow from '../ChatWindow/ChatWindow';
+import useAuth from 'src/hooks/userAuth';
 
 interface IPrivateMessagesProps {
 	onCloseClick: () => void;
@@ -12,6 +13,10 @@ interface IPrivateMessagesProps {
 	friends: IFriendStruct[];
 	// chatWindowControl: (state: boolean) => void;
 }
+
+// export interface IChatStruct {
+// 	chatId: number;
+// }
 
 const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	onCloseClick,
@@ -22,12 +27,31 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	const chatsList = [''];
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
 	const [chatWindowUserId, setChatWindowUserId] = useState(0);
+	const [chatsJoined, setChatsJoined] = useState([]);
+	const { accessToken } = useAuth();
+
+	// on mounting this component, fetch the chatsJoined
+	useEffect(() => {
+		fetch('/api/user/me/chatsJoined', {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				setChatsJoined(data);
+			});
+	}, []);
 
 	const openPrivateMessageWindow: any = (friendId: number) => {
+		const chatId = chatsJoined.map((currentMap) => {
+			chatsJoined.Chat.
+		})
 		console.log(friendId);
 		setChatWindowIsOpen(true);
 		setChatWindowUserId(friendId);
-		// chatWindowControl(true);
 	};
 	return (
 		<>

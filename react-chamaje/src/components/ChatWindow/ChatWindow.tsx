@@ -21,7 +21,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	onCloseClick,
 	windowDragConstraintRef,
 }) => {
-	// TODO: remove this
 	const [textareaIsFocused, setTextareaIsFocused] = useState(false);
 	const [textareaIsEmpty, setTextareaIsEmpty] = useState(true);
 	const [textareaContent, setTextareaContent] = useState('');
@@ -54,6 +53,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 		<Window
 			windowTitle={`Chat with ${userId}`}
 			onCloseClick={onCloseClick}
+			windowDragConstraintRef={windowDragConstraintRef}
 			links={[
 				{ name: 'Profile', onClick: () => null },
 				{ name: 'Play', onClick: () => null },

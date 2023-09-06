@@ -41,7 +41,6 @@ export class UserController {
 				target: true,
 				friends: true,
 				chatsJoined: true,
-				ownedChannels: true,
 			}, // Include the gamesPlayed relation
 		});
 
@@ -104,7 +103,7 @@ export class UserController {
 			rank: userRank,
 			// chat
 			chatsJoined: user.chatsJoined,
-			ownedChannels: user.ownedChannels,
+			// ownedChannels: user.ownedChannels,
 		};
 	}
 
@@ -164,6 +163,51 @@ export class UserController {
 			onlineStatus: currentFriend.onlineStatus,
 		}));
 		return friends;
+	}
+
+	// Chat logic
+	// Private messages
+	@Get('me/chatsJoined')
+	async getChat(
+		@Req() request: CustomRequest,
+		@Param('userId') userId: number,
+	) {
+		// this contains an array of the chat sessions
+		const response = await this.prisma.user.findUnique({
+			// where: { Users: { some: { userId: { in: [request.userId, userId] } } } },
+			where: {
+				id: request.userId,
+			},
+			include: {
+				chatsJoined: true,
+			},
+		});
+		// this contains an array of the chat rooms joined 
+		const chatPromises = response.chatsJoined.map(async (currentChat) => {
+			const res = await this.prisma.chat.findUnique({
+				where: {
+					id: currentChat.chatId,
+				},
+			});
+			return res; // Return the result of each asynchronous operation
+		});
+		const chatRoomsResults = await Promise.all(chatPromises);
+		
+		// const ret = response.chatsJoined.map((currentChat) => {
+		// 	const res = await this.prisma.chat.findUnique({
+		// 		where: {
+		// 			id: currentChat.chatId,
+		// 		},
+		// 	});
+		// });
+		const chatSessions = response.chatsJoined.map((currentChat) => ({
+			chatId: currentChat.chatId,
+		}));
+		const ret = chatSessions.map((currentRoom) => ({
+			chatId: currentRoom.chatId,
+			
+		}))
+		return ret;
 	}
 
 	// TODO: why do we have this and the /me endpoint ?
