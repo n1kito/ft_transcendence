@@ -125,7 +125,7 @@ const Desktop = () => {
 				)}
 				{gameWindowIsOpen && (
 					<Game
-						onCloseClick={() => setChannelsWindowIsOpen(false)}
+						onCloseClick={() => setGameWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
 					/>
 				)}

@@ -31,5 +31,7 @@
 }
 
 .game-canvas {
-	background-color: red;
+	background-color: black;
+	height: 100%;
+	width: 100%;
 }
