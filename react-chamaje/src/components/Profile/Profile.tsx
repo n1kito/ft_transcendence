@@ -104,10 +104,7 @@ const Profile: React.FC<ProfileProps> = ({
 				const data = await response.text();
 				console.log('qr code: ', data);
 				setQrcode(data);
-				// setIsTwoFAEnabled(!isTwoFAEnabled);
-				// setTwoFAVerified(false);
 				setTwoFactorAuthWindowIsOpen(true);
-				// logOut();
 			}
 		} catch (error) {
 			console.error('2fa: ', error);

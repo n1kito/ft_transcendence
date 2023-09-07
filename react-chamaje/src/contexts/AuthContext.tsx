@@ -74,7 +74,6 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 
 	// Log the user out by removing cookies and updating state
 	const logOut = () => {
-		alert('log out');
 		Cookies.remove('refreshToken');
 		setAccessToken('');
 		setIsAuthentificated(false);

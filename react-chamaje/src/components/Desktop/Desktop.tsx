@@ -85,9 +85,6 @@ const Desktop = () => {
 			userData?.chatSocket?.endConnection();
 			// when unmounting desktop component, reset userData
 			setUserData(null);
-			// setIsTwoFAEnabled(false);
-			// setIsAuthentificated(false);
-			// setIsTwoFAEnabled(false);
 		};
 	}, []);
 

@@ -140,9 +140,10 @@ export class AuthController {
 		return 'User could not login 🛑';
 	}
 
-	@Get('2fa/')
-	async login2fa(): Promise<any> {
-		console.log('\n---------------- 2fa ---------------\n');
+	@Post('2fa/')
+	async login2fa(@Request() request, @Body() body): Promise<any> {
+		console.log('\n---------------- 2fa login ---------------\n');
+		console.log('found code in body: ', body.twoFactorAuthCode);
 	}
 
 	@Post('2fa/turn-on')

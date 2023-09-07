@@ -57,9 +57,9 @@ const Login = ({}) => {
 				{isAuthentificated && !isTwoFaVerified && (
 					<Window windowTitle="Login" onCloseClick={() => null}>
 						<Terminal
-							instruction="Enter you Google code"
+							instruction="Enter your Google code"
 							type="input"
-							redirUrl="api/login/2fa/authenticate"
+							redirUrl="api/login/2fa/"
 						/>
 					</Window>
 				)}

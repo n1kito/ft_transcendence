@@ -41,3 +41,12 @@
 	background-color: black;
 	/* animation: blink-animation 1s steps(2, start) infinite; */
 }
+
+#prompt-wrapper {
+	display: flex;
+	align-items: flex-end;
+	justify-items: space-between;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	gap: 0.5rem;
+}
