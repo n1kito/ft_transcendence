@@ -9,12 +9,25 @@ import ChatGameInvite from './Components/ChatGameInvite/ChatGameInvite';
 import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/SettingsWindow';
 import Title from '../Profile/Components/Title/Title';
 import InputField from '../Profile/Components/InputField/InputField';
+import useAuth from 'src/hooks/userAuth';
 
 export interface IChatWindowProps {
 	onCloseClick: () => void;
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
 	userId: number;
 	chatId: number;
+}
+
+interface IMessage {
+	sentById: number;
+	sentAt: Date;
+	content: string;
+}
+
+interface IChatInfo {
+	isChannel: boolean;
+	isPrivate: boolean;
+	isProtected: boolean;
 }
 
 const ChatWindow: React.FC<IChatWindowProps> = ({
@@ -50,6 +63,27 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	const openSettingsPanel = () => {
 		setSettingsPanelIsOpen(!settingsPanelIsOpen);
 	};
+
+	// back logic
+	const [messages, setMessages] = useState<IMessage[]>([]);
+	const { accessToken } = useAuth();
+	useEffect(() => {
+		fetch('api/user/chatMessages/' + chatId, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				setMessages(data);
+			});
+	}, []);
+
+	useEffect(() => {
+		console.log('messages', messages);
+	}, [messages]);
 
 	return (
 		<Window

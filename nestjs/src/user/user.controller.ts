@@ -208,6 +208,32 @@ export class UserController {
 		return ret;
 	}
 
+
+	// get messages from chat
+	@Get('/chatMessages/:chatId')
+	async getChatMessages(
+		@Req() request: CustomRequest,
+		@Param('chatId') chatId: number,
+	) {
+		const nbChatId: number = +chatId;
+		// if the userId is in the chat lets go
+		console.log('🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱');
+		const response = await this.prisma.chat.findUnique({
+			where: {
+				id: nbChatId,
+			},
+			include: {
+				messages: true,
+			},
+		});
+		const messages = response.messages.map((currentMessage) => ({
+			sentById: currentMessage.userId,
+			sentAt: currentMessage.sentAt,
+			content: currentMessage.content,
+		}));
+		return messages;
+	}
+
 	// TODO: why do we have this and the /me endpoint ?
 	// TODO: switch this endpoint to userID
 	// TODO: move the logics to user.service.ts ?
