@@ -1,8 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import './Game.css';
 import Window from '../Window/Window';
 import { Paddle } from './Entities/Paddle';
 import { Ball } from './Entities/Ball';
+import Button from '../Shared/Button/Button';
+import Tooltip from '../Shared/Tooltip/Tooltip';
+import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/SettingsWindow';
+import FriendBadge from '../Friends/Components/FriendBadge/FriendBadge';
+import { UserContext } from '../../contexts/UserContext';
 
 interface IGameProps {
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
@@ -13,7 +18,29 @@ const Game: React.FC<IGameProps> = ({
 	onCloseClick,
 	windowDragConstraintRef,
 }) => {
-	const [userHasOpponent, setUserHasOpponent] = useState(true);
+	const [tooltipVisible, setTooltipVisible] = useState(false);
+	const { userData } = useContext(UserContext);
+
+	/*
+	░█▀▀░▀█▀░█▀█░▀█▀░█▀▀░█▀▀
+	░▀▀█░░█░░█▀█░░█░░█▀▀░▀▀█
+	░▀▀▀░░▀░░▀░▀░░▀░░▀▀▀░▀▀▀ 
+	*/
+
+	const [settingsWindowVisible, setSettingWindowVisible] = useState(true);
+	const [gameIsRunning, setGameIsRunning] = useState(false);
+	const [gameHasTwoPlayers, setGameHasTwoPlayers] = useState(false);
+	const [player1Ready, setPlayer1Ready] = useState(false);
+	const [player2Ready, setPlayer2Ready] = useState(false);
+	const [userWonGame, setUserWonGame] = useState(true);
+	const [userLostGame, setUserLostGame] = useState(true);
+
+	/*
+	░█▀▀░█▀█░█▄█░█▀▀░░░█░░░█▀█░█▀▀░▀█▀░█▀▀
+	░█░█░█▀█░█░█░█▀▀░░░█░░░█░█░█░█░░█░░█░░
+	░▀▀▀░▀░▀░▀░▀░▀▀▀░░░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀
+	*/
+
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
 	useEffect(() => {
@@ -65,14 +92,14 @@ const Game: React.FC<IGameProps> = ({
 		// This is the loop that continualy updates our game
 		const loop = () => {
 			// Modify the state of the game based on user input
-			update();
+			updateCoordinates();
 			// Draw the current state of objects onto the screen
-			draw();
+			drawCanvas();
 			// Request the next frame
 			window.requestAnimationFrame(loop);
 		};
 
-		const draw = () => {
+		const drawCanvas = () => {
 			clearCanvas();
 			drawNet();
 			ball.draw(canvasDrawingCtx);
@@ -80,7 +107,7 @@ const Game: React.FC<IGameProps> = ({
 		};
 
 		// Update the position of each element
-		const update = () => {
+		const updateCoordinates = () => {
 			if (canvasRef.current) {
 				// Update paddles position
 				paddlePlayer1.move(canvasRef.current);
@@ -124,7 +151,7 @@ const Game: React.FC<IGameProps> = ({
 				canvasDrawingCtx.fillStyle = 'white';
 			}
 		};
-
+		// TODO: couldn't this be moved somewhere else ?
 		let gradient: CanvasGradient;
 		const netWidth = 3;
 		const setupCanvasStyle = () => {
@@ -161,23 +188,57 @@ const Game: React.FC<IGameProps> = ({
 		>
 			{/* TODO: add the player information above the canvas game */}
 			<div className={`game-wrapper`}>
-				{userHasOpponent ? (
-					<>
-						<canvas
-							className="game-canvas"
-							ref={canvasRef}
-							width={700}
-							height={500}
+				<div className="game-overlay-wrapper">
+					<div
+						className={`winner-announcement ${
+							!userWonGame && !userLostGame ? 'hide-announcement' : ''
+						}`}
+					>
+						WINNER: {userLostGame ? 'NOT ' : ''}YOU
+					</div>
+					<div className="game-settings-window-wrapper">
+						<div className="game-settings-window-titlebar">Upcoming match</div>
+						<div className="game-settings-window-content">
+							<FriendBadge
+								badgeTitle={userData?.login || '?'}
+								badgeImageUrl={userData?.image || undefined}
+								onlineIndicator={false}
+							/>
+							<span>VS</span>
+							<FriendBadge isClickable={true} />
+						</div>
+					</div>
+					<div
+						className="game-play-button-wrapper"
+						onMouseEnter={() => {
+							setTooltipVisible(true);
+						}}
+						onMouseLeave={() => {
+							setTooltipVisible(false);
+						}}
+					>
+						<Tooltip
+							isVisible={tooltipVisible && player1Ready && !player2Ready}
+							position="bottom"
 						>
-							This browser doesnt support canvas technology, try another or
-							update.
-						</canvas>
-					</>
-				) : (
-					<>
-						<span className="game-waiting">Waiting for a match...</span>
-					</>
-				)}
+							waiting for your opponent
+						</Tooltip>
+						<Button
+							onClick={() => setPlayer1Ready(true)}
+							disabled={player1Ready && !player2Ready}
+						>
+							play
+						</Button>
+					</div>
+				</div>
+				<canvas
+					className="game-canvas"
+					ref={canvasRef}
+					width={700}
+					height={500}
+				>
+					This browser doesnt support canvas technology, try another or update.
+				</canvas>
 			</div>
 		</Window>
 	);

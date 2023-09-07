@@ -59,8 +59,8 @@ export class Ball {
 				console.log('Collision with right paddle');
 				return true;
 			}
-			return false;
 		}
+		return false;
 	}
 
 	// Check if the ball has collided with a wall and changes its direction accordingly

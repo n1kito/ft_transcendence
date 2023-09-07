@@ -19,7 +19,7 @@
 	box-shadow: 0.7rem 0.7rem 0 0 #f8ef57;
 	cursor: default;
 	/* overflow: hidden; */
-	overflow: hidden;
+	overflow: visible;
 	position: relative;
 }
 
