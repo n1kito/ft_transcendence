@@ -14,12 +14,14 @@ export interface IChatWindowProps {
 	onCloseClick: () => void;
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
 	userId: number;
+	chatId: number;
 }
 
 const ChatWindow: React.FC<IChatWindowProps> = ({
 	userId,
 	onCloseClick,
 	windowDragConstraintRef,
+	chatId,
 }) => {
 	const [textareaIsFocused, setTextareaIsFocused] = useState(false);
 	const [textareaIsEmpty, setTextareaIsEmpty] = useState(true);
@@ -51,7 +53,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 
 	return (
 		<Window
-			windowTitle={`Chat with ${userId}`}
+			windowTitle={`Chat with ${chatId}`}
 			onCloseClick={onCloseClick}
 			windowDragConstraintRef={windowDragConstraintRef}
 			links={[

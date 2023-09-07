@@ -179,34 +179,32 @@ export class UserController {
 				id: request.userId,
 			},
 			include: {
-				chatsJoined: true,
+				chatsSessions: true,
 			},
 		});
-		// this contains an array of the chat rooms joined 
-		const chatPromises = response.chatsJoined.map(async (currentChat) => {
+		// this contains an array of the chat rooms joined
+		const chatPromises = response.chatsSessions.map(async (currentChat) => {
 			const res = await this.prisma.chat.findUnique({
 				where: {
 					id: currentChat.chatId,
+				},
+				include: {
+					participants: true,
 				},
 			});
 			return res; // Return the result of each asynchronous operation
 		});
 		const chatRoomsResults = await Promise.all(chatPromises);
-		
-		// const ret = response.chatsJoined.map((currentChat) => {
-		// 	const res = await this.prisma.chat.findUnique({
-		// 		where: {
-		// 			id: currentChat.chatId,
-		// 		},
-		// 	});
-		// });
-		const chatSessions = response.chatsJoined.map((currentChat) => ({
-			chatId: currentChat.chatId,
+
+		// this contains for each room joined, the id of the room and the list
+		// of the userId that joined it
+		// TODO: Add the messages
+		const ret = chatRoomsResults.map((currentRoom) => ({
+			chatId: currentRoom.id,
+			participants: currentRoom.participants.map((currentParticipant) => {
+				return currentParticipant.userId;
+			}),
 		}));
-		const ret = chatSessions.map((currentRoom) => ({
-			chatId: currentRoom.chatId,
-			
-		}))
 		return ret;
 	}
 

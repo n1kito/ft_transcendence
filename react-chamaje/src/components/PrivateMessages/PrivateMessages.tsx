@@ -14,9 +14,10 @@ interface IPrivateMessagesProps {
 	// chatWindowControl: (state: boolean) => void;
 }
 
-// export interface IChatStruct {
-// 	chatId: number;
-// }
+export interface IChatStruct {
+	chatId: number;
+	participants: number[];
+}
 
 const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	onCloseClick,
@@ -27,7 +28,8 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	const chatsList = [''];
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
 	const [chatWindowUserId, setChatWindowUserId] = useState(0);
-	const [chatsJoined, setChatsJoined] = useState([]);
+	const [chatWindowId, setChatWindowId] = useState(0);
+	const [chatsJoined, setChatsJoined] = useState<IChatStruct[]>([]);
 	const { accessToken } = useAuth();
 
 	// on mounting this component, fetch the chatsJoined
@@ -42,16 +44,36 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 			.then((response) => response.json())
 			.then((data) => {
 				setChatsJoined(data);
+				console.log(chatsJoined);
 			});
 	}, []);
 
+	useEffect(() => {
+		console.log('chatsJoined', chatsJoined);
+	}, [chatsJoined]);
+
+	useEffect(() => {
+		console.log('chatWindowId', chatWindowId);
+	}, [chatWindowId]);
+
 	const openPrivateMessageWindow: any = (friendId: number) => {
-		const chatId = chatsJoined.map((currentMap) => {
-			chatsJoined.Chat.
-		})
+		const chatId = chatsJoined.map((currentChat) => {
+			if (
+				currentChat.participants.length === 2 &&
+				(currentChat.participants.at(0) === friendId ||
+					currentChat.participants.at(1) === friendId)
+			) {
+				setChatWindowId(currentChat.chatId)
+				return ;
+			}
+		});
 		console.log(friendId);
 		setChatWindowIsOpen(true);
 		setChatWindowUserId(friendId);
+
+		// TODO: this should create a new chat with the user
+		if (!chatId)
+			console.error('This chat does not exist')
 	};
 	return (
 		<>
@@ -87,6 +109,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					onCloseClick={() => setChatWindowIsOpen(false)}
 					windowDragConstraintRef={windowDragConstraintRef}
 					userId={chatWindowUserId}
+					chatId={chatWindowId}
 				/>
 			)}
 		</>
