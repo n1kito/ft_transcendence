@@ -29,8 +29,14 @@ const RetrieveAccessToken = () => {
 						// Store token in AuthContext
 						updateAccessToken(data.accessToken);
 
+						// navigate('/desktop');
+
 						// Redirect user back to login page to continue login process with google authenticator
 						if (data.twofa) {
+							console.log(
+								'retrieveAccessToken - redirecting to login page: ',
+								data.twofa,
+							);
 							setIsTwoFAEnabled(true);
 							navigate('/');
 						}

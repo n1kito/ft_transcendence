@@ -58,6 +58,16 @@ export class AuthController {
 			// Retrieve user information after successful authentication
 			await this.authService.retrieveUserInfo();
 
+			// verify if 2fa is enabled if so return true;
+			const response = await this.authService.istwofaEnabled(
+				this.authService.getUserId(),
+			);
+
+			console.log(
+				'🎃 Authenticated, checking if 2fa is enabled:',
+				response.isTwoFactorAuthenticationEnabled,
+			);
+
 			// Prepare the payload for generating tokens
 			const payload = {
 				userId: this.authService.getUserId(),
@@ -128,6 +138,11 @@ export class AuthController {
 	@Get('login-failed')
 	loginFailed(): string {
 		return 'User could not login 🛑';
+	}
+
+	@Get('2fa/')
+	async login2fa(): Promise<any> {
+		console.log('\n---------------- 2fa ---------------\n');
 	}
 
 	@Post('2fa/turn-on')

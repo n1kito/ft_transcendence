@@ -98,7 +98,11 @@ export class TokenService {
 
 	// After refresh token and userId are verified,
 	// generate a new access token
-	async refreshToken(@Req() req: Request): Promise<string> {
+	async refreshToken(@Req() req: Request): Promise<{
+		accessToken: string;
+		isTwoFactorAuthEnabled: boolean;
+		isTwoFactorAuthVerified: boolean;
+	}> {
 		try {
 			// retrieve refreshToken from cookies in request
 			const refreshToken = req.cookies['refreshToken'];
@@ -118,7 +122,16 @@ export class TokenService {
 			// If user is valid, generate a new access token
 			const newAccessToken = this.generateAccessToken({ userId });
 
-			return newAccessToken;
+			// let isTwoFactorAuthEnabled: boolean;
+			const response = await this.prisma.user.findUnique({
+				where: { id: userId },
+			});
+
+			return {
+				accessToken: newAccessToken,
+				isTwoFactorAuthEnabled: response.isTwoFactorAuthenticationEnabled,
+				isTwoFactorAuthVerified: response.isTwoFactorAuthenticationVerified,
+			};
 		} catch (error) {
 			throw new Error('Invalid or expired refresh token');
 		}

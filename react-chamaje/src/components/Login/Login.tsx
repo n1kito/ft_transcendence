@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import './Login.css';
 // import Background from '../Background/Background';
 import Window from '../Window/Window';
@@ -6,12 +6,21 @@ import Terminal from './Components/Terminal/Terminal';
 import { motion } from 'framer-motion';
 import Stickerparticles from './Components/Stickerparticles/Stickerparticles';
 import useAuth from 'src/hooks/userAuth';
+import { UserContext } from 'src/contexts/UserContext';
 
 const Login = ({}) => {
 	const constraintRef = useRef(null);
 
 	const [passkey, setPasskey] = useState('');
-	const { isAuthentificated, isTwoFAVerified, isTwoFAEnabled } = useAuth();
+	const {
+		isAuthentificated,
+		isTwoFAEnabled,
+		setIsTwoFAEnabled,
+		isTwoFaVerified,
+	} = useAuth();
+
+	// const { userData, setUserData } = useContext(UserContext);
+
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
 			const updatedPasskey = passkey.slice(-3) + event.key;
@@ -23,7 +32,9 @@ const Login = ({}) => {
 			document.removeEventListener('keydown', handleKeyDown);
 
 		return () => {
+			// alert();
 			document.removeEventListener('keydown', handleKeyDown);
+			// setIsTwoFAEnabled(isTwoFAEnabled);
 		};
 	}, [passkey]);
 
@@ -43,7 +54,7 @@ const Login = ({}) => {
 					</Window>
 				)}
 
-				{isAuthentificated && isTwoFAEnabled && !isTwoFAVerified && (
+				{isAuthentificated && !isTwoFaVerified && (
 					<Window windowTitle="Login" onCloseClick={() => null}>
 						<Terminal
 							instruction="Enter you Google code"

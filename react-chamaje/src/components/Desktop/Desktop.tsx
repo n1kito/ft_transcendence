@@ -43,8 +43,6 @@ const Desktop = () => {
 		accessToken,
 		setIsTwoFAEnabled,
 		isTwoFAEnabled,
-		isTwoFAVerified,
-		setTwoFAVerified,
 	} = useAuth();
 
 	let [qrcode, setQrcode] = useState('');
@@ -73,7 +71,6 @@ const Desktop = () => {
 					// Set the user data in the context
 					setUserData(updatedData);
 					setIsTwoFAEnabled(data.isTwoFactorAuthenticationEnabled);
-					setTwoFAVerified(true);
 				} else {
 					logOut();
 				}
@@ -88,9 +85,9 @@ const Desktop = () => {
 			userData?.chatSocket?.endConnection();
 			// when unmounting desktop component, reset userData
 			setUserData(null);
-			setIsTwoFAEnabled(false);
-			setIsAuthentificated(false);
-			setIsTwoFAEnabled(false);
+			// setIsTwoFAEnabled(false);
+			// setIsAuthentificated(false);
+			// setIsTwoFAEnabled(false);
 		};
 	}, []);
 
@@ -125,7 +122,6 @@ const Desktop = () => {
 				console.log('is oke');
 				setQrcode('');
 				setIsTwoFAEnabled(false);
-				setTwoFAVerified(false);
 			}
 		} catch (error) {
 			console.error('2fa: ', error);

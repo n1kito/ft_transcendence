@@ -32,7 +32,7 @@ export class UserController {
 	@Get('me')
 	async getMyinfo(@Req() request: CustomRequest) {
 		const userId = this.userService.authenticateUser(request);
-
+		console.log('👹 user id :', userId);
 		// Fetch the user information from the database using the userId
 		const user = await this.prisma.user.findUnique({
 			where: { id: request.userId },

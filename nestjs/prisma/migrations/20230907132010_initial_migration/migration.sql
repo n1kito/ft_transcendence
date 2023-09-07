@@ -11,6 +11,7 @@ CREATE TABLE "User" (
     "onlineStatus" BOOLEAN NOT NULL DEFAULT false,
     "twoFactorAuthenticationSecret" TEXT,
     "isTwoFactorAuthenticationEnabled" BOOLEAN NOT NULL DEFAULT false,
+    "isTwoFactorAuthenticationVerified" BOOLEAN NOT NULL DEFAULT false,
     "isDefaultProfile" BOOLEAN NOT NULL DEFAULT false,
     "login_is_locked" BOOLEAN NOT NULL DEFAULT false,
     "email_is_locked" BOOLEAN NOT NULL DEFAULT false,

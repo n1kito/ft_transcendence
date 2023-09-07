@@ -25,6 +25,7 @@ model User {
     // Two Factor authentication
     twoFactorAuthenticationSecret       String? 
     isTwoFactorAuthenticationEnabled    Boolean @default(false)
+    isTwoFactorAuthenticationVerified   Boolean @default(false)
 
     // Friendship system
     friends          User[]  @relation("Friendship")

@@ -21,7 +21,7 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 	const [validationCode, setValidationCode] = useState('');
 	const [inputError, setInputError] = useState(true);
 
-	const { accessToken, setTwoFAVerified } = useAuth();
+	const { accessToken, setIsTwoFAEnabled } = useAuth();
 
 	// Handle input state: disable the 'activate' button in case
 	// of invalid input
@@ -54,7 +54,7 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 			const responseData = await response.json();
 			if (response.ok) {
 				alert('code is valid!');
-				setTwoFAVerified(true);
+				setIsTwoFAEnabled(true);
 			} else {
 				console.error('problemo: ', responseData);
 			}
