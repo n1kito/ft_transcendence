@@ -52,6 +52,9 @@ export class ChatController {
 			sentAt: currentMessage.sentAt,
 			content: currentMessage.content,
 		}));
-		return messages;
+		const sortedMessages = messages.sort(
+			(msgA, msgB) => msgA.sentAt.getDate() - msgB.sentAt.getDate(),
+		);
+		return sortedMessages;
 	}
 }

@@ -11,19 +11,19 @@ import Title from '../Profile/Components/Title/Title';
 import InputField from '../Profile/Components/InputField/InputField';
 import useAuth from 'src/hooks/userAuth';
 
-export interface IChatWindowProps {
-	onCloseClick: () => void;
-	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
-	userId: number;
-	chatId: number;
-}
-
-interface IMessage {
+export interface IMessage {
 	sentById: number;
 	sentAt: Date;
 	content: string;
 }
 
+export interface IChatWindowProps {
+	onCloseClick: () => void;
+	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
+	userId: number;
+	chatId: number;
+	messages: IMessage[];
+}
 interface IChatInfo {
 	isChannel: boolean;
 	isPrivate: boolean;
@@ -35,6 +35,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	onCloseClick,
 	windowDragConstraintRef,
 	chatId,
+	messages,
 }) => {
 	const [textareaIsFocused, setTextareaIsFocused] = useState(false);
 	const [textareaIsEmpty, setTextareaIsEmpty] = useState(true);
@@ -65,21 +66,21 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	};
 
 	// back logic
-	const [messages, setMessages] = useState<IMessage[]>([]);
-	const { accessToken } = useAuth();
-	useEffect(() => {
-		fetch('api/user/chatMessages/' + chatId, {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-			},
-			credentials: 'include',
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				setMessages(data);
-			});
-	}, []);
+	// const [messages, setMessages] = useState<IMessage[]>([]);
+	// const { accessToken } = useAuth();
+	// useEffect(() => {
+	// 	fetch('api/user/chatMessages/' + chatId, {
+	// 		method: 'GET',
+	// 		headers: {
+	// 			Authorization: `Bearer ${accessToken}`,
+	// 		},
+	// 		credentials: 'include',
+	// 	})
+	// 		.then((response) => response.json())
+	// 		.then((data) => {
+	// 			setMessages(data);
+	// 		});
+	// }, []);
 
 	useEffect(() => {
 		console.log('messages', messages);
@@ -101,78 +102,16 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 		>
 			<div className="chat-wrapper">
 				<div className="chat-content" ref={chatContentRef}>
-					<ChatBubble
-						sender="Jee"
-						time="24/09/1992 - 11:11 PM"
-						senderAvatar="https://cdnb.artstation.com/p/assets/images/images/059/395/601/large/liqudiv-zhan-liqudiv-midjourney-ai-overpaint-web-20220605-2.jpg?1676302872"
-					>
-						Salut, c’est pas Jee !
-					</ChatBubble>
-					<ChatBubble
-						wasSent={true}
-						sender="Nikito"
-						time="24/09/1992 - 11:11 PM"
-					>
-						Bah t'es qui alors
-					</ChatBubble>
-					<ChatBubble
-						sender="Jee"
-						time="24/09/1992 - 11:11 PM"
-						senderAvatar="https://cdnb.artstation.com/p/assets/images/images/059/395/601/large/liqudiv-zhan-liqudiv-midjourney-ai-overpaint-web-20220605-2.jpg?1676302872"
-					>
-						Tu parles mieux déjà
-					</ChatBubble>
-					<ChatBubble
-						sender="Jee"
-						time="24/09/1992 - 11:11 PM"
-						senderAvatar="https://cdnb.artstation.com/p/assets/images/images/059/395/601/large/liqudiv-zhan-liqudiv-midjourney-ai-overpaint-web-20220605-2.jpg?1676302872"
-					>
-						Salut, c’est pas Jee !
-					</ChatBubble>
-					<ChatBubble
-						sender="Jee"
-						time="24/09/1992 - 11:11 PM"
-						senderAvatar="https://cdnb.artstation.com/p/assets/images/images/059/395/601/large/liqudiv-zhan-liqudiv-midjourney-ai-overpaint-web-20220605-2.jpg?1676302872"
-					>
-						Salut, c’est pas Jee !
-					</ChatBubble>
-					<ChatBubble
-						sender="Jee"
-						time="24/09/1992 - 11:11 PM"
-						senderAvatar="https://cdnb.artstation.com/p/assets/images/images/059/395/601/large/liqudiv-zhan-liqudiv-midjourney-ai-overpaint-web-20220605-2.jpg?1676302872"
-					>
-						Salut, c’est pas Jee !
-					</ChatBubble>
-					<ChatBubble
-						sender="Jee"
-						time="24/09/1992 - 11:11 PM"
-						senderAvatar="https://cdnb.artstation.com/p/assets/images/images/059/395/601/large/liqudiv-zhan-liqudiv-midjourney-ai-overpaint-web-20220605-2.jpg?1676302872"
-					>
-						Salut, c’est pas Jee !
-					</ChatBubble>
-					<ChatBubble
-						sender="Jee"
-						time="24/09/1992 - 11:11 PM"
-						senderAvatar="https://cdnb.artstation.com/p/assets/images/images/059/395/601/large/liqudiv-zhan-liqudiv-midjourney-ai-overpaint-web-20220605-2.jpg?1676302872"
-					>
-						Salut, c’est pas Jee !
-					</ChatBubble>
+					{messages.map((currentMessage) => (
+						<ChatBubble
+							sender={currentMessage.sentById.toString()}
+							time={currentMessage.sentAt.toString()}
+						>
+							{currentMessage.content}
+						</ChatBubble>
+					))}
 					<ChattNotification type="Muted" sender="Nikito" recipient="Jee" />
-					<ChatBubble
-						sender="Jee"
-						time="24/09/1992 - 11:11 PM"
-						senderAvatar="https://cdnb.artstation.com/p/assets/images/images/059/395/601/large/liqudiv-zhan-liqudiv-midjourney-ai-overpaint-web-20220605-2.jpg?1676302872"
-					>
-						Salut, c’est pas Jee !
-					</ChatBubble>
 					<ChatGameInvite sender="Jee" recipient="Nikito" />
-					<ChatBubble
-						wasSent={true}
-						sender={userData?.login}
-						time="24/09/1992 - 11:11 PM"
-					>
-						Je suis très mal à l'aise
-					</ChatBubble>
 				</div>
 				<div
 					className={`chat-input ${

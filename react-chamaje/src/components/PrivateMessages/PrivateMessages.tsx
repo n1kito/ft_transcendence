@@ -4,7 +4,7 @@ import Window from '../Window/Window';
 import PrivateMessagesList from './Components/PrivateMessagesList/PrivateMessagesList';
 import FriendBadge from '../Friends/Components/FriendBadge/FriendBadge';
 import { IFriendStruct } from '../Desktop/Desktop';
-import ChatWindow from '../ChatWindow/ChatWindow';
+import ChatWindow, { IMessage } from '../ChatWindow/ChatWindow';
 import useAuth from 'src/hooks/userAuth';
 
 interface IPrivateMessagesProps {
@@ -30,7 +30,22 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	const [chatWindowUserId, setChatWindowUserId] = useState(0);
 	const [chatWindowId, setChatWindowId] = useState(0);
 	const [chatsJoined, setChatsJoined] = useState<IChatStruct[]>([]);
+	const [messages, setMessages] = useState<IMessage[]>([]);
 	const { accessToken } = useAuth();
+
+	async function fetchMessages(chatId: number) {
+		fetch('api/user/chatMessages/' + chatId, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				setMessages(data);
+			});
+	}
 
 	// on mounting this component, fetch the chatsJoined
 	useEffect(() => {
@@ -47,7 +62,9 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 				console.log(chatsJoined);
 			});
 	}, []);
-
+	useEffect(() => {
+		console.log('messages', messages);
+	}, [messages]);
 	useEffect(() => {
 		console.log('chatsJoined', chatsJoined);
 	}, [chatsJoined]);
@@ -63,8 +80,9 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 				(currentChat.participants.at(0) === friendId ||
 					currentChat.participants.at(1) === friendId)
 			) {
-				setChatWindowId(currentChat.chatId)
-				return ;
+				setChatWindowId(currentChat.chatId);
+				fetchMessages(currentChat.chatId)
+				return;
 			}
 		});
 		console.log(friendId);
@@ -72,8 +90,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 		setChatWindowUserId(friendId);
 
 		// TODO: this should create a new chat with the user
-		if (!chatId)
-			console.error('This chat does not exist')
+		if (!chatId) console.error('This chat does not exist');
 	};
 	return (
 		<>
@@ -110,6 +127,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					windowDragConstraintRef={windowDragConstraintRef}
 					userId={chatWindowUserId}
 					chatId={chatWindowId}
+					messages={messages}
 				/>
 			)}
 		</>
