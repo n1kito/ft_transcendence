@@ -9,11 +9,10 @@ export interface navBarProps {
 }
 
 const NavBar: React.FC<navBarProps> = ({ isLoggedIn = true }) => {
-	const navClasses = 'navBar' + `${isLoggedIn ? ' loggedIn' : ''}`;
 	const { userData } = useContext(UserContext);
 
 	return (
-		<div className={navClasses}>
+		<div className={`navBar ${isLoggedIn ? 'loggedIn' : ''}`}>
 			<div className="menuItems">
 				{/* <Button></Button> */}
 				<a href="#" title="Link name">

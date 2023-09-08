@@ -8,6 +8,7 @@ import Tooltip from '../Shared/Tooltip/Tooltip';
 import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/SettingsWindow';
 import FriendBadge from '../Friends/Components/FriendBadge/FriendBadge';
 import { UserContext } from '../../contexts/UserContext';
+import useAuth from '../../hooks/userAuth';
 
 interface IGameRoomProps {
 	roomId: number;
@@ -18,12 +19,15 @@ interface IGameRoomProps {
 interface IGameProps {
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
 	onCloseClick: () => void;
+	gameRoomInfo?: IGameRoomProps;
 }
 
 const Game: React.FC<IGameProps> = ({
 	onCloseClick,
 	windowDragConstraintRef,
+	gameRoomInfo = undefined,
 }) => {
+	const { accessToken } = useAuth();
 	const [tooltipVisible, setTooltipVisible] = useState(false);
 	const { userData } = useContext(UserContext);
 
@@ -38,8 +42,8 @@ const Game: React.FC<IGameProps> = ({
 	const [gameHasTwoPlayers, setGameHasTwoPlayers] = useState(false);
 	const [player1Ready, setPlayer1Ready] = useState(false);
 	const [player2Ready, setPlayer2Ready] = useState(false);
-	const [userWonGame, setUserWonGame] = useState(true);
-	const [userLostGame, setUserLostGame] = useState(false);
+	const [userWonGame, setUserWonGame] = useState(false);
+	const [userLostGame, setUserLostGame] = useState(true);
 
 	/*
 	░█▀▀░█▀█░█▄█░█▀▀░░░█░░░█▀█░█▀▀░▀█▀░█▀▀
@@ -185,6 +189,44 @@ const Game: React.FC<IGameProps> = ({
 		setupCanvasStyle();
 		loop();
 	}, []);
+
+	/*
+	░█▀▄░█▀█░█▀█░█▄█░░░█░░░█▀█░█▀▀░▀█▀░█▀▀
+	░█▀▄░█░█░█░█░█░█░░░█░░░█░█░█░█░░█░░█░░
+	░▀░▀░▀▀▀░▀▀▀░▀░▀░░░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀
+	*/
+
+	useEffect(() => {
+		// If the component was mounted with no room information (from the desktop icon)
+		// we need to request a roomId to play in, either an empty room or a room with someone
+		// already waiting in it
+		if (gameRoomInfo == undefined) {
+			const findRoom = async () => {
+				// Feth the user data from the server
+				try {
+					// user/me
+					const response = await fetch('/api/game/assign-room', {
+						method: 'GET',
+						credentials: 'include',
+						headers: {
+							Authorization: `Bearer ${accessToken}`,
+						},
+					});
+					if (response.ok) {
+						const data = await response.json();
+						// Set the user data in the context
+						console.log(`You're in game room #${data.roomId}`);
+					} else {
+						console.log(`Could not get room Id`);
+					}
+				} catch (error) {
+					console.error('Error: ', error);
+				}
+			};
+			findRoom();
+		}
+	}, []);
+
 	return (
 		<Window
 			windowTitle="Game"
@@ -229,7 +271,7 @@ const Game: React.FC<IGameProps> = ({
 								isVisible={tooltipVisible && player1Ready && !player2Ready}
 								position="bottom"
 							>
-								waiting for your opponent
+								Waiting for your opponent to press "play"
 							</Tooltip>
 							<Button
 								onClick={() => setPlayer1Ready(true)}

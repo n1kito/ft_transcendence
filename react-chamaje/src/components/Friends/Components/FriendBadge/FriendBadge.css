@@ -19,6 +19,7 @@
 	height: 6rem;
 	overflow: hidden;
 	position: relative;
+	transition: opacity 0.5s linear;
 }
 
 .badge-avatar img {

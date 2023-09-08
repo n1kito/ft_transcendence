@@ -29,7 +29,7 @@ const Desktop = () => {
 	const [openProfileWindow, setProfileWindowIsOpen] = useState(false);
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
 	const [channelsWindowIsOpen, setChannelsWindowIsOpen] = useState(false);
-	const [gameWindowIsOpen, setGameWindowIsOpen] = useState(true);
+	const [gameWindowIsOpen, setGameWindowIsOpen] = useState(false);
 
 	const navigate = useNavigate();
 	const { isAuthentificated, refreshToken, logOut, accessToken } = useAuth();
@@ -63,8 +63,8 @@ const Desktop = () => {
 			}
 		};
 
-		fetchUserData();
-	}, [setUserData]);
+		if (isAuthentificated) fetchUserData();
+	}, [setUserData, isAuthentificated]);
 
 	const friendsClickHandler = () => {
 		setFriendsWindowIsOpen(true);

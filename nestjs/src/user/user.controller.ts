@@ -18,6 +18,7 @@ import { Request, response, Response } from 'express';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { validate } from 'class-validator';
+
 export interface CustomRequest extends Request {
 	userId: number;
 }
@@ -31,7 +32,7 @@ export class UserController {
 
 	@Get('me')
 	async getMyinfo(@Req() request: CustomRequest) {
-		const userId = this.userService.authenticateUser(request);
+		const userId = this.userService.authenticateUser(request); // TODO: should there be a try/catch here? The authenticateUser() method does throw an error
 
 		// Fetch the user information from the database using the userId
 		const user = await this.prisma.user.findUnique({

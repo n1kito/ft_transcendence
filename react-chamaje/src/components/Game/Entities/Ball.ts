@@ -48,7 +48,7 @@ export class Ball {
 				this.x + this.radius > paddle.x // Ball right side is on the right of the paddle's left side)
 			) {
 				this.dx *= -1;
-				console.log('Collision with left paddle');
+				// console.log('Collision with left paddle');
 				return true;
 			} else if (
 				side === 'right' &&
@@ -56,7 +56,7 @@ export class Ball {
 				this.x - this.radius < paddle.x + paddle.width // Ball left side is on the left of the paddle's right side)
 			) {
 				this.dx *= -1;
-				console.log('Collision with right paddle');
+				// console.log('Collision with right paddle');
 				return true;
 			}
 		}
@@ -74,7 +74,7 @@ export class Ball {
 		// Note: You might want to handle scoring or reset the ball position here
 		if (this.x - this.radius <= 0 || this.x + this.radius >= canvas.width) {
 			this.dx = -this.dx;
-			console.log('someone scored !');
+			// console.log('someone scored !');
 		}
 	}
 }

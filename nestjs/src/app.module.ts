@@ -9,6 +9,8 @@ import { DatabaseSetupModule } from './services/database-setup/database-setup.mo
 import { PrismaModule } from './services/prisma-service/prisma.module';
 import { PrismaService } from './services/prisma-service/prisma.service';
 import { TokenModule } from './token/token.module';
+import { GameModule } from './game/game.module';
+import { GameService } from './game/game.service';
 
 @Module({
 	imports: [
@@ -18,8 +20,9 @@ import { TokenModule } from './token/token.module';
 		DatabaseSetupModule,
 		PrismaModule,
 		TokenModule,
+		GameModule,
 	],
 	controllers: [AppController],
-	providers: [AppService, PrismaService],
+	providers: [AppService, PrismaService, GameService],
 })
 export class AppModule {}

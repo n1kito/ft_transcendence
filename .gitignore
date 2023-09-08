@@ -1,6 +1,9 @@
 # Postgresql volume
 postgresql
 
+# Prisma migrations
+**/migrations
+
 # Dependencies
 **/node_modules
 

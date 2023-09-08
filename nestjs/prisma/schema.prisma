@@ -46,17 +46,40 @@ model User {
 }
 
 model Game {
-    id       Int           @id @default(autoincrement())
-    playedAt DateTime      @default(now())
-    players  gameSession[]
+    id         Int           @id @default(autoincrement())
+    playedAt   DateTime      @default(now())
+    players    gameSession[]
+    gameRoom   gameRoom      @relation(fields: [gameRoomId], references: [id])
+    gameRoomId Int           @unique
+}
+
+enum PlayerGameStatus {
+    Waiting // Waiting for the game to start
+    Ready // Player is ready to start the game (they presse the play button)
+    Playing // Player is currently in a game
+    Finished // Player finished the game
 }
 
 model gameSession {
-    id       Int     @id @default(autoincrement())
-    user     User    @relation(fields: [userId], references: [id])
-    userId   Int
-    game     Game    @relation(fields: [gameId], references: [id])
-    gameId   Int
-    score    Int
-    isWinner Boolean
+    id           Int              @id @default(autoincrement())
+    user         User             @relation(fields: [userId], references: [id])
+    userId       Int
+    game         Game             @relation(fields: [gameId], references: [id])
+    gameId       Int
+    score        Int              @default(0)
+    isWinner     Boolean          @default(false)
+    playerStatus PlayerGameStatus @default(Waiting)
+}
+
+enum GameRoomStatus {
+    Waiting // Waiting for players to join
+    Full // Two players have joined the game
+    InProgress // The game has started
+    Finished // The game has ended
+}
+
+model gameRoom {
+    id         Int            @id @default(autoincrement())
+    gameStatus GameRoomStatus @default(Waiting)
+    game       Game?
 }
