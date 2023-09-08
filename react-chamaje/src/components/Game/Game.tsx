@@ -9,6 +9,12 @@ import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/Settings
 import FriendBadge from '../Friends/Components/FriendBadge/FriendBadge';
 import { UserContext } from '../../contexts/UserContext';
 
+interface IGameRoomProps {
+	roomId: number;
+	opponentLogin: string;
+	opponentAvatar: string;
+}
+
 interface IGameProps {
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
 	onCloseClick: () => void;
@@ -33,7 +39,7 @@ const Game: React.FC<IGameProps> = ({
 	const [player1Ready, setPlayer1Ready] = useState(false);
 	const [player2Ready, setPlayer2Ready] = useState(false);
 	const [userWonGame, setUserWonGame] = useState(true);
-	const [userLostGame, setUserLostGame] = useState(true);
+	const [userLostGame, setUserLostGame] = useState(false);
 
 	/*
 	░█▀▀░█▀█░█▄█░█▀▀░░░█░░░█▀█░█▀▀░▀█▀░█▀▀
@@ -188,49 +194,52 @@ const Game: React.FC<IGameProps> = ({
 		>
 			{/* TODO: add the player information above the canvas game */}
 			<div className={`game-wrapper`}>
-				<div className="game-overlay-wrapper">
-					<div
-						className={`winner-announcement ${
-							!userWonGame && !userLostGame ? 'hide-announcement' : ''
-						}`}
-					>
-						WINNER: {userLostGame ? 'NOT ' : ''}YOU
-					</div>
-					<div className="game-settings-window-wrapper">
-						<div className="game-settings-window-titlebar">Upcoming match</div>
-						<div className="game-settings-window-content">
-							<FriendBadge
-								badgeTitle={userData?.login || '?'}
-								badgeImageUrl={userData?.image || undefined}
-								onlineIndicator={false}
-							/>
-							<span>VS</span>
-							<FriendBadge isClickable={true} />
+				{(!player1Ready || !player2Ready) && (
+					<div className="game-overlay-wrapper">
+						{(userWonGame || userLostGame) && (
+							<div className={`winner-announcement`}>
+								WINNER: {userLostGame ? 'NOT ' : ''}YOU
+							</div>
+						)}
+						<div className="game-settings-window-wrapper">
+							<div className="game-settings-window-titlebar">
+								Upcoming match
+							</div>
+							<div className="game-settings-window-content">
+								<FriendBadge
+									badgeTitle={userData?.login || '?'}
+									badgeImageUrl={userData?.image || undefined}
+									onlineIndicator={false}
+									isActive={player1Ready}
+								/>
+								<span>VS</span>
+								<FriendBadge isClickable={true} isActive={player2Ready} />
+							</div>
+						</div>
+						<div
+							className="game-play-button-wrapper"
+							onMouseEnter={() => {
+								setTooltipVisible(true);
+							}}
+							onMouseLeave={() => {
+								setTooltipVisible(false);
+							}}
+						>
+							<Tooltip
+								isVisible={tooltipVisible && player1Ready && !player2Ready}
+								position="bottom"
+							>
+								waiting for your opponent
+							</Tooltip>
+							<Button
+								onClick={() => setPlayer1Ready(true)}
+								disabled={player1Ready && !player2Ready}
+							>
+								play
+							</Button>
 						</div>
 					</div>
-					<div
-						className="game-play-button-wrapper"
-						onMouseEnter={() => {
-							setTooltipVisible(true);
-						}}
-						onMouseLeave={() => {
-							setTooltipVisible(false);
-						}}
-					>
-						<Tooltip
-							isVisible={tooltipVisible && player1Ready && !player2Ready}
-							position="bottom"
-						>
-							waiting for your opponent
-						</Tooltip>
-						<Button
-							onClick={() => setPlayer1Ready(true)}
-							disabled={player1Ready && !player2Ready}
-						>
-							play
-						</Button>
-					</div>
-				</div>
+				)}
 				<canvas
 					className="game-canvas"
 					ref={canvasRef}

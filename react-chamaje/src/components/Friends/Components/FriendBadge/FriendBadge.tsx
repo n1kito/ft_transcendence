@@ -13,10 +13,12 @@ export interface IFriendBadgeProps extends ShadowWrapperProps {
 	isChannelBadge?: boolean;
 	isEmptyBadge?: boolean;
 	dashedBorder?: boolean;
+	isActive?: boolean;
 }
 
 const FriendBadge: React.FC<IFriendBadgeProps> = ({
 	isClickable = false,
+	isActive = true,
 	shadow = isClickable || false,
 	badgeTitle = 'Title',
 	badgeImageUrl = m3ganAvatar,
@@ -51,7 +53,11 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 				{!isEmptyBadge && (
 					<>
 						{!isChannelBadge && (
-							<div className="badge-avatar">
+							<div
+								className={`badge-avatar ${
+									!isActive ? 'disable-friend-badge' : ''
+								}`}
+							>
 								<img src={badgeImageUrl} draggable={false} />
 							</div>
 						)}
