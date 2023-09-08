@@ -91,6 +91,10 @@ const ProfileSettings: React.FC = () => {
 				body: JSON.stringify(updatedFields),
 			});
 
+		//		body: JSON.stringify({content: value, }),
+		
+			//
+
 			console.log('response status:', response.status);
 
 			// Update the userData in the context with the updated user data

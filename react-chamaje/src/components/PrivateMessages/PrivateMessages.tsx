@@ -34,7 +34,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	const { accessToken } = useAuth();
 
 	async function fetchMessages(chatId: number) {
-		fetch('api/user/chatMessages/' + chatId, {
+		fetch('api/chat/chatMessages/' + chatId, {
 			method: 'GET',
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
@@ -81,7 +81,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					currentChat.participants.at(1) === friendId)
 			) {
 				setChatWindowId(currentChat.chatId);
-				fetchMessages(currentChat.chatId)
+				fetchMessages(currentChat.chatId);
 				return;
 			}
 		});

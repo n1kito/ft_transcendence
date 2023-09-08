@@ -15,7 +15,18 @@ export interface IMessage {
 	sentById: number;
 	sentAt: Date;
 	content: string;
+	login: string;
+	avatar: string;
 }
+
+const dateFormatOptions: Intl.DateTimeFormatOptions = {
+	year: '2-digit',
+	month: '2-digit',
+	day: '2-digit',
+	hour: '2-digit',
+	minute: '2-digit',
+	hour12: true, // Use 24-hour format
+};
 
 export interface IChatWindowProps {
 	onCloseClick: () => void;
@@ -65,27 +76,28 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 		setSettingsPanelIsOpen(!settingsPanelIsOpen);
 	};
 
-	// back logic
-	// const [messages, setMessages] = useState<IMessage[]>([]);
-	// const { accessToken } = useAuth();
-	// useEffect(() => {
-	// 	fetch('api/user/chatMessages/' + chatId, {
-	// 		method: 'GET',
-	// 		headers: {
-	// 			Authorization: `Bearer ${accessToken}`,
-	// 		},
-	// 		credentials: 'include',
-	// 	})
-	// 		.then((response) => response.json())
-	// 		.then((data) => {
-	// 			setMessages(data);
-	// 		});
-	// }, []);
-
 	useEffect(() => {
 		console.log('messages', messages);
 	}, [messages]);
 
+	const { accessToken } = useAuth();
+
+	const sendMessage = async () => {
+		console.log('accessToken', accessToken);
+		await fetch('/api/chat/sendMessage', {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+			body: JSON.stringify({ message: textareaContent, chatId: chatId }),
+		});
+		console.log(
+			'JSON.stringify({textareaContent, chatId})',
+			JSON.stringify({ textareaContent, chatId }),
+		);
+	};
 	return (
 		<Window
 			windowTitle={`Chat with ${chatId}`}
@@ -102,14 +114,23 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 		>
 			<div className="chat-wrapper">
 				<div className="chat-content" ref={chatContentRef}>
-					{messages.map((currentMessage) => (
-						<ChatBubble
-							sender={currentMessage.sentById.toString()}
-							time={currentMessage.sentAt.toString()}
-						>
-							{currentMessage.content}
-						</ChatBubble>
-					))}
+					{messages.map((currentMessage) => {
+						const date: Date = new Date(currentMessage.sentAt);
+						return (
+							<ChatBubble
+								wasSent={
+									userData && currentMessage.sentById === userData.id
+										? true
+										: false
+								}
+								sender={currentMessage.login}
+								time={date.toLocaleString('en-US', dateFormatOptions)}
+								senderAvatar={currentMessage.avatar}
+							>
+								{currentMessage.content}
+							</ChatBubble>
+						);
+					})}
 					<ChattNotification type="Muted" sender="Nikito" recipient="Jee" />
 					<ChatGameInvite sender="Jee" recipient="Nikito" />
 				</div>
@@ -123,7 +144,11 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 						onBlur={() => setTextareaIsFocused(false)}
 						onChange={handleInputChange}
 					></textarea>
-					<Button baseColor={[151, 51, 91]} disabled={textareaIsEmpty}>
+					<Button
+						baseColor={[151, 51, 91]}
+						disabled={textareaIsEmpty}
+						onClick={sendMessage}
+					>
 						send
 					</Button>
 				</div>

@@ -55,6 +55,28 @@ export class DatabaseSetupService implements OnModuleInit {
 							},
 						],
 					});
+					await this.prisma.chat.createMany({
+						data: [
+							{ isChannel: false, isPrivate: false, isProtected: false },
+							{ isChannel: false, isPrivate: false, isProtected: false },
+							{ isChannel: false, isPrivate: false, isProtected: false },
+						],
+					});
+					await this.prisma.chatSession.createMany({
+						data: [
+							{ userId: 1, chatId: 1 },
+							{ userId: 2, chatId: 1 },
+							{ userId: 2, chatId: 2 },
+							{ userId: 6, chatId: 3 },
+						],
+					});
+					await this.prisma.message.createMany({
+						data: [
+							{ content: 'Miaou', userId: 6 },
+							{ content: 'This is Sophie here', userId: 1 },
+							{ content: "Tu changes quand d'opérateur ?", userId: 2 },
+						],
+					});
 				} catch (error) {
 					throw new Error('Error populating database: ' + error);
 				}

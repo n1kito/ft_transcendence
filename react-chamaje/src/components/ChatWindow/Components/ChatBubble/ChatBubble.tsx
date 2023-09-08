@@ -86,7 +86,7 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 				</div>
 			)}
 			<div className={`chat-bubble-content ${wasSent ? 'green-bubble' : ''}`}>
-				<span className="chat-bubble-info">{`@${sender} – 11:11 PM`}</span>
+				<span className="chat-bubble-info">{`@${sender} – ${time}`}</span>
 				{children}
 			</div>
 		</div>
