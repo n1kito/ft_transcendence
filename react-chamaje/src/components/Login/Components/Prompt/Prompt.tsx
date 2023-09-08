@@ -3,6 +3,7 @@ import './Prompt.css';
 import Typewriter from 'typewriter-effect';
 import useAuth from 'src/hooks/userAuth';
 import { keyboardKey } from '@testing-library/user-event';
+import { useNavigate } from 'react-router-dom';
 
 interface PromptProps {
 	instruction?: string;
@@ -15,11 +16,14 @@ const Prompt: React.FC<PromptProps> = ({
 	type = 'input',
 	redirUrl = '',
 }) => {
+	const { accessToken } = useAuth();
 	const labelWidth = instruction.length * 0.5;
+
 	const [validationCode, setValidationCode] = useState('');
 	const [inputError, setInputError] = useState(false);
-	const { accessToken } = useAuth();
 	const [fetchData, setFetchData] = useState(false);
+
+	const navigate = useNavigate();
 
 	const handleKeyPress = (event: KeyboardEvent) => {
 		const { key } = event;
@@ -29,11 +33,14 @@ const Prompt: React.FC<PromptProps> = ({
 		else console.log('user pressed something else');
 	};
 
-	const handleEnterKeyPress = (event: KeyboardEvent) => {
-		// const { key } = event;
+	const checkInputFormat = (validationCode: string) => {
+		console.log('\n\nCHECK validation code:', validationCode);
+		// Check if validationCode contains only digits and is size 6
+		return /^\d+$/.test(validationCode) && validationCode.length === 6;
+	};
 
+	const handleEnterKeyPress = (event: KeyboardEvent) => {
 		if (event.key === 'Enter') {
-			console.log('user typed ENTER');
 			setFetchData(true);
 		}
 	};
@@ -46,6 +53,8 @@ const Prompt: React.FC<PromptProps> = ({
 		return () => {
 			if (type === 'bool')
 				window.removeEventListener('keydown', handleKeyPress);
+			if (type === 'input')
+				window.removeEventListener('keydown', handleEnterKeyPress);
 		};
 	}, []);
 
@@ -53,38 +62,40 @@ const Prompt: React.FC<PromptProps> = ({
 		console.log('\ninput:', event.target.value);
 		const inputValue = event.target.value;
 		setValidationCode(inputValue);
-		if (inputValue.length === 6) {
-			setFetchData(true);
-		} else {
-			setFetchData(false);
-		}
+		console.log('🧶validation code:', validationCode);
 	};
 
 	useEffect(() => {
-		if (fetchData) {
-			console.log('INPUT IS COMPLETE');
-			const fetchTwoFactorAuthLogin = async () => {
-				try {
-					console.log('🧶🧶🧶 fetching two factor login');
-					const response = await fetch('/api/login/2fa', {
-						method: 'POST',
-						credentials: 'include',
-						headers: {
-							Authorization: `Bearer ${accessToken}`,
-						},
-						body: JSON.stringify({ twoFactorAuthCode: validationCode }),
-					});
-					const data = await response.json();
-					if (response.ok) {
-						console.log('response from /api/login/2fa:', data);
-					} else console.log('problemo from /api/login/2fa: ', data);
-				} catch (error) {
-					console.error(error);
+		console.log('🧶validation code:', validationCode);
+	}, [validationCode]);
+
+	useEffect(() => {
+		const fetchTwoFactorAuthLogin = async () => {
+			try {
+				console.log('🧶🧶🧶 fetching two factor login - code:', validationCode);
+				const response = await fetch('/api/login/2fa/authenticate', {
+					method: 'POST',
+					credentials: 'include',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${accessToken}`,
+					},
+					body: JSON.stringify({ code: validationCode }),
+				});
+				const data = await response.json();
+				if (response.ok) {
+					console.log('response from /api/login/2fa:', data);
+					navigate('/desktop');
+				} else {
+					console.log('problemo from /api/login/2fa: ', data);
 				}
-				// Reset the fetchData flag to false after making the request
-				setFetchData(false);
-			};
-		}
+			} catch (error) {
+				console.error(error);
+			}
+		};
+		if (fetchData && checkInputFormat(validationCode))
+			fetchTwoFactorAuthLogin();
+		setFetchData(false);
 	}, [fetchData]);
 
 	return (
@@ -103,15 +114,20 @@ const Prompt: React.FC<PromptProps> = ({
 							}}
 						/>
 					</label>
-					<input
-						className="prompt-input"
-						maxLength={6}
-						type="text"
-						inputMode="numeric"
-						pattern="[0-9]*"
-						value={validationCode}
-						onChange={handleInputChange}
-					></input>
+					{type === 'bool' && <input></input>}
+					{type === 'input' && (
+						<input
+							className="prompt-input"
+							maxLength={6}
+							type="text"
+							inputMode="numeric"
+							pattern="[0-9]{6}"
+							value={validationCode}
+							onChange={handleInputChange}
+							required
+							autoFocus
+						></input>
+					)}
 				</div>
 				<div className="line2">
 					{inputError === true && (

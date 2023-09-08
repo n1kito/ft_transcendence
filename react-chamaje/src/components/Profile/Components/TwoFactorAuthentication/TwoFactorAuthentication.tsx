@@ -18,26 +18,9 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 	// windowDragConstraintRef,
 	// onCloseClick,
 }) => {
+	const { accessToken, setIsTwoFAEnabled } = useAuth();
 	const [validationCode, setValidationCode] = useState('');
 	const [inputError, setInputError] = useState(true);
-
-	const { accessToken, setIsTwoFAEnabled } = useAuth();
-
-	// Handle input state: disable the 'activate' button in case
-	// of invalid input
-	const handleInput = (newValidationCode: string) => {
-		// Save keyboard event is ValidationCodeState
-		setValidationCode(newValidationCode);
-
-		// test if input is only digit
-		const isDigitOnly = /^[0-9]+$/.test(newValidationCode);
-
-		// if input is not valid set InputError to true
-		if (!newValidationCode || newValidationCode.length < 6 || !isDigitOnly)
-			setInputError(true);
-		// else validate input
-		else setInputError(false);
-	};
 
 	const handleActivateButtonClick = async () => {
 		console.log('🍉 handle activate button click: ', validationCode);
@@ -61,6 +44,21 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 		} catch (error) {
 			console.error(error);
 		}
+	};
+	// Handle input state: disable the 'activate' button in case
+	// of invalid input
+	const handleInput = (newValidationCode: string) => {
+		// Save keyboard event is ValidationCodeState
+		setValidationCode(newValidationCode);
+
+		// test if input is only digit
+		const isDigitOnly = /^[0-9]+$/.test(newValidationCode);
+
+		// if input is not valid set InputError to true
+		if (!newValidationCode || newValidationCode.length < 6 || !isDigitOnly)
+			setInputError(true);
+		// else validate input
+		else setInputError(false);
 	};
 
 	return (
