@@ -11,6 +11,7 @@ import {
 	Req,
 	HttpCode,
 	NotFoundException,
+	Put,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import * as jwt from 'jsonwebtoken';
@@ -61,11 +62,6 @@ export class AuthController {
 			// verify if 2fa is enabled if so return true;
 			const response = await this.authService.istwofaEnabled(
 				this.authService.getUserId(),
-			);
-
-			console.log(
-				'🎃 Authenticated, checking if 2fa is enabled:',
-				response.isTwoFactorAuthenticationEnabled,
 			);
 
 			// Prepare the payload for generating tokens
@@ -122,11 +118,11 @@ export class AuthController {
 		this.authService.deleteTemporaryAuthCode();
 
 		// verify if 2fa is enabled if so return true;
-		const response = await this.authService.istwofaEnabled(payload.userId);
+		const is2faEnabled = await this.authService.istwofaEnabled(payload.userId);
 
 		return {
 			accessToken: accessToken,
-			twofa: response.isTwoFactorAuthenticationEnabled,
+			twofa: is2faEnabled,
 		};
 	}
 
@@ -138,12 +134,6 @@ export class AuthController {
 	@Get('login-failed')
 	loginFailed(): string {
 		return 'User could not login 🛑';
-	}
-
-	@Post('2fa/')
-	async login2fa(@Request() request, @Body() body): Promise<any> {
-		console.log('\n---------------- 2fa login ---------------\n');
-		console.log('found code in body: ', body.twoFactorAuthCode);
 	}
 
 	@Post('2fa/turn-on')
@@ -199,6 +189,21 @@ export class AuthController {
 			return res
 				.status(200)
 				.json({ message: 'two-factor authentication enabled!' });
+		} catch (error) {
+			console.error(error);
+		}
+	}
+
+	@Put('2fa/log-out')
+	async logOut2fa(@Request() request, @Body() body, @Res() res): Promise<any> {
+		console.log('\n---------------- 2fa logOut ---------------\n');
+		try {
+			// extract access token from header, decode it and retrieve userId
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			this.authService.updateVerifyStatus(userId, false);
+			return res.status(200).json({ message: 'VERIFY STATUS DISABLED' });
 		} catch (error) {
 			console.error(error);
 		}

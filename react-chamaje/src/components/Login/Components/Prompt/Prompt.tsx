@@ -25,54 +25,65 @@ const Prompt: React.FC<PromptProps> = ({
 
 	const navigate = useNavigate();
 
-	const handleKeyPress = (event: KeyboardEvent) => {
-		const { key } = event;
+	/**************************************************************************************/
+	/* 42 API login                                                    					  */
+	/**************************************************************************************/
 
+	// handle keyboard event for 42 api login process
+	const handleBoolKeyPress = (event: KeyboardEvent) => {
+		const { key } = event;
+		// If 'yes', open a new window with the specified URL in the same tab
 		if (key == 'Y') window.open(redirUrl, '_self');
+		// If 'n', do nothing
 		else if (key == 'n') return;
-		else console.log('user pressed something else');
 	};
 
+	// when mounting add an event listener for 42 api login process
+	useEffect(() => {
+		if (type === 'bool') window.addEventListener('keydown', handleBoolKeyPress);
+		return () => {
+			// remove the event listener on unmount
+			if (type === 'bool')
+				window.removeEventListener('keydown', handleBoolKeyPress);
+		};
+	}, []);
+
+	/**************************************************************************************/
+	/* two-factor Authentication login                                                    */
+	/**************************************************************************************/
+
+	// Update the 'validationCode' state with the input value
+	const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setValidationCode(event.target.value);
+	};
+
+	// setup an effect to add an event listener
+	useEffect(() => {
+		if (type === 'input')
+			window.addEventListener('keydown', handleEnterKeyPress);
+		return () => {
+			if (type === 'input')
+				window.removeEventListener('keydown', handleEnterKeyPress);
+		};
+	}, []);
+
+	// Check if `validationCode` is only digit and has a length of 6
 	const checkInputFormat = (validationCode: string) => {
-		console.log('\n\nCHECK validation code:', validationCode);
-		// Check if validationCode contains only digits and is size 6
 		return /^\d+$/.test(validationCode) && validationCode.length === 6;
 	};
 
+	// Set 'fetchData' flag to true when Enter key is pressed
 	const handleEnterKeyPress = (event: KeyboardEvent) => {
 		if (event.key === 'Enter') {
 			setFetchData(true);
 		}
 	};
 
-	useEffect(() => {
-		if (type === 'bool') window.addEventListener('keydown', handleKeyPress);
-
-		if (type === 'input')
-			window.addEventListener('keydown', handleEnterKeyPress);
-		return () => {
-			if (type === 'bool')
-				window.removeEventListener('keydown', handleKeyPress);
-			if (type === 'input')
-				window.removeEventListener('keydown', handleEnterKeyPress);
-		};
-	}, []);
-
-	const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		console.log('\ninput:', event.target.value);
-		const inputValue = event.target.value;
-		setValidationCode(inputValue);
-		console.log('🧶validation code:', validationCode);
-	};
-
-	useEffect(() => {
-		console.log('🧶validation code:', validationCode);
-	}, [validationCode]);
-
+	// on `validation code` submit, fetch two-factor authentication login data
+	// to verify it. If the code is valid, navigate to `/desktop`
 	useEffect(() => {
 		const fetchTwoFactorAuthLogin = async () => {
 			try {
-				console.log('🧶🧶🧶 fetching two factor login - code:', validationCode);
 				const response = await fetch('/api/login/2fa/authenticate', {
 					method: 'POST',
 					credentials: 'include',
@@ -80,11 +91,12 @@ const Prompt: React.FC<PromptProps> = ({
 						'Content-Type': 'application/json',
 						'Authorization': `Bearer ${accessToken}`,
 					},
+					// send the validation code to verify it
 					body: JSON.stringify({ code: validationCode }),
 				});
 				const data = await response.json();
 				if (response.ok) {
-					console.log('response from /api/login/2fa:', data);
+					console.log('response ok from /api/login/2fa:', data);
 					navigate('/desktop');
 				} else {
 					console.log('problemo from /api/login/2fa: ', data);
@@ -93,6 +105,8 @@ const Prompt: React.FC<PromptProps> = ({
 				console.error(error);
 			}
 		};
+		// if user has typed `Enter` and the validation code format is valid,
+		// fetch request
 		if (fetchData && checkInputFormat(validationCode))
 			fetchTwoFactorAuthLogin();
 		setFetchData(false);

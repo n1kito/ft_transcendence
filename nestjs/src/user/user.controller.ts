@@ -32,7 +32,6 @@ export class UserController {
 	@Get('me')
 	async getMyinfo(@Req() request: CustomRequest) {
 		const userId = this.userService.authenticateUser(request);
-		console.log('👹 user id :', userId);
 		// Fetch the user information from the database using the userId
 		const user = await this.prisma.user.findUnique({
 			where: { id: request.userId },
@@ -209,7 +208,8 @@ export class UserController {
 		}
 		// if the login of the user who sent the request is the same as the login of the user they want the info of,
 		// we return more information
-		if (userRequestingLogin && userRequestingLogin === login)
+		// TODO: remove 2fa secret from user
+		if (userRequestingLogin && userRequestingLogin === login) {
 			return {
 				...user,
 				gamesCount: gamesCount,
@@ -224,6 +224,7 @@ export class UserController {
 				rivalLogin,
 				rivalImage,
 			};
+		}
 		// else, we only return what is needed for the profile component
 		else
 			return {

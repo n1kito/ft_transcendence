@@ -324,10 +324,25 @@ export class AuthService {
 		});
 	}
 
-	async istwofaEnabled(userId: number) {
-		return await this.prisma.user.findUnique({
+	// update 2fa status as verified
+	//(meaning user has logged in successfully with google authenticator)
+	async updateVerifyStatus(userId: number, isVerified: boolean) {
+		const response = await this.prisma.user.update({
 			where: { id: userId },
+			data: {
+				isTwoFactorAuthenticationVerified: isVerified,
+			},
 		});
+	}
+
+	async istwofaEnabled(userId: number) {
+		const res = await this.prisma.user
+			.findUnique({
+				where: { id: userId },
+			})
+			.then((res) => res.isTwoFactorAuthenticationEnabled);
+		console.log('\n\n🫠 is two fa enabled: ', res);
+		return res;
 	}
 
 	async isTwoFactorAuthenticationCodeValid(
@@ -348,6 +363,7 @@ export class AuthService {
 			secret: user.twoFactorAuthenticationSecret,
 		});
 		if (!res) this.turnOffTwoFactorAuthentication(userId);
+		if (this.istwofaEnabled) this.updateVerifyStatus(userId, true);
 		return res;
 	}
 

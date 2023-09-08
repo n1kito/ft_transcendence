@@ -97,7 +97,7 @@ const Desktop = () => {
 
 	const handleTabClosing = () => {
 		userData?.chatSocket?.endConnection();
-		logOut();
+		// logOut();
 		setUserData(null);
 	};
 

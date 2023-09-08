@@ -38,3 +38,6 @@ npm-debug.log*
 
 # Ignore Postgresql data files
 *.pgdata
+
+# Prisma migrations
+**/migrations

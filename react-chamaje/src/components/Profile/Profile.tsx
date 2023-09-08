@@ -43,13 +43,13 @@ const Profile: React.FC<ProfileProps> = ({
 	const { userData } = useContext(UserContext);
 	const [profileData, setProfileData] = useState<UserData | null>(null); // Declare profileData state
 	const isOwnProfile = login == userData?.login;
-	let [qrcode, setQrcode] = useState('');
 
-	// panel
+	// Settings panel
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [twoFactorAuthWindowisOpen, setTwoFactorAuthWindowIsOpen] =
 		useState(false);
 	const [TwoFactorAuthEnableMode, setTwoFactorAuthEnableMode] = useState(false);
+	let [qrcode, setQrcode] = useState('');
 
 	// TODO: fetch profile data should be a separate service so we don't rewrite the function in multiple components
 	const fetchProfileData = async () => {
@@ -81,10 +81,6 @@ const Profile: React.FC<ProfileProps> = ({
 		});
 	}, []);
 
-	// useEffect(() => {
-	// 	console.log('Profile data is: ', profileData);
-	// }, [profileData]);
-
 	const openSettingsPanel = () => {
 		setSettingsPanelIsOpen(!settingsPanelIsOpen);
 	};
@@ -100,9 +96,7 @@ const Profile: React.FC<ProfileProps> = ({
 				},
 			});
 			if (response.ok) {
-				console.log(response);
 				const data = await response.text();
-				console.log('qr code: ', data);
 				setQrcode(data);
 				setTwoFactorAuthWindowIsOpen(true);
 			}
@@ -123,8 +117,6 @@ const Profile: React.FC<ProfileProps> = ({
 			if (response.ok) {
 				console.log('is oke');
 				setQrcode('');
-				// setIsTwoFAEnabled(false);
-				// setTwoFAVerified(false);
 			}
 		} catch (error) {
 			console.error('2fa: ', error);
@@ -132,7 +124,6 @@ const Profile: React.FC<ProfileProps> = ({
 	};
 
 	useEffect(() => {
-		// disableTwoFactorAuthentication();
 		setTwoFactorAuthWindowIsOpen(false);
 		setQrcode('');
 	}, [isTwoFAEnabled]);

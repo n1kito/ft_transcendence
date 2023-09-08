@@ -73,7 +73,23 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 	}, []);
 
 	// Log the user out by removing cookies and updating state
-	const logOut = () => {
+	const logOut = async () => {
+		// // disable two-factor login verify status
+		try {
+			const response = await fetch('/api/login/2fa/log-out', {
+				method: 'PUT',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+				credentials: 'include',
+			});
+			const data = await response.json();
+			if (response.ok) {
+				console.log(data.message);
+			} else console.log('problemo with 2fa logOut');
+		} catch (error) {
+			console.error(error);
+		}
 		Cookies.remove('refreshToken');
 		setAccessToken('');
 		setIsAuthentificated(false);
