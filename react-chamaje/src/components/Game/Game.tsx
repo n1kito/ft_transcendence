@@ -9,6 +9,8 @@ import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/Settings
 import FriendBadge from '../Friends/Components/FriendBadge/FriendBadge';
 import { UserContext } from '../../contexts/UserContext';
 import useAuth from '../../hooks/userAuth';
+import { Socket, io } from 'socket.io-client';
+import { GameSocket } from '../../services/GameSocket';
 
 interface IGameRoomProps {
 	roomId: number;
@@ -37,6 +39,8 @@ const Game: React.FC<IGameProps> = ({
 	░▀▀▀░░▀░░▀░▀░░▀░░▀▀▀░▀▀▀ 
 	*/
 
+	const [socket, setSocket] = useState<Socket | null>(null);
+	const [roomId, setRoomId] = useState(0);
 	const [settingsWindowVisible, setSettingWindowVisible] = useState(true);
 	const [gameIsRunning, setGameIsRunning] = useState(false);
 	const [gameHasTwoPlayers, setGameHasTwoPlayers] = useState(false);
@@ -214,10 +218,14 @@ const Game: React.FC<IGameProps> = ({
 					});
 					if (response.ok) {
 						const data = await response.json();
-						// Set the user data in the context
-						console.log(`You're in game room #${data.roomId}`);
+						console.log(`🏓 Assigned to room #${data.roomId}`);
+						setRoomId(data.roomId);
+
+						// Initiate websocket connection
+						const newSocket = new GameSocket(123);
+						// setSocket(newSocket);
 					} else {
-						console.log(`Could not get room Id`);
+						console.error(`Could not get room Id`);
 					}
 				} catch (error) {
 					console.error('Error: ', error);
@@ -225,7 +233,17 @@ const Game: React.FC<IGameProps> = ({
 			};
 			findRoom();
 		}
+		// Cleanup logic for disconnecting the socket when game component unmounts
+		return () => {
+			if (socket) socket.disconnect();
+		};
 	}, []);
+
+	/*
+	░█░█░█▀▀░█▀▄░█▀▀░█▀█░█▀▀░█░█░█▀▀░▀█▀░░░█░░░█▀█░█▀▀░▀█▀░█▀▀
+	░█▄█░█▀▀░█▀▄░▀▀█░█░█░█░░░█▀▄░█▀▀░░█░░░░█░░░█░█░█░█░░█░░█░░
+	░▀░▀░▀▀▀░▀▀░░▀▀▀░▀▀▀░▀▀▀░▀░▀░▀▀▀░░▀░░░░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀
+	*/
 
 	return (
 		<Window
