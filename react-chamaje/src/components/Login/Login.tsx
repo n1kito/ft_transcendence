@@ -32,8 +32,8 @@ const Login = ({}) => {
 			document.removeEventListener('keydown', handleKeyDown);
 
 		return () => {
-			// alert();
 			document.removeEventListener('keydown', handleKeyDown);
+
 			// setIsTwoFAEnabled(isTwoFAEnabled);
 		};
 	}, [passkey]);

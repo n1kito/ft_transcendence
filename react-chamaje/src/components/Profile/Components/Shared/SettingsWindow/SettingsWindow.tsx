@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import './SettingsWindow.css';
 
 interface ISettingsWindowProps {
@@ -12,10 +12,14 @@ const SettingsWindow: React.FC<ISettingsWindowProps> = ({
 	settingsWindowVisible,
 	windowTitle = '',
 }) => {
+	useEffect(() => {
+		console.log('Setting window CLICK');
+	}, [settingsWindowVisible]);
 	return (
 		<div
 			className="settings-window-wrapper"
 			onClick={() => {
+				// fetch/////
 				settingsWindowVisible(false);
 			}}
 		>

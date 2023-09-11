@@ -140,6 +140,10 @@ const Prompt: React.FC<PromptProps> = ({
 							onChange={handleInputChange}
 							required
 							autoFocus
+							style={{
+								fontFamily: 'Courier New',
+								fontSize: '0.8rem',
+							}}
 						></input>
 					)}
 				</div>

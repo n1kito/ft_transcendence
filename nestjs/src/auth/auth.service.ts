@@ -318,6 +318,8 @@ export class AuthService {
 			data: {
 				// deactivate 2fa
 				isTwoFactorAuthenticationEnabled: false,
+				// deactivate 2fa validation status
+				isTwoFactorAuthenticationVerified: false,
 				// remove secret
 				twoFactorAuthenticationSecret: null,
 			},
@@ -362,7 +364,7 @@ export class AuthService {
 			token: twoFactorAuthenticationCode,
 			secret: user.twoFactorAuthenticationSecret,
 		});
-		if (!res) this.turnOffTwoFactorAuthentication(userId);
+		// if (!res) this.turnOffTwoFactorAuthentication(userId);
 		if (this.istwofaEnabled) this.updateVerifyStatus(userId, true);
 		return res;
 	}

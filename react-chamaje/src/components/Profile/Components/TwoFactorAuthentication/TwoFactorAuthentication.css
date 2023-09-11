@@ -26,12 +26,10 @@
 .validation-code-form {
 	display: flex;
 	flex-direction: column;
-	/* outline: 1px solid navy; */
 	justify-content: space-between;
 
 	padding: 0.5rem;
 	gap: 1rem;
-	/* align-items: center; */
 }
 .qr-code img {
 	border-radius: 0.6;

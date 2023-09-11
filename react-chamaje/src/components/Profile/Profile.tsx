@@ -87,22 +87,25 @@ const Profile: React.FC<ProfileProps> = ({
 
 	// enable two-factor authentication
 	const enableTwoFactorAuthentication = async () => {
-		try {
-			const response = await fetch('api/login/2fa/turn-on', {
-				method: 'POST',
-				credentials: 'include',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-			});
-			if (response.ok) {
-				const data = await response.text();
-				setQrcode(data);
-				setTwoFactorAuthWindowIsOpen(true);
-			}
-		} catch (error) {
-			console.error('2fa: ', error);
-		}
+		setTwoFactorAuthWindowIsOpen(true);
+
+		// try {
+		// 	const response = await fetch('api/login/2fa/turn-on', {
+		// 		method: 'POST',
+		// 		credentials: 'include',
+		// 		headers: {
+		// 			Authorization: `Bearer ${accessToken}`,
+		// 		},
+		// 	});
+		// 	if (response.ok) {
+		// 		const data = await response.text();
+		// 		setQrcode(data);
+		// 		setTwoFactorAuthWindowIsOpen(true);
+		// 		// console.log('2FA enabled: ', )
+		// 	}
+		// } catch (error) {
+		// 	console.error('2fa: ', error);
+		// }
 	};
 
 	const disableTwoFactorAuthentication = async () => {
@@ -117,6 +120,7 @@ const Profile: React.FC<ProfileProps> = ({
 			if (response.ok) {
 				console.log('is oke');
 				setQrcode('');
+				setIsTwoFAEnabled(false);
 			}
 		} catch (error) {
 			console.error('2fa: ', error);
@@ -208,7 +212,13 @@ const Profile: React.FC<ProfileProps> = ({
 					>
 						{isTwoFAEnabled ? 'disable' : 'enable'}
 					</Button>
-					{qrcode && <TwoFactorAuthentication qrCode={qrcode} />}
+					{twoFactorAuthWindowisOpen && (
+						<TwoFactorAuthentication
+							qrCode={qrcode}
+							setQrCode={setQrcode}
+							setTwoFactorAuthWindowisOpen={setTwoFactorAuthWindowIsOpen}
+						/>
+					)}
 				</SettingsWindow>
 			)}
 		</Window>
