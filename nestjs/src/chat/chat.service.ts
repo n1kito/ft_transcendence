@@ -1,19 +1,26 @@
-import { Get, HttpStatus, Injectable, NotFoundException, Param, Req } from '@nestjs/common';
+import {
+	Get,
+	HttpStatus,
+	Injectable,
+	NotFoundException,
+	Param,
+	Req,
+} from '@nestjs/common';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { CustomRequest } from 'src/user/user.controller';
 import { SendMessageDTO } from './dto/sendMessage.dto';
 import { ValidationError, validate } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 import { CustomException } from 'src/user/user.service';
+import { CreateChatDTO } from './dto/createChat.dto';
 
 @Injectable()
 export class ChatService {
-	
 	private errors: { field: string; message: string; statusCode: number }[] = [];
-    
-    constructor(private readonly prisma: PrismaService) {}
 
-    // method to push any encountered error
+	constructor(private readonly prisma: PrismaService) {}
+
+	// method to push any encountered error
 	private pushError(field: string, message: string, statusCode: number) {
 		this.errors.push({ field, message, statusCode });
 	}
@@ -28,12 +35,35 @@ export class ChatService {
 		return userId;
 	}
 
-    // DTO validation
+	// Message DTO validation
 	async validateSendMessageDto(sendMessageDTO: SendMessageDTO): Promise<void> {
 		// converts the plain js object sendMessageDTO into an instance of the 'SendMessageDTO class'
 		// Any dto errors are stored in classValidatorErrors
 		const classValidatorErrors: ValidationError[] = await validate(
 			plainToClass(SendMessageDTO, sendMessageDTO),
+		);
+		// if classValidators is not empty
+		if (classValidatorErrors.length > 0) {
+			// iterates over each error
+			for (const error of classValidatorErrors) {
+				// add the dto error into the 'errors' property
+				for (const constraintKey of Object.keys(error.constraints)) {
+					this.pushError(
+						error.property,
+						error.constraints[constraintKey],
+						HttpStatus.BAD_REQUEST,
+					);
+				}
+			}
+		}
+	}
+
+	// Chat DTO validation
+	async validateCreateChatDto(createMessage: CreateChatDTO): Promise<void> {
+		// converts the plain js object createMessage into an instance of the 'CreateChatDTO class'
+		// Any dto errors are stored in classValidatorErrors
+		const classValidatorErrors: ValidationError[] = await validate(
+			plainToClass(CreateChatDTO, createMessage),
 		);
 		// if classValidators is not empty
 		if (classValidatorErrors.length > 0) {
@@ -96,21 +126,57 @@ export class ChatService {
 		return messagesWithLogin;
 	}
 
+	// create Chat
+	async createChat(userId: number, content: CreateChatDTO) {
+		this.errors = [];
+		try {
+			const chat = await this.prisma.chat.create({
+				data: {
+					isChannel: content.isChannel,
+					isPrivate: content.isPrivate,
+					isProtected: content.isProtected,
+					password: content.password,
+				},
+			});
+			// if (this.errors.length > 0) {
+				//     throw new Exce(this.errors);
+				// }
+				return chat.id;
+			} catch (e) {
+			console.log('error creating chat:', e);
+			// throw new CustomException(this.errors);
+		}
+	}
+	
+	// create chatSession
+	async createChatSession(userId: number, chatId: number) {
+		await this.prisma.chatSession.create({
+			data: {
+				chatId: chatId,
+				userId: userId,
+			},
+		});
+		console.log('🐱🐱🐱🐱🐱🐱🐱🐱');
+	}
 
-    // send message
-    async sendMessage(userId: number, content: SendMessageDTO) {
-        this.errors = [];
-        try {
-            await this.validateSendMessageDto(content);
-            await this.prisma.message.create({
-                    data: { chatId: content.chatId, userId: userId, content: content.message }
-                })
-            // if (this.errors.length > 0) {
-            //     throw new Exce(this.errors);
-            // }
-        } catch (e) {
-            console.log('error sending message:', e);
-            // throw new CustomException(this.errors);
-        }
-    }
+	// send message
+	async sendMessage(userId: number, content: SendMessageDTO) {
+		this.errors = [];
+		try {
+			await this.validateSendMessageDto(content);
+			await this.prisma.message.create({
+				data: {
+					chatId: content.chatId,
+					userId: userId,
+					content: content.message,
+				},
+			});
+			// if (this.errors.length > 0) {
+			//     throw new Exce(this.errors);
+			// }
+		} catch (e) {
+			console.log('error sending message:', e);
+			// throw new CustomException(this.errors);
+		}
+	}
 }

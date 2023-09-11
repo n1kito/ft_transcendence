@@ -9,7 +9,7 @@ import { DatabaseSetupModule } from './services/database-setup/database-setup.mo
 import { PrismaModule } from './services/prisma-service/prisma.module';
 import { PrismaService } from './services/prisma-service/prisma.service';
 import { TokenModule } from './token/token.module';
-import { ConnectionStatusModule } from './connection-status/connection-status.module';
+import { ConnectionStatusModule } from './chatWebSocket/chatWebSocket.module';
 import { ChatModule } from './chat/chat.module';
 
 @Module({

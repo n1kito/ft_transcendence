@@ -1,4 +1,4 @@
-import { Injectable, Req } from '@nestjs/common';
+import { Injectable, NotFoundException, Req } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 import { StringifyOptions } from 'querystring';
@@ -34,6 +34,25 @@ export class TokenService {
 		});
 		console.log('generate refresh token:', refreshToken);
 		return refreshToken;
+	}
+
+	// from authorization header, extract access token and retrieve userId
+	// by verifying it with jwt
+	ExtractUserId(authorizationHeader: string): number {
+		// check if authorization header is valid
+		if (!authorizationHeader || !authorizationHeader.startsWith('Bearer '))
+			throw new Error('wrong authorization header');
+
+		// extract access token from header
+		const accessToken = authorizationHeader.slice(7);
+
+		// verify access token wit jwt
+		const decodedAccessToken = this.verifyToken(accessToken);
+		if (!decodedAccessToken)
+			throw new NotFoundException('Authentication required');
+
+		// return userId
+		return decodedAccessToken.userId;
 	}
 
 	// Method to verify a token and return the payload

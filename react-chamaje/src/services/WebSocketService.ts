@@ -43,6 +43,9 @@ class WebSocketService {
 		return this.socket;
 	}
 
+	/* ********************************************************************* */
+	/* ************************** CONNECTED STATUS ************************* */
+	/* ********************************************************************* */
 	sendServerConnection() {
 		try {
 			this.socket.emit('ServerConnection', this.userId);
@@ -68,6 +71,25 @@ class WebSocketService {
 
 	onLogOut(callback: callbackInterface) {
 		this.socket.on('ClientLogOut', callback);
+	}
+
+	/* ********************************************************************* */
+	/* ******************************** CHAT ******************************* */
+	/* ********************************************************************* */
+	joinRoom(chatId: number) {
+		this.socket.emit('joinRoom', chatId);
+		console.log('🚪 Entering room n.', chatId);
+	}
+
+	leaveRoom(chatId: number) {
+		this.socket.emit('leaveRoom', chatId);
+		console.log('🚪 Leaving room n.', chatId);
+	}
+
+	sendMessage(content: string, chatId: number) {
+		this.socket.emit('sendMessage', chatId, (res: any) => {
+			console.log(res);
+		});
 	}
 }
 export default WebSocketService;

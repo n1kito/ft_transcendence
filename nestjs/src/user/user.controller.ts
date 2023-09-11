@@ -18,6 +18,7 @@ import { Request, response, Response } from 'express';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { validate } from 'class-validator';
+import { get } from 'http';
 export interface CustomRequest extends Request {
 	userId: number;
 }
@@ -165,75 +166,6 @@ export class UserController {
 		return friends;
 	}
 
-	// Chat logic
-	// Private messages
-	@Get('me/chatsJoined')
-	async getChat(
-		@Req() request: CustomRequest,
-		@Param('userId') userId: number,
-	) {
-		// this contains an array of the chat sessions
-		const response = await this.prisma.user.findUnique({
-			// where: { Users: { some: { userId: { in: [request.userId, userId] } } } },
-			where: {
-				id: request.userId,
-			},
-			include: {
-				chatsSessions: true,
-			},
-		});
-		// this contains an array of the chat rooms joined
-		const chatPromises = response.chatsSessions.map(async (currentChat) => {
-			const res = await this.prisma.chat.findUnique({
-				where: {
-					id: currentChat.chatId,
-				},
-				include: {
-					participants: true,
-				},
-			});
-			return res; // Return the result of each asynchronous operation
-		});
-		const chatRoomsResults = await Promise.all(chatPromises);
-
-		// this contains for each room joined, the id of the room and the list
-		// of the userId that joined it
-		// TODO: Add the messages
-		const ret = chatRoomsResults.map((currentRoom) => ({
-			chatId: currentRoom.id,
-			participants: currentRoom.participants.map((currentParticipant) => {
-				return currentParticipant.userId;
-			}),
-		}));
-		return ret;
-	}
-
-
-	// get messages from chat
-	@Get('/chatMessages/:chatId')
-	async getChatMessages(
-		@Req() request: CustomRequest,
-		@Param('chatId') chatId: number,
-	) {
-		const nbChatId: number = +chatId;
-		// if the userId is in the chat lets go
-		console.log('🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱🐱');
-		const response = await this.prisma.chat.findUnique({
-			where: {
-				id: nbChatId,
-			},
-			include: {
-				messages: true,
-			},
-		});
-		const messages = response.messages.map((currentMessage) => ({
-			sentById: currentMessage.userId,
-			sentAt: currentMessage.sentAt,
-			content: currentMessage.content,
-		}));
-		return messages;
-	}
-
 	// TODO: why do we have this and the /me endpoint ?
 	// TODO: switch this endpoint to userID
 	// TODO: move the logics to user.service.ts ?
@@ -327,5 +259,92 @@ export class UserController {
 				rivalLogin,
 				rivalImage,
 			};
+	}
+
+	@Get('/byId/:userId')
+	async getLoginFromUserId(
+		@Req() request: CustomRequest,
+		@Param('userId') userId: number,
+	) {
+		// be sure the userId is a number
+		let userIdToNb: number = +userId
+		const response = await this.prisma.user.findUnique({
+			where: { id: userIdToNb },
+			select: {
+				login: true,
+			},
+		});
+		if (!response)
+			return { message: 'User not found' };
+		const ret = { login: response.login };
+		console.log('ret', ret)
+		return ret;
+	}
+
+	// Chat logic
+	// Private messages
+	@Get('me/chatsJoined')
+	async getChat(
+		@Req() request: CustomRequest,
+		@Param('userId') userId: number,
+	) {
+		// this contains an array of the chat sessions
+		const response = await this.prisma.user.findUnique({
+			// where: { Users: { some: { userId: { in: [request.userId, userId] } } } },
+			where: {
+				id: request.userId,
+			},
+			include: {
+				chatsSessions: true,
+			},
+		});
+		// this contains an array of the chat rooms joined
+		const chatPromises = response.chatsSessions.map(async (currentChat) => {
+			const res = await this.prisma.chat.findUnique({
+				where: {
+					id: currentChat.chatId,
+				},
+				include: {
+					participants: true,
+				},
+			});
+			return res; // Return the result of each asynchronous operation
+		});
+		const chatRoomsResults = await Promise.all(chatPromises);
+
+		// this contains for each room joined, the id of the room and the list
+		// of the userId that joined it
+		// TODO: Add the messages
+		const ret = chatRoomsResults.map((currentRoom) => ({
+			chatId: currentRoom.id,
+			participants: currentRoom.participants.map((currentParticipant) => {
+				return currentParticipant.userId;
+			}),
+		}));
+		return ret;
+	}
+
+	// get messages from chat
+	@Get('/chatMessages/:chatId')
+	async getChatMessages(
+		@Req() request: CustomRequest,
+		@Param('chatId') chatId: number,
+	) {
+		const nbChatId: number = +chatId;
+		// if the userId is in the chat lets go
+		const response = await this.prisma.chat.findUnique({
+			where: {
+				id: nbChatId,
+			},
+			include: {
+				messages: true,
+			},
+		});
+		const messages = response.messages.map((currentMessage) => ({
+			sentById: currentMessage.userId,
+			sentAt: currentMessage.sentAt,
+			content: currentMessage.content,
+		}));
+		return messages;
 	}
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import './PrivateMessages.css';
 import Window from '../Window/Window';
 import PrivateMessagesList from './Components/PrivateMessagesList/PrivateMessagesList';
@@ -6,6 +6,7 @@ import FriendBadge from '../Friends/Components/FriendBadge/FriendBadge';
 import { IFriendStruct } from '../Desktop/Desktop';
 import ChatWindow, { IMessage } from '../ChatWindow/ChatWindow';
 import useAuth from 'src/hooks/userAuth';
+import { UserContext } from 'src/contexts/UserContext';
 
 interface IPrivateMessagesProps {
 	onCloseClick: () => void;
@@ -31,6 +32,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	const [chatWindowId, setChatWindowId] = useState(0);
 	const [chatsJoined, setChatsJoined] = useState<IChatStruct[]>([]);
 	const [messages, setMessages] = useState<IMessage[]>([]);
+	const { userData, setUserData } = useContext(UserContext);
 	const { accessToken } = useAuth();
 
 	async function fetchMessages(chatId: number) {
@@ -59,7 +61,17 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 			.then((response) => response.json())
 			.then((data) => {
 				setChatsJoined(data);
-				console.log(chatsJoined);
+				const updatedUserData = {
+					...userData,
+					id: userData?.id,
+					login: userData?.login || '',
+					email: userData?.email || '',
+					friends: userData?.friends || [],
+					chatSocket: userData?.chatSocket || null,
+					image: userData?.image || '',
+					chatsJoined: chatsJoined,
+				};
+				setUserData(updatedUserData);
 			});
 	}, []);
 	useEffect(() => {
@@ -73,24 +85,51 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 		console.log('chatWindowId', chatWindowId);
 	}, [chatWindowId]);
 
+	// on click on an avatar, check if a PM conversation exists.
+	// If it does, open the window, set the userId and chatId, and fetch
+	// the messages.
+	// Otherwise open clean the messages and open the window
 	const openPrivateMessageWindow: any = (friendId: number) => {
+		let foundChat = false;
 		const chatId = chatsJoined.map((currentChat) => {
+			console.log('currentChat', currentChat);
 			if (
 				currentChat.participants.length === 2 &&
 				(currentChat.participants.at(0) === friendId ||
 					currentChat.participants.at(1) === friendId)
 			) {
+				console.log('found a corresponding chat', currentChat);
 				setChatWindowId(currentChat.chatId);
 				fetchMessages(currentChat.chatId);
+				foundChat = true;
 				return;
 			}
 		});
-		console.log(friendId);
 		setChatWindowIsOpen(true);
 		setChatWindowUserId(friendId);
-
 		// TODO: this should create a new chat with the user
-		if (!chatId) console.error('This chat does not exist');
+		if (!foundChat && !chatWindowId) {
+			fetch('api/chat/createChatPrivateMessage/' + friendId, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${accessToken}`,
+				},
+				credentials: 'include',
+				body: JSON.stringify({
+					isChannel: false,
+					isPrivate: true,
+					isProtected: false,
+					userId: friendId,
+				}),
+			})
+				.then((response) => response.json())
+				.then((data) => {
+					setChatWindowId(data);
+					setMessages([]);
+				});
+			console.error('This chat does not exist');
+		}
 	};
 	return (
 		<>

@@ -6,5 +6,6 @@ export class SendMessageDTO {
 	message: string;
 
 	@IsNumber()
+	@IsNotEmpty()
 	chatId: number;
 }

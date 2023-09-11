@@ -20,9 +20,13 @@ function decodeToken(client: Socket): any {
 }
 
 @WebSocketGateway({ path: '/ws/' })
-export class ConnectionStatusGateway
+export class chatWebSocketGateway
 	implements OnGatewayConnection, OnGatewayDisconnect
 {
+	/* ********************************************************************* */
+	/* ***************************** CONNECTION **************************** */
+	/* ********************************************************************* */
+
 	// initiate connection after validating acces token
 	handleConnection(client: any, ...args: any[]) {
 		try {
@@ -68,5 +72,35 @@ export class ConnectionStatusGateway
 		client.disconnect();
 
 		// client.disconnect();
+	}
+
+	/* ********************************************************************* */
+	/* ******************************** CHAT ******************************* */
+	/* ********************************************************************* */
+	@SubscribeMessage('joinRoom')
+	handleJoinRoom(
+		@MessageBody() roomId: number,
+		@ConnectedSocket() client: Socket,
+	): void {
+		client.join(roomId.toString());
+		console.log('🚪🚪🚪' + client.id + 'just entered room n.' + roomId);
+	}
+
+	@SubscribeMessage('leaveRoom')
+	handleLeaveRoom(
+		@MessageBody() roomId: number,
+		@ConnectedSocket() client: Socket,
+	): void {
+		client.leave(roomId.toString());
+		console.log('🚪🚪🚪' + client.id + 'just left room n.' + roomId);
+	}
+
+	@SubscribeMessage('sendMessage')
+	handleSendMessage(
+		@MessageBody() roomId: string,
+		@ConnectedSocket() client: Socket,
+	): string {
+		this.server.to(roomId.toString()).emit('receiveMessage', roomId)
+		return roomId;
 	}
 }

@@ -4,6 +4,7 @@ import React, {
 	createContext,
 	useState,
 } from 'react';
+import { IChatStruct } from 'src/components/PrivateMessages/PrivateMessages';
 import WebSocketService from 'src/services/WebSocketService';
 
 export interface IMatchHistory {
@@ -41,7 +42,7 @@ export interface UserData {
 	targetDiscoveredByUser?: boolean;
 	// ... other properties
 	// chat properties
-	chatsJoined?: [];
+	chatsJoined?: IChatStruct[];
 	ownedChannels?: [];
 }
 

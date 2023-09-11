@@ -11,6 +11,14 @@ import Title from '../Profile/Components/Title/Title';
 import InputField from '../Profile/Components/InputField/InputField';
 import useAuth from 'src/hooks/userAuth';
 
+export interface IChatWindowProps {
+	onCloseClick: () => void;
+	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
+	userId: number;
+	chatId: number;
+	messages: IMessage[];
+}
+
 export interface IMessage {
 	sentById: number;
 	sentAt: Date;
@@ -27,14 +35,6 @@ const dateFormatOptions: Intl.DateTimeFormatOptions = {
 	minute: '2-digit',
 	hour12: true, // Use 24-hour format
 };
-
-export interface IChatWindowProps {
-	onCloseClick: () => void;
-	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
-	userId: number;
-	chatId: number;
-	messages: IMessage[];
-}
 interface IChatInfo {
 	isChannel: boolean;
 	isPrivate: boolean;
@@ -76,11 +76,43 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 		setSettingsPanelIsOpen(!settingsPanelIsOpen);
 	};
 
-	useEffect(() => {
-		console.log('messages', messages);
-	}, [messages]);
-
+	// Chat logic
 	const { accessToken } = useAuth();
+	const [login, setLogin] = useState('Anonymous');
+	// const [oldChatId, setOldChatId] = useState(chatId);
+
+	// change the login every time the userId changes
+	useEffect(() => {
+		fetch('api/user/byId/' + userId, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				if (data.message) console.error('User not Found');
+				else setLogin(data.login);
+			});
+	}, [userId]);
+
+	// On mount, join the room associated with the chat
+	// TODO: find a way to leave room when changing chat (because it is
+	// not an unmounting)
+	useEffect(() => {
+		console.log('chatId in ChatWindow', chatId);
+		if (chatId) userData?.chatSocket?.joinRoom(chatId);
+		// return () => {
+		// 	userData?.chatSocket?.leaveRoom(chatId);
+		// };
+	}, [chatId]);
+
+	// TODO: Supposed to leave the last room but I need to check if it works
+
+	// useEffect(() => {
+	// 	userData?.chatSocket?.leaveRoom(chatId);
+	// }, [chatId]);
 
 	const sendMessage = async () => {
 		console.log('accessToken', accessToken);
@@ -93,14 +125,10 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 			credentials: 'include',
 			body: JSON.stringify({ message: textareaContent, chatId: chatId }),
 		});
-		console.log(
-			'JSON.stringify({textareaContent, chatId})',
-			JSON.stringify({ textareaContent, chatId }),
-		);
 	};
 	return (
 		<Window
-			windowTitle={`Chat with ${chatId}`}
+			windowTitle={`Chat with ${login}`}
 			onCloseClick={onCloseClick}
 			windowDragConstraintRef={windowDragConstraintRef}
 			links={[
