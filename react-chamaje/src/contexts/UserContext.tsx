@@ -17,6 +17,7 @@ export interface IMatchHistory {
 export interface UserData {
 	// Define the structure of your user data
 	// For example:
+	id?: number;
 	image: string;
 	login: string;
 	email: string;

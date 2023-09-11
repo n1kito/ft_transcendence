@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import './Game.css';
 import Window from '../Window/Window';
 import { Paddle } from './Entities/Paddle';
@@ -39,8 +39,8 @@ const Game: React.FC<IGameProps> = ({
 	░▀▀▀░░▀░░▀░▀░░▀░░▀▀▀░▀▀▀ 
 	*/
 
-	const [socket, setSocket] = useState<Socket | null>(null);
-	const [roomId, setRoomId] = useState(0);
+	const [socket, setSocket] = useState<GameSocket | null>(null);
+	const [roomId, setRoomId] = useState<number | undefined>(undefined);
 	const [settingsWindowVisible, setSettingWindowVisible] = useState(true);
 	const [gameIsRunning, setGameIsRunning] = useState(false);
 	const [gameHasTwoPlayers, setGameHasTwoPlayers] = useState(false);
@@ -92,10 +92,16 @@ const Game: React.FC<IGameProps> = ({
 		// TODO: should only do something if the gameWindow is in focus
 		window.addEventListener('keydown', function (e) {
 			// keys[e.key] = true;
-			if (e.key === 'ArrowUp') paddlePlayer1.direction = -1;
-			if (e.key === 'ArrowDown') paddlePlayer1.direction = 1;
-			// Prevent the key's default behavior, so it does not scroll down for example
-			e.preventDefault();
+			if (e.key === 'ArrowUp') {
+				paddlePlayer1.direction = -1;
+				// Prevent the key's default behavior, so it does not scroll down for example
+				e.preventDefault();
+			}
+			if (e.key === 'ArrowDown') {
+				paddlePlayer1.direction = 1;
+				// Prevent the key's default behavior, so it does not scroll down for example
+				e.preventDefault();
+			}
 		});
 		window.addEventListener('keyup', function (e) {
 			// delete keys[e.key];
@@ -200,44 +206,94 @@ const Game: React.FC<IGameProps> = ({
 	░▀░▀░▀▀▀░▀▀▀░▀░▀░░░▀▀▀░▀▀▀░▀▀▀░▀▀▀░▀▀▀
 	*/
 
-	useEffect(() => {
-		// If the component was mounted with no room information (from the desktop icon)
-		// we need to request a roomId to play in, either an empty room or a room with someone
-		// already waiting in it
-		if (gameRoomInfo == undefined) {
-			const findRoom = async () => {
-				// Feth the user data from the server
-				try {
-					// user/me
-					const response = await fetch('/api/game/assign-room', {
-						method: 'GET',
-						credentials: 'include',
-						headers: {
-							Authorization: `Bearer ${accessToken}`,
-						},
-					});
-					if (response.ok) {
-						const data = await response.json();
-						console.log(`🏓 Assigned to room #${data.roomId}`);
-						setRoomId(data.roomId);
+	// This was using a fetch request to ask for a room assignment.
+	// You will find below that I've decided to do it over websockets instead
+	// useEffect(() => {
+	// 	// If the component was mounted with no room information (from the desktop icon)
+	// 	// we need to request a roomId to play in, either an empty room or a room with someone
+	// 	// already waiting in it
+	// 	if (gameRoomInfo == undefined) {
+	// 		const findRoom = async () => {
+	// 			// Feth the user data from the server
+	// 			try {
+	// 				// user/me
+	// 				const response = await fetch('/api/game/assign-room', {
+	// 					method: 'GET',
+	// 					credentials: 'include',
+	// 					headers: {
+	// 						Authorization: `Bearer ${accessToken}`,
+	// 					},
+	// 				});
+	// 				if (response.ok) {
+	// 					const data = await response.json();
+	// 					console.log(`🏓 Assigned to room #${data.roomId}`);
+	// 					setRoomId(data.roomId);
 
-						// Initiate websocket connection
-						const newSocket = new GameSocket(123);
-						// setSocket(newSocket);
-					} else {
-						console.error(`Could not get room Id`);
-					}
-				} catch (error) {
-					console.error('Error: ', error);
-				}
-			};
-			findRoom();
-		}
-		// Cleanup logic for disconnecting the socket when game component unmounts
+	// 					// Initiate websocket connection
+	// 					const newSocket = new GameSocket(123);
+	// 					setSocket(newSocket);
+	// 				} else {
+	// 					console.error(`Could not get room Id`);
+	// 				}
+	// 			} catch (error) {
+	// 				console.error('Error: ', error);
+	// 			}
+	// 		};
+	// 		findRoom();
+	// 	}
+	// 	// Cleanup logic for disconnecting the socket when game component unmounts
+	// 	return () => {
+	// 		// TODO: disconnect the socket on unmount
+	// 		// if (socket) socket.disconnect();
+	// 	};
+	// }, []);
+
+	useEffect(() => {
+		const setupSocket = async () => {
+			try {
+				// If the component was mounted with no room information (from the desktop icon)
+				// we need to request a roomId to play in, either an empty room or a room with someone
+				// already waiting in it
+				// Create a websocket connection
+				const gameSocket = new GameSocket(userData?.id || 123, accessToken);
+				if (!gameSocket)
+					console.error('Could not instantiate web socket for pong game');
+				setSocket(gameSocket);
+			} catch (error) {
+				console.error('Could not initiate socket connection: ', error);
+			}
+		};
+		setupSocket();
+
 		return () => {
+			// Cleanup logic: disconnect the socket
 			if (socket) socket.disconnect();
 		};
 	}, []);
+
+	useEffect(() => {
+		try {
+			const findRoom = async () => {
+				if (!socket) return;
+				console.log({ socket });
+				// Find a room to be in
+				// User opened the game from the desktop and do not have an opponent in mind
+				if (gameRoomInfo == undefined) {
+					const assignedRoomId = await socket.findSoloGameRoom();
+					console.log(`Player was assigned room #${assignedRoomId}`);
+					setRoomId(assignedRoomId);
+					socket.joinRoom();
+				}
+				// User knows who they're playing against and need a room #
+				else {
+				}
+			};
+			console.log('findRoom triggered');
+			findRoom();
+		} catch (error) {
+			console.error('Could not find game room: ', error);
+		}
+	}, [socket]);
 
 	/*
 	░█░█░█▀▀░█▀▄░█▀▀░█▀█░█▀▀░█░█░█▀▀░▀█▀░░░█░░░█▀█░█▀▀░▀█▀░█▀▀

@@ -8,7 +8,8 @@ const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement,
 );
 root.render(
-	<React.StrictMode>
+	// <React.StrictMode>
+	<>
 		<App />
 		{/* svg noise filter applied to the entire body element */}
 		<svg className="filter-svg">
@@ -21,7 +22,8 @@ root.render(
 				/>
 			</filter>
 		</svg>
-	</React.StrictMode>,
+	</>,
+	// </React.StrictMode>,
 );
 
 // If you want to start measuring performance in your app, pass a function
