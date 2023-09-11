@@ -22,16 +22,21 @@ export class GameGateway
 
 	handleConnection(client: Socket, ...args: any[]) {
 		console.log('🟢 Client connected: ', client.id);
-		// this.server.emit('message', 'You little cunt');
 	}
 
 	handleDisconnect(client: Socket) {
 		console.log('🔴 Client disconnected:', client.id);
 	}
 
-	@SubscribeMessage('message')
-	handleMessage(client: any, payload: any): string {
-		console.log('🔫 Received a message');
-		return 'Hello world!';
+	@SubscribeMessage('onlineStatusConfirmation')
+	handleMessage(
+		client: any,
+		payload: any,
+	): { event: string; data: { message: string } } {
+		console.log('Client wants to communicate');
+		return {
+			event: 'onlineStatusResponse',
+			data: { message: 'Hey gorgeous ! 😘' },
+		};
 	}
 }

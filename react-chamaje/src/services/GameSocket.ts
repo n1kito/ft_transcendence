@@ -13,6 +13,7 @@ export class GameSocket {
 		});
 		this.connectionSocket.on('connect', () => {
 			console.log('Connected to server ! 🔌🟢 ');
+			this.connectionSocket.emit('onlineStatusConfirmation', {});
 		});
 		this.connectionSocket.on('connect_error', (error: Error) => {
 			console.error('Connection Error:', error);
@@ -23,12 +24,12 @@ export class GameSocket {
 
 		// Listen for messages events from the server
 		this.connectionSocket.on(
-			'onlineStatusConfirmation',
+			'onlineStatusResponse',
 			this.handleMessage.bind(this),
 		);
 	}
 
-	handleMessage(message: string) {
-		console.log(message);
+	handleMessage(data: { message: string }) {
+		console.log('Server says:', data.message);
 	}
 }
