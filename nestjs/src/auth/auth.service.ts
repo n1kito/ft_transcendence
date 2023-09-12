@@ -148,14 +148,15 @@ export class AuthService {
 	}
 
 	// TODO: test that this works once the profile update process has been setup
+	// TODO: 12.09.2023 login and email should not be updated at login as user data are being kept in database
 	// Updates user info on login depending on whether those values where manually updated by the user or not
 	async updateUserInfo(userInDb: User) {
 		await this.prisma.user.update({
 			where: { ft_id: userInDb.ft_id },
 			data: {
-				login: !userInDb.login_is_locked
-					? this.userData.login
-					: this.userData.login,
+				// login: !userInDb.login_is_locked
+				// 	? this.userData.login
+				// 	: this.userData.login,
 				email: !userInDb.email_is_locked ? this.userData.email : undefined,
 				image: !userInDb.image_is_locked ? this.userData.image : undefined,
 			},

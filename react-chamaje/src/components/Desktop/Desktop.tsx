@@ -105,25 +105,6 @@ const Desktop = () => {
 		navigate('/friends');
 	};
 
-	const handleClickDisable = async () => {
-		try {
-			const response = await fetch('api/login/2fa/turn-off', {
-				method: 'POST',
-				credentials: 'include',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-			});
-			if (response.ok) {
-				console.log('is oke');
-				setQrcode('');
-				setIsTwoFAEnabled(false);
-			}
-		} catch (error) {
-			console.error('2fa: ', error);
-		}
-	};
-
 	return (
 		<div className="desktopWrapper" ref={windowDragConstraintRef}>
 			<DesktopIcon
@@ -160,7 +141,7 @@ const Desktop = () => {
 				{openProfileWindow && (
 					<Profile
 						key="profile-window"
-						login="jeepark"
+						login={userData?.login}
 						onCloseClick={() => setProfileWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
 					/>
@@ -180,12 +161,12 @@ const Desktop = () => {
 					/>
 				)}
 			</AnimatePresence>
-			<ChatWindow login="Jee" />
-			<Profile
-				login="jeepark"
+			{/* <ChatWindow login="Jee" /> */}
+			{/* <Profile
+				login={userData?.login}
 				onCloseClick={() => setProfileWindowIsOpen(false)}
 				windowDragConstraintRef={windowDragConstraintRef}
-			/>
+			/> */}
 		</div>
 	);
 };

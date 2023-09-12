@@ -59,11 +59,6 @@ export class AuthController {
 			// Retrieve user information after successful authentication
 			await this.authService.retrieveUserInfo();
 
-			// verify if 2fa is enabled if so return true;
-			const response = await this.authService.istwofaEnabled(
-				this.authService.getUserId(),
-			);
-
 			// Prepare the payload for generating tokens
 			const payload = {
 				userId: this.authService.getUserId(),

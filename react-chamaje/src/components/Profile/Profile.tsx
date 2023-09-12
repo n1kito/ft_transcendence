@@ -30,7 +30,7 @@ import { useNavigate } from 'react-router-dom';
 
 // TODO: find a way to make the shaddow wrapper widht's 100% so if fills the sidebar
 export interface ProfileProps {
-	login: string;
+	login: string | undefined;
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
 	onCloseClick: () => void;
 }
@@ -41,7 +41,7 @@ const Profile: React.FC<ProfileProps> = ({
 	onCloseClick,
 }) => {
 	const { accessToken, isTwoFAEnabled, setIsTwoFAEnabled, logOut } = useAuth();
-	const { userData } = useContext(UserContext);
+	const { userData, setUserData } = useContext(UserContext);
 	const [profileData, setProfileData] = useState<UserData | null>(null); // Declare profileData state
 	const isOwnProfile = login == userData?.login;
 
@@ -93,6 +93,10 @@ const Profile: React.FC<ProfileProps> = ({
 			}
 		});
 	}, []);
+
+	useEffect(() => {
+		if (userData?.login !== profileData?.login) setProfileData(userData);
+	}, [userData]);
 
 	/**************************************************************************************/
 	/* two-factor Authentication Settings                                                 */
@@ -222,30 +226,9 @@ const Profile: React.FC<ProfileProps> = ({
 								picture={profileData.image}
 								isModifiable={isOwnProfile}
 							/>
-							<Title bigTitle={true}>{profileData.login}</Title>
+							<Title bigTitle={true}>{userData?.login}</Title>
 							<TitleList profileData={profileData} />
 							{isOwnProfile && <ProfileSettings />}
-
-							{/* {isOwnProfile && (
-								<div className="profile-buttons">
-									{userData && userData.login == login && (
-										<Button baseColor={[308, 80, 92]}>change password</Button>
-									)}
-									{userData && !(userData.login == login) && (
-										<Button baseColor={[308, 80, 92]}>add friend</Button>
-									)}
-									<Button baseColor={[0, 80, 92]}>
-										<svg
-											className="trashcan-sgv"
-											xmlns="http://www.w3.org/2000/svg"
-											height="1em"
-											viewBox="0 0 448 512"
-										>
-											<path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z" />
-										</svg>
-									</Button>
-								</div> 
-									)}*/}
 						</div>
 						<div className="profile-content">
 							<ProfileStats profileData={profileData} />
@@ -269,7 +252,11 @@ const Profile: React.FC<ProfileProps> = ({
 					windowTitle="Settings"
 					settingsWindowVisible={setSettingsPanelIsOpen}
 				>
-					<Title highlightColor="yellow">{settingsMode}</Title>
+					<Title highlightColor="yellow">
+						{settingsMode === 'Delete Profile'
+							? `${settingsMode} ?`
+							: settingsMode}
+					</Title>
 					{settingsMode === 'Two-Factor Authentication' && (
 						<Button
 							baseColor={isTwoFAEnabled ? [40, 100, 80] : [111, 60, 84]}
@@ -302,7 +289,7 @@ const Profile: React.FC<ProfileProps> = ({
 							<Button
 								baseColor={[40, 100, 80]}
 								onClick={() => {
-									window.alert('this would close delete profile window');
+									setSettingsPanelIsOpen(false);
 								}}
 							>
 								no
