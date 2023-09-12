@@ -127,6 +127,7 @@ const Desktop = () => {
 					<Game
 						onCloseClick={() => setGameWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
+						opponentId={4}
 					/>
 				)}
 			</AnimatePresence>

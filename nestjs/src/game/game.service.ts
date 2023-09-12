@@ -26,9 +26,13 @@ export class GameService {
 	// The requesting user joins a game with no opponent in mind
 	// (meaning it's not from a chat invite)
 	async handleSoloRoomAssignment(userId: number): Promise<gameRoom> {
-		let assignedRoom;
+		let assignedRoom: gameRoom;
 
 		// Find an available room the user might already be in
+		// TODO: issue, if the user is waiting in this room in another tab,
+		// we're going to give them the same room here, but maybe that's not an
+		// issue...? Like they can only play in one place at once normally, so
+		// the second screen they're not playing from would just show the game being played
 		assignedRoom = await this.findAvailableRoomUserIsIn(userId);
 		if (!assignedRoom) {
 			// If there are none, find any available room with "Waiting"
@@ -48,10 +52,15 @@ export class GameService {
 	// Our user want to play against a specific opponent
 	async handleAdversaryRoomAssignment(
 		userId: number,
-		adversaryId: number,
+		opponentId: number,
 	): Promise<gameRoom> {
-		let assignedRoom;
+		let assignedRoom: gameRoom;
 
+		// Find a room we're migh already be in with our adversary
+		assignedRoom = await this.findRoomWithOpponent(userId, opponentId);
+		// If we find one, return it
+		if (assignedRoom) return assignedRoom;
+		// Else
 		// Find an available room the user might already be in
 		assignedRoom = await this.findAvailableRoomUserIsIn(userId);
 		if (!assignedRoom) {
@@ -70,7 +79,7 @@ export class GameService {
 					update: {
 						players: {
 							create: {
-								userId: adversaryId,
+								userId: opponentId,
 							},
 						},
 					},
@@ -133,5 +142,38 @@ export class GameService {
 			},
 		});
 		return newRoom;
+	}
+
+	// Find a room we're already in with our opponent
+	async findRoomWithOpponent(
+		userId: number,
+		opponentId: number,
+	): Promise<gameRoom | null> {
+		// This will find a room where both players are
+		const roomWithBothPlayers = await this.prisma.gameRoom.findFirst({
+			where: {
+				AND: [
+					{
+						game: {
+							players: {
+								some: {
+									userId: userId,
+								},
+							},
+						},
+					},
+					{
+						game: {
+							players: {
+								some: {
+									userId: opponentId,
+								},
+							},
+						},
+					},
+				],
+			},
+		});
+		return roomWithBothPlayers;
 	}
 }

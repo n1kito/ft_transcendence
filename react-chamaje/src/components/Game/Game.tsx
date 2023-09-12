@@ -11,26 +11,28 @@ import { UserContext } from '../../contexts/UserContext';
 import useAuth from '../../hooks/userAuth';
 import { Socket, io } from 'socket.io-client';
 import { GameSocket } from '../../services/GameSocket';
+import GameOverlay from './Components/GameOverlay/GameOverlay';
 
 interface IGameRoomProps {
-	roomId: number;
+	roomId: number; // TODO: this should not be given by the props, it should instead be found by the game component
+	// we should only need to tell the component who we are trying to play against
 	opponentLogin: string;
-	opponentAvatar: string;
+	opponentAvatar: string; // TODO: this should also not be given when opening the component
 }
 
 interface IGameProps {
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
 	onCloseClick: () => void;
-	gameRoomInfo?: IGameRoomProps;
+	// gameRoomInfo?: IGameRoomProps;
+	opponentId?: number | undefined;
 }
 
 const Game: React.FC<IGameProps> = ({
 	onCloseClick,
 	windowDragConstraintRef,
-	gameRoomInfo = undefined,
+	opponentId = undefined,
 }) => {
 	const { accessToken } = useAuth();
-	const [tooltipVisible, setTooltipVisible] = useState(false);
 	const { userData } = useContext(UserContext);
 
 	/*
@@ -39,15 +41,31 @@ const Game: React.FC<IGameProps> = ({
 	░▀▀▀░░▀░░▀░▀░░▀░░▀▀▀░▀▀▀ 
 	*/
 
-	const [socket, setSocket] = useState<GameSocket | null>(null);
+	// const [socket, setSocket] = useState<GameSocket | null>(null);
 	const [roomId, setRoomId] = useState<number | undefined>(undefined);
 	const [settingsWindowVisible, setSettingWindowVisible] = useState(true);
 	const [gameIsRunning, setGameIsRunning] = useState(false);
 	const [gameHasTwoPlayers, setGameHasTwoPlayers] = useState(false);
+	const [connectedToServer, setConnectedToServer] = useState(false);
+	const [connectionStatus, setConnectionStatus] = useState('');
 	const [player1Ready, setPlayer1Ready] = useState(false);
 	const [player2Ready, setPlayer2Ready] = useState(false);
+	const [gameCanStart, setGameCanStart] = useState(false);
 	const [userWonGame, setUserWonGame] = useState(false);
 	const [userLostGame, setUserLostGame] = useState(true);
+
+	// Instantiate a websocket connection that will be kept through renders
+	const gameSocket = useMemo(() => {
+		return new GameSocket(
+			userData?.id || 123,
+			accessToken,
+			setPlayer1Ready,
+			setPlayer2Ready,
+			setGameCanStart,
+			setConnectedToServer,
+			setConnectionStatus,
+		);
+	}, []);
 
 	/*
 	░█▀▀░█▀█░█▄█░█▀▀░░░█░░░█▀█░█▀▀░▀█▀░█▀▀
@@ -249,51 +267,93 @@ const Game: React.FC<IGameProps> = ({
 	// }, []);
 
 	useEffect(() => {
-		const setupSocket = async () => {
-			try {
-				// If the component was mounted with no room information (from the desktop icon)
-				// we need to request a roomId to play in, either an empty room or a room with someone
-				// already waiting in it
-				// Create a websocket connection
-				const gameSocket = new GameSocket(userData?.id || 123, accessToken);
-				if (!gameSocket)
-					console.error('Could not instantiate web socket for pong game');
-				setSocket(gameSocket);
-			} catch (error) {
-				console.error('Could not initiate socket connection: ', error);
-			}
-		};
-		setupSocket();
+		try {
+			// Initiate the socket connection
+			// It checks itself for errors and displays a message to the user directly
+			gameSocket.initiateSocketConnection();
+		} catch (error) {
+			console.error(error);
+		}
+		// const setupSocket = async () => {
+		// 	try {
+		// 		// If the component was mounted with no room information (from the desktop icon)
+		// 		// we need to request a roomId to play in, either an empty room or a room with someone
+		// 		// already waiting in it
+		// 		// Create a websocket connection
+		// 		const gameSocket = new GameSocket(
+		// 			userData?.id || 123,
+		// 			accessToken,
+		// 			setPlayer1Ready,
+		// 			setPlayer2Ready,
+		// 		);
+		// 		if (!gameSocket)
+		// 			console.error('Could not instantiate web socket for pong game');
+		// 		setSocket(gameSocket);
+		// 	} catch (error) {
+		// 		console.error('Could not initiate socket connection: ', error);
+		// 	}
+		// };
+		// setupSocket();
 
 		return () => {
 			// Cleanup logic: disconnect the socket
-			if (socket) socket.disconnect();
+			if (gameSocket) gameSocket.disconnect();
 		};
 	}, []);
 
+	// Once we are connected to the server, try to join a room
 	useEffect(() => {
+		// If we were not connected to the server, do nothing
+		if (!connectedToServer) return;
+
+		// Otherwise, try to join a room
 		try {
-			const findRoom = async () => {
-				if (!socket) return;
-				console.log({ socket });
-				// Find a room to be in
-				// User opened the game from the desktop and do not have an opponent in mind
-				if (gameRoomInfo == undefined) {
-					const assignedRoomId = await socket.findSoloGameRoom();
-					console.log(`Player was assigned room #${assignedRoomId}`);
-					setRoomId(assignedRoomId);
-					socket.joinRoom();
-				}
-				// User knows who they're playing against and need a room #
-				else {
-				}
-			};
-			console.log('findRoom triggered');
-			findRoom();
+			// Ask the server to join a room either with an opponent (or alone)
+			gameSocket.joinGameRoom(opponentId);
+			// gameSocket.joinGameRoom();
 		} catch (error) {
-			console.error('Could not find game room: ', error);
+			console.error(error);
 		}
-	}, [socket]);
+	}, [connectedToServer]);
+
+	// useEffect(() => {
+	// 	try {
+	// 		const findRoom = async () => {
+	// 			if (!gameSocket) return;
+	// 			console.log({ gameSocket });
+	// 			// Find a room to be in
+	// 			// User opened the game from the desktop and do not have an opponent in mind
+	// 			if (opponentId == undefined) {
+	// 				const assignedRoomId = await gameSocket.findSoloGameRoom();
+	// 				console.log(`Player was assigned room #${assignedRoomId}`);
+	// 				setRoomId(assignedRoomId);
+	// 				gameSocket.joinRoom();
+	// 			}
+	// 			// User knows who they're playing against and need a room #
+	// 			else if (opponentId > 0) {
+	// 				console.log('%/* Styling the Game component */
+	// 				cTrying to find a room for two...', 'color: purple');
+	// 			}
+	// 			const assignedRoomId = await gameSocket.findRoomForTwo(
+	// 				opponentId || -1,
+	// 			);
+	// 		};
+	// 		console.log('findRoom triggered');
+	// 		findRoom();
+	// 	} catch (error) {
+	// 		console.error('Could not find game room: ', error);
+	// 	}
+	// }, [gameSocket]);
+
+	// Check if the game can start
+	useEffect(() => {
+		if (player1Ready && player2Ready) setGameCanStart(true);
+	}, [player1Ready, player2Ready]);
+
+	// Update the value of UserLostGame based on updates to userWonGame
+	useEffect(() => {
+		setUserLostGame(!userWonGame);
+	}, [userWonGame]);
 
 	/*
 	░█░█░█▀▀░█▀▄░█▀▀░█▀█░█▀▀░█░█░█▀▀░▀█▀░░░█░░░█▀█░█▀▀░▀█▀░█▀▀
@@ -310,51 +370,16 @@ const Game: React.FC<IGameProps> = ({
 		>
 			{/* TODO: add the player information above the canvas game */}
 			<div className={`game-wrapper`}>
-				{(!player1Ready || !player2Ready) && (
-					<div className="game-overlay-wrapper">
-						{(userWonGame || userLostGame) && (
-							<div className={`winner-announcement`}>
-								WINNER: {userLostGame ? 'NOT ' : ''}YOU
-							</div>
-						)}
-						<div className="game-settings-window-wrapper">
-							<div className="game-settings-window-titlebar">
-								Upcoming match
-							</div>
-							<div className="game-settings-window-content">
-								<FriendBadge
-									badgeTitle={userData?.login || '?'}
-									badgeImageUrl={userData?.image || undefined}
-									onlineIndicator={false}
-									isActive={player1Ready}
-								/>
-								<span>VS</span>
-								<FriendBadge isClickable={true} isActive={player2Ready} />
-							</div>
-						</div>
-						<div
-							className="game-play-button-wrapper"
-							onMouseEnter={() => {
-								setTooltipVisible(true);
-							}}
-							onMouseLeave={() => {
-								setTooltipVisible(false);
-							}}
-						>
-							<Tooltip
-								isVisible={tooltipVisible && player1Ready && !player2Ready}
-								position="bottom"
-							>
-								Waiting for your opponent to press "play"
-							</Tooltip>
-							<Button
-								onClick={() => setPlayer1Ready(true)}
-								disabled={player1Ready && !player2Ready}
-							>
-								play
-							</Button>
-						</div>
-					</div>
+				{!gameCanStart && (
+					<GameOverlay
+						connectedToServer={connectedToServer}
+						connectionStatus={connectionStatus}
+						userWonGame={userWonGame}
+						userLostGame={userLostGame}
+						player1Ready={player1Ready}
+						player2Ready={player2Ready}
+						setPlayer1Ready={setPlayer1Ready}
+					/>
 				)}
 				<canvas
 					className="game-canvas"
