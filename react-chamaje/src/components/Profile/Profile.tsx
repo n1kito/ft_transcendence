@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import './Profile.css';
 import ProfilePicBadge from './Components/ProfilePicBadge/ProfilePicBadge';
 import { UserContext, UserData } from '../../contexts/UserContext';
@@ -46,11 +46,22 @@ const Profile: React.FC<ProfileProps> = ({
 
 	// Settings panel
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
+
 	const [twoFactorAuthWindowisOpen, setTwoFactorAuthWindowIsOpen] =
 		useState(false);
+
 	const [TwoFactorAuthEnableMode, setTwoFactorAuthEnableMode] = useState(false);
 
+	const isInProcessRef = useRef(false);
+
+	const [deleteProfileWindowisOpen, setDeleteProfileWindowisOpen] =
+		useState(false);
+
 	// TODO: fetch profile data should be a separate service so we don't rewrite the function in multiple components
+
+	/**************************************************************************************/
+	/* Profile Data                                                                       */
+	/**************************************************************************************/
 	const fetchProfileData = async () => {
 		try {
 			const response = await fetch(`/api/user/${login}`, {
@@ -80,15 +91,18 @@ const Profile: React.FC<ProfileProps> = ({
 		});
 	}, []);
 
-	const openSettingsPanel = () => {
-		setSettingsPanelIsOpen(!settingsPanelIsOpen);
-	};
+	/**************************************************************************************/
+	/* two-factor Authentication Settings                                                 */
+	/**************************************************************************************/
 
 	// enable two-factor authentication and open a new window
 	// displaying generated qr code and inputfield where
 	// the code given by google authenticator must be entered
 	const enableTwoFactorAuthentication = async () => {
+		console.log('process is starting!');
 		setTwoFactorAuthWindowIsOpen(true);
+		isInProcessRef.current = true;
+		console.log('enable2FA, REF:', isInProcessRef);
 	};
 
 	// disable two-factor authentication
@@ -103,27 +117,56 @@ const Profile: React.FC<ProfileProps> = ({
 			});
 			if (response.ok) {
 				setIsTwoFAEnabled(false);
+			} else if (response.status === 500) {
+				const messageError = await response.json();
+				console.error(messageError);
 			}
 		} catch (error) {
-			console.error('2fa: ', error);
+			throw new Error('internal error');
 		}
 	};
 
+	// if 2Fa is correctly enable, means 2FA window must unmount and
+	// end 2FA process by its reference
 	useEffect(() => {
 		setTwoFactorAuthWindowIsOpen(false);
+		isInProcessRef.current = false;
 	}, [isTwoFAEnabled]);
 
+	// before closing tab by refreshing action, in case the user has not finished
+	// being verified by google authentication, turn-off 2FA mode.
+	const handleTabClosing = () => {
+		// if still in authentication process
+		if (isInProcessRef.current) {
+			// turn-off 2FA to prevent setting the user as verified
+			disableTwoFactorAuthentication().catch((error) => {
+				console.error('Error disabling 2FA: ', error);
+			});
+		}
+	};
+
+	// add event listener for page refreshing
 	useEffect(() => {
+		window.addEventListener('unload', handleTabClosing);
 		return () => {
-			if (twoFactorAuthWindowisOpen) alert();
+			window.removeEventListener('unload', handleTabClosing);
 		};
 	});
+
+	// on click, open 2FA window
+	const openSettingsPanel = () => {
+		setSettingsPanelIsOpen(!settingsPanelIsOpen);
+	};
+
+	// const openDeleteProfileSettingsPanel = () => {
+	// 	setDeleteProfileWindowisOpen(true);
+	// };
 
 	return (
 		<Window
 			windowTitle={login || 'window title'}
 			links={[
-				{ name: 'Delete profile', onClick: () => null },
+				{ name: 'Delete profile', onClick: openSettingsPanel },
 				{ name: 'Two-Factor Authentication', onClick: openSettingsPanel },
 				// { name: 'Link3', onClick: () => null },
 			]}

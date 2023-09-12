@@ -96,10 +96,9 @@ const Prompt: React.FC<PromptProps> = ({
 				});
 				const data = await response.json();
 				if (response.ok) {
-					console.log('response ok from /api/login/2fa:', data);
 					navigate('/desktop');
 				} else {
-					console.log('problemo from /api/login/2fa: ', data);
+					console.error('problemo from /api/login/2fa: ', data);
 				}
 			} catch (error) {
 				console.error(error);
@@ -145,23 +144,6 @@ const Prompt: React.FC<PromptProps> = ({
 								fontSize: '0.8rem',
 							}}
 						></input>
-					)}
-				</div>
-				<div className="line2">
-					{inputError === true && (
-						<div id="msg-error">
-							<label style={{ minWidth: labelWidth + 'rem' }}>
-								<Typewriter
-									options={{
-										strings: '> Code must be only digit!',
-										autoStart: true,
-										loop: false,
-										cursor: '',
-										delay: 20,
-									}}
-								/>
-							</label>
-						</div>
 					)}
 				</div>
 

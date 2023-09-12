@@ -12,7 +12,7 @@ interface IAuthContext {
 	refreshToken: () => Promise<void>;
 	updateAccessToken: (generatedAccessToken: string) => void;
 	accessToken: string;
-
+	setAccessToken: (token: string) => void;
 	isTwoFaVerified: boolean;
 	setIsTwoFaVerified: (status: boolean) => void;
 }
@@ -145,6 +145,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 				refreshToken,
 				updateAccessToken,
 				accessToken,
+				setAccessToken,
 				isTwoFaVerified,
 				setIsTwoFaVerified,
 			}}

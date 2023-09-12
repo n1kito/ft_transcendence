@@ -13,7 +13,6 @@ const RetrieveAccessToken = () => {
 			// Retrieve the code from the current URL
 			const urlParameters = new URLSearchParams(location.search);
 			const code = urlParameters.get('code');
-			console.log('CODE: ', code);
 			if (code) {
 				try {
 					const response = await fetch('/api/login/retrieve-access-token', {
@@ -31,10 +30,6 @@ const RetrieveAccessToken = () => {
 
 						// Redirect user back to login page to continue login process with google authenticator
 						if (data.twofa) {
-							console.log(
-								'retrieveAccessToken - redirecting to login page: ',
-								data.twofa,
-							);
 							setIsTwoFAEnabled(true);
 							navigate('/');
 						}
