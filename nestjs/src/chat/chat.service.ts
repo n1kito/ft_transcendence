@@ -139,15 +139,15 @@ export class ChatService {
 				},
 			});
 			// if (this.errors.length > 0) {
-				//     throw new Exce(this.errors);
-				// }
-				return chat.id;
-			} catch (e) {
+			//     throw new Exce(this.errors);
+			// }
+			return chat.id;
+		} catch (e) {
 			console.log('error creating chat:', e);
 			// throw new CustomException(this.errors);
 		}
 	}
-	
+
 	// create chatSession
 	async createChatSession(userId: number, chatId: number) {
 		await this.prisma.chatSession.create({
@@ -163,7 +163,9 @@ export class ChatService {
 	async sendMessage(userId: number, content: SendMessageDTO) {
 		this.errors = [];
 		try {
+			console.log('content.message before validation', content.message);
 			await this.validateSendMessageDto(content);
+			console.log('content.message after validation', content.message);
 			await this.prisma.message.create({
 				data: {
 					chatId: content.chatId,

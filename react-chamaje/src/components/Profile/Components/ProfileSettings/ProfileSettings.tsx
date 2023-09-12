@@ -103,7 +103,7 @@ const ProfileSettings: React.FC = () => {
 					...userData,
 					login: username,
 					email: email,
-					id: userData?.id || undefined,
+					id: userData ? userData.id : 0,
 					image: userData?.image || '',
 					friends: userData?.friends || [],
 					chatSocket: userData?.chatSocket || null,

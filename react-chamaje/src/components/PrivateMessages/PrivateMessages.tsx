@@ -219,6 +219,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					userId={chatWindowUserId}
 					chatId={chatWindowId}
 					messages={messages}
+					setMessages={setMessages}
 				/>
 			)}
 		</>

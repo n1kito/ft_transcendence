@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { Dispatch, SetStateAction, useContext, useEffect, useRef, useState } from 'react';
 import './ChatWindow.css';
 import Window from '../Window/Window';
 import Button from '../Shared/Button/Button';
@@ -17,6 +17,7 @@ export interface IChatWindowProps {
 	userId: number;
 	chatId: number;
 	messages: IMessage[];
+	setMessages: Dispatch<SetStateAction<IMessage[]>>,
 }
 
 export interface IMessage {
@@ -48,6 +49,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	windowDragConstraintRef,
 	chatId,
 	messages,
+	setMessages
 }) => {
 	/* ********************************************************************* */
 	/* ******************************* FRONT ******************************* */
@@ -69,6 +71,13 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 		setTextareaIsEmpty(newValue === '');
 	};
 
+	// On enter, send the message if not empty
+	const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+		if (event.key === 'Enter' && !event.shiftKey) {
+			event.preventDefault();
+			if (!textareaIsEmpty) sendMessage();
+		}
+	};
 	useEffect(() => {
 		const container = chatContentRef.current;
 		if (container) {
@@ -100,7 +109,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	// empty the textarea when changing active chat
 	useEffect(() => {
 		setTextareaContent('');
-		setTextareaIsEmpty(true)
+		setTextareaIsEmpty(true);
 	}, [userId]);
 	/* ********************************************************************* */
 	/* ******************************** CHAT ******************************* */
@@ -138,6 +147,22 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 			userData.login,
 			userData.image,
 		);
+		console.log(
+			' JSON.stringify({ message: textareaContent, chatId: chatId }',
+			JSON.stringify({ message: textareaContent, chatId: chatId }),
+		);
+		// display users' own message by updating the messages[]
+		const updatedMessages: IMessage[] = messages.map((val) => {
+			return val;
+		});
+		updatedMessages.push({
+			chatId: chatId,
+			sentById: userData ? userData.id : 0,
+			sentAt: new Date(),
+			content: textareaContent,
+			login: userData ? userData?.login : '',
+		});
+		setMessages(updatedMessages);
 		setTextareaContent('');
 		setTextareaIsEmpty(true);
 	};
@@ -192,6 +217,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 						onFocus={() => setTextareaIsFocused(true)}
 						onBlur={() => setTextareaIsFocused(false)}
 						onChange={handleInputChange}
+						onKeyDown={handleKeyDown}
 					></textarea>
 					<Button
 						baseColor={[151, 51, 91]}
