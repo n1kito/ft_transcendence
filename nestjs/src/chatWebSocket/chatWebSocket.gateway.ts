@@ -19,6 +19,23 @@ function decodeToken(client: Socket): any {
 	) as jwt.JwtPayload;
 }
 
+interface ICommunication {
+	chatId: number;
+	message: string;
+	userId: number;
+	login: string;
+	avatar: string;
+}
+
+export interface IMessage {
+	chatId: number;
+	sentById: number;
+	sentAt: Date;
+	content: string;
+	login: string;
+	avatar?: string;
+}
+
 @WebSocketGateway({ path: '/ws/' })
 export class chatWebSocketGateway
 	implements OnGatewayConnection, OnGatewayDisconnect
@@ -97,10 +114,24 @@ export class chatWebSocketGateway
 
 	@SubscribeMessage('sendMessage')
 	handleSendMessage(
-		@MessageBody() roomId: string,
+		@MessageBody() content: ICommunication,
 		@ConnectedSocket() client: Socket,
-	): string {
-		this.server.to(roomId.toString()).emit('receiveMessage', roomId)
-		return roomId;
+	): void {
+		const messageToSend: IMessage = {
+			chatId: content.chatId,
+			sentById: content.userId,
+			sentAt: new Date(),
+			content: content.message,
+			login: content.login,
+			avatar: content.avatar,
+		};
+		// sends the message to everyone except the sender
+		client.to(content.chatId.toString()).emit('receiveMessage', messageToSend);
+		console.log(
+			'📣📣📣 sending this message:' +
+				content.message +
+				' to room ' +
+				content.chatId,
+		);
 	}
 }

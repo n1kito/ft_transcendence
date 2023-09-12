@@ -35,6 +35,46 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	const { userData, setUserData } = useContext(UserContext);
 	const { accessToken } = useAuth();
 
+	/* ********************************************************************* */
+	/* ***************************** WEBSOCKET ***************************** */
+	/* ********************************************************************* */
+
+	// LISTENER: when receiving a message in active chat
+	// listen for a message everytime the chatId changes
+	useEffect(() => {
+		if (!userData || !userData.chatSocket) {
+			console.warn('your userData was not set up yet');
+			return;
+		}
+		const onReceiveMessage = (message: IMessage) => {
+			// if it is the active chat, load message
+			if (message.chatId === chatWindowId) {
+				const updatedMessages: IMessage[] = messages.map((val) => {
+					return val;
+				});
+				updatedMessages.push(message);
+				setMessages(updatedMessages);
+			} else {
+				console.log(
+					'%cYou received a message from another chat',
+					'color:lightblue;',
+				);
+			}
+		};
+		// userData?.chatSocket?.onReceiveMessage(onReceiveMessage);
+		userData?.chatSocket?.onReceiveMessage(onReceiveMessage);
+
+		// stop listening to messages
+		// TODO: need to change that because I am not sure it will stop listening to the right room
+		return () => {
+			userData.chatSocket?.offReceiveMessage(onReceiveMessage);
+		};
+	}, [chatWindowId, messages]);
+
+	/* ********************************************************************* */
+	/* ******************************* FETCH ******************************* */
+	/* ********************************************************************* */
+
 	async function fetchMessages(chatId: number) {
 		fetch('api/chat/chatMessages/' + chatId, {
 			method: 'GET',
@@ -49,8 +89,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 			});
 	}
 
-	// on mounting this component, fetch the chatsJoined
-	useEffect(() => {
+	async function fetchChatsJoined() {
 		fetch('/api/user/me/chatsJoined', {
 			method: 'GET',
 			headers: {
@@ -61,30 +100,52 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 			.then((response) => response.json())
 			.then((data) => {
 				setChatsJoined(data);
-				const updatedUserData = {
-					...userData,
-					id: userData?.id,
-					login: userData?.login || '',
-					email: userData?.email || '',
-					friends: userData?.friends || [],
-					chatSocket: userData?.chatSocket || null,
-					image: userData?.image || '',
-					chatsJoined: chatsJoined,
-				};
-				setUserData(updatedUserData);
 			});
-	}, []);
+	}
+
+	async function createChat(friendId: number) {
+		return fetch('api/chat/createChatPrivateMessage/' + friendId, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+			body: JSON.stringify({
+				isChannel: false,
+				isPrivate: true,
+				isProtected: false,
+				userId: friendId,
+			}),
+		});
+	}
+	
+	
+	/* ********************************************************************* */
+	/* ******************************* DEBUG ******************************* */
+	/* ********************************************************************* */
+	
 	useEffect(() => {
-		console.log('messages', messages);
+		console.log(' PrivateMessage - messages', messages);
 	}, [messages]);
 	useEffect(() => {
-		console.log('chatsJoined', chatsJoined);
+		console.log(' PrivateMessage - chatsJoined', chatsJoined);
 	}, [chatsJoined]);
 
 	useEffect(() => {
-		console.log('chatWindowId', chatWindowId);
+		console.log(' PrivateMessage - chatWindowId', chatWindowId);
 	}, [chatWindowId]);
+	
+		
+	/* ********************************************************************* */
+	/* ******************************* LOGIC ******************************* */
+	/* ********************************************************************* */
 
+	// on mounting this component, fetch the chatsJoined
+	useEffect(() => {
+		fetchChatsJoined();
+	}, []);
+	
 	// on click on an avatar, check if a PM conversation exists.
 	// If it does, open the window, set the userId and chatId, and fetch
 	// the messages.
@@ -92,13 +153,11 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	const openPrivateMessageWindow: any = (friendId: number) => {
 		let foundChat = false;
 		const chatId = chatsJoined.map((currentChat) => {
-			console.log('currentChat', currentChat);
 			if (
 				currentChat.participants.length === 2 &&
 				(currentChat.participants.at(0) === friendId ||
 					currentChat.participants.at(1) === friendId)
 			) {
-				console.log('found a corresponding chat', currentChat);
 				setChatWindowId(currentChat.chatId);
 				fetchMessages(currentChat.chatId);
 				foundChat = true;
@@ -107,30 +166,23 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 		});
 		setChatWindowIsOpen(true);
 		setChatWindowUserId(friendId);
-		// TODO: this should create a new chat with the user
-		if (!foundChat && !chatWindowId) {
-			fetch('api/chat/createChatPrivateMessage/' + friendId, {
-				method: 'PUT',
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${accessToken}`,
-				},
-				credentials: 'include',
-				body: JSON.stringify({
-					isChannel: false,
-					isPrivate: true,
-					isProtected: false,
-					userId: friendId,
-				}),
-			})
+		// If no corresponding chat were found, create it, set messages to empty
+		// change the chat window and update chatsJoined[]
+		if (!foundChat) {
+			createChat(friendId)
 				.then((response) => response.json())
 				.then((data) => {
 					setChatWindowId(data);
 					setMessages([]);
+					fetchChatsJoined();
 				});
 			console.error('This chat does not exist');
 		}
 	};
+
+	/* ********************************************************************* */
+	/* ******************************* RETURN ****************************** */
+	/* ********************************************************************* */
 	return (
 		<>
 			<Window

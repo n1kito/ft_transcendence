@@ -86,10 +86,27 @@ class WebSocketService {
 		console.log('🚪 Leaving room n.', chatId);
 	}
 
-	sendMessage(content: string, chatId: number) {
-		this.socket.emit('sendMessage', chatId, (res: any) => {
-			console.log(res);
+	sendMessage(message: string, chatId: number, login: string, avatar: string) {
+		this.socket.emit('sendMessage', {
+			chatId: chatId,
+			message: message,
+			userId: this.userId,
+			login: login,
+			avatar: avatar,
 		});
+		console.log('sending message to ' + chatId + ': ' + message);
+	}
+
+	// used when on active chat
+	onReceiveMessage(callback: callbackInterface) {
+		this.socket.on('receiveMessage', callback);
+		console.log('message listener on');
+	}
+
+	// used when leaving active chat but staying in room
+	offReceiveMessage(callback: callbackInterface) {
+		this.socket.off('receiveMessage', callback);
+		console.log('message listener on');
 	}
 }
 export default WebSocketService;

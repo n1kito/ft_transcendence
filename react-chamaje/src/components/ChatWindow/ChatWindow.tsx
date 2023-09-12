@@ -20,11 +20,12 @@ export interface IChatWindowProps {
 }
 
 export interface IMessage {
+	chatId: number;
 	sentById: number;
 	sentAt: Date;
 	content: string;
 	login: string;
-	avatar: string;
+	avatar?: string;
 }
 
 const dateFormatOptions: Intl.DateTimeFormatOptions = {
@@ -48,6 +49,10 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	chatId,
 	messages,
 }) => {
+	/* ********************************************************************* */
+	/* ******************************* FRONT ******************************* */
+	/* ********************************************************************* */
+
 	const [textareaIsFocused, setTextareaIsFocused] = useState(false);
 	const [textareaIsEmpty, setTextareaIsEmpty] = useState(true);
 	const [textareaContent, setTextareaContent] = useState('');
@@ -76,11 +81,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 		setSettingsPanelIsOpen(!settingsPanelIsOpen);
 	};
 
-	// Chat logic
-	const { accessToken } = useAuth();
-	const [login, setLogin] = useState('Anonymous');
-	// const [oldChatId, setOldChatId] = useState(chatId);
-
 	// change the login every time the userId changes
 	useEffect(() => {
 		fetch('api/user/byId/' + userId, {
@@ -97,6 +97,18 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 			});
 	}, [userId]);
 
+	// empty the textarea when changing active chat
+	useEffect(() => {
+		setTextareaContent('');
+		setTextareaIsEmpty(true)
+	}, [userId]);
+	/* ********************************************************************* */
+	/* ******************************** CHAT ******************************* */
+	/* ********************************************************************* */
+
+	const { accessToken } = useAuth();
+	const [login, setLogin] = useState('Anonymous');
+
 	// On mount, join the room associated with the chat
 	// TODO: find a way to leave room when changing chat (because it is
 	// not an unmounting)
@@ -107,12 +119,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 		// 	userData?.chatSocket?.leaveRoom(chatId);
 		// };
 	}, [chatId]);
-
-	// TODO: Supposed to leave the last room but I need to check if it works
-
-	// useEffect(() => {
-	// 	userData?.chatSocket?.leaveRoom(chatId);
-	// }, [chatId]);
 
 	const sendMessage = async () => {
 		console.log('accessToken', accessToken);
@@ -125,7 +131,21 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 			credentials: 'include',
 			body: JSON.stringify({ message: textareaContent, chatId: chatId }),
 		});
+
+		userData?.chatSocket?.sendMessage(
+			textareaContent,
+			chatId,
+			userData.login,
+			userData.image,
+		);
+		setTextareaContent('');
+		setTextareaIsEmpty(true);
 	};
+
+	/* ********************************************************************* */
+	/* ******************************* RETURN ****************************** */
+	/* ********************************************************************* */
+
 	return (
 		<Window
 			windowTitle={`Chat with ${login}`}
@@ -159,8 +179,8 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							</ChatBubble>
 						);
 					})}
-					<ChattNotification type="Muted" sender="Nikito" recipient="Jee" />
-					<ChatGameInvite sender="Jee" recipient="Nikito" />
+					{/* <ChattNotification type="Muted" sender="Nikito" recipient="Jee" />
+					<ChatGameInvite sender="Jee" recipient="Nikito" /> */}
 				</div>
 				<div
 					className={`chat-input ${
@@ -168,6 +188,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 					}`}
 				>
 					<textarea
+						value={textareaContent}
 						onFocus={() => setTextareaIsFocused(true)}
 						onBlur={() => setTextareaIsFocused(false)}
 						onChange={handleInputChange}
