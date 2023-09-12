@@ -57,3 +57,12 @@
 .profile-buttons > :first-child {
 	flex: 1;
 }
+
+.delete-profile-wrapper {
+	display: flex;
+	flex-direction: row;
+	gap: 2rem;
+	justify-content: space-around;
+	flex-wrap: nowrap;
+	align-items: center;
+}

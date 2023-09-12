@@ -3,6 +3,7 @@ import {
 	Body,
 	ConflictException,
 	Controller,
+	Delete,
 	Get,
 	HttpException,
 	HttpStatus,
@@ -125,6 +126,22 @@ export class UserController {
 			response
 				.status(500)
 				.json({ error: 'Could not update target discovery status.' });
+		}
+	}
+
+	@Delete('me/delete')
+	async deleteSelf(@Req() request: CustomRequest, @Res() response: Response) {
+		try {
+			const userId = this.userService.authenticateUser(request);
+			// console.log('🛟 me/delete\n userId:', userId);
+			await this.userService.deleteUser(userId);
+			response
+				.status(200)
+				.json({ message: 'User account deleted successfully' });
+		} catch (error) {
+			return response.status(500).json({
+				error: 'Could not delete user account',
+			});
 		}
 	}
 

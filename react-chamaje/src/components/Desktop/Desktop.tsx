@@ -49,7 +49,6 @@ const Desktop = () => {
 	const windowDragConstraintRef = useRef(null);
 
 	useEffect(() => {
-		// if (!isAuthentificated) return;
 		const fetchUserData = async () => {
 			// Feth the user data from the server
 			try {

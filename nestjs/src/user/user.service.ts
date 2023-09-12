@@ -250,4 +250,17 @@ export class UserService {
 			};
 		});
 	}
+
+	async deleteUser(userId: number) {
+		try {
+			const isdeleted = await this.prisma.user.delete({
+				where: { id: userId },
+			});
+			console.log('User deleted successfully');
+		} catch (error) {
+			console.log('Could not delete user:', error.message);
+			throw new Error('Could not delete user');
+		}
+		// console.log('User deleted successfully');
+	}
 }

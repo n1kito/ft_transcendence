@@ -26,6 +26,7 @@ import Window from '../Window/Window';
 import SettingsWindow from './Components/Shared/SettingsWindow/SettingsWindow';
 import TwoFactorAuthentication from './Components/TwoFactorAuthentication/TwoFactorAuthentication';
 import InputField from './Components/InputField/InputField';
+import { useNavigate } from 'react-router-dom';
 
 // TODO: find a way to make the shaddow wrapper widht's 100% so if fills the sidebar
 export interface ProfileProps {
@@ -39,13 +40,14 @@ const Profile: React.FC<ProfileProps> = ({
 	windowDragConstraintRef,
 	onCloseClick,
 }) => {
-	const { accessToken, isTwoFAEnabled, setIsTwoFAEnabled } = useAuth();
+	const { accessToken, isTwoFAEnabled, setIsTwoFAEnabled, logOut } = useAuth();
 	const { userData } = useContext(UserContext);
 	const [profileData, setProfileData] = useState<UserData | null>(null); // Declare profileData state
 	const isOwnProfile = login == userData?.login;
 
 	// Settings panel
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
+	const [settingsMode, setSettingsMode] = useState('');
 
 	const [twoFactorAuthWindowisOpen, setTwoFactorAuthWindowIsOpen] =
 		useState(false);
@@ -56,6 +58,7 @@ const Profile: React.FC<ProfileProps> = ({
 
 	const [deleteProfileWindowisOpen, setDeleteProfileWindowisOpen] =
 		useState(false);
+	const navigate = useNavigate();
 
 	// TODO: fetch profile data should be a separate service so we don't rewrite the function in multiple components
 
@@ -158,16 +161,52 @@ const Profile: React.FC<ProfileProps> = ({
 		setSettingsPanelIsOpen(!settingsPanelIsOpen);
 	};
 
-	// const openDeleteProfileSettingsPanel = () => {
-	// 	setDeleteProfileWindowisOpen(true);
-	// };
+	/**************************************************************************************/
+	/* Delete Profile Settings                                                            */
+	/**************************************************************************************/
+
+	const deleteProfile = async () => {
+		try {
+			const response = await fetch('api/user/me/delete', {
+				method: 'DELETE',
+				credentials: 'include',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+			});
+			if (response.ok) {
+				alert('delete profile');
+				// navigate('/');
+				logOut();
+				console.log('plop');
+			} else if (response.status === 500) {
+				const messageError = await response.json();
+				console.error(messageError);
+			}
+		} catch (error) {
+			throw new Error('internal error');
+		}
+	};
 
 	return (
 		<Window
 			windowTitle={login || 'window title'}
 			links={[
-				{ name: 'Delete profile', onClick: openSettingsPanel },
-				{ name: 'Two-Factor Authentication', onClick: openSettingsPanel },
+				{
+					name: 'Two-Factor Authentication',
+					onClick: () => {
+						setSettingsMode('Two-Factor Authentication');
+						setSettingsPanelIsOpen(true);
+					},
+				},
+				{
+					name: 'Delete profile',
+
+					onClick: () => {
+						setSettingsMode('Delete Profile');
+						setSettingsPanelIsOpen(true);
+					},
+				},
 				// { name: 'Link3', onClick: () => null },
 			]}
 			useBeigeBackground={true}
@@ -187,7 +226,7 @@ const Profile: React.FC<ProfileProps> = ({
 							<TitleList profileData={profileData} />
 							{isOwnProfile && <ProfileSettings />}
 
-							{isOwnProfile && (
+							{/* {isOwnProfile && (
 								<div className="profile-buttons">
 									{userData && userData.login == login && (
 										<Button baseColor={[308, 80, 92]}>change password</Button>
@@ -205,8 +244,8 @@ const Profile: React.FC<ProfileProps> = ({
 											<path d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0H284.2c12.1 0 23.2 6.8 28.6 17.7L320 32h96c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 96 0 81.7 0 64S14.3 32 32 32h96l7.2-14.3zM32 128H416V448c0 35.3-28.7 64-64 64H96c-35.3 0-64-28.7-64-64V128zm96 64c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16V432c0 8.8 7.2 16 16 16s16-7.2 16-16V208c0-8.8-7.2-16-16-16z" />
 										</svg>
 									</Button>
-								</div>
-							)}
+								</div> 
+									)}*/}
 						</div>
 						<div className="profile-content">
 							<ProfileStats profileData={profileData} />
@@ -230,24 +269,45 @@ const Profile: React.FC<ProfileProps> = ({
 					windowTitle="Settings"
 					settingsWindowVisible={setSettingsPanelIsOpen}
 				>
-					<Title highlightColor="yellow">Two-Factor Authentication</Title>
-					<Button
-						baseColor={isTwoFAEnabled ? [40, 100, 80] : [111, 60, 84]}
-						onClick={
-							isTwoFAEnabled
-								? disableTwoFactorAuthentication
-								: enableTwoFactorAuthentication
-						}
-						disabled={!!twoFactorAuthWindowisOpen}
-					>
-						{isTwoFAEnabled ? 'disable' : 'enable'}
-					</Button>
+					<Title highlightColor="yellow">{settingsMode}</Title>
+					{settingsMode === 'Two-Factor Authentication' && (
+						<Button
+							baseColor={isTwoFAEnabled ? [40, 100, 80] : [111, 60, 84]}
+							onClick={
+								isTwoFAEnabled
+									? disableTwoFactorAuthentication
+									: enableTwoFactorAuthentication
+							}
+							disabled={!!twoFactorAuthWindowisOpen}
+						>
+							{isTwoFAEnabled ? 'disable' : 'enable'}
+						</Button>
+					)}
 					{twoFactorAuthWindowisOpen && (
 						<TwoFactorAuthentication
-							// qrCode={qrcode}
-							// setQrCode={setQrcode}
 							setTwoFactorAuthWindowisOpen={setTwoFactorAuthWindowIsOpen}
 						/>
+					)}
+
+					{settingsMode === 'Delete Profile' && (
+						<div className="delete-profile-wrapper">
+							<Button
+								baseColor={[111, 60, 84]}
+								onClick={() => {
+									deleteProfile();
+								}}
+							>
+								yes
+							</Button>
+							<Button
+								baseColor={[40, 100, 80]}
+								onClick={() => {
+									window.alert('this would close delete profile window');
+								}}
+							>
+								no
+							</Button>
+						</div>
 					)}
 				</SettingsWindow>
 			)}

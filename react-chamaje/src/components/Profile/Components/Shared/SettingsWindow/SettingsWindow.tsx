@@ -12,14 +12,10 @@ const SettingsWindow: React.FC<ISettingsWindowProps> = ({
 	settingsWindowVisible,
 	windowTitle = '',
 }) => {
-	useEffect(() => {
-		console.log('Setting window CLICK');
-	}, [settingsWindowVisible]);
 	return (
 		<div
 			className="settings-window-wrapper"
 			onClick={() => {
-				// fetch/////
 				settingsWindowVisible(false);
 			}}
 		>
