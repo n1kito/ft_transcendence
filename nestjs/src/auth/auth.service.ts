@@ -354,19 +354,23 @@ export class AuthService {
 		console.log('\n\n isTwoFactorAuthenticationCodeValid\n userId: ', userId);
 		console.log('token: ', twoFactorAuthenticationCode);
 
-		const user = await this.prisma.user.findUnique({
-			where: { id: userId },
-		});
+		try {
+			const user = await this.prisma.user.findUnique({
+				where: { id: userId },
+			});
 
-		console.log('secret: ', user.twoFactorAuthenticationSecret);
+			console.log('secret: ', user.twoFactorAuthenticationSecret);
 
-		const res = authenticator.verify({
-			token: twoFactorAuthenticationCode,
-			secret: user.twoFactorAuthenticationSecret,
-		});
-		// if (!res) this.turnOffTwoFactorAuthentication(userId);
-		if (this.istwofaEnabled) this.updateVerifyStatus(userId, true);
-		return res;
+			const res = authenticator.verify({
+				token: twoFactorAuthenticationCode,
+				secret: user.twoFactorAuthenticationSecret,
+			});
+			// if (!res) this.turnOffTwoFactorAuthentication(userId);
+			if (this.istwofaEnabled) this.updateVerifyStatus(userId, true);
+			return res;
+		} catch (error) {
+			throw new Error(error);
+		}
 	}
 
 	async loginWith2fa(user: User) {}

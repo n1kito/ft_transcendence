@@ -183,13 +183,14 @@ export class AuthController {
 			console.log('user id:', userId, 'code is:', isCodeValid);
 
 			if (!isCodeValid) {
-				return res.status(401).json({ message: 'Wrong authentication code' });
+				return res.status(401).json({ message: 'Invalid two-factor code' });
 			}
 
 			return res
 				.status(200)
 				.json({ message: 'two-factor authentication enabled!' });
 		} catch (error) {
+			console.log('\n--------- error ---------\n');
 			console.error(error);
 		}
 	}

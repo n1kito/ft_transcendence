@@ -49,7 +49,6 @@ const Profile: React.FC<ProfileProps> = ({
 	const [twoFactorAuthWindowisOpen, setTwoFactorAuthWindowIsOpen] =
 		useState(false);
 	const [TwoFactorAuthEnableMode, setTwoFactorAuthEnableMode] = useState(false);
-	let [qrcode, setQrcode] = useState('');
 
 	// TODO: fetch profile data should be a separate service so we don't rewrite the function in multiple components
 	const fetchProfileData = async () => {
@@ -85,29 +84,14 @@ const Profile: React.FC<ProfileProps> = ({
 		setSettingsPanelIsOpen(!settingsPanelIsOpen);
 	};
 
-	// enable two-factor authentication
+	// enable two-factor authentication and open a new window
+	// displaying generated qr code and inputfield where
+	// the code given by google authenticator must be entered
 	const enableTwoFactorAuthentication = async () => {
 		setTwoFactorAuthWindowIsOpen(true);
-
-		// try {
-		// 	const response = await fetch('api/login/2fa/turn-on', {
-		// 		method: 'POST',
-		// 		credentials: 'include',
-		// 		headers: {
-		// 			Authorization: `Bearer ${accessToken}`,
-		// 		},
-		// 	});
-		// 	if (response.ok) {
-		// 		const data = await response.text();
-		// 		setQrcode(data);
-		// 		setTwoFactorAuthWindowIsOpen(true);
-		// 		// console.log('2FA enabled: ', )
-		// 	}
-		// } catch (error) {
-		// 	console.error('2fa: ', error);
-		// }
 	};
 
+	// disable two-factor authentication
 	const disableTwoFactorAuthentication = async () => {
 		try {
 			const response = await fetch('api/login/2fa/turn-off', {
@@ -118,8 +102,6 @@ const Profile: React.FC<ProfileProps> = ({
 				},
 			});
 			if (response.ok) {
-				console.log('is oke');
-				setQrcode('');
 				setIsTwoFAEnabled(false);
 			}
 		} catch (error) {
@@ -129,8 +111,13 @@ const Profile: React.FC<ProfileProps> = ({
 
 	useEffect(() => {
 		setTwoFactorAuthWindowIsOpen(false);
-		setQrcode('');
 	}, [isTwoFAEnabled]);
+
+	useEffect(() => {
+		return () => {
+			if (twoFactorAuthWindowisOpen) alert();
+		};
+	});
 
 	return (
 		<Window
@@ -214,8 +201,8 @@ const Profile: React.FC<ProfileProps> = ({
 					</Button>
 					{twoFactorAuthWindowisOpen && (
 						<TwoFactorAuthentication
-							qrCode={qrcode}
-							setQrCode={setQrcode}
+							// qrCode={qrcode}
+							// setQrCode={setQrcode}
 							setTwoFactorAuthWindowisOpen={setTwoFactorAuthWindowIsOpen}
 						/>
 					)}
