@@ -92,13 +92,13 @@ const Prompt: React.FC<PromptProps> = ({
 						'Authorization': `Bearer ${accessToken}`,
 					},
 					// send the validation code to verify it
-					body: JSON.stringify({ code: validationCode }),
+					body: JSON.stringify({ twoFactorAuthenticationCode: validationCode }),
 				});
 				const data = await response.json();
 				if (response.ok) {
 					navigate('/desktop');
 				} else {
-					console.error('problemo from /api/login/2fa: ', data);
+					console.error('error with two-factor authentication: ', data);
 				}
 			} catch (error) {
 				console.error(error);

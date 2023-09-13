@@ -95,13 +95,13 @@ export class UserController {
 
 	@Put('me/update')
 	async updateMyUser(
-		@Body() updateUserDto: UpdateUserDto,
+		@Body() updateUser: UpdateUserDto,
 		@Req() request: CustomRequest,
 		@Res() response: Response,
 	) {
 		const userId = this.userService.authenticateUser(request);
 
-		await this.userService.updateUser(userId, updateUserDto);
+		await this.userService.updateUser(userId, updateUser);
 		response
 			.status(HttpStatus.OK)
 			.json({ message: 'User updated successfully' });

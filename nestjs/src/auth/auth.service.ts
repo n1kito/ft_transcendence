@@ -11,7 +11,7 @@ interface UserData {
 	email: string;
 	hash: string;
 	image: string;
-	twoFactorAuthenticationSecret: string;
+	// twoFactorAuthenticationSecret: string;
 }
 
 @Injectable()
@@ -116,7 +116,7 @@ export class AuthService {
 				email: responseData.email,
 				hash: 'temporary password',
 				image: responseData.image.versions.small,
-				twoFactorAuthenticationSecret: '',
+				// twoFactorAuthenticationSecret: '',
 			};
 
 			// TODO: add try/catch around this if we want to have more precise error logs ?
@@ -138,7 +138,7 @@ export class AuthService {
 				this.userId = newUser.id;
 			}
 			// if the user already exists, update their information (if they have not manually overwritten it themselves)
-			else await this.updateUserInfo(userInDb);
+			// else await this.updateUserInfo(userInDb);
 			// this.yourDataRepository.save(mappedData);
 			this.userId = userInDb.id;
 		} catch (error) {
@@ -148,7 +148,8 @@ export class AuthService {
 	}
 
 	// TODO: test that this works once the profile update process has been setup
-	// TODO: 12.09.2023 login and email should not be updated at login as user data are being kept in database
+	// TODO: 12.09.2023 jee: login and email should not be updated at login as userdata are being kept in database
+	// so whenever user updates its username or email, these data are lost with function updateUserInfo
 	// Updates user info on login depending on whether those values where manually updated by the user or not
 	async updateUserInfo(userInDb: User) {
 		await this.prisma.user.update({
@@ -157,7 +158,7 @@ export class AuthService {
 				// login: !userInDb.login_is_locked
 				// 	? this.userData.login
 				// 	: this.userData.login,
-				email: !userInDb.email_is_locked ? this.userData.email : undefined,
+				// email: !userInDb.email_is_locked ? this.userData.email : undefined,
 				image: !userInDb.image_is_locked ? this.userData.image : undefined,
 			},
 		});

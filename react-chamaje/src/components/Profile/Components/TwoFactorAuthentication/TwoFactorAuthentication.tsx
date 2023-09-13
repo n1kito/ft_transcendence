@@ -33,7 +33,7 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 					'Content-Type': 'application/json',
 					'Authorization': `Bearer ${accessToken}`,
 				},
-				body: JSON.stringify({ code: validationCode }),
+				body: JSON.stringify({ twoFactorAuthenticationCode: validationCode }),
 			});
 			if (response.ok) {
 				const responseData = await response.json();
@@ -48,6 +48,7 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 				// `ValidationCodeError` state to display
 				// error message
 				const responseData = await response.json();
+				console.log('response: ', responseData);
 				setValidationCodeError(responseData.message);
 			}
 		} catch (error) {
@@ -121,7 +122,6 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 		turnOn2fa();
 
 		return () => {
-			// alert();
 			// On unmount, if ever the process is not completed before
 			// verifyin user's 2FA autentication (meaning validation code
 			// is verified by google auth), turn off 2FA and close window
