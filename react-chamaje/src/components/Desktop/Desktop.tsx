@@ -10,6 +10,11 @@ import useAuth from '../../hooks/userAuth';
 import ProfileSettings from '../Profile/Components/ProfileSettings/ProfileSettings';
 import { AuthContext } from '../../contexts/AuthContext';
 import Profile from '../Profile/Profile';
+import { io } from 'socket.io-client';
+import WebSocketService from 'src/services/WebSocketService';
+import Button from './../Shared/Button/Button';
+import { unmountComponentAtNode, render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import PrivateMessages from '../PrivateMessages/PrivateMessages';
 import { AnimatePresence } from 'framer-motion';
 import ChatWindow from '../ChatWindow/ChatWindow';
@@ -19,11 +24,15 @@ import ChatIcon from './Icons/PC.svg';
 import FriendsIcon from './Icons/NOTEBOOK.svg';
 import GameIcon from './Icons/CD.svg';
 import Channels from '../Channels/Channels';
-import { io } from 'socket.io-client';
-import WebSocketService from 'src/services/WebSocketService';
-import Button from './../Shared/Button/Button';
-import { unmountComponentAtNode, render } from 'react-dom';
-import { createRoot } from 'react-dom/client';
+
+// Friend structure to keep track of them and their online/ingame status
+export interface IFriendStruct {
+	id: number;
+	login: string;
+	image: string;
+	onlineStatus: boolean;
+}
+let nbFriendsOnline = 0;
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -100,10 +109,96 @@ const Desktop = () => {
 		setUserData(null);
 	};
 
-	const friendsClickHandler = () => {
-		setFriendsWindowIsOpen(true);
-		navigate('/friends');
-	};
+	/* ********************************************************************* */
+	/* **************************** CHAT SOCKET **************************** */
+	/* ********************************************************************* */
+
+	/**
+	 * Friends connections checking
+	 */
+
+	const [friends, setFriends] = useState<IFriendStruct[]>([]);
+
+	useEffect(() => {
+		// TODO: instead of just storing them in a State, the user context should simply be updated so all other components that use it can be re-rendered (I think)
+		// TODO: if the user is not auth the map method cannot iterate since the friends variable is not an array. Should not be an issue since only logged in users can access the desktop but it might be better to think ahead for this
+		fetch('/api/user/friends', {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				setFriends(data);
+			});
+	}, []);
+
+	/**
+	 * Listens for a 'userLoggedIn' message and compares its id with the id
+	 * of its friends to know which ones are connected
+	 * Emits back a response so the friend that just connected knows the
+	 * current user is connected too
+	 */
+	useEffect(() => {
+		const handleLoggedIn = (data: number) => {
+			setFriends((prevFriends) =>
+				prevFriends.map((friend) => {
+					if (
+						friend.id === data &&
+						(friend.onlineStatus === false || friend.onlineStatus === undefined)
+					) {
+						nbFriendsOnline++;
+						return { ...friend, onlineStatus: true };
+					} else {
+						return friend;
+					}
+				}),
+			);
+		};
+		userData?.chatSocket?.onClientLogIn(handleLoggedIn);
+	}, [userData]);
+
+	/**
+	 * listens for a 'ClientLogInResponse' to check on connection which friends
+	 * were connected
+	 */
+	useEffect(() => {
+		const handleLoggedInResponse = (data: number) => {
+			setFriends((prevFriends) =>
+				prevFriends.map((friend) => {
+					if (
+						friend.id === data &&
+						(friend.onlineStatus === false || friend.onlineStatus === undefined)
+					) {
+						nbFriendsOnline++;
+						return { ...friend, onlineStatus: true };
+					} else {
+						return friend;
+					}
+				}),
+			);
+		};
+		userData?.chatSocket?.onClientLogInResponse(handleLoggedInResponse);
+	}, [userData]);
+
+	// listen for a `ClientLogOut`
+	useEffect(() => {
+		const handleLoggedOut = (data: number) => {
+			setFriends((prevFriends) =>
+				prevFriends.map((friend) => {
+					if (friend.id === data && friend.onlineStatus === true) {
+						nbFriendsOnline--;
+						return { ...friend, onlineStatus: false };
+					} else {
+						return friend;
+					}
+				}),
+			);
+		};
+		userData?.chatSocket?.onLogOut(handleLoggedOut);
+	}, [userData]);
 
 	return (
 		<div className="desktopWrapper" ref={windowDragConstraintRef}>
@@ -111,7 +206,7 @@ const Desktop = () => {
 				name="Game"
 				iconSrc={GameIcon}
 				id={++iconId}
-				onDoubleClick={friendsClickHandler}
+				onDoubleClick={() => setFriendsWindowIsOpen(true)}
 			/>
 			<DesktopIcon
 				name="Profile"
@@ -146,6 +241,14 @@ const Desktop = () => {
 						windowDragConstraintRef={windowDragConstraintRef}
 					/>
 				)}
+				{openFriendsWindow && (
+					<FriendsList
+						onCloseClick={() => setFriendsWindowIsOpen(false)}
+						windowDragConstraintRef={windowDragConstraintRef}
+						friends={friends}
+						nbFriendsOnline={nbFriendsOnline}
+					/>
+				)}
 				{chatWindowIsOpen && (
 					<PrivateMessages
 						key="chat-window"
@@ -160,14 +263,7 @@ const Desktop = () => {
 						windowDragConstraintRef={windowDragConstraintRef}
 					/>
 				)}
-				<FriendsList />
 			</AnimatePresence>
-			{/* <ChatWindow login="Jee" /> */}
-			{/* <Profile
-				login={userData?.login}
-				onCloseClick={() => setProfileWindowIsOpen(false)}
-				windowDragConstraintRef={windowDragConstraintRef}
-			/> */}
 		</div>
 	);
 };

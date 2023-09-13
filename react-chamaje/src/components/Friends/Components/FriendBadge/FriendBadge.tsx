@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useContext, useState } from 'react';
+import React, { ReactNode, useContext, useEffect, useState } from 'react';
 import './FriendBadge.css';
 import m3ganAvatar from './images/m3gan.jpg';
 import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
@@ -28,13 +28,13 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 	dashedBorder = isEmptyBadge || false,
 	onClick,
 }) => {
+	const userContext = useContext(UserContext);
+	const [friends, setFriends] = useState(userContext.userData?.friends); // TODO: this should not be done this way, it should be linked to the user's actual status
 	let displayTitle = badgeTitle;
 	if (isChannelBadge && badgeTitle.length > 20) {
 		displayTitle = badgeTitle.slice(0, 20) + '...';
 	}
 
-	const userContext = useContext(UserContext);
-	const [friends, setFriends] = useState(userContext.userData?.friends); // TODO: this should not be done this way, it should be linked to the user's actual status
 	const [friendIsPlaying, setFriendIsPlaying] = useState(false);
 
 	return (

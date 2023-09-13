@@ -100,6 +100,7 @@ export class UserController {
 			id: currentFriend.id,
 			login: currentFriend.login,
 			image: currentFriend.image,
+			onlineStatus: currentFriend.onlineStatus,
 		}));
 		return friends;
 	}
