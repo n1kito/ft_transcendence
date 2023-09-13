@@ -261,25 +261,46 @@ export class UserController {
 			};
 	}
 
+	// Get login from userId
+	// TODO: DTO for userID ?
 	@Get('/byId/:userId')
 	async getLoginFromUserId(
 		@Req() request: CustomRequest,
 		@Param('userId') userId: number,
 	) {
 		// be sure the userId is a number
-		let userIdToNb: number = +userId
+		let userIdToNb: number = +userId;
 		const response = await this.prisma.user.findUnique({
 			where: { id: userIdToNb },
 			select: {
 				login: true,
 			},
 		});
-		if (!response)
-			return { message: 'User not found' };
+		if (!response) return { message: 'User not found' };
 		const ret = { login: response.login };
-		console.log('ret', ret)
+		console.log('ret', ret);
 		return ret;
 	}
+
+	// Get userId from login
+	// TODO: DTO for login ?
+	@Get('/byLogin/:login')
+	async getUserIdFromLogin(
+		@Req() request: CustomRequest,
+		@Param('login') login: string,
+	) {
+		// be sure the userId is a number
+		const response = await this.prisma.user.findUnique({
+			where: { login: login },
+			select: {
+				id: true,
+			},
+		});
+		if (!response) return { message: 'User not found' };
+		const ret = { id: response.id };
+		return ret;
+	}
+	
 
 	// Chat logic
 	// Private messages

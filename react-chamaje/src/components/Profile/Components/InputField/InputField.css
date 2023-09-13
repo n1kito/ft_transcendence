@@ -36,3 +36,16 @@
 	z-index: 100;
 	position: absolute;
 }
+
+.input.success {
+	border: 20px solid #04af5c;
+	box-shadow: none;
+}
+
+.successMessage {
+	color: #04af5c;
+	font-size: 0.7rem;
+	position: relatif;
+	z-index: 100;
+	position: absolute;
+}

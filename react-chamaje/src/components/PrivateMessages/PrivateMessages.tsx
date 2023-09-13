@@ -7,6 +7,11 @@ import { IFriendStruct } from '../Desktop/Desktop';
 import ChatWindow, { IMessage } from '../ChatWindow/ChatWindow';
 import useAuth from 'src/hooks/userAuth';
 import { UserContext } from 'src/contexts/UserContext';
+import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/SettingsWindow';
+import Title from '../Profile/Components/Title/Title';
+import InputField from '../Profile/Components/InputField/InputField';
+import Button from '../Shared/Button/Button';
+import { error } from 'console';
 
 interface IPrivateMessagesProps {
 	onCloseClick: () => void;
@@ -31,7 +36,11 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	const [chatWindowUserId, setChatWindowUserId] = useState(0);
 	const [chatWindowId, setChatWindowId] = useState(0);
 	const [chatsJoined, setChatsJoined] = useState<IChatStruct[]>([]);
+	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [messages, setMessages] = useState<IMessage[]>([]);
+	const [searchedLogin, setSearchedLogin] = useState('');
+	const [searchUserError, setSearchUserError] = useState('');
+	const [searchUserSuccess, setSearchUserSuccess] = useState('');
 	const { userData, setUserData } = useContext(UserContext);
 	const { accessToken } = useAuth();
 
@@ -120,6 +129,17 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 		});
 	}
 
+	//findUserWithLogin
+	async function findUserByLogin(login: string) {
+		return fetch('api/user/byLogin/' + login, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+		});
+	}
+
 	/* ********************************************************************* */
 	/* ******************************* DEBUG ******************************* */
 	/* ********************************************************************* */
@@ -178,6 +198,33 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 		}
 	};
 
+	// find the user by login and create the chat
+	const createNewChatFromLogin = () => {
+		console.log('searchedLogin', searchedLogin);
+		if (searchedLogin) {
+			findUserByLogin(searchedLogin)
+				.then((response) => response.json())
+				.then((data) => {
+					if (data.message) {
+						throw new Error('User not found');
+					}
+					console.log('response data', data);
+					createChat(data.id);
+					setSearchUserSuccess('Chat created successfully!');
+				})
+				.catch((e: string) => {
+					console.error(e);
+					setSearchUserError('User not found');
+				});
+		}
+	};
+
+	const handleLoginChange = (login: string) => {
+		setSearchedLogin(login);
+		setSearchUserError('');
+		setSearchUserSuccess('');
+	};
+
 	/* ********************************************************************* */
 	/* ******************************* RETURN ****************************** */
 	/* ********************************************************************* */
@@ -189,6 +236,14 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 				onCloseClick={onCloseClick}
 				key="private-messages-window"
 				windowDragConstraintRef={windowDragConstraintRef}
+				links={[
+					{
+						name: 'New Chat',
+						onClick: () => {
+							setSettingsPanelIsOpen(true);
+						},
+					},
+				]}
 			>
 				<PrivateMessagesList>
 					{chatsList.length > 0 ? (
@@ -209,6 +264,25 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 						<FriendBadge isEmptyBadge={true} isChannelBadge={false} />
 					)}
 				</PrivateMessagesList>
+				{settingsPanelIsOpen && (
+					<SettingsWindow settingsWindowVisible={setSettingsPanelIsOpen}>
+						<Title highlightColor="yellow">User name</Title>
+						<div className="settings-form">
+							<InputField
+								onChange={handleLoginChange}
+								error={searchUserError}
+								success={searchUserSuccess}
+							></InputField>
+							<Button
+								onClick={() => {
+									createNewChatFromLogin();
+								}}
+							>
+								create chat
+							</Button>
+						</div>
+					</SettingsWindow>
+				)}
 			</Window>
 			{chatWindowIsOpen && (
 				<ChatWindow
