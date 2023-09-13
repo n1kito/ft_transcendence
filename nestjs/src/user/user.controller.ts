@@ -19,6 +19,7 @@ import { Request, response, Response } from 'express';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { validate } from 'class-validator';
+import { twoFactorAuthenticationCodeDto } from 'src/auth/dto/two-factor-auth-code.dto';
 export interface CustomRequest extends Request {
 	userId: number;
 }
@@ -29,69 +30,6 @@ export class UserController {
 		private readonly userService: UserService,
 		private readonly prisma: PrismaService,
 	) {}
-
-	@Get('me')
-	async getMyinfo(@Req() request: CustomRequest) {
-		const userId = this.userService.authenticateUser(request);
-		// Fetch the user information from the database using the userId
-		const user = await this.prisma.user.findUnique({
-			where: { id: request.userId },
-			include: { gamesPlayed: true, target: true, friends: true }, // Include the gamesPlayed relation
-		});
-
-		// Handle case when user is not found
-		if (!user) {
-			return { message: 'User not found' };
-		}
-
-		// Get user games count
-		const gamesCount = user.gamesPlayed.length;
-		// await this.prisma.game.count({
-		// 	where: {
-		// 		OR: [{ player1Id: user.id }, { player2Id: user.id }],
-		// 	},
-		// });
-
-		// Bestie logic
-		const bestieUser = await this.userService.findUserBestie(user.id);
-
-		// Target logic
-		const targetLogin = user?.target?.login;
-		const targetImage = user?.target?.image;
-		// Rival logic
-		const { rivalLogin, rivalImage } = await this.userService.findUserRival(
-			user.id,
-		);
-
-		// get user's rank
-		const usersWithHigherKillCountThanOurUser = await this.prisma.user.count({
-			where: {
-				killCount: {
-					gt: await this.prisma.user
-						.findUnique({
-							where: { id: user.id },
-							select: { killCount: true },
-						})
-						.then((user) => user?.killCount || 0),
-				},
-			},
-		});
-		const userRank = usersWithHigherKillCountThanOurUser + 1;
-		// Return the user information
-		return {
-			...user,
-			targetLogin,
-			targetImage,
-			gamesCount,
-			bestieLogin: bestieUser.bestieLogin,
-			bestieImage: bestieUser.bestieImage,
-			rivalLogin,
-			rivalImage,
-			killCount: user.killCount,
-			winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
-			rank: userRank,
-		};
-	}
 
 	@Put('me/update')
 	async updateMyUser(
@@ -175,6 +113,17 @@ export class UserController {
 		@Param('login') login: string,
 		@Req() request: CustomRequest,
 	) {
+		// When mounting desktop, user/:login (old user/me) is fetched to set userContext.
+		// So when fetching for the first time login is unknown.
+		// Therefore login from database must be retrieved to updated `login`
+		if (login === 'me') {
+			const user = await this.prisma.user.findUnique({
+				where: { id: request.userId },
+			});
+			// update login by user's login
+			login = user.login;
+		}
+
 		const user = await this.prisma.user.findUnique({
 			where: { login },
 			include: { gamesPlayed: true },
@@ -223,12 +172,14 @@ export class UserController {
 		} catch (error) {
 			console.log('Error retrieving match history: ', error);
 		}
+
 		// if the login of the user who sent the request is the same as the login of the user they want the info of,
 		// we return more information
-		// TODO: remove 2fa secret from user
 		if (userRequestingLogin && userRequestingLogin === login) {
+			// return user data except its 2fa secret
+			const { twoFactorAuthenticationSecret, ...updatedUser } = user;
 			return {
-				...user,
+				...updatedUser,
 				gamesCount: gamesCount,
 				killCount: user.killCount,
 				winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,

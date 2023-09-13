@@ -52,7 +52,7 @@ const Desktop = () => {
 		const fetchUserData = async () => {
 			// Feth the user data from the server
 			try {
-				const response = await fetch('/api/user/me', {
+				const response = await fetch(`/api/user/${'me'}`, {
 					method: 'GET',
 					credentials: 'include',
 					headers: {
@@ -160,6 +160,7 @@ const Desktop = () => {
 						windowDragConstraintRef={windowDragConstraintRef}
 					/>
 				)}
+				<FriendsList />
 			</AnimatePresence>
 			{/* <ChatWindow login="Jee" /> */}
 			{/* <Profile
