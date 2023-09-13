@@ -1,4 +1,11 @@
-import React, { Dispatch, SetStateAction, useContext, useEffect, useRef, useState } from 'react';
+import React, {
+	Dispatch,
+	SetStateAction,
+	useContext,
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
 import './ChatWindow.css';
 import Window from '../Window/Window';
 import Button from '../Shared/Button/Button';
@@ -10,6 +17,7 @@ import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/Settings
 import Title from '../Profile/Components/Title/Title';
 import InputField from '../Profile/Components/InputField/InputField';
 import useAuth from 'src/hooks/userAuth';
+import DOMPurify from 'dompurify';
 
 export interface IChatWindowProps {
 	onCloseClick: () => void;
@@ -17,7 +25,7 @@ export interface IChatWindowProps {
 	userId: number;
 	chatId: number;
 	messages: IMessage[];
-	setMessages: Dispatch<SetStateAction<IMessage[]>>,
+	setMessages: Dispatch<SetStateAction<IMessage[]>>;
 }
 
 export interface IMessage {
@@ -49,7 +57,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	windowDragConstraintRef,
 	chatId,
 	messages,
-	setMessages
+	setMessages,
 }) => {
 	/* ********************************************************************* */
 	/* ******************************* FRONT ******************************* */
@@ -78,13 +86,12 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 			if (!textareaIsEmpty) sendMessage();
 		}
 	};
+
+	// get the user to the last message
 	useEffect(() => {
 		const container = chatContentRef.current;
-		if (container) {
-			// Make the new messages show up at the bottom
-			container.scrollTop = container.scrollHeight;
-		}
-	}, []); // TODO: this should track the state of the messages passed to the component, so when new messages are added they appear at the bottom of the div
+		container?.scrollIntoView({ behavior: 'smooth' });
+	}, [messages]); 
 
 	const openSettingsPanel = () => {
 		setSettingsPanelIsOpen(!settingsPanelIsOpen);
@@ -186,9 +193,19 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 			useBeigeBackground={true}
 		>
 			<div className="chat-wrapper">
-				<div className="chat-content" ref={chatContentRef}>
-					{messages.map((currentMessage) => {
+				<div className="chat-content">
+					{messages.map((currentMessage, index) => {
 						const date: Date = new Date(currentMessage.sentAt);
+						const messageWithNewlines = currentMessage.content.replace(
+							/\n/g,
+							'<br />',
+						);
+						// keep the message displayed safe from XSS attacks
+						const sanitizedData = () => ({
+							__html: DOMPurify.sanitize(messageWithNewlines),
+						});
+						const isLast = index === messages.length - 1;
+
 						return (
 							<ChatBubble
 								wasSent={
@@ -199,8 +216,15 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 								sender={currentMessage.login}
 								time={date.toLocaleString('en-US', dateFormatOptions)}
 								senderAvatar={currentMessage.avatar}
+								isLast={isLast}
+								// messageRef={chatContentRef}
 							>
-								{currentMessage.content}
+								{
+									<div
+										dangerouslySetInnerHTML={sanitizedData()}
+										ref={isLast ? chatContentRef : undefined}
+									/>
+								}
 							</ChatBubble>
 						);
 					})}

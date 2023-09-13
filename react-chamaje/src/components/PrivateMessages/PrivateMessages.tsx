@@ -119,12 +119,11 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 			}),
 		});
 	}
-	
-	
+
 	/* ********************************************************************* */
 	/* ******************************* DEBUG ******************************* */
 	/* ********************************************************************* */
-	
+
 	useEffect(() => {
 		console.log(' PrivateMessage - messages', messages);
 	}, [messages]);
@@ -135,8 +134,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	useEffect(() => {
 		console.log(' PrivateMessage - chatWindowId', chatWindowId);
 	}, [chatWindowId]);
-	
-		
+
 	/* ********************************************************************* */
 	/* ******************************* LOGIC ******************************* */
 	/* ********************************************************************* */
@@ -145,7 +143,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	useEffect(() => {
 		fetchChatsJoined();
 	}, []);
-	
+
 	// on click on an avatar, check if a PM conversation exists.
 	// If it does, open the window, set the userId and chatId, and fetch
 	// the messages.

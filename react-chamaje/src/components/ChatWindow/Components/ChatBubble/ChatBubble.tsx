@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, RefObject, useState } from 'react';
 import './ChatBubble.css';
 import Tooltip from '../../../Shared/Tooltip/Tooltip';
 import Button from '../../../Shared/Button/Button';
@@ -9,6 +9,8 @@ interface IChatBubbleProps {
 	senderAvatar?: string;
 	time?: string;
 	children: ReactNode;
+	isLast?: boolean;
+	// messageRef?: RefObject<HTMLDivElement>;
 }
 
 const ChatBubble: React.FC<IChatBubbleProps> = ({
@@ -17,6 +19,8 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 	time = '',
 	senderAvatar = '',
 	children,
+	isLast = false,
+	// messageRef,
 }) => {
 	const [tooltipVisible, setTooltipVisible] = useState(false);
 
@@ -24,9 +28,13 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 		window.alert(`This should open ${sender}'s profile`);
 	};
 
+	// if (isLast) {
+	// 	console.warn('isLast was true, messageRef=', messageRef);
+	// }
 	return (
 		<div
 			className={`chat-bubble-wrapper ${wasSent ? 'bubble-align-right' : ''}`}
+			// ref={messageRef}
 		>
 			{!wasSent && (
 				<div
