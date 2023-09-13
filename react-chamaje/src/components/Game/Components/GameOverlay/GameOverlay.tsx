@@ -10,7 +10,6 @@ type ReactBooleanSeter = React.Dispatch<React.SetStateAction<boolean>>;
 interface IGameOverlayProps {
 	connectedToServer: boolean;
 	connectionStatus: string;
-	opponentStatus: string;
 	userWonGame: boolean;
 	userLostGame: boolean;
 	player1Ready: boolean;

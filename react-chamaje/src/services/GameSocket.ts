@@ -41,7 +41,7 @@ export class GameSocket {
 		connectedToServerSeter: ReactBooleanSeter,
 		setConnectionStatus: ReactStringSeter,
 		setOpponentInfo: React.Dispatch<
-		React.SetStateAction<{ login: string; image: string } | undefined>
+			React.SetStateAction<{ login: string; image: string } | undefined>
 		>,
 		setOpponentIsReconnecting: ReactBooleanSeter,
 	) {

@@ -12,6 +12,7 @@ import useAuth from '../../hooks/userAuth';
 import { Socket, io } from 'socket.io-client';
 import { GameSocket } from '../../services/GameSocket';
 import GameOverlay from './Components/GameOverlay/GameOverlay';
+import { GameContext } from '../../contexts/GameContext';
 
 interface IGameRoomProps {
 	roomId: number; // TODO: this should not be given by the props, it should instead be found by the game component
@@ -42,6 +43,9 @@ const Game: React.FC<IGameProps> = ({
 	*/
 
 	// const [socket, setSocket] = useState<GameSocket | null>(null);
+	// Import the game context, so it can be used everywhere
+	const { gameData, updateGameData, resetGameData } = useContext(GameContext);
+
 	const [playerInRoom, setPlayerInRoom] = useState(false);
 	const [settingsWindowVisible, setSettingWindowVisible] = useState(true);
 	const [gameIsRunning, setGameIsRunning] = useState(false);
@@ -393,31 +397,32 @@ const Game: React.FC<IGameProps> = ({
 			windowDragConstraintRef={windowDragConstraintRef}
 			resizable={true}
 		>
-			{/* TODO: add the player information above the canvas game */}
-			<div className={`game-wrapper`}>
-				{!gameCanStart && (
-					<GameOverlay
-						connectedToServer={connectedToServer}
-						connectionStatus={connectionStatus}
-						userWonGame={userWonGame}
-						userLostGame={userLostGame}
-						playerInRoom={playerInRoom}
-						player1Ready={player1Ready}
-						player2Ready={player2Ready}
-						setPlayer1Ready={setPlayer1Ready}
-						opponentInfo={opponentInfo}
-						opponentIsReconnecting={opponentIsReconnecting}
-					/>
-				)}
-				<canvas
-					className="game-canvas"
-					ref={canvasRef}
-					width={700}
-					height={500}
-				>
-					This browser doesnt support canvas technology, try another or update.
-				</canvas>
-			</div>
+				{/* TODO: add the player information above the canvas game */}
+				<div className={`game-wrapper`}>
+					{!gameCanStart && (
+						<GameOverlay
+							connectedToServer={connectedToServer}
+							connectionStatus={connectionStatus}
+							userWonGame={userWonGame}
+							userLostGame={userLostGame}
+							playerInRoom={playerInRoom}
+							player1Ready={player1Ready}
+							player2Ready={player2Ready}
+							setPlayer1Ready={setPlayer1Ready}
+							opponentInfo={opponentInfo}
+							opponentIsReconnecting={opponentIsReconnecting}
+						/>
+					)}
+					<canvas
+						className="game-canvas"
+						ref={canvasRef}
+						width={700}
+						height={500}
+					>
+						This browser doesnt support canvas technology, try another or
+						update.
+					</canvas>
+				</div>
 		</Window>
 	);
 };

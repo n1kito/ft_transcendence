@@ -21,6 +21,7 @@ import FriendsIcon from './Icons/NOTEBOOK.svg';
 import GameIcon from './Icons/CD.svg';
 import ChannelsIcon from './Icons/EARTH.svg';
 import Game from '../Game/Game';
+import { GameProvider } from '../../contexts/GameContext';
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
@@ -125,11 +126,13 @@ const Desktop = () => {
 					/>
 				)}
 				{gameWindowIsOpen && (
-					<Game
-						onCloseClick={() => setGameWindowIsOpen(false)}
-						windowDragConstraintRef={windowDragConstraintRef}
-						// opponentId={userData?.id === 7 ? 8 : 7}
-					/>
+					<GameProvider>
+						<Game
+							onCloseClick={() => setGameWindowIsOpen(false)}
+							windowDragConstraintRef={windowDragConstraintRef}
+							// opponentId={userData?.id === 7 ? 8 : 7}
+						/>
+					</GameProvider>
 				)}
 			</AnimatePresence>
 		</div>
