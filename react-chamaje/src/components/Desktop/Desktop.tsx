@@ -13,12 +13,13 @@ import Profile from '../Profile/Profile';
 import PrivateMessages from '../PrivateMessages/PrivateMessages';
 import { AnimatePresence } from 'framer-motion';
 import ChatWindow from '../ChatWindow/ChatWindow';
+import Channels from '../Channels/Channels';
 
 import ProfileIcon from './Icons/CARD.svg';
 import ChatIcon from './Icons/PC.svg';
 import FriendsIcon from './Icons/NOTEBOOK.svg';
 import GameIcon from './Icons/CD.svg';
-import Channels from '../Channels/Channels';
+import ChannelsIcon from './Icons/EARTH.svg';
 import Game from '../Game/Game';
 
 const Desktop = () => {
@@ -93,7 +94,7 @@ const Desktop = () => {
 			/>
 			<DesktopIcon
 				name="Channels"
-				iconSrc={ChatIcon}
+				iconSrc={ChannelsIcon}
 				id={++iconId}
 				onDoubleClick={() => setChannelsWindowIsOpen(true)}
 			/>
@@ -127,7 +128,7 @@ const Desktop = () => {
 					<Game
 						onCloseClick={() => setGameWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
-						opponentId={4}
+						// opponentId={userData?.id === 7 ? 8 : 7}
 					/>
 				)}
 			</AnimatePresence>

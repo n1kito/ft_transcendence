@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import FriendBadge from '../../../Friends/Components/FriendBadge/FriendBadge';
 import { UserContext } from '../../../../contexts/UserContext';
 import Tooltip from '../../../Shared/Tooltip/Tooltip';
@@ -10,21 +10,28 @@ type ReactBooleanSeter = React.Dispatch<React.SetStateAction<boolean>>;
 interface IGameOverlayProps {
 	connectedToServer: boolean;
 	connectionStatus: string;
+	opponentStatus: string;
 	userWonGame: boolean;
 	userLostGame: boolean;
 	player1Ready: boolean;
 	player2Ready: boolean;
+	playerInRoom: boolean;
 	setPlayer1Ready: ReactBooleanSeter;
+	opponentInfo?: { login: string; image: string };
+	opponentIsReconnecting: boolean;
 }
 
 const GameOverlay: React.FC<IGameOverlayProps> = ({
 	connectedToServer,
 	connectionStatus,
+	opponentIsReconnecting,
 	userWonGame,
 	userLostGame,
 	player1Ready,
 	player2Ready,
+	playerInRoom,
 	setPlayer1Ready,
+	opponentInfo,
 }) => {
 	const { userData } = useContext(UserContext);
 	const [tooltipVisible, setTooltipVisible] = useState(false);
@@ -48,8 +55,15 @@ const GameOverlay: React.FC<IGameOverlayProps> = ({
 								isActive={player1Ready}
 							/>
 							<span>VS</span>
-							<FriendBadge isClickable={true} isActive={player2Ready} />
+							<FriendBadge
+								badgeTitle={opponentInfo?.login || 'Locating...'}
+								badgeImageUrl={opponentInfo?.image}
+								isClickable={true}
+								isActive={player2Ready}
+								onlineIndicator={false}
+							/>
 						</div>
+						<p>Your opponent was disconnected</p>
 					</div>
 					<div
 						className="game-play-button-wrapper"
@@ -68,7 +82,7 @@ const GameOverlay: React.FC<IGameOverlayProps> = ({
 						</Tooltip>
 						<Button
 							onClick={() => setPlayer1Ready(true)}
-							disabled={player1Ready && !player2Ready}
+							disabled={!playerInRoom || (player1Ready && !player2Ready)}
 						>
 							play
 						</Button>

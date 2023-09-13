@@ -42,7 +42,7 @@ const Game: React.FC<IGameProps> = ({
 	*/
 
 	// const [socket, setSocket] = useState<GameSocket | null>(null);
-	const [roomId, setRoomId] = useState<number | undefined>(undefined);
+	const [playerInRoom, setPlayerInRoom] = useState(false);
 	const [settingsWindowVisible, setSettingWindowVisible] = useState(true);
 	const [gameIsRunning, setGameIsRunning] = useState(false);
 	const [gameHasTwoPlayers, setGameHasTwoPlayers] = useState(false);
@@ -52,18 +52,24 @@ const Game: React.FC<IGameProps> = ({
 	const [player2Ready, setPlayer2Ready] = useState(false);
 	const [gameCanStart, setGameCanStart] = useState(false);
 	const [userWonGame, setUserWonGame] = useState(false);
-	const [userLostGame, setUserLostGame] = useState(true);
+	const [userLostGame, setUserLostGame] = useState(false);
+	const [opponentInfo, setOpponentInfo] = useState<
+		{ login: string; image: string } | undefined
+	>(undefined);
+	const [opponentIsReconnecting, setOpponentIsReconnecting] = useState(false);
 
 	// Instantiate a websocket connection that will be kept through renders
 	const gameSocket = useMemo(() => {
 		return new GameSocket(
 			userData?.id || 123,
 			accessToken,
-			setPlayer1Ready,
+			setPlayerInRoom,
 			setPlayer2Ready,
 			setGameCanStart,
 			setConnectedToServer,
 			setConnectionStatus,
+			setOpponentInfo,
+			setOpponentIsReconnecting,
 		);
 	}, []);
 
@@ -296,6 +302,7 @@ const Game: React.FC<IGameProps> = ({
 		// setupSocket();
 
 		return () => {
+			gameSocket.log('Left the game !');
 			// Cleanup logic: disconnect the socket
 			if (gameSocket) gameSocket.disconnect();
 		};
@@ -350,10 +357,28 @@ const Game: React.FC<IGameProps> = ({
 		if (player1Ready && player2Ready) setGameCanStart(true);
 	}, [player1Ready, player2Ready]);
 
-	// Update the value of UserLostGame based on updates to userWonGame
+	// TODO: this is an issue on load because on gameOverlay the
+	// message that you won or lost depends on either of these two states being true
+	// // Update the value of UserLostGame based on updates to userWonGame
+	// useEffect(() => {
+	// 	setUserLostGame(!userWonGame);
+	// }, [userLostGame]);
+
 	useEffect(() => {
-		setUserLostGame(!userWonGame);
-	}, [userWonGame]);
+		console.log('Opponent info: ', opponentInfo);
+	}, [opponentInfo]);
+
+	useEffect(() => {
+		if (player1Ready) gameSocket.notifyPlayer1Ready();
+	}, [player1Ready]);
+
+	useEffect(() => {
+		setGameCanStart(player1Ready && player2Ready);
+	}, [player1Ready, player2Ready]);
+
+	useEffect(() => {
+		console.log('Game can start: ', gameCanStart);
+	}, [gameCanStart]);
 
 	/*
 	░█░█░█▀▀░█▀▄░█▀▀░█▀█░█▀▀░█░█░█▀▀░▀█▀░░░█░░░█▀█░█▀▀░▀█▀░█▀▀
@@ -376,9 +401,12 @@ const Game: React.FC<IGameProps> = ({
 						connectionStatus={connectionStatus}
 						userWonGame={userWonGame}
 						userLostGame={userLostGame}
+						playerInRoom={playerInRoom}
 						player1Ready={player1Ready}
 						player2Ready={player2Ready}
 						setPlayer1Ready={setPlayer1Ready}
+						opponentInfo={opponentInfo}
+						opponentIsReconnecting={opponentIsReconnecting}
 					/>
 				)}
 				<canvas

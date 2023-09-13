@@ -11,6 +11,21 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+enum PlayerGameStatus {
+    Waiting // Waiting for the game to start
+    Ready // Player is ready to start the game (they presse the play button)
+    Playing // Player is currently in a game
+    Finished // Player finished the game
+}
+
+
+enum GameRoomStatus {
+    Waiting // Waiting for players to join
+    Full // Two players have joined the game
+    InProgress // The game has started
+    Finished // The game has ended
+}
+
 model User {
     id        Int      @id @unique @default(autoincrement())
     ft_id     Int?     @unique
@@ -43,7 +58,10 @@ model User {
     targetId               Int?
     targetedBy             User[]  @relation("Target")
     targetDiscoveredByUser Boolean @default(false)
-}
+}	
+
+// TODO: give a status to the actual game ? Like WAITING / FINISHED
+// TODO: should all games have an obligatory room ? Because we might end up with a lot of rooms after the matches are done.
 
 model Game {
     id         Int           @id @default(autoincrement())
@@ -51,13 +69,6 @@ model Game {
     players    gameSession[]
     gameRoom   gameRoom      @relation(fields: [gameRoomId], references: [id])
     gameRoomId Int           @unique
-}
-
-enum PlayerGameStatus {
-    Waiting // Waiting for the game to start
-    Ready // Player is ready to start the game (they presse the play button)
-    Playing // Player is currently in a game
-    Finished // Player finished the game
 }
 
 model gameSession {
@@ -69,13 +80,6 @@ model gameSession {
     score        Int              @default(0)
     isWinner     Boolean          @default(false)
     playerStatus PlayerGameStatus @default(Waiting)
-}
-
-enum GameRoomStatus {
-    Waiting // Waiting for players to join
-    Full // Two players have joined the game
-    InProgress // The game has started
-    Finished // The game has ended
 }
 
 model gameRoom {
