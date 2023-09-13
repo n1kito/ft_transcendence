@@ -54,7 +54,6 @@ const Desktop = () => {
 		isTwoFAEnabled,
 	} = useAuth();
 
-	let [qrcode, setQrcode] = useState('');
 	const windowDragConstraintRef = useRef(null);
 
 	useEffect(() => {
@@ -89,7 +88,6 @@ const Desktop = () => {
 
 		if (isAuthentificated) fetchUserData();
 		return () => {
-			// alert();
 			userData?.chatSocket?.endConnection();
 			// when unmounting desktop component, reset userData
 			setUserData(null);
@@ -105,7 +103,6 @@ const Desktop = () => {
 
 	const handleTabClosing = () => {
 		userData?.chatSocket?.endConnection();
-		// logOut();
 		setUserData(null);
 	};
 

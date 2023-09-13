@@ -19,7 +19,7 @@ export class TokenController {
 				isTwoFactorAuthVerified: data.isTwoFactorAuthVerified,
 			});
 		} catch (error) {
-			throw new Error('Could not refresh token: ' + error);
+			res.status(500).json({ error: 'Could not refresh token' });
 		}
 	}
 }

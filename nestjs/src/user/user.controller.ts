@@ -20,6 +20,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { validate } from 'class-validator';
 import { twoFactorAuthenticationCodeDto } from 'src/auth/dto/two-factor-auth-code.dto';
+
 export interface CustomRequest extends Request {
 	userId: number;
 }
@@ -71,7 +72,6 @@ export class UserController {
 	async deleteSelf(@Req() request: CustomRequest, @Res() response: Response) {
 		try {
 			const userId = this.userService.authenticateUser(request);
-			// console.log('🛟 me/delete\n userId:', userId);
 			await this.userService.deleteUser(userId);
 			response
 				.status(200)

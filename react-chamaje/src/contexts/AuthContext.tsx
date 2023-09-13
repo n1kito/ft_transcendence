@@ -118,7 +118,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 					setIsTwoFaVerified(data.isTwoFactorAuthVerified);
 				}
 			} else {
-				console.log('Refresh response is NOT ok');
+				console.error('Refresh response is NOT ok');
 			}
 		} catch (error) {
 			console.log('Refresh token failed, logging out');
