@@ -61,8 +61,6 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 						// Log the user out if token refresh fails
 						logOut();
 					}
-					// Log the user out in case of other authentication errors
-					logOut();
 				}
 			} catch (error) {
 				// Log the user out if fetching authentication status fails
@@ -74,25 +72,17 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 
 	// Log the user out by removing cookies and updating state
 	const logOut = async () => {
-		// // disable two-factor login verify status
-		if (isTwoFAEnabled) {
-			try {
-				const response = await fetch('/api/login/2fa/log-out', {
-					method: 'PUT',
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-					},
-					credentials: 'include',
-				});
-				const data = await response.json();
-				if (response.ok) {
-					console.log(data.message);
-				} else console.log('problemo with 2fa logOut');
-			} catch (error) {
-				console.error(error);
-			}
+		try {
+			const response = await fetch('/api/login/logout', {
+				method: 'PUT',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+				credentials: 'include',
+			});
+		} catch (error) {
+			console.error(error);
 		}
-		Cookies.remove('refreshToken');
 		setAccessToken('');
 		setIsAuthentificated(false);
 		setIsTwoFaVerified(false);
@@ -123,7 +113,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 		} catch (error) {
 			console.log('Refresh token failed, logging out');
 			// Log the user out if token refresh fails
-			logOut();
+			// logOut();
 			console.log('Error occurred while refreshing token:', error);
 		}
 	};

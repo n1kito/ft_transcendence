@@ -138,7 +138,7 @@ export class AuthService {
 				this.userId = newUser.id;
 			}
 			// if the user already exists, update their information (if they have not manually overwritten it themselves)
-			// else await this.updateUserInfo(userInDb);
+			else await this.updateUserInfo(userInDb);
 			// this.yourDataRepository.save(mappedData);
 			this.userId = userInDb.id;
 		} catch (error) {
@@ -147,19 +147,14 @@ export class AuthService {
 		}
 	}
 
-	// TODO: test that this works once the profile update process has been setup
-	// TODO: 12.09.2023 jee: login and email should not be updated at login as userdata are being kept in database
-	// so whenever user updates its username or email, these data are lost with function updateUserInfo
 	// Updates user info on login depending on whether those values where manually updated by the user or not
 	async updateUserInfo(userInDb: User) {
 		await this.prisma.user.update({
 			where: { ft_id: userInDb.ft_id },
 			data: {
-				// login: !userInDb.login_is_locked
-				// 	? this.userData.login
-				// 	: this.userData.login,
-				// email: !userInDb.email_is_locked ? this.userData.email : undefined,
-				image: !userInDb.image_is_locked ? this.userData.image : undefined,
+				login: !userInDb.login_is_locked ? this.userData.login : userInDb.login,
+				email: !userInDb.email_is_locked ? this.userData.email : userInDb.email,
+				image: !userInDb.image_is_locked ? this.userData.image : userInDb.image,
 			},
 		});
 		// Store the user id in the local object, so we can use it in the JWT token
@@ -361,6 +356,10 @@ export class AuthService {
 	// update 2fa status as verified
 	//(meaning user has logged in successfully with google authenticator)
 	async updateVerifyStatus(userId: number, isVerified: boolean) {
+		const user = await this.prisma.user.findUnique({
+			where: { id: userId },
+		});
+		if (!user) return;
 		const response = await this.prisma.user.update({
 			where: { id: userId },
 			data: {

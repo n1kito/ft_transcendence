@@ -73,6 +73,18 @@ export class UserService {
 					login: updateUserDto.login,
 				},
 			});
+
+			const isLoginLocked: boolean = !!updateUserDto.login;
+			const isEmailLocked: boolean = !!updateUserDto.email;
+
+			const lock = await this.prisma.user.update({
+				where: { id: userId },
+				data: {
+					login_is_locked: isLoginLocked,
+					email_is_locked: isEmailLocked,
+				},
+			});
+
 			// Check if there are any validation errors from dto, throw error
 			if (this.errors.length > 0) {
 				throw new CustomException(this.errors);
@@ -256,7 +268,6 @@ export class UserService {
 			const isdeleted = await this.prisma.user.delete({
 				where: { id: userId },
 			});
-			console.log('User deleted successfully');
 		} catch (error) {
 			console.log('Could not delete user:', error.message);
 			throw new Error('Could not delete user');
