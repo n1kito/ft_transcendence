@@ -7,6 +7,7 @@ import {
 	Put,
 	Req,
 	Res,
+	ValidationPipe,
 } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
@@ -29,16 +30,21 @@ export class ChatController {
 		@Req() request: CustomRequest,
 		@Param('chatId') chatId: number,
 	) {
-		const response = await this.prisma.chat.findUnique({
-			where: {
-				id: chatId,
-			},
-		});
-		return {
-			isChannel: response.isChannel,
-			isPrivate: response.isPrivate,
-			isProtected: response.isProtected,
-		};
+		try {
+			this.tokenService.ExtractUserId(request.headers['authorization']);
+			const response = await this.prisma.chat.findUnique({
+				where: {
+					id: chatId,
+				},
+			});
+			return {
+				isChannel: response.isChannel,
+				isPrivate: response.isPrivate,
+				isProtected: response.isProtected,
+			};
+		} catch (e) {
+			console.error('error fetching chat info: ', e);
+		}
 	}
 
 	// get messages from chat
@@ -47,13 +53,18 @@ export class ChatController {
 		@Req() request: CustomRequest,
 		@Param('chatId') chatId: number,
 	) {
-		const messages = await this.chatService.getChatMessages(request, chatId);
-		return messages;
+		try {
+			this.tokenService.ExtractUserId(request.headers['authorization']);
+			const messages = await this.chatService.getChatMessages(request, chatId);
+			return messages;
+		} catch (e) {
+			console.error('error fetching messages: ', e);
+		}
 	}
 
 	@Put('/createChatPrivateMessage/:userId')
 	async createChat(
-		@Body() createChat: CreateChatDTO,
+		@Body(new ValidationPipe()) createChat: CreateChatDTO,
 		@Req() request: CustomRequest,
 	) {
 		// TODO: should I check that this chat does not already exist?
@@ -61,7 +72,6 @@ export class ChatController {
 			const userId = this.tokenService.ExtractUserId(
 				request.headers['authorization'],
 			);
-			await this.chatService.validateCreateChatDto(createChat);
 			const chatId = await this.chatService.createChat(userId, createChat);
 			// create both chat sessions
 			await this.chatService.createChatSession(userId, chatId);
@@ -72,27 +82,19 @@ export class ChatController {
 		}
 	}
 
-	// TODO: Do I need to check the authentication here?
 	@Put('/sendMessage')
 	async sendMessage(
-		@Body() sendMessage: SendMessageDTO,
+		@Body(new ValidationPipe()) sendMessage: SendMessageDTO,
 		@Req() request: CustomRequest,
-		// @Res() response: Response,
 	) {
 		try {
 			const userId = this.tokenService.ExtractUserId(
 				request.headers['authorization'],
 			);
-			// const userId = this.chatService.authenticateUser(request);
 			await this.chatService.sendMessage(userId, sendMessage);
-			// response.status(HttpStatus.OK)
-			// 	.json({ message: 'User updated successfully' });
 		} catch (e) {
-			console.error('error authenticating', e);
+			console.error('error sending a message', e);
 		}
 	}
 }
-// const sortedMessages = messages.sort(
-// 	(msgA, msgB) => msgA.sentAt.getDate() - msgB.sentAt.getDate(),
-// );
-// return sortedMessages;
+
