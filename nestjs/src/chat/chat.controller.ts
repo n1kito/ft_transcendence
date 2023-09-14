@@ -76,7 +76,7 @@ export class ChatController {
 			// create both chat sessions
 			await this.chatService.createChatSession(userId, chatId);
 			await this.chatService.createChatSession(createChat.userId, chatId);
-			return chatId;
+			return { chatId: chatId };
 		} catch (e) {
 			console.error('error creating a private message: ', e);
 		}
@@ -97,4 +97,3 @@ export class ChatController {
 		}
 	}
 }
-

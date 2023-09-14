@@ -250,4 +250,34 @@ export class UserService {
 			};
 		});
 	}
+
+	/* ********************************************************************* */
+	/* ******************************* CHAT ******************************** */
+	/* ********************************************************************* */
+
+	// get all chat Sessions from the user
+	async getChatSessions(userId: number) {
+		const response = await this.prisma.user.findUnique({
+			// where: { Users: { some: { userId: { in: [request.userId, userId] } } } },
+			where: {
+				id: userId,
+			},
+			select: {
+				chatsSessions: true,
+			},
+		});
+		return response.chatsSessions;
+	}
+
+	// get public data of a user from the userId
+	async getPublicDataFromUserId(userId: number) {
+		const response = await this.prisma.user.findUnique({
+			where: { id: userId },
+			select: {
+				login: true,
+				image: true,
+			},
+		});
+		return response;
+	}
 }

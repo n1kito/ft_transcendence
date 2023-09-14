@@ -22,7 +22,7 @@ import DOMPurify from 'dompurify';
 export interface IChatWindowProps {
 	onCloseClick: () => void;
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
-	userId: number;
+	name: string;
 	chatId: number;
 	messages: IMessage[];
 	setMessages: Dispatch<SetStateAction<IMessage[]>>;
@@ -52,7 +52,8 @@ interface IChatInfo {
 }
 
 const ChatWindow: React.FC<IChatWindowProps> = ({
-	userId,
+	// userId,
+	name,
 	onCloseClick,
 	windowDragConstraintRef,
 	chatId,
@@ -97,33 +98,16 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 		setSettingsPanelIsOpen(!settingsPanelIsOpen);
 	};
 
-	// change the login every time the userId changes
-	useEffect(() => {
-		fetch('api/user/byId/' + userId, {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-			},
-			credentials: 'include',
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				if (data.message) console.error('User not Found');
-				else setLogin(data.login);
-			});
-	}, [userId]);
-
 	// empty the textarea when changing active chat
 	useEffect(() => {
 		setTextareaContent('');
 		setTextareaIsEmpty(true);
-	}, [userId]);
+	}, [chatId]);
 	/* ********************************************************************* */
 	/* ******************************** CHAT ******************************* */
 	/* ********************************************************************* */
 
 	const { accessToken } = useAuth();
-	const [login, setLogin] = useState('Anonymous');
 
 	// On mount, join the room associated with the chat
 	// TODO: find a way to leave room when changing chat (because it is
@@ -154,10 +138,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 			userData.login,
 			userData.image,
 		);
-		console.log(
-			' JSON.stringify({ message: textareaContent, chatId: chatId }',
-			JSON.stringify({ message: textareaContent, chatId: chatId }),
-		);
 		// display users' own message by updating the messages[]
 		const updatedMessages: IMessage[] = messages.map((val) => {
 			return val;
@@ -180,7 +160,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 
 	return (
 		<Window
-			windowTitle={`Chat with ${login}`}
+			windowTitle={`Chat with ${name}`}
 			onCloseClick={onCloseClick}
 			windowDragConstraintRef={windowDragConstraintRef}
 			links={[

@@ -65,6 +65,18 @@ export class ChatService {
 		return messagesWithLogin;
 	}
 
+	async getPrivateMessageRoom(chatId: number) {
+		const res = await this.prisma.chat.findFirst({
+			where: {
+				id: chatId,
+				isChannel: false,
+			},
+			include: {
+				participants: true,
+			},
+		});
+		return res;
+	}
 	// create Chat
 	async createChat(userId: number, content: CreateChatDTO) {
 		const chat = await this.prisma.chat.create({

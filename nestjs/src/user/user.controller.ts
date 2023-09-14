@@ -19,6 +19,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { validate } from 'class-validator';
 import { get } from 'http';
+import { ChatService } from 'src/chat/chat.service';
+import { pairwise } from 'rxjs';
 export interface CustomRequest extends Request {
 	userId: number;
 }
@@ -28,6 +30,7 @@ export class UserController {
 	constructor(
 		private readonly userService: UserService,
 		private readonly prisma: PrismaService,
+		private readonly chatService: ChatService,
 	) {}
 
 	@Get('me')
@@ -41,7 +44,6 @@ export class UserController {
 				gamesPlayed: true,
 				target: true,
 				friends: true,
-				chatsJoined: true,
 			}, // Include the gamesPlayed relation
 		});
 
@@ -103,7 +105,6 @@ export class UserController {
 			winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
 			rank: userRank,
 			// chat
-			chatsJoined: user.chatsJoined,
 			// ownedChannels: user.ownedChannels,
 		};
 	}
@@ -261,23 +262,18 @@ export class UserController {
 			};
 	}
 
-	// Get login from userId
+	// Get public data from userId
 	// TODO: DTO for userID ?
 	@Get('/byId/:userId')
-	async getLoginFromUserId(
+	async getPublicDataFromUserId(
 		@Req() request: CustomRequest,
 		@Param('userId') userId: number,
 	) {
 		// be sure the userId is a number
 		let userIdToNb: number = +userId;
-		const response = await this.prisma.user.findUnique({
-			where: { id: userIdToNb },
-			select: {
-				login: true,
-			},
-		});
+		const response = await this.userService.getPublicDataFromUserId(userIdToNb);
 		if (!response) return { message: 'User not found' };
-		const ret = { login: response.login };
+		const ret = { login: response.login, image: response.image };
 		console.log('ret', ret);
 		return ret;
 	}
@@ -300,49 +296,59 @@ export class UserController {
 		const ret = { id: response.id };
 		return ret;
 	}
-	
 
 	// Chat logic
 	// Private messages
-	@Get('me/chatsJoined')
+	@Get('me/privateMessages')
 	async getChat(
 		@Req() request: CustomRequest,
 		@Param('userId') userId: number,
 	) {
 		// this contains an array of the chat sessions
-		const response = await this.prisma.user.findUnique({
-			// where: { Users: { some: { userId: { in: [request.userId, userId] } } } },
-			where: {
-				id: request.userId,
-			},
-			include: {
-				chatsSessions: true,
-			},
-		});
-		// this contains an array of the chat rooms joined
-		const chatPromises = response.chatsSessions.map(async (currentChat) => {
-			const res = await this.prisma.chat.findUnique({
-				where: {
-					id: currentChat.chatId,
-				},
-				include: {
-					participants: true,
-				},
-			});
-			return res; // Return the result of each asynchronous operation
-		});
-		const chatRoomsResults = await Promise.all(chatPromises);
+		const chatSessions = await this.userService.getChatSessions(request.userId);
 
-		// this contains for each room joined, the id of the room and the list
-		// of the userId that joined it
-		// TODO: Add the messages
-		const ret = chatRoomsResults.map((currentRoom) => ({
-			chatId: currentRoom.id,
-			participants: currentRoom.participants.map((currentParticipant) => {
-				return currentParticipant.userId;
+		// this contains an array of the chat rooms joined that are not channels
+		const chatPromises = chatSessions.map(async (currentChat) => {
+			const room = await this.chatService.getPrivateMessageRoom(
+				currentChat.chatId,
+			);
+			return room; // Return the result of each asynchronous operation
+		});
+		// the filter(Boolean) throws away every null/undefined object
+		const chatRoomsResults = await Promise.all(chatPromises);
+		const chatRoomsFiltered = chatRoomsResults.filter(Boolean);
+
+		// this contains for each room joined, the id of the room, the participants,
+		// the name of the other user and its image
+		const rooms = await Promise.all(
+			chatRoomsFiltered.map(async (currentRoom) => {
+				let name: string;
+				let avatar: string;
+				await Promise.all(
+					currentRoom.participants.map(async (currentParticipant) => {
+						if (currentParticipant.userId !== request.userId) {
+							const participantData =
+								await this.userService.getPublicDataFromUserId(
+									currentParticipant.userId,
+								);
+							name = participantData.login;
+							avatar = participantData.image;
+						}
+					}),
+				);
+
+				return {
+					chatId: currentRoom.id,
+					participants: currentRoom.participants.map((currentParticipant) => {
+						return currentParticipant.userId;
+					}),
+					name: name,
+					avatar: avatar,
+				};
 			}),
-		}));
-		return ret;
+		);
+		console.log('rooms', rooms);
+		return rooms;
 	}
 
 	// get messages from chat

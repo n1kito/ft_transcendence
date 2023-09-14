@@ -52,8 +52,6 @@ model User {
     Message       Message[]
 
     // relation with User[] in Chat. maybe delete ?
-    chatsJoined   Chat?         @relation(fields: [chatId], references: [id])
-    chatId        Int?
 }
 
 model Game {
@@ -83,19 +81,19 @@ model Chat {
     isPrivate    Boolean // this will be true if it is a msg between 2 users
     isProtected  Boolean // true if password
     password     String?
+    name         String?
 
     // to delete
-    peopleInHere User[]
     // owner       User?     @relation(fields: [ownerId], references: [id], "owners")
     // ownerId      Int?
 }
 
 model chatSession {
-    id     Int   @id @default(autoincrement())
+    id Int @id @default(autoincrement())
 
     Chat   Chat? @relation(fields: [chatId], references: [id])
     chatId Int?
-    
+
     User   User? @relation(fields: [userId], references: [id])
     userId Int?
     // lastOpen ? So we know when new msg
@@ -103,15 +101,15 @@ model chatSession {
 }
 
 model Message {
-    id      Int      @id @default(autoincrement())
-    
-    Chat    Chat?    @relation(fields: [chatId], references: [id])
-    chatId  Int?
+    id Int @id @default(autoincrement())
 
-    sentBy  User     @relation(fields: [userId], references: [id])
-    userId  Int
+    Chat   Chat? @relation(fields: [chatId], references: [id])
+    chatId Int?
 
-    sentAt  DateTime @default(now())
+    sentBy User @relation(fields: [userId], references: [id])
+    userId Int
+
+    sentAt DateTime @default(now())
 
     content String
 }

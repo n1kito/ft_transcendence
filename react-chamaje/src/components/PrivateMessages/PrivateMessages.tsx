@@ -23,6 +23,9 @@ interface IPrivateMessagesProps {
 export interface IChatStruct {
 	chatId: number;
 	participants: number[];
+	name: string; // for the PM its the login
+	avatar?: string;
+	onlineIndicator?: boolean; // if it is a friend of us, show the online status
 }
 
 const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
@@ -35,7 +38,8 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
 	const [chatWindowUserId, setChatWindowUserId] = useState(0);
 	const [chatWindowId, setChatWindowId] = useState(0);
-	const [chatsJoined, setChatsJoined] = useState<IChatStruct[]>([]);
+	const [chatWindowName, setChatWindowName] = useState('');
+	const [privateMessages, setPrivateMessages] = useState<IChatStruct[]>([]);
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [messages, setMessages] = useState<IMessage[]>([]);
 	const [searchedLogin, setSearchedLogin] = useState('');
@@ -95,11 +99,14 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 			.then((response) => response.json())
 			.then((data) => {
 				setMessages(data);
+			})
+			.catch((e) => {
+				console.error('Error fetching messages: ', e);
 			});
 	}
 
-	async function fetchChatsJoined() {
-		fetch('/api/user/me/chatsJoined', {
+	async function fetchPrivateMessages() {
+		fetch('/api/user/me/privateMessages', {
 			method: 'GET',
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
@@ -108,25 +115,41 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 		})
 			.then((response) => response.json())
 			.then((data) => {
-				setChatsJoined(data);
+				setPrivateMessages(data);
+			})
+			.catch((e) => {
+				console.error('Error fetching private conversations: ', e);
 			});
 	}
 
 	async function createChat(friendId: number) {
-		return fetch('api/chat/createChatPrivateMessage/' + friendId, {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${accessToken}`,
+		if (userData && friendId === userData.id) {
+			console.error('hi there');
+			throw new Error('Stop talking with yourself');
+		}
+		const response = await fetch(
+			'api/chat/createChatPrivateMessage/' + friendId,
+			{
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${accessToken}`,
+				},
+				credentials: 'include',
+				body: JSON.stringify({
+					isChannel: false,
+					isPrivate: true,
+					isProtected: false,
+					userId: friendId,
+				}),
 			},
-			credentials: 'include',
-			body: JSON.stringify({
-				isChannel: false,
-				isPrivate: true,
-				isProtected: false,
-				userId: friendId,
-			}),
-		});
+		);
+		if (response.ok) {
+			const responseData = await response.json();
+			return responseData.chatId;
+		} else {
+			throw new Error('Error creating chat');
+		}
 	}
 
 	//findUserWithLogin
@@ -148,8 +171,8 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 		console.log(' PrivateMessage - messages', messages);
 	}, [messages]);
 	useEffect(() => {
-		console.log(' PrivateMessage - chatsJoined', chatsJoined);
-	}, [chatsJoined]);
+		console.log(' PrivateMessage - privateMessages', privateMessages);
+	}, [privateMessages]);
 
 	useEffect(() => {
 		console.log(' PrivateMessage - chatWindowId', chatWindowId);
@@ -159,9 +182,9 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	/* ******************************* LOGIC ******************************* */
 	/* ********************************************************************* */
 
-	// on mounting this component, fetch the chatsJoined
+	// on mounting this component, fetch the privateMessages
 	useEffect(() => {
-		fetchChatsJoined();
+		fetchPrivateMessages();
 	}, []);
 
 	// on click on an avatar, check if a PM conversation exists.
@@ -170,29 +193,32 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	// Otherwise open clean the messages and open the window
 	const openPrivateMessageWindow: any = (friendId: number) => {
 		let foundChat = false;
-		const chatId = chatsJoined.map((currentChat) => {
+		const chatId = privateMessages.map((currentChat) => {
 			if (
 				currentChat.participants.length === 2 &&
 				(currentChat.participants.at(0) === friendId ||
 					currentChat.participants.at(1) === friendId)
 			) {
 				setChatWindowId(currentChat.chatId);
+				setChatWindowName(currentChat.name);
 				fetchMessages(currentChat.chatId);
 				foundChat = true;
 				return;
 			}
 		});
 		setChatWindowIsOpen(true);
-		setChatWindowUserId(friendId);
 		// If no corresponding chat were found, create it, set messages to empty
-		// change the chat window and update chatsJoined[]
+		// change the chat window and update privateMessages[]
 		if (!foundChat) {
 			createChat(friendId)
 				.then((response) => response.json())
-				.then((data) => {
+				.then(async (data) => {
 					setChatWindowId(data);
 					setMessages([]);
-					fetchChatsJoined();
+					await fetchPrivateMessages();
+				})
+				.catch((e) => {
+					console.error(e);
 				});
 			console.error('This chat does not exist');
 		}
@@ -204,17 +230,19 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 		if (searchedLogin) {
 			findUserByLogin(searchedLogin)
 				.then((response) => response.json())
-				.then((data) => {
+				.then(async (data) => {
 					if (data.message) {
 						throw new Error('User not found');
 					}
 					console.log('response data', data);
-					createChat(data.id);
+					await createChat(data.id);
 					setSearchUserSuccess('Chat created successfully!');
+					await fetchPrivateMessages();
+					setSettingsPanelIsOpen(false);
 				})
 				.catch((e: string) => {
 					console.error(e);
-					setSearchUserError('User not found');
+					setSearchUserError('Wrong user');
 				});
 		}
 	};
@@ -247,19 +275,32 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 			>
 				<PrivateMessagesList>
 					{chatsList.length > 0 ? (
-						friends.map((friend, index) => (
+						privateMessages.map((room, index) => {
+							// find the other participant id
+							let participantId: number | undefined;
+							userData && room.participants.at(0) !== userData.id
+								? (participantId = room.participants.at(0))
+								: (participantId = room.participants.at(1));
+
+							// if it is a friend, display onlinestatus
+							const friend = friends.find((friend) => {
+								return friend.id === participantId;
+							});
+							console.warn('You found a friend in me', friend);
 							// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
-							<FriendBadge
-								key={index}
-								badgeTitle={friend.login}
-								badgeImageUrl={`http://localhost:3000${friend.image}`}
-								onlineIndicator={friend.onlineStatus}
-								isClickable={true}
-								onClick={() => {
-									openPrivateMessageWindow(friend.id);
-								}}
-							/>
-						))
+							return (
+								<FriendBadge
+									key={index}
+									badgeTitle={room.name}
+									badgeImageUrl={`http://localhost:3000${room.avatar}`}
+									onlineIndicator={friend ? friend.onlineStatus : false}
+									isClickable={true}
+									onClick={() => {
+										openPrivateMessageWindow(participantId);
+									}}
+								/>
+							);
+						})
 					) : (
 						<FriendBadge isEmptyBadge={true} isChannelBadge={false} />
 					)}
@@ -288,7 +329,8 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 				<ChatWindow
 					onCloseClick={() => setChatWindowIsOpen(false)}
 					windowDragConstraintRef={windowDragConstraintRef}
-					userId={chatWindowUserId}
+					// userId={chatWindowUserId}
+					name={chatWindowName}
 					chatId={chatWindowId}
 					messages={messages}
 					setMessages={setMessages}
