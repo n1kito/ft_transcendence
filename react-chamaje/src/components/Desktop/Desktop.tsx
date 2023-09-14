@@ -197,6 +197,24 @@ const Desktop = () => {
 		userData?.chatSocket?.onLogOut(handleLoggedOut);
 	}, [userData]);
 
+	/* ********************************************************************* */
+	/* **************************** FRIENDS ******************************** */
+	/* ********************************************************************* */
+
+	const [showFriendProfile, setShowFriendProfile] = useState('');
+
+	const handleBadgeClick = (friendLogin: string) => {
+		setShowFriendProfile(friendLogin);
+		console.log('👀 handleBadgeClick - friend login: ', friendLogin);
+	};
+
+	useEffect(() => {
+		return () => {
+			// setShowFriendProfile('');
+			// alert();
+		};
+	});
+
 	return (
 		<div className="desktopWrapper" ref={windowDragConstraintRef}>
 			<DesktopIcon
@@ -240,11 +258,20 @@ const Desktop = () => {
 				)}
 				{openFriendsWindow && (
 					<FriendsList
+						key="Friend-list-window"
 						onCloseClick={() => setFriendsWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
 						friends={friends}
 						nbFriendsOnline={nbFriendsOnline}
+						onBadgeClick={handleBadgeClick}
 					/>
+				)}
+				{showFriendProfile && (
+					<Profile
+						login={showFriendProfile}
+						onCloseClick={() => setShowFriendProfile('')}
+						windowDragConstraintRef={windowDragConstraintRef}
+					></Profile>
 				)}
 				{chatWindowIsOpen && (
 					<PrivateMessages

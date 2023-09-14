@@ -45,6 +45,8 @@ const Profile: React.FC<ProfileProps> = ({
 	const [profileData, setProfileData] = useState<UserData | null>(null); // Declare profileData state
 	const isOwnProfile = login == userData?.login;
 
+	console.log('👀 isOwnProfile: ', isOwnProfile);
+
 	// Settings panel
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [settingsMode, setSettingsMode] = useState('');
@@ -92,11 +94,19 @@ const Profile: React.FC<ProfileProps> = ({
 				setProfileData(userData);
 			}
 		});
+
+		return () => {
+			setProfileData(null);
+		};
 	}, []);
 
-	useEffect(() => {
-		if (userData?.login !== profileData?.login) setProfileData(userData);
-	}, [userData]);
+	// useEffect(() => {
+	// 	if (userData?.login !== profileData?.login) setProfileData(userData);
+	// }, [userData]);
+
+	const isMyFriend = userData?.friends.find(
+		(friend) => friend.login === profileData?.login,
+	);
 
 	/**************************************************************************************/
 	/* two-factor Authentication Settings                                                 */
@@ -195,24 +205,35 @@ const Profile: React.FC<ProfileProps> = ({
 	return (
 		<Window
 			windowTitle={login || 'window title'}
-			links={[
-				{
-					name: 'Two-Factor Authentication',
-					onClick: () => {
-						setSettingsMode('Two-Factor Authentication');
-						setSettingsPanelIsOpen(true);
-					},
-				},
-				{
-					name: 'Delete profile',
+			links={
+				isOwnProfile
+					? [
+							{
+								name: 'Two-Factor Authentication',
+								onClick: () => {
+									setSettingsMode('Two-Factor Authentication');
+									setSettingsPanelIsOpen(true);
+								},
+							},
+							{
+								name: 'Delete profile',
 
-					onClick: () => {
-						setSettingsMode('Delete Profile');
-						setSettingsPanelIsOpen(true);
-					},
-				},
-				// { name: 'Link3', onClick: () => null },
-			]}
+								onClick: () => {
+									setSettingsMode('Delete Profile');
+									setSettingsPanelIsOpen(true);
+								},
+							},
+					  ]
+					: [
+							{
+								name: 'Delete Friend',
+								onClick: () => {
+									setSettingsMode('Delete Friend');
+									setSettingsPanelIsOpen(true);
+								},
+							},
+					  ]
+			}
 			useBeigeBackground={true}
 			onCloseClick={onCloseClick}
 			key="profile-window"
@@ -226,7 +247,7 @@ const Profile: React.FC<ProfileProps> = ({
 								picture={profileData.image}
 								isModifiable={isOwnProfile}
 							/>
-							<Title bigTitle={true}>{userData?.login}</Title>
+							<Title bigTitle={true}>{profileData?.login}</Title>
 							<TitleList profileData={profileData} />
 							{isOwnProfile && <ProfileSettings />}
 						</div>
@@ -247,7 +268,7 @@ const Profile: React.FC<ProfileProps> = ({
 					<p>Error loading profile contents</p>
 				)}
 			</div>
-			{settingsPanelIsOpen && (
+			{settingsPanelIsOpen && isOwnProfile && (
 				<SettingsWindow
 					windowTitle="Settings"
 					settingsWindowVisible={setSettingsPanelIsOpen}

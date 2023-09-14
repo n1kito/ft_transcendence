@@ -105,10 +105,6 @@ export class UserController {
 		return friends;
 	}
 
-	// TODO: why do we have this and the /me endpoint ?
-	// TODO: switch this endpoint to userID
-	// TODO: move the logics to user.service.ts ?
-	// TODO: Is this correctly authenticated ?
 	@Get(':login')
 	async getUserInfo(
 		@Param('login') login: string,
@@ -127,7 +123,7 @@ export class UserController {
 
 		const user = await this.prisma.user.findUnique({
 			where: { login },
-			include: { gamesPlayed: true },
+			include: { gamesPlayed: true, friends: true },
 		});
 		if (!user) {
 			// Handle case when user is not found
@@ -178,7 +174,9 @@ export class UserController {
 		// we return more information
 		if (userRequestingLogin && userRequestingLogin === login) {
 			// return user data except its 2fa secret
+
 			const { twoFactorAuthenticationSecret, ...updatedUser } = user;
+			console.log('😽😽😽 updated user:', updatedUser);
 			return {
 				...updatedUser,
 				gamesCount: gamesCount,
@@ -192,6 +190,7 @@ export class UserController {
 				matchHistory: matchHistory,
 				rivalLogin,
 				rivalImage,
+				// friends: this.getUserFriends,
 			};
 		}
 		// else, we only return what is needed for the profile component
