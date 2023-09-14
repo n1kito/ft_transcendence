@@ -9,6 +9,7 @@ describe('<Profile />', () => {
 		render(
 			<Profile
 				login="testerlg"
+				isMyFriend={false}
 				onCloseClick={() => null}
 				windowDragConstraintRef={mockRef}
 			/>,

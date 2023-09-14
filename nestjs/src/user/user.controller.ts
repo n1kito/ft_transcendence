@@ -174,9 +174,7 @@ export class UserController {
 		// we return more information
 		if (userRequestingLogin && userRequestingLogin === login) {
 			// return user data except its 2fa secret
-
 			const { twoFactorAuthenticationSecret, ...updatedUser } = user;
-			console.log('😽😽😽 updated user:', updatedUser);
 			return {
 				...updatedUser,
 				gamesCount: gamesCount,
@@ -212,5 +210,56 @@ export class UserController {
 				rivalLogin,
 				rivalImage,
 			};
+	}
+
+	// TODO: add DTO
+	@Put(':login/add')
+	async addFriend(
+		@Param('login') login: string,
+		@Req() request: CustomRequest,
+		@Res() response: Response,
+	) {
+		try {
+			console.log('🌝 friend login: ', login);
+			const userId = this.userService.authenticateUser(request);
+
+			// retrieve friend's user id
+			const friend = await this.prisma.user.findUnique({
+				where: { login: login },
+			});
+			if (!friend) response.status(404).json({ message: 'Friend not found' });
+
+			await this.userService.addFriend(userId, friend.id);
+			response.status(200).json({ message: 'Friend deleted successfully' });
+		} catch (error) {
+			return response.status(500).json({
+				error: error,
+			});
+		}
+	}
+
+	@Delete(':login/delete')
+	async deleteFriend(
+		@Param('login') login: string,
+		@Req() request: CustomRequest,
+		@Res() response: Response,
+	) {
+		try {
+			const userId = this.userService.authenticateUser(request);
+
+			// retrieve friend's user id
+			const friend = await this.prisma.user.findUnique({
+				where: { login: login },
+			});
+
+			if (!friend) response.status(404).json({ message: 'Friend not found' });
+
+			await this.userService.deleteFriend(userId, friend.id);
+			response.status(200).json({ message: 'Friend deleted successfully' });
+		} catch (error) {
+			return response.status(500).json({
+				error: error,
+			});
+		}
 	}
 }

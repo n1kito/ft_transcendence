@@ -43,6 +43,8 @@ const Desktop = () => {
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
 	const [channelsWindowIsOpen, setChannelsWindowIsOpen] = useState(false);
 
+	const [showFriendProfile, setShowFriendProfile] = useState('');
+
 	const navigate = useNavigate();
 	const {
 		isAuthentificated,
@@ -56,36 +58,35 @@ const Desktop = () => {
 
 	const windowDragConstraintRef = useRef(null);
 
-	useEffect(() => {
-		const fetchUserData = async () => {
-			// Feth the user data from the server
-			try {
-				const response = await fetch(`/api/user/${'me'}`, {
-					method: 'GET',
-					credentials: 'include',
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-					},
-				});
-				if (response.ok) {
-					const data = await response.json();
-					console.log(data);
-					const mySocket = new WebSocketService(accessToken, data.id);
-					const updatedData = {
-						...data,
-						chatSocket: mySocket,
-					};
-					// Set the user data in the context
-					setUserData(updatedData);
-					setIsTwoFAEnabled(data.isTwoFactorAuthenticationEnabled);
-				} else {
-					logOut();
-				}
-			} catch (error) {
-				console.log('Error: ', error);
+	const fetchUserData = async () => {
+		// Feth the user data from the server
+		try {
+			const response = await fetch(`/api/user/${'me'}`, {
+				method: 'GET',
+				credentials: 'include',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+			});
+			if (response.ok) {
+				const data = await response.json();
+				console.log(data);
+				const mySocket = new WebSocketService(accessToken, data.id);
+				const updatedData = {
+					...data,
+					chatSocket: mySocket,
+				};
+				// Set the user data in the context
+				setUserData(updatedData);
+				setIsTwoFAEnabled(data.isTwoFactorAuthenticationEnabled);
+			} else {
+				logOut();
 			}
-		};
-
+		} catch (error) {
+			console.log('Error: ', error);
+		}
+	};
+	useEffect(() => {
 		if (isAuthentificated) fetchUserData();
 		return () => {
 			userData?.chatSocket?.endConnection();
@@ -115,10 +116,9 @@ const Desktop = () => {
 	 */
 
 	const [friends, setFriends] = useState<IFriendStruct[]>([]);
-
-	useEffect(() => {
-		// TODO: instead of just storing them in a State, the user context should simply be updated so all other components that use it can be re-rendered (I think)
-		// TODO: if the user is not auth the map method cannot iterate since the friends variable is not an array. Should not be an issue since only logged in users can access the desktop but it might be better to think ahead for this
+	// TODO: instead of just storing them in a State, the user context should simply be updated so all other components that use it can be re-rendered (I think)
+	// TODO: if the user is not auth the map method cannot iterate since the friends variable is not an array. Should not be an issue since only logged in users can access the desktop but it might be better to think ahead for this
+	const fetchFriend = async () => {
 		fetch('/api/user/friends', {
 			method: 'GET',
 			headers: {
@@ -130,6 +130,9 @@ const Desktop = () => {
 			.then((data) => {
 				setFriends(data);
 			});
+	};
+	useEffect(() => {
+		fetchFriend();
 	}, []);
 
 	/**
@@ -201,7 +204,7 @@ const Desktop = () => {
 	/* **************************** FRIENDS ******************************** */
 	/* ********************************************************************* */
 
-	const [showFriendProfile, setShowFriendProfile] = useState('');
+	// const [showFriendProfile, setShowFriendProfile] = useState('');
 
 	const handleBadgeClick = (friendLogin: string) => {
 		setShowFriendProfile(friendLogin);
@@ -209,11 +212,15 @@ const Desktop = () => {
 	};
 
 	useEffect(() => {
+		if (showFriendProfile === '') {
+			console.log('friend profile close');
+			fetchFriend();
+		}
 		return () => {
 			// setShowFriendProfile('');
 			// alert();
 		};
-	});
+	}, [showFriendProfile]);
 
 	return (
 		<div className="desktopWrapper" ref={windowDragConstraintRef}>
@@ -252,6 +259,7 @@ const Desktop = () => {
 					<Profile
 						key="profile-window"
 						login={userData?.login}
+						isMyFriend={false}
 						onCloseClick={() => setProfileWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
 					/>
@@ -271,6 +279,7 @@ const Desktop = () => {
 						login={showFriendProfile}
 						onCloseClick={() => setShowFriendProfile('')}
 						windowDragConstraintRef={windowDragConstraintRef}
+						isMyFriend={true}
 					></Profile>
 				)}
 				{chatWindowIsOpen && (

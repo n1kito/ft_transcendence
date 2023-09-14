@@ -7,6 +7,10 @@ import { io } from 'socket.io-client';
 import Window from 'src/components/Window/Window';
 import { IFriendStruct } from 'src/components/Desktop/Desktop';
 import Profile from 'src/components/Profile/Profile';
+import SettingsWindow from 'src/components/Profile/Components/Shared/SettingsWindow/SettingsWindow';
+import Title from 'src/components/Profile/Components/Title/Title';
+import InputField from 'src/components/Profile/Components/InputField/InputField';
+import Button from 'src/components/Shared/Button/Button';
 
 interface IFriendsListProps {
 	onCloseClick: () => void;
@@ -23,12 +27,55 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 	windowDragConstraintRef,
 	onBadgeClick,
 }) => {
+	const { accessToken } = useAuth();
+	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
+	const [searchedLogin, setSearchedLogin] = useState('');
+	const [searchUserError, setSearchUserError] = useState('');
+	const [searchUserSuccess, setSearchUserSuccess] = useState('');
+	const [isFriendAdded, setIsFriendAdded] = useState(false);
+
+	const handleLoginChange = (login: string) => {
+		setSearchedLogin(login);
+		setSearchUserError('');
+		setSearchUserSuccess('');
+	};
+
+	const addFriend = async () => {
+		alert('add friend');
+		try {
+			const response = await fetch(`api/user/${searchedLogin}/add`, {
+				method: 'PUT',
+				credentials: 'include',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+			});
+			if (response.ok) {
+				setSettingsPanelIsOpen(false);
+				setIsFriendAdded(true);
+			} else if (response.status === 500 || response.status === 404) {
+				const messageError = await response.json();
+				console.error(messageError);
+			}
+		} catch (error) {
+			throw new Error('internal error');
+		}
+	};
+
 	return (
 		<Window
 			windowTitle="Friends"
 			onCloseClick={onCloseClick}
 			key="friends-list-window"
 			windowDragConstraintRef={windowDragConstraintRef}
+			links={[
+				{
+					name: 'Add friend',
+					onClick: () => {
+						setSettingsPanelIsOpen(true);
+					},
+				},
+			]}
 		>
 			<div className="friendsList">
 				{friends.map((friend, index) => (
@@ -46,6 +93,26 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 					/>
 				))}
 			</div>
+			{settingsPanelIsOpen && (
+				<SettingsWindow settingsWindowVisible={setSettingsPanelIsOpen}>
+					<Title highlightColor="yellow">Username</Title>
+					<div className="settings-form">
+						<InputField
+							onChange={handleLoginChange}
+							error={searchUserError}
+							success={searchUserSuccess}
+							maxlength={8}
+						></InputField>
+						<Button
+							onClick={() => {
+								addFriend();
+							}}
+						>
+							Add friend
+						</Button>
+					</div>
+				</SettingsWindow>
+			)}
 			<div className="bottomInfo">
 				{' '}
 				{friends.length} friends, {nbFriendsOnline} online{' '}

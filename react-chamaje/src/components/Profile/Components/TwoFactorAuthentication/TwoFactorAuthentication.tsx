@@ -147,7 +147,7 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 						value={validationCode}
 						onChange={handleInput}
 						error={validationCodeError}
-						type="2fa"
+						maxlength={6}
 					/>
 					<Button onClick={handleActivateButtonClick} disabled={inputError}>
 						activate

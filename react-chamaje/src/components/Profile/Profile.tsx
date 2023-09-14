@@ -31,12 +31,14 @@ import { useNavigate } from 'react-router-dom';
 // TODO: find a way to make the shaddow wrapper widht's 100% so if fills the sidebar
 export interface ProfileProps {
 	login: string | undefined;
+	isMyFriend: boolean | false;
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
 	onCloseClick: () => void;
 }
 
 const Profile: React.FC<ProfileProps> = ({
 	login,
+	isMyFriend,
 	windowDragConstraintRef,
 	onCloseClick,
 }) => {
@@ -46,6 +48,7 @@ const Profile: React.FC<ProfileProps> = ({
 	const isOwnProfile = login == userData?.login;
 
 	console.log('👀 isOwnProfile: ', isOwnProfile);
+	console.log('👀 isMyFriend: ', isMyFriend);
 
 	// Settings panel
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
@@ -95,18 +98,17 @@ const Profile: React.FC<ProfileProps> = ({
 			}
 		});
 
+		console.log('🎃🎃🎃 fetch profile data: ', profileData);
+
 		return () => {
 			setProfileData(null);
 		};
 	}, []);
 
-	// useEffect(() => {
-	// 	if (userData?.login !== profileData?.login) setProfileData(userData);
-	// }, [userData]);
-
-	const isMyFriend = userData?.friends.find(
-		(friend) => friend.login === profileData?.login,
-	);
+	useEffect(() => {
+		if (isOwnProfile && userData?.login !== profileData?.login)
+			setProfileData(userData);
+	}, [userData]);
 
 	/**************************************************************************************/
 	/* two-factor Authentication Settings                                                 */
@@ -116,10 +118,8 @@ const Profile: React.FC<ProfileProps> = ({
 	// displaying generated qr code and inputfield where
 	// the code given by google authenticator must be entered
 	const enableTwoFactorAuthentication = async () => {
-		console.log('process is starting!');
 		setTwoFactorAuthWindowIsOpen(true);
 		isInProcessRef.current = true;
-		console.log('enable2FA, REF:', isInProcessRef);
 	};
 
 	// disable two-factor authentication
@@ -189,11 +189,34 @@ const Profile: React.FC<ProfileProps> = ({
 				},
 			});
 			if (response.ok) {
-				alert('delete profile');
-				// navigate('/');
 				logOut();
-				console.log('plop');
 			} else if (response.status === 500) {
+				const messageError = await response.json();
+				console.error(messageError);
+			}
+		} catch (error) {
+			throw new Error('internal error');
+		}
+	};
+
+	/**************************************************************************************/
+	/* Friends                                                                            */
+	/**************************************************************************************/
+	const [isFriendDeleted, setIsFriendDeleted] = useState(false);
+
+	const deleteFriend = async () => {
+		try {
+			const response = await fetch(`api/user/${login}/delete`, {
+				method: 'DELETE',
+				credentials: 'include',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+			});
+			if (response.ok) {
+				setSettingsPanelIsOpen(false);
+				onCloseClick();
+			} else if (response.status === 500 || response.status === 404) {
 				const messageError = await response.json();
 				console.error(messageError);
 			}
@@ -225,17 +248,28 @@ const Profile: React.FC<ProfileProps> = ({
 							},
 					  ]
 					: [
-							{
-								name: 'Delete Friend',
-								onClick: () => {
-									setSettingsMode('Delete Friend');
-									setSettingsPanelIsOpen(true);
-								},
-							},
+							isMyFriend
+								? {
+										name: 'Delete Friend',
+										onClick: () => {
+											setSettingsMode('Delete Friend');
+											setSettingsPanelIsOpen(true);
+										},
+								  }
+								: {
+										name: 'Add Friend',
+										onClick: () => {
+											setSettingsMode('Add Friend');
+											setSettingsPanelIsOpen(true);
+										},
+								  },
 					  ]
 			}
 			useBeigeBackground={true}
-			onCloseClick={onCloseClick}
+			onCloseClick={() => {
+				onCloseClick();
+				// setProfileData(null);
+			}}
 			key="profile-window"
 			windowDragConstraintRef={windowDragConstraintRef}
 		>
@@ -268,13 +302,13 @@ const Profile: React.FC<ProfileProps> = ({
 					<p>Error loading profile contents</p>
 				)}
 			</div>
-			{settingsPanelIsOpen && isOwnProfile && (
+			{settingsPanelIsOpen && (
 				<SettingsWindow
 					windowTitle="Settings"
 					settingsWindowVisible={setSettingsPanelIsOpen}
 				>
 					<Title highlightColor="yellow">
-						{settingsMode === 'Delete Profile'
+						{settingsMode === 'Delete Profile' || 'Delete Friend'
 							? `${settingsMode} ?`
 							: settingsMode}
 					</Title>
@@ -303,6 +337,27 @@ const Profile: React.FC<ProfileProps> = ({
 								baseColor={[111, 60, 84]}
 								onClick={() => {
 									deleteProfile();
+								}}
+							>
+								yes
+							</Button>
+							<Button
+								baseColor={[40, 100, 80]}
+								onClick={() => {
+									setSettingsPanelIsOpen(false);
+								}}
+							>
+								no
+							</Button>
+						</div>
+					)}
+
+					{settingsMode === 'Delete Friend' && (
+						<div className="delete-friend-wrapper">
+							<Button
+								baseColor={[111, 60, 84]}
+								onClick={() => {
+									deleteFriend();
 								}}
 							>
 								yes

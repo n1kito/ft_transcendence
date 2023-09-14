@@ -274,4 +274,86 @@ export class UserService {
 		}
 		// console.log('User deleted successfully');
 	}
+
+	async deleteFriend(userId: number, friendUserIdToDelete: number) {
+		try {
+			// retrieve user's data including its friends list
+			const user = await this.prisma.user.findUnique({
+				where: {
+					id: userId,
+				},
+				include: {
+					friends: true,
+				},
+			});
+
+			if (!user) throw new Error('User not found');
+
+			// in friends array, remove the requested friend by its id
+			const updatedFriends = user.friends
+				.filter((friend) => friend.id !== friendUserIdToDelete)
+				.map((friend) => ({
+					id: friend.id,
+				}));
+
+			// set the updated friends array
+			const updatedUser = await this.prisma.user.update({
+				where: {
+					id: userId,
+				},
+				data: {
+					friends: {
+						set: updatedFriends,
+					},
+				},
+			});
+		} catch (error) {
+			throw new Error('Could not delete friend');
+		}
+	}
+
+	async addFriend(userId: number, friendUserIdToAdd: number) {
+		try {
+			// Retrieve user's data including its friends list
+			const user = await this.prisma.user.findUnique({
+				where: {
+					id: userId,
+				},
+				include: {
+					friends: true,
+				},
+			});
+
+			if (!user) throw new Error('User not found');
+
+			// Check if the friend to add already exists in the user's friends list
+			const friendExists = user.friends.some(
+				(friend) => friend.id === friendUserIdToAdd,
+			);
+
+			if (friendExists) {
+				throw new Error('Friend already exists in the list');
+			}
+
+			// Add the new friend to the friends array
+			const updatedFriends = [
+				...user.friends,
+				{
+					id: friendUserIdToAdd,
+				},
+			];
+
+			// Set the updated friends array
+			const updatedUser = await this.prisma.user.update({
+				where: {
+					id: userId,
+				},
+				data: {
+					friends: {
+						set: updatedFriends,
+					},
+				},
+			});
+		} catch (error) {}
+	}
 }
