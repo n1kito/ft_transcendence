@@ -34,7 +34,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	friends,
 	// chatWindowControl,
 }) => {
-	const chatsList = [''];
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
 	const [chatWindowUserId, setChatWindowUserId] = useState(0);
 	const [chatWindowId, setChatWindowId] = useState(0);
@@ -258,73 +257,82 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	/* ********************************************************************* */
 	return (
 		<>
-			<Window
-				windowTitle="Private Messages"
-				useBeigeBackground={true}
-				onCloseClick={onCloseClick}
-				key="private-messages-window"
-				windowDragConstraintRef={windowDragConstraintRef}
-				links={[
-					{
-						name: 'New Chat',
-						onClick: () => {
-							setSettingsPanelIsOpen(true);
+			<div className='private-messages-window'>
+				<Window
+					windowTitle="Private Messages"
+					useBeigeBackground={true}
+					onCloseClick={onCloseClick}
+					key="private-messages-window"
+					windowDragConstraintRef={windowDragConstraintRef}
+					links={[
+						{
+							name: 'New Chat',
+							onClick: () => {
+								setSettingsPanelIsOpen(true);
+							},
 						},
-					},
-				]}
-			>
-				<PrivateMessagesList>
-					{chatsList.length > 0 ? (
-						privateMessages.map((room, index) => {
-							// find the other participant id
-							let participantId: number | undefined;
-							userData && room.participants.at(0) !== userData.id
-								? (participantId = room.participants.at(0))
-								: (participantId = room.participants.at(1));
+					]}
+				>
+					<PrivateMessagesList>
+						{privateMessages.length > 0 ? (
+							privateMessages.map((room, index) => {
+								// find the other participant id
+								let participantId: number | undefined;
+								userData && room.participants.at(0) !== userData.id
+									? (participantId = room.participants.at(0))
+									: (participantId = room.participants.at(1));
 
-							// if it is a friend, display onlinestatus
-							const friend = friends.find((friend) => {
-								return friend.id === participantId;
-							});
-							console.warn('You found a friend in me', friend);
-							// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
-							return (
-								<FriendBadge
-									key={index}
-									badgeTitle={room.name}
-									badgeImageUrl={`http://localhost:3000${room.avatar}`}
-									onlineIndicator={friend ? friend.onlineStatus : false}
-									isClickable={true}
-									onClick={() => {
-										openPrivateMessageWindow(participantId);
-									}}
-								/>
-							);
-						})
-					) : (
-						<FriendBadge isEmptyBadge={true} isChannelBadge={false} />
-					)}
-				</PrivateMessagesList>
-				{settingsPanelIsOpen && (
-					<SettingsWindow settingsWindowVisible={setSettingsPanelIsOpen}>
-						<Title highlightColor="yellow">User name</Title>
-						<div className="settings-form">
-							<InputField
-								onChange={handleLoginChange}
-								error={searchUserError}
-								success={searchUserSuccess}
-							></InputField>
-							<Button
+								// if it is a friend, display onlinestatus
+								const friend = friends.find((friend) => {
+									return friend.id === participantId;
+								});
+								console.warn('You found a friend in me', friend);
+
+								// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
+								return (
+									<FriendBadge
+										key={index}
+										badgeTitle={room.name}
+										badgeImageUrl={`http://localhost:3000${room.avatar}`}
+										onlineIndicator={friend ? friend.onlineStatus : false}
+										isClickable={true}
+										onClick={() => {
+											openPrivateMessageWindow(participantId);
+										}}
+									/>
+								);
+							})
+						) : (
+							<FriendBadge
+								isEmptyBadge={true}
+								isChannelBadge={false}
 								onClick={() => {
-									createNewChatFromLogin();
+									setSettingsPanelIsOpen(true);
 								}}
-							>
-								create chat
-							</Button>
-						</div>
-					</SettingsWindow>
-				)}
-			</Window>
+							/>
+						)}
+					</PrivateMessagesList>
+					{settingsPanelIsOpen && (
+						<SettingsWindow settingsWindowVisible={setSettingsPanelIsOpen}>
+							<Title highlightColor="yellow">User name</Title>
+							<div className="settings-form">
+								<InputField
+									onChange={handleLoginChange}
+									error={searchUserError}
+									success={searchUserSuccess}
+								></InputField>
+								<Button
+									onClick={() => {
+										createNewChatFromLogin();
+									}}
+								>
+									create chat
+								</Button>
+							</div>
+						</SettingsWindow>
+					)}
+				</Window>
+			</div>
 			{chatWindowIsOpen && (
 				<ChatWindow
 					onCloseClick={() => setChatWindowIsOpen(false)}
