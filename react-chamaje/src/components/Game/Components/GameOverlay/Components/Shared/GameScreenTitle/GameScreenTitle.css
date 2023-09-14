@@ -1,0 +1,16 @@
+.game-screen-title {
+	font-size: 6rem;
+	line-height: 4rem;
+	font-family: 'VT323', monospace;
+	color: transparent;
+	background-image: linear-gradient(
+		to bottom right,
+		#c2ffb6b0,
+		#fea4b6fe,
+		#ffa3b6,
+		#dda9ff,
+		#a2d1ff
+	);
+	background-clip: text;
+	text-align: center;
+}

@@ -1,6 +1,6 @@
-import { Paddle } from './Paddle';
+import Paddle from './Paddle';
 
-export class Ball {
+export default class Ball {
 	x: number;
 	y: number;
 	radius: number;

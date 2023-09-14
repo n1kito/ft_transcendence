@@ -52,14 +52,13 @@ const Button: React.FC<MyButtonProps> = ({
 
 	return (
 		<div
+			onClick={handleClick}
 			className={`button-wrapper ${buttonClass} ${
 				disabled ? 'button-disabled' : ''
 			}`}
 			style={buttonStyle}
 		>
-			<button className="colored-button" onClick={handleClick}>
-				{children}
-			</button>
+			<button className="colored-button">{children}</button>
 		</div>
 	);
 };

@@ -89,7 +89,6 @@ export class GameGateway
 				this.userSockets[userId].push(client.id);
 				// Link the socket id to the client Id, so we can find its owner easily
 				this.socketOwners[client.id] = userId;
-				console.log('');
 			}
 		} catch (error) {
 			console.error('Connection error:', error);
@@ -98,9 +97,10 @@ export class GameGateway
 	}
 
 	handleDisconnect(client: Socket) {
+		console.log('📣 SOMEONE IS LEAVING!!!!!');
 		// When a client disconnects, we want to set all of their game sessions
 		// as waiting, so we can handle reconnection later
-		this.setAllUserGameSessionsTo(123, PlayerGameStatus.Waiting);
+		// this.setAllUserGameSessionsTo(123, PlayerGameStatus.Waiting);
 
 		// Remove this socket from the userSockets array
 		// so it's not associated with our user anymore
@@ -142,16 +142,17 @@ export class GameGateway
 			socketOwnerId,
 			'opponent-was-disconnected',
 		);
-		setTimeout(() => {
-			console.log("Let's say that the user has left for goood");
-			// if the user has not reconnected after 10 seconds
-			if (!this.userSockets[socketOwnerId]) {
-				// let all their opponents know that user will not be coming back
-				this.notifyCurrentOpponents(client, socketOwnerId, 'opponent-left');
-				// remove the user from all their active opponent rooms
-				this.gameService.removePlayerFromOpponentRooms(socketOwnerId);
-			}
-		}, 10000);
+		// TODO: fix this
+		// setTimeout(() => {
+		// 	console.log("Let's say that the user has left for goood");
+		// 	// if the user has not reconnected after 10 seconds
+		// 	if (!this.userSockets[socketOwnerId]) {
+		// 		// let all their opponents know that user will not be coming back
+		// 		this.notifyCurrentOpponents(client, socketOwnerId, 'opponent-left');
+		// 		// remove the user from all their active opponent rooms
+		// 		this.gameService.removePlayerFromOpponentRooms(socketOwnerId);
+		// 	}
+		// }, 10000);
 	}
 
 	private findSocketOwner(socketId: string): number | null {
@@ -211,8 +212,7 @@ export class GameGateway
 	// 	// 	}
 	// 	// }
 	// 	try {
-	// 		// Try to find a room for our user
-	// 		const assignedRoom = await this.gameService.handleSoloRoomAssignment(
+	// 		// Try to find a room for our userefault
 	// 			userId,
 	// 		);
 	// 		return {
@@ -320,7 +320,6 @@ export class GameGateway
 		data: { userId: number; roomId: string },
 	) {
 		const { userId, roomId } = data;
-
 		// Retrieve our opponent's information
 		const opponentInformation: { login: string; image: string } =
 			await this.gameService.getOpponentInformation(userId, roomId);
@@ -345,6 +344,7 @@ export class GameGateway
 	// Player notifies that it's ready
 	@SubscribeMessage('player-is-ready')
 	async handlePlayerIsReady(client: Socket, data: { roomId: string }) {
+		console.log(`CURRENT MAP: ${JSON.stringify(this.userSockets, null, 2)}`);
 		const { roomId } = data;
 		// Notify the other users in the room that their opponent is ready
 		client.to(roomId).emit('opponent-is-ready');

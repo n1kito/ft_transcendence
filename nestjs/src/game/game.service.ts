@@ -36,7 +36,10 @@ export class GameService {
 			return players.length === 1 && players[0] != userId;
 		});
 		console.log(
-			`[🏓] Found ${soloRoom ? 'a' : 'no'} room with someone waiting`,
+			`[🏓] Found ${soloRoom ? 'a' : 'no'} room with someone waiting${
+				soloRoom ? ':' : '.'
+			}`,
+			this.roomsMap[soloRoom],
 		);
 		// If a solo room is found, return its id, or return nothing
 		return soloRoom || undefined;
@@ -64,8 +67,11 @@ export class GameService {
 		try {
 			// if the room exists
 			if (this.roomsMap[roomId]) {
+				// for player in the room our player is in
 				for (const playerId of this.roomsMap[roomId]) {
+					// check if the player's id is different from ours
 					if (playerId !== userId) {
+						// and retrieve that user's information
 						const userInformation = await this.prisma.user.findUnique({
 							where: {
 								id: playerId,
@@ -84,6 +90,7 @@ export class GameService {
 			return undefined;
 		}
 	}
+
 
 	// Deletes all the rooms a user is alone in
 	deletePlayerSoloRooms(userId: number) {

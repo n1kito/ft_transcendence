@@ -1,62 +1,71 @@
 import { error } from 'console';
 import React from 'react';
 import { Socket, io } from 'socket.io-client';
+import { IGameDataProps } from '../contexts/GameContext';
 
 type ReactBooleanSeter = React.Dispatch<React.SetStateAction<boolean>>;
 type ReactStringSeter = React.Dispatch<React.SetStateAction<string>>;
 
-interface IGameDataProps {
-	gameRoomId: number;
-	opponentId?: number;
-	opponentLogin?: string;
-	opponentImage?: string;
-}
+// interface IGameDataProps {
+// 	gameRoomId: number;
+// 	opponentId?: number;
+// 	opponentLogin?: string;
+// 	opponentImage?: string;
+// }
 
 export class GameSocket {
 	// Variables
 	private socket: Socket | undefined;
 	private userId: number;
 	private accessToken: string;
-	private currentGameRoomId: string | undefined; // TODO: this should be a state in the game, so if the other player leaves we can set it to null and start the process again
 
 	// Setters
 	// These will come from the Game component, and will help us update the
 	// Game component with what the server says
-	private setPlayerInRoom: ReactBooleanSeter;
-	private setPlayer2Ready: ReactBooleanSeter;
-	private setGameCanStart: ReactBooleanSeter;
-	private setOpponentIsReconnecting: ReactBooleanSeter;
-	private setConnectedToServer: ReactBooleanSeter;
-	private setConnectionStatus: ReactStringSeter;
-	private setOpponentInfo: React.Dispatch<
-		React.SetStateAction<{ login: string; image: string } | undefined>
-	>;
+	// private setPlayerInRoom: ReactBooleanSeter;
+	// private setPlayer2Ready: ReactBooleanSeter;
+	// private setGameCanStart: ReactBooleanSeter;
+	// private setOpponentIsReconnecting: ReactBooleanSeter;
+	// private setConnectedToServer: ReactBooleanSeter;
+	// private setConnectionStatus: ReactStringSeter;
+	// private setOpponentInfo: React.Dispatch<
+	// 	React.SetStateAction<{ login: string; image: string } | undefined>
+	// >;
+	private gameData: IGameDataProps;
+	private updateGameData: (updates: Partial<IGameDataProps>) => void;
+	private resetGamedata: () => void;
 
 	constructor(
 		userId: number,
 		accessToken: string,
-		setPlayerInRoom: ReactBooleanSeter,
-		player2ReadySeter: ReactBooleanSeter,
-		gameCanStartSeter: ReactBooleanSeter,
-		connectedToServerSeter: ReactBooleanSeter,
-		setConnectionStatus: ReactStringSeter,
-		setOpponentInfo: React.Dispatch<
-			React.SetStateAction<{ login: string; image: string } | undefined>
-		>,
-		setOpponentIsReconnecting: ReactBooleanSeter,
+		// setPlayerInRoom: ReactBooleanSeter,
+		// player2ReadySeter: ReactBooleanSeter,
+		// gameCanStartSeter: ReactBooleanSeter,
+		// connectedToServerSeter: ReactBooleanSeter,
+		// setConnectionStatus: ReactStringSeter,
+		// setOpponentInfo: React.Dispatch<
+		// 	React.SetStateAction<{ login: string; image: string } | undefined>
+		// >,
+		// setOpponentIsReconnecting: ReactBooleanSeter,
+		gamedata: IGameDataProps,
+		updateGamedata: (updates: Partial<IGameDataProps>) => void,
+		resetGameData: () => void,
 	) {
 		// Initialize variables
 		this.userId = userId;
 		this.accessToken = accessToken;
 
 		// Initialize setters
-		this.setPlayerInRoom = setPlayerInRoom;
-		this.setPlayer2Ready = player2ReadySeter;
-		this.setGameCanStart = gameCanStartSeter;
-		this.setConnectedToServer = connectedToServerSeter;
-		this.setConnectionStatus = setConnectionStatus;
-		this.setOpponentInfo = setOpponentInfo;
-		this.setOpponentIsReconnecting = setOpponentIsReconnecting;
+		this.gameData = gamedata;
+		this.updateGameData = updateGamedata;
+		this.resetGamedata = resetGameData;
+		// this.setPlayerInRoom = setPlayerInRoom;
+		// this.setPlayer2Ready = player2ReadySeter;
+		// this.setGameCanStart = gameCanStartSeter;
+		// this.setConnectedToServer = connectedToServerSeter;
+		// this.setConnectionStatus = setConnectionStatus;
+		// this.setOpponentInfo = setOpponentInfo;
+		// this.setOpponentIsReconnecting = setOpponentIsReconnecting;
 	}
 
 	// Try to initiate a socket connection with the server
@@ -70,22 +79,28 @@ export class GameSocket {
 			});
 			// if (!this.connectionSocket) return;
 			this.socket.on('connect', () => {
-				console.log('Connected to server ! 🔌🟢 ');
+				this.log('Connected to server ! 🔌🟢 ');
 			});
 			this.socket.on('identification_ok', () => {
 				// Notify the game component that we are connected to the server
-				this.setConnectedToServer(true);
+				this.updateGameData({ connectedToServer: true });
 			});
 			this.socket.on('connect_error', (error: Error) => {
-				this.setConnectionStatus('Connection error');
+				this.updateGameData({ connectionErrorStatus: 'Connection error' });
+				// this.setConnectionStatus('Connection error');
 			});
 			this.socket.on('connect_timeout', () => {
-				this.setConnectionStatus('Connection timeout');
+				this.updateGameData({ connectionErrorStatus: 'Connection timeout' });
+				// this.setConnectionStatus('Connection timeout');
 			});
 			this.socket.on('connection_limit_reached', () => {
-				this.setConnectionStatus(
-					'Too many connections, please close some tabs and refresh !',
-				);
+				this.updateGameData({
+					connectionErrorStatus:
+						'Too many connections, please close some tabs and refresh !',
+				});
+				// this.setConnectionStatus(
+				// 	'Too many connections, please close some tabs and refresh !',
+				// );
 			});
 			// Listen for the 'disconnect' event prevent reconnection from wanted disconnection
 			this.socket.on('disconnect', (reason) => {
@@ -101,7 +116,10 @@ export class GameSocket {
 				}
 			});
 		} catch (error) {
-			this.setConnectionStatus('Connection failed: ' + error);
+			this.updateGameData({
+				connectionErrorStatus: 'Connection failed: ' + error,
+			});
+			// this.setConnectionStatus('Connection failed: ' + error);
 			// Throw on error, so the parent component cannot try to interact
 			// with the server if they are not connected to it
 			throw new Error('Could not connect to server');
@@ -127,51 +145,60 @@ export class GameSocket {
 				opponentId: opponentId,
 			});
 			// if the server succeeds
+			// TODO: type the roomInfo so we know what to expect
+			// Maybe store all types in a separate file ?
 			this.socket?.on('room-joined', (roomInfo) => {
 				this.log(`Server put us in room ${roomInfo.id}.`);
-				this.currentGameRoomId = roomInfo.id;
 				// let the front know we have been assigned a room
-				this.setPlayerInRoom(true);
+				this.updateGameData({ roomId: roomInfo.id });
+				// this.setPlayerInRoom(true);
 
 				// set the socket to monitor/receive opponent information
 				this.socket?.on(`room-is-full`, () => {
 					this.log('Got notified that the room is full');
-					this.log('Requesting opponent information');
-					this.socket?.emit('request-opponent-info', {
-						userId: this.userId,
-						roomId: this.currentGameRoomId,
-					});
+					this.updateGameData({ roomIsFull: true });
+					// this.socket?.emit('request-opponent-info', {
+					// 	userId: this.userId,
+					// 	roomId: this.gameData.roomId,
+					// });
 				});
 				// and request that information
 				this.socket?.on(
 					'server-opponent-info',
 					(opponentInfo: { login: string; image: string }) => {
-						// this.log(`My opponent: ${JSON.stringify(opponentInfo, null, 2)}`);
+						this.log(`My opponent: ${JSON.stringify(opponentInfo, null, 2)}`);
 						this.log('Opponent information received');
-						this.setOpponentInfo(opponentInfo);
+						this.updateGameData({ opponentInfo: opponentInfo });
+						// this.setOpponentInfo(opponentInfo);
 					},
 				);
 
 				// look out for when the opponent is ready
 				this.socket?.on('opponent-is-ready', () => {
-					this.setPlayer2Ready(true);
-					// TODO: I can't test this without someone else's account
+					this.updateGameData({ player2Ready: true });
+					// this.setPlayer2Ready(true);
 				});
 
 				// look out for when opponent might be temporarily disconnected
 				this.socket?.on('opponent-was-disconnected', () => {
 					this.log('Opponent was disconnected but might come back !');
-					this.setPlayer2Ready(false);
-					this.setOpponentIsReconnecting(true);
+					this.updateGameData({ player2Ready: false });
+					this.updateGameData({ opponentIsReconnecting: true });
+					// this.setPlayer2Ready(false);
+					// this.setOpponentIsReconnecting(true);
 				});
 
 				// look out for when opponent might be disconnected
 				this.socket?.on('opponent-left', () => {
 					this.log('Opponent left for good :(');
 					// Let the game know that player2 is not ready
-					this.setOpponentIsReconnecting(false);
+					this.updateGameData({
+						opponentIsReconnecting: false,
+						opponentInfo: undefined,
+					});
+					// this.setOpponentIsReconnecting(false);
 					// And that actually we don't have a player2 anymore
-					this.setOpponentInfo(undefined);
+					// this.setOpponentInfo(undefined);
 				});
 			});
 			// if there was an error joining a room
@@ -180,13 +207,24 @@ export class GameSocket {
 				throw new Error('error joining room');
 			});
 		} catch (error) {
-			this.setConnectionStatus('Could not join room: ' + error);
+			this.updateGameData({
+				connectionErrorStatus: 'Could not join room: ' + error,
+			});
+			// this.setConnectionStatus('Could not join room: ' + error);
 		}
+	}
+
+	requestOpponentInfo() {
+		this.log(`Requesting opponent info for room: ${this.gameData.roomId}`);
+		this.socket?.emit('request-opponent-info', {
+			userId: this.userId,
+			roomId: this.gameData.roomId,
+		});
 	}
 
 	notifyPlayer1Ready() {
 		this.socket?.emit('player-is-ready', {
-			roomId: this.currentGameRoomId,
+			roomId: this.gameData.roomId,
 		});
 	}
 

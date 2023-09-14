@@ -1,0 +1,41 @@
+.game-selection-screen-window-wrapper {
+	background-color: #fbd9f6;
+	border: 3px solid black;
+	border-radius: 1rem;
+	overflow: hidden;
+	height: fit-content;
+	max-height: 90%;
+	max-width: 90%;
+}
+
+.game-selection-screen-window-titlebar {
+	background-color: white;
+	padding: 0.3rem 1rem;
+	text-align: center;
+	border-bottom: 3px solid black;
+
+	font-family: 'VT323', monospace;
+	font-size: 2rem;
+}
+
+.game-selection-screen-window-content {
+	padding: 1.5rem 2rem;
+
+	display: flex;
+	flex-direction: row;
+	gap: 2rem;
+	align-items: center;
+}
+
+.game-selection-screen-window-content > span {
+	font-family: 'VT323', monospace;
+	text-shadow: 4px 4px 0px #f8ef57;
+	font-size: 7rem;
+	/* letter-spacing: 0.5px; */
+}
+
+.game-selection-screen-buttons {
+	display: flex;
+	flex-direction: row;
+	gap: 2rem;
+}
