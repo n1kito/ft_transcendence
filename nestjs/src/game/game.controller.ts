@@ -4,7 +4,7 @@ import { CustomRequest } from 'src/user/user.controller';
 import { UserService } from 'src/user/user.service';
 import { Response } from 'express';
 import { TokenService } from 'src/token/token.service';
-import { GameRoomStatus } from '@prisma/client';
+// import { GameRoomStatus } from '@prisma/client';
 import { GameService } from './game.service';
 import AuthService from 'src/auth/auth.service';
 

@@ -9,7 +9,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { GameService } from './game.service';
-import { GameRoomStatus, PlayerGameStatus, gameRoom } from '@prisma/client';
+// import { GameRoomStatus, PlayerGameStatus, gameRoom } from '@prisma/client';
 import * as jwt from 'jsonwebtoken';
 
 interface IRoomInformationProps {
@@ -57,17 +57,17 @@ export class GameGateway
 	}
 
 	afterInit(server: Server) {
-		console.log('🦄 Server initialized !');
+		console.log('[🦄] Server initialized !');
 	}
 
 	// TODO: only allow our user to have one socket at a time ?
 	handleConnection(client: Socket, ...args: any[]) {
-		console.log('🟢 Client connected: ', client.id);
+		console.log('[🟢] Client connected: ', client.id);
 		try {
 			const decodedPayload = decodeToken(client);
 			// Extract our userId from the payload, so we know who's connected
 			const userId = decodedPayload.userId;
-			console.log(`🎉 Client token verified for user ${userId}!`);
+			console.log(`[🎉] Client token verified for user ${userId}!`);
 			client.emit('identification_ok');
 			// Add the userId to our map along with they socket identifier
 			// This allows to to track all the sockets our user is using to
@@ -80,7 +80,7 @@ export class GameGateway
 			// it's not the fete ici.
 			if (this.userSockets[userId].length === 5) {
 				console.log(
-					`❗User #${userId} already has ${this.userSockets[userId].length} sockets in use, we say NO.`,
+					`[❗] User #${userId} already has ${this.userSockets[userId].length} sockets in use, we say NO.`,
 				);
 				client.emit('connection_limit_reached');
 				throw new Error('user reached max connections');
@@ -97,7 +97,6 @@ export class GameGateway
 	}
 
 	handleDisconnect(client: Socket) {
-		console.log('📣 SOMEONE IS LEAVING!!!!!');
 		// When a client disconnects, we want to set all of their game sessions
 		// as waiting, so we can handle reconnection later
 		// this.setAllUserGameSessionsTo(123, PlayerGameStatus.Waiting);
@@ -120,18 +119,21 @@ export class GameGateway
 		// Also remove that socket from the socketOwners map
 		if (client.id in this.socketOwners) delete this.socketOwners[client.id];
 		console.log(
-			'🔴 Client %s disconnected from socket %s',
+			'[🔴] Client %s disconnected from socket %s',
 			socketOwnerId,
 			client.id,
 		);
 		if (Object.keys(this.socketOwners).length > 0)
 			console.log(
-				'📊 Here are the sockets we are still tracking: ',
+				'[📊] Here are the sockets we are still tracking: ',
 				this.socketOwners,
 			);
 		if (Object.keys(this.userSockets).length > 0)
-			console.log('📊 Here are the users still connected: ', this.userSockets);
-		else console.log('📊 There are no more users connected');
+			console.log(
+				'[📊] Here are the users still connected: ',
+				this.userSockets,
+			);
+		else console.log('[📊] There are no more users connected');
 
 		// When a user leaves:
 		// - Remove all the rooms they were alone in
@@ -397,40 +399,40 @@ export class GameGateway
 	// }
 
 	// Event used by users to notify the server they are ready to play
-	@SubscribeMessage('player-is-ready')
-	async handlePlayerReady(
-		client: Socket,
-		data: { userId: number; roomId: number },
-	) {
-		// broadcast to everyone in the room other than the sender that they are ready
-		client.to(`game-room-#${data.roomId}`).emit('opponent-is-ready');
-	}
+	// @SubscribeMessage('player-is-ready')
+	// async handlePlayerReady(
+	// 	client: Socket,
+	// 	data: { userId: number; roomId: number },
+	// ) {
+	// 	// broadcast to everyone in the room other than the sender that they are ready
+	// 	client.to(`game-room-#${data.roomId}`).emit('opponent-is-ready');
+	// }
 
 	// User has been assigned a room and would like to know who they're playing against
-	@SubscribeMessage('request-opponent-info')
-	async shareOpponentInfo(
-		client: any,
-		data: { userId: number; roomId: number },
-	) {}
+	// @SubscribeMessage('request-opponent-info')
+	// async shareOpponentInfo(
+	// 	client: any,
+	// 	data: { userId: number; roomId: number },
+	// ) {}
 
-	private getRoomClientCount(roomId: number): number {
-		const roomClients = this.server.sockets.adapter.rooms.get(`${roomId}`);
-		return roomClients ? roomClients.size : 0;
-	}
+	// private getRoomClientCount(roomId: number): number {
+	// 	const roomClients = this.server.sockets.adapter.rooms.get(`${roomId}`);
+	// 	return roomClients ? roomClients.size : 0;
+	// }
 
 	// Changes the status of all the game sessions of a user
 	// (Useful when user disconnects so we can set him as waiting everywhere at once)
-	private async setAllUserGameSessionsTo(
-		userId: number,
-		newStatus: PlayerGameStatus,
-	): Promise<void> {
-		await this.prisma.gameSession.updateMany({
-			where: {
-				userId: userId,
-			},
-			data: {
-				playerStatus: newStatus,
-			},
-		});
-	}
+	// private async setAllUserGameSessionsTo(
+	// 	userId: number,
+	// 	newStatus: PlayerGameStatus,
+	// ): Promise<void> {
+	// 	await this.prisma.gameSession.updateMany({
+	// 		where: {
+	// 			userId: userId,
+	// 		},
+	// 		data: {
+	// 			playerStatus: newStatus,
+	// 		},
+	// 	});
+	// }
 }

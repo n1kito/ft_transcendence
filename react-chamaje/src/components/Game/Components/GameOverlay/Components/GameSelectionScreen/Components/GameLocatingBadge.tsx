@@ -13,24 +13,24 @@ import xavier from '../../../../../../Profile/Components/TargetBadge/images/roul
 // is not setup in
 
 const GameLocatingBadge = () => {
-	const [backgroundImage, setBackgroundImage] = useState(chucky);
 	const [imageIndex, setImageIndex] = useState(0);
 
 	const imagesArray = [chucky, norminet, scream, sophie, theRing, xavier];
 
 	useEffect(() => {
 		setTimeout(() => {
-			setBackgroundImage(imagesArray[imageIndex]);
 			setImageIndex(imageIndex == imagesArray.length - 1 ? 0 : imageIndex + 1);
 		}, 500);
-	}, [backgroundImage, imageIndex]);
+	}, [imageIndex]);
 
 	return (
 		<ShadowWrapper shadow={false} isClickable={false}>
 			<div className="game-locating-badge-wrapper">
 				<div
 					className="game-locating-badge-background"
-					style={{ backgroundImage: `url(${backgroundImage})` }}
+					style={{
+						backgroundImage: `url(${imagesArray[imageIndex]})`,
+					}}
 				></div>
 			</div>
 		</ShadowWrapper>

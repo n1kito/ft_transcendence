@@ -15,12 +15,12 @@ import { useGameSocket } from '../../hooks/useGameSocket';
 import { join } from 'path';
 import GameCanvas from './Components/GameCanvas/GameCanvas';
 
-interface IGameRoomProps {
-	roomId: number; // TODO: this should not be given by the props, it should instead be found by the game component
-	// we should only need to tell the component who we are trying to play against
-	opponentLogin: string;
-	opponentAvatar: string; // TODO: this should also not be given when opening the component
-}
+// interface IGameRoomProps {
+// 	roomId: number; // TODO: this should not be given by the props, it should instead be found by the game component
+// 	// we should only need to tell the component who we are trying to play against
+// 	opponentLogin: string;
+// 	opponentAvatar: string; // TODO: this should also not be given when opening the component
+// }
 
 interface IGameProps {
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
@@ -37,7 +37,7 @@ const Game: React.FC<IGameProps> = ({
 	// Import the game context, so it can be used everywhere
 	const { gameData, updateGameData, resetGameData } = useContext(GameContext);
 	// use our socket hook
-	const { disconnectSocket, joinRoom, requestOpponentInfo, setPlayer1AsReady } =
+	const { joinRoom, requestOpponentInfo, setPlayer1AsReady } =
 		useGameSocket();
 
 	// If we're connected to the socket and don't have a room, ask for one
@@ -63,14 +63,6 @@ const Game: React.FC<IGameProps> = ({
 		if (gameData.player1Ready && gameData.player2Ready)
 			updateGameData({ gameCanStart: true });
 	}, [gameData.player1Ready, gameData.player2Ready]);
-
-	useEffect(() => {
-		return () => {
-			console.log('disconnecting socket');
-			if (gameData.socket) console.log('gamedata still has a socket');
-			disconnectSocket();
-		};
-	}, []);
 
 	return (
 		<Window

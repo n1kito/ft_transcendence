@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { GameRoomStatus, gameRoom } from '@prisma/client';
+// import { GameRoomStatus, gameRoom } from '@prisma/client';
 import { create } from 'domain';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { randomBytes } from 'crypto';
@@ -91,7 +91,6 @@ export class GameService {
 		}
 	}
 
-
 	// Deletes all the rooms a user is alone in
 	deletePlayerSoloRooms(userId: number) {
 		for (const roomId in this.roomsMap) {
@@ -102,6 +101,13 @@ export class GameService {
 					`[🧹] User #${userId} was alone in room ${roomId}, removing it`,
 				);
 				delete this.roomsMap[roomId];
+				console.log(
+					`[🧹] Current state of rooms: ${JSON.stringify(
+						this.roomsMap,
+						null,
+						4,
+					)}`,
+				);
 			}
 		}
 	}

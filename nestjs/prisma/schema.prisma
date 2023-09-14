@@ -18,14 +18,6 @@ enum PlayerGameStatus {
     Finished // Player finished the game
 }
 
-
-enum GameRoomStatus {
-    Waiting // Waiting for players to join
-    Full // Two players have joined the game
-    InProgress // The game has started
-    Finished // The game has ended
-}
-
 model User {
     id        Int      @id @unique @default(autoincrement())
     ft_id     Int?     @unique
@@ -67,8 +59,6 @@ model Game {
     id         Int           @id @default(autoincrement())
     playedAt   DateTime      @default(now())
     players    gameSession[]
-    gameRoom   gameRoom      @relation(fields: [gameRoomId], references: [id])
-    gameRoomId Int           @unique
 }
 
 model gameSession {
@@ -80,10 +70,4 @@ model gameSession {
     score        Int              @default(0)
     isWinner     Boolean          @default(false)
     playerStatus PlayerGameStatus @default(Waiting)
-}
-
-model gameRoom {
-    id         Int            @id @default(autoincrement())
-    gameStatus GameRoomStatus @default(Waiting)
-    game       Game?
 }

@@ -4,6 +4,7 @@ import { GameContext } from '../contexts/GameContext';
 import { Socket, io } from 'socket.io-client';
 import { useIsomorphicLayoutEffect } from 'framer-motion';
 import useAuth from './userAuth';
+import { GameSocket } from '../services/GameSocket';
 
 export const useGameSocket = () => {
 	// Import necessary contexts
@@ -11,29 +12,26 @@ export const useGameSocket = () => {
 	const { gameData, updateGameData, resetGameData } = useContext(GameContext);
 	const { accessToken } = useAuth();
 
-	// Set a socket state
-	const [socket, setSocket] = useState<Socket | null>(null);
+	// Set a socket Ref so I can use it anywhere in this hook
+	const socketRef = useRef<Socket | null>(null);
 
 	// on hook init
 	useEffect(() => {
-		if (!gameData.socket) {
+		if (!socketRef.current) {
 			// Initialize the socket connection
-			const gameSocket = io({
+			socketRef.current = io({
 				path: '/ws/',
 				reconnection: false,
 				auth: { accessToken: accessToken },
 			});
 			// Store it in our context
-			updateGameData({ socket: gameSocket });
+			updateGameData({ socket: socketRef.current });
 		}
 
 		return () => {
-			// if (gameData.socket?.connected) socketLog('socket is still connected');
-			// // if (gameData.socket?.connected) socketLog('socket is still connected');
-			// socketLog('Disconnecting socket...');
-			// // gameData.socket?.off();
-			// gameData.socket?.disconnect(); // TODO: this does not trigger a disconnect server side
+			socketLog('Disconnecting socket 🔴');
 			// // TODO: when the socket is disconnected, all the listener should be removed with the off method I think
+			socketRef.current?.disconnect();
 		};
 	}, []);
 
@@ -45,19 +43,12 @@ export const useGameSocket = () => {
 		);
 	};
 
-	const disconnectSocket = () => {
-		if (gameData.socket?.connected) socketLog('socket is still connected');
-		gameData.socket?.disconnect(); // TODO: this does not trigger a disconnect server side
-		updateGameData({ socket: undefined });
-	};
-
 	// Once a socket is assigned, setup our basic listeners
 	useEffect(() => {
 		if (!gameData.socket) return;
 
-		// if (!this.connectionSocket) return;
 		gameData.socket.on('connect', () => {
-			socketLog('Connected to server ! 🔌🟢 ');
+			socketLog('Connected to server ! 🟢 ');
 		});
 		gameData.socket.on('identification_ok', () => {
 			socketLog('Server authentification confirmed');
@@ -96,25 +87,25 @@ export const useGameSocket = () => {
 		socketLog('Asking for a room...');
 		try {
 			// ask the server to assign us a room
-			gameData.socket?.emit('join-room', {
+			socketRef.current?.emit('join-room', {
 				userId: userData?.id,
 				opponentId: undefined, // TODO: this should not be undefined when opened from a chat
 			});
 
 			// if the server succeeds
-			gameData.socket?.on('room-joined', (roomInfo) => {
+			socketRef.current?.on('room-joined', (roomInfo) => {
 				socketLog(`Server put us in room ${roomInfo.id}.`);
 				// let the front know we have been assigned a room
 				updateGameData({ roomId: roomInfo.id });
 				// setPlayerInRoom(true);
 
 				// set the socket to monitor/receive opponent information
-				gameData.socket?.on(`room-is-full`, () => {
+				socketRef.current?.on(`room-is-full`, () => {
 					socketLog('Got notified that the room is full');
 					updateGameData({ roomIsFull: true });
 				});
 				// and request that information
-				gameData.socket?.on(
+				socketRef.current?.on(
 					'server-opponent-info',
 					(opponentInfo: { login: string; image: string }) => {
 						socketLog(`My opponent: ${JSON.stringify(opponentInfo, null, 2)}`);
@@ -125,14 +116,14 @@ export const useGameSocket = () => {
 				);
 
 				// look out for when the opponent is ready
-				gameData.socket?.on('opponent-is-ready', () => {
+				socketRef.current?.on('opponent-is-ready', () => {
 					socketLog('Got news that our opponent is ready');
 					updateGameData({ player2Ready: true });
 					// setPlayer2Ready(true);
 				});
 
 				// look out for when opponent might be temporarily disconnected
-				gameData.socket?.on('opponent-was-disconnected', () => {
+				socketRef.current?.on('opponent-was-disconnected', () => {
 					// TODO: I DO NOT RECEIVE THIS ANYMORE, WHAT IS THE FUCK
 					socketLog('Opponent was disconnected but might come back !');
 					updateGameData({ player2Ready: false });
@@ -142,7 +133,7 @@ export const useGameSocket = () => {
 				});
 
 				// look out for when opponent might be disconnected
-				gameData.socket?.on('opponent-left', () => {
+				socketRef.current?.on('opponent-left', () => {
 					socketLog('Opponent left for good :(');
 					// Let the game know that player2 is not ready
 					updateGameData({
@@ -154,7 +145,7 @@ export const useGameSocket = () => {
 					// setOpponentInfo(undefined);
 				});
 				// if there was an error joining a room
-				gameData.socket?.on('error-joining-room', () => {
+				socketRef.current?.on('error-joining-room', () => {
 					socketLog('error joining room');
 					throw new Error('error joining room');
 				});
@@ -168,17 +159,17 @@ export const useGameSocket = () => {
 
 	const requestOpponentInfo = () => {
 		socketLog(`Requesting opponent info for room: ${gameData.roomId}`);
-		gameData.socket?.emit('request-opponent-info', {
+		socketRef.current?.emit('request-opponent-info', {
 			userId: userData?.id,
 			roomId: gameData.roomId,
 		});
 	};
 
 	const setPlayer1AsReady = () => {
-		gameData.socket?.emit('player-is-ready', {
+		socketRef.current?.emit('player-is-ready', {
 			roomId: gameData.roomId,
 		});
 	};
 
-	return { disconnectSocket, joinRoom, requestOpponentInfo, setPlayer1AsReady };
+	return { joinRoom, requestOpponentInfo, setPlayer1AsReady };
 };
