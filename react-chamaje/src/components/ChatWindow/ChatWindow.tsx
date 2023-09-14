@@ -91,7 +91,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	useEffect(() => {
 		const container = chatContentRef.current;
 		container?.scrollIntoView({ behavior: 'smooth' });
-	}, [messages]); 
+	}, [messages]);
 
 	const openSettingsPanel = () => {
 		setSettingsPanelIsOpen(!settingsPanelIsOpen);
@@ -208,6 +208,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 
 						return (
 							<ChatBubble
+								key={index}
 								wasSent={
 									userData && currentMessage.sentById === userData.id
 										? true
@@ -217,7 +218,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 								time={date.toLocaleString('en-US', dateFormatOptions)}
 								senderAvatar={currentMessage.avatar}
 								isLast={isLast}
-								// messageRef={chatContentRef}
 							>
 								{
 									<div
