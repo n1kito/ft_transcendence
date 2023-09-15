@@ -12,9 +12,13 @@
 	left: 50%;
 	transform: translate(-50%, -50%);
 	content: '?';
-	/* color: lightpink; */
+	color: yellow;
 	font-family: 'VT323', monospace;
 	font-size: 5rem;
+	/* color: transparent; */
+	/* background-image: linear-gradient(green, blue); */
+	text-shadow: yellowgreen 1px 0 10px;
+	/* background-clip: text; */
 }
 
 .game-locating-badge-background {
@@ -24,4 +28,7 @@
 	background-size: cover;
 	background-position: center;
 	border-radius: 0.5rem;
+	position: absolute;
+	top: 0;
+	left: 0;
 }

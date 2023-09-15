@@ -144,17 +144,6 @@ export class GameGateway
 			socketOwnerId,
 			'opponent-was-disconnected',
 		);
-		// TODO: fix this
-		// setTimeout(() => {
-		// 	console.log("Let's say that the user has left for goood");
-		// 	// if the user has not reconnected after 10 seconds
-		// 	if (!this.userSockets[socketOwnerId]) {
-		// 		// let all their opponents know that user will not be coming back
-		// 		this.notifyCurrentOpponents(client, socketOwnerId, 'opponent-left');
-		// 		// remove the user from all their active opponent rooms
-		// 		this.gameService.removePlayerFromOpponentRooms(socketOwnerId);
-		// 	}
-		// }, 10000);
 	}
 
 	private findSocketOwner(socketId: string): number | null {
@@ -171,64 +160,6 @@ export class GameGateway
 		// Notify the opponents that we got disconnected
 		for (const roomId of activeRoomIds) this.server.in(roomId).emit(eventTitle);
 	}
-
-	// @SubscribeMessage('onlineStatusConfirmation')
-	// handleMessage(
-	// 	client: any,
-	// 	payload: any,
-	// ): { event: string; data: { message: string } } {
-	// 	console.log('Client wants to make sure they are connected');
-	// 	return {
-	// 		event: 'onlineStatusResponse',
-	// 		data: { message: 'Hey gorgeous ! 😘 You are indeed connected' },
-	// 	};
-	// }
-
-	// // User requested a game room for themselves, they don't already have an opponent
-	// @SubscribeMessage('request solo game room')
-	// async assignSoloGameRoom(
-	// 	client: any,
-	// 	payload: { userId: number },
-	// ): Promise<{ event: string; data: { gameRoomId: number } }> {
-	// 	console.log('Client would like to find a solo room !');
-
-	// 	// let assignedRoom;
-	// 	const userId = payload.userId;
-
-	// 	// // Find an available room the user might already be in
-	// 	// assignedRoom = await this.gameService.findAvailableRoomUserIsIn(
-	// 	// 	payload.userId,
-	// 	// );
-	// 	// if (!assignedRoom) {
-	// 	// 	// If there are none, find any available room with "Waiting"
-	// 	// 	// status that our user is not already in
-	// 	// 	assignedRoom = await this.gameService.findRoomWaiting(payload.userId);
-	// 	// 	if (!assignedRoom) {
-	// 	// 		// If there are no available rooms, create one with our user inside
-	// 	// 		assignedRoom = await this.gameService.createRoomWithSingleUser(
-	// 	// 			payload.userId,
-	// 	// 		);
-	// 	// 		if (!assignedRoom)
-	// 	// 			// If there is still no room assigned, there was an error somewhere
-	// 	// 			throw new Error('Could not assign room to single player');
-	// 	// 	}
-	// 	// }
-	// 	try {
-	// 		// Try to find a room for our userefault
-	// 			userId,
-	// 		);
-	// 		return {
-	// 			event: 'assigned game room',
-	// 			data: { gameRoomId: assignedRoom.id },
-	// 		};
-	// 	} catch (error) {
-	// 		console.error(
-	// 			'this.userSockets.lengthould not assign solo game room: ',
-	// 			error,
-	// 		);
-	// 		return { event: 'error assigning solo room', data: { gameRoomId: -1 } };
-	// 	}
-	// }
 
 	// This will look for a room for the user, join the room and add them to the corresponding
 	// socket room, so they can receive updates. The user will received the roomId so they
@@ -266,55 +197,6 @@ export class GameGateway
 		}
 	}
 
-	// This will look for a room for the user, join the room and add them to the corresponding
-	// socket room, so they can receive updates. The user will received the roomId so they
-	// know how to communicate to it as well.
-	// @SubscribeMessage('join-room')
-	// async joinRoom(
-	// 	client: any,
-	// 	data: { userId: number; opponentId: number | undefined },
-	// ) {
-	// 	try {
-	// 		let assignedRoom: string;
-
-	// 		// Find a room for our user and their opponent
-	// 		if (data.opponentId) {
-	// 			console.log(`🏓 User would like to play with user #${data.opponentId}`);
-	// 			assignedRoom = await this.gameService.handleAdversaryRoomAssignment(
-	// 				data.userId,
-	// 				data.opponentId,
-	// 			);
-	// 		}
-	// 		// Find an available room or create a room for our user
-	// 		else {
-	// 			console.log('🏓 User would like to be paired with someone');
-	// 			assignedRoom = await this.gameService.handleSoloRoomAssignment(
-	// 				data.userId,
-	// 			);
-	// 		}
-	// 		console.log('Assigned room', JSON.stringify(assignedRoom, null, 2));
-	// 		// Join the user to the socket room corresponding to it
-	// 		const roomName = `game-room-#${assignedRoom.id}`;
-	// 		console.log('Room name is: ', roomName);
-	// 		client.join(roomName);
-	// 		client.emit('room-joined', {
-	// 			id: assignedRoom.id,
-	// 			state: assignedRoom.gameStatus,
-	// 		});
-
-	// 		// If the room is full, notify both users
-	// 		if (assignedRoom.gameStatus === GameRoomStatus.Full) {
-	// 			this.server.in(roomName).emit('room-is-full');
-	// 			// TODO: I STOPPED HERE, I ACTUALLY NEED TO SEND THE INFORMATION
-	// 			// AND THEN IN THE FRONT IDENFITY WHICH IS OUR OPPONENT AND UPDATE
-	// 			// THE GAME STATE THIS WAY
-	// 		}
-	// 	} catch (error) {
-	// 		console.error('Could not join game room: ', error);
-	// 		client.emit('error-joining-room');
-	// 	}
-	// }
-
 	// Send users their opponent's information
 	@SubscribeMessage('request-opponent-info')
 	async handleOpponentInfoRequest(
@@ -329,20 +211,6 @@ export class GameGateway
 		client.emit('server-opponent-info', opponentInformation);
 	}
 
-	// // Send users their opponent's information
-	// @SubscribeMessage('request-opponent-info')
-	// async shareOpponentInformation(
-	// 	client: any,
-	// 	data: { userId: number; roomId: number },
-	// ) {
-	// 	const opponentInformation: {
-	// 		login: string;
-	// 		image: string;
-	// 	} = await this.getOpponentInformation({ ...data });
-	// 	client.emit('server-opponent-info', opponentInformation);
-	// 	// broadcast the opponent information to client
-	// }
-
 	// Player notifies that it's ready
 	@SubscribeMessage('player-is-ready')
 	async handlePlayerIsReady(client: Socket, data: { roomId: string }) {
@@ -352,87 +220,12 @@ export class GameGateway
 		client.to(roomId).emit('opponent-is-ready');
 	}
 
-	// async getOpponentInformation(data: {
-	// 	userId: number;
-	// 	roomId: number;
-	// }): Promise<{ login: string; image: string }> {
-	// 	// Extract necessary information
-	// 	const { userId, roomId } = data;
-	// 	console.log(
-	// 		`User ${userId} would like to know who they're playing against !`,
-	// 	);
-
-	// 	const gameRoomInfo = await this.prisma.gameRoom.findUnique({
-	// 		where: {
-	// 			id: roomId,
-	// 		},
-	// 		select: {
-	// 			game: {
-	// 				select: {
-	// 					players: {
-	// 						where: {
-	// 							userId: {
-	// 								not: userId,
-	// 							},
-	// 						},
-	// 						select: {
-	// 							user: {
-	// 								select: {
-	// 									login: true,
-	// 									image: true,
-	// 								},
-	// 							},
-	// 						},
-	// 					},
-	// 				},
-	// 			},
-	// 		},
-	// 	});
-	// 	// TODO: protect for if my opponent is not in the room anymore
-	// 	// by the time I look for it
-	// 	const opponentInfo = gameRoomInfo.game.players[0].user;
-	// 	console.log('Opponent is: ', JSON.stringify(opponentInfo, null, 2));
-	// 	return {
-	// 		login: opponentInfo.login,
-	// 		image: opponentInfo.image,
-	// 	};
-	// }
-
-	// Event used by users to notify the server they are ready to play
-	// @SubscribeMessage('player-is-ready')
-	// async handlePlayerReady(
-	// 	client: Socket,
-	// 	data: { userId: number; roomId: number },
-	// ) {
-	// 	// broadcast to everyone in the room other than the sender that they are ready
-	// 	client.to(`game-room-#${data.roomId}`).emit('opponent-is-ready');
-	// }
-
-	// User has been assigned a room and would like to know who they're playing against
-	// @SubscribeMessage('request-opponent-info')
-	// async shareOpponentInfo(
-	// 	client: any,
-	// 	data: { userId: number; roomId: number },
-	// ) {}
-
-	// private getRoomClientCount(roomId: number): number {
-	// 	const roomClients = this.server.sockets.adapter.rooms.get(`${roomId}`);
-	// 	return roomClients ? roomClients.size : 0;
-	// }
-
-	// Changes the status of all the game sessions of a user
-	// (Useful when user disconnects so we can set him as waiting everywhere at once)
-	// private async setAllUserGameSessionsTo(
-	// 	userId: number,
-	// 	newStatus: PlayerGameStatus,
-	// ): Promise<void> {
-	// 	await this.prisma.gameSession.updateMany({
-	// 		where: {
-	// 			userId: userId,
-	// 		},
-	// 		data: {
-	// 			playerStatus: newStatus,
-	// 		},
-	// 	});
-	// }
+	@SubscribeMessage('padde-movement')
+	async handlePaddleUp(
+		clientSocket: Socket,
+		data: { playerNumber: number; direction: string },
+	) {
+		const { playerNumber, direction } = data;
+		console.log(`[🎮] Player ${playerNumber} moved their paddle ${direction}`);
+	}
 }

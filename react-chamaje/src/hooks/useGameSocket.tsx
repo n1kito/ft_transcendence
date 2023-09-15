@@ -37,7 +37,7 @@ export const useGameSocket = () => {
 
 	const socketLog = (logContent: string) => {
 		console.log(
-			`%c GameSocket %c ${logContent}`,
+			`%c Socket %c ${logContent}`,
 			'background: purple; color: pink',
 			'',
 		);

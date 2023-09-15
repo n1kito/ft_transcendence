@@ -2,6 +2,7 @@ import React, {
 	Dispatch,
 	SetStateAction,
 	createContext,
+	useEffect,
 	useState,
 } from 'react';
 import { Socket } from 'socket.io-client';
@@ -32,8 +33,8 @@ export interface IGameDataProps {
 // Initial state of the gameData
 const defaultGameState: IGameDataProps = {
 	socket: undefined,
-	gameCanStart: false,
-	gameIsPlaying: false,
+	gameCanStart: true,
+	gameIsPlaying: true,
 	player1Ready: false,
 	player2Ready: false,
 	roomIsFull: false,
@@ -68,6 +69,15 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
 	// We use our initial state above to initialize it
 	const [gameData, setGameData] = useState<IGameDataProps>(defaultGameState);
 
+	useEffect(() => {
+		const gameDataLog = { ...gameData, socket: 'not loggable' };
+		console.log(
+			`%c GameData %c ${JSON.stringify(gameDataLog, null, 4)}`,
+			'color: yellow; background:magenta',
+			'',
+		);
+	}, [gameData]);
+
 	// We want a helper function that will allow us to update one, many or all
 	// properties of the game state without having to override the entire thing manually
 	const updateGameData = (updates: Partial<IGameDataProps>) => {
@@ -83,12 +93,13 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
 				'background:blue; color:turquoise',
 				'',
 			);
-		else
+		else {
 			console.log(
-				`%c GameDataUpdated %c ${JSON.stringify(updates, null, 2)}`,
+				`%c GameDataUpdated %c ${JSON.stringify(updates, null, 4)}`,
 				'background:blue; color:turquoise',
 				'',
 			);
+		}
 	};
 
 	// Helper function to reset the game state to its initial state in one function call
