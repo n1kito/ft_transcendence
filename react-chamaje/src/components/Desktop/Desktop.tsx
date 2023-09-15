@@ -129,8 +129,10 @@ const Desktop = () => {
 			.then((response) => response.json())
 			.then((data) => {
 				setFriends(data);
-			});
+			})
+			.then(() => console.log('FRIENDS: ', friends));
 	};
+
 	useEffect(() => {
 		fetchFriend();
 	}, []);
@@ -214,10 +216,10 @@ const Desktop = () => {
 		if (showFriendProfile === '') {
 			console.log('friend profile close');
 			fetchFriend();
+			// userData?.chatSocket?.endConnection();
 		}
 		return () => {
 			// setShowFriendProfile('');
-			alert();
 		};
 	}, [showFriendProfile]);
 

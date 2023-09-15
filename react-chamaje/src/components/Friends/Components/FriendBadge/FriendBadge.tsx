@@ -5,6 +5,7 @@ import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import { ShadowWrapperProps } from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import OnlineIndicator from '../../../Profile/Components/Shared/OnlineIndicator/OnlineIndicator';
 import { UserContext } from 'src/contexts/UserContext';
+import { on } from 'events';
 
 export interface IFriendBadgeProps extends ShadowWrapperProps {
 	badgeTitle?: string;
@@ -23,19 +24,24 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 	badgeImageUrl = m3ganAvatar,
 	toolTip = '',
 	isChannelBadge = false,
-	onlineIndicator = !isChannelBadge,
+	onlineIndicator = false,
 	isEmptyBadge = false,
 	dashedBorder = isEmptyBadge || false,
 	onClick,
 }) => {
 	const userContext = useContext(UserContext);
-	const [friends, setFriends] = useState(userContext.userData?.friends); // TODO: this should not be done this way, it should be linked to the user's actual status
 	let displayTitle = badgeTitle;
 	if (isChannelBadge && badgeTitle.length > 20) {
 		displayTitle = badgeTitle.slice(0, 20) + '...';
 	}
 
 	const [friendIsPlaying, setFriendIsPlaying] = useState(false);
+
+	useEffect(() => {
+		if (onlineIndicator === undefined)
+			console.log('online indicator is undefined');
+		console.log('ONLINE INDICATOR: ', onlineIndicator);
+	});
 
 	return (
 		<ShadowWrapper

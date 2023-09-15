@@ -55,12 +55,11 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 			.then((data) => {
 				console.log('🩵 friends list before: ', friends);
 				setFriends(data);
-				const updatedUserData = {
-					...userData,
-					friends: data,
-				};
-				console.log('🩵 friends list after: ', friends, updatedUserData, data);
+
 				setIsFriendAdded(false);
+			})
+			.then(() => {
+				console.log('LIST - FRIENDS: ', friends);
 			});
 	};
 
@@ -76,38 +75,28 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 			if (response.ok) {
 				setSettingsPanelIsOpen(false);
 				setIsFriendAdded(true);
-			} else if (response.status === 500 || response.status === 404) {
-				const messageError = await response.json();
-				console.error(messageError);
+			} else {
+				const Error = await response.json();
+				setSearchUserError(Error.message);
 			}
 		} catch (error) {
 			throw new Error('internal error');
 		}
 	};
 
-	const handleFriendAdded = (userId: number) => {
-		setFriends((prevFriends) =>
-			prevFriends.map((friend) => {
-				if (
-					friend.id === userId &&
-					(friend.onlineStatus === false || friend.onlineStatus === undefined)
-				) {
-					nbFriendsOnline++;
-					return { ...friend, onlineStatus: true };
-				} else {
-					return friend;
-				}
-			}),
-		);
-	};
-
 	useEffect(() => {
 		if (isFriendAdded) {
 			console.log('🩵 just added a friend, fetching friend');
 			fetchFriend();
-			userData?.chatSocket?.onClientLogIn(handleFriendAdded);
 		}
+		return () => {
+			// userData?.chatSocket?.endConnection();
+		};
 	}, [isFriendAdded]);
+
+	useEffect(() => {
+		console.log('Mounting: ', friends);
+	});
 
 	return (
 		<Window
@@ -134,7 +123,6 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 						onlineIndicator={friend.onlineStatus}
 						isClickable={true}
 						onClick={() => {
-							// alert(friend.login);
 							onBadgeClick(friend.login);
 						}}
 					/>
@@ -150,6 +138,7 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 							success={searchUserSuccess}
 							maxlength={8}
 						></InputField>
+
 						<Button
 							onClick={() => {
 								addFriend();

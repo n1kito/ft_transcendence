@@ -25,3 +25,11 @@
 	background-color: white;
 	border-top: 3px solid black;
 }
+
+.settings-form {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+
+	gap: 1rem;
+}

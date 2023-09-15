@@ -20,7 +20,6 @@ model User {
     image           String?
     createdAt       DateTime    @default(now())
     token           String?
-    onlineStatus    Boolean     @default(false)
 
     // Two Factor authentication
     twoFactorAuthenticationSecret       String? 
