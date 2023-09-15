@@ -335,6 +335,7 @@ export class UserService {
 				throw new Error('Friend already exists in the list');
 			}
 
+			// update user's friends array with the newly added friend
 			user = await this.prisma.user.update({
 				where: {
 					id: userId,
@@ -342,7 +343,7 @@ export class UserService {
 				data: {
 					friends: {
 						connect: {
-							id: friendUserIdToAdd, // Assuming 'id' is the field used to identify friends
+							id: friendUserIdToAdd,
 						},
 					},
 				},
@@ -351,7 +352,7 @@ export class UserService {
 				},
 			});
 		} catch (error) {
-			console.error('👕add friend:', error);
+			throw new Error('could not add friend: internal error');
 		}
 	}
 }

@@ -17,13 +17,15 @@ interface IFriendsListProps {
 	onBadgeClick: (friendLogin: string) => void;
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
 	friends: IFriendStruct[];
-	nbFriendsOnline: number;
 	setFriends: React.Dispatch<React.SetStateAction<IFriendStruct[]>>;
+	nbFriendsOnline: number;
+	setNbFriendsOnline: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const FriendsList: React.FC<IFriendsListProps> = ({
 	friends,
 	nbFriendsOnline,
+	setNbFriendsOnline,
 	onCloseClick,
 	windowDragConstraintRef,
 	onBadgeClick,
@@ -53,9 +55,11 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 		})
 			.then((response) => response.json())
 			.then((data) => {
-				console.log('🩵 friends list before: ', friends);
 				setFriends(data);
-
+				let nb = nbFriendsOnline;
+				console.log('🍕🍕🍕 nb online friends: ', nbFriendsOnline, nb);
+				// if (nb) setNbFriendsOnline(--nb);
+				userData?.chatSocket?.sendServerConnection();
 				setIsFriendAdded(false);
 			})
 			.then(() => {
@@ -86,17 +90,10 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 
 	useEffect(() => {
 		if (isFriendAdded) {
-			console.log('🩵 just added a friend, fetching friend');
 			fetchFriend();
 		}
-		return () => {
-			// userData?.chatSocket?.endConnection();
-		};
+		return () => {};
 	}, [isFriendAdded]);
-
-	useEffect(() => {
-		console.log('Mounting: ', friends);
-	});
 
 	return (
 		<Window

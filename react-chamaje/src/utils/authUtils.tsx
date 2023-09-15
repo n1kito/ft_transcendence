@@ -14,9 +14,6 @@ export function showComponentIfNotLoggedIn<P extends object>(
 			// if authenticate and 2FA was disabled or
 			// if authenticate and 2FA was enabled and code was verified
 			// go to desktop
-			console.log('\n\n🍄 User is authenticated: ', isAuthentificated);
-			console.log('🍄 2FA has been enabled: ', isTwoFAEnabled);
-			console.log('🍄 2FA has been verified: ', isTwoFaVerified);
 
 			if (
 				(isAuthentificated && !isTwoFAEnabled) ||

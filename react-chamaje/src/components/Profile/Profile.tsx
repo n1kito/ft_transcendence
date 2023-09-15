@@ -34,6 +34,8 @@ export interface ProfileProps {
 	isMyFriend: boolean | false;
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
 	onCloseClick: () => void;
+	nbOnline: number;
+	setNbOnline: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const Profile: React.FC<ProfileProps> = ({
@@ -41,14 +43,13 @@ const Profile: React.FC<ProfileProps> = ({
 	isMyFriend,
 	windowDragConstraintRef,
 	onCloseClick,
+	nbOnline,
+	setNbOnline,
 }) => {
 	const { accessToken, isTwoFAEnabled, setIsTwoFAEnabled, logOut } = useAuth();
 	const { userData, setUserData } = useContext(UserContext);
 	const [profileData, setProfileData] = useState<UserData | null>(null); // Declare profileData state
 	const isOwnProfile = login == userData?.login;
-
-	console.log('👀 isOwnProfile: ', isOwnProfile);
-	console.log('👀 isMyFriend: ', isMyFriend);
 
 	// Settings panel
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
@@ -97,8 +98,6 @@ const Profile: React.FC<ProfileProps> = ({
 				setProfileData(userData);
 			}
 		});
-
-		console.log('🎃🎃🎃 fetch profile data: ', profileData);
 
 		return () => {
 			setProfileData(null);
@@ -214,6 +213,8 @@ const Profile: React.FC<ProfileProps> = ({
 				},
 			});
 			if (response.ok) {
+				let nb = nbOnline;
+				if (nb) setNbOnline(--nb);
 				setSettingsPanelIsOpen(false);
 				onCloseClick();
 			} else if (response.status === 500 || response.status === 404) {

@@ -45,6 +45,8 @@ const Desktop = () => {
 
 	const [showFriendProfile, setShowFriendProfile] = useState('');
 
+	const [nbOnline, SetNbOnline] = useState(0);
+
 	const navigate = useNavigate();
 	const {
 		isAuthentificated,
@@ -129,8 +131,7 @@ const Desktop = () => {
 			.then((response) => response.json())
 			.then((data) => {
 				setFriends(data);
-			})
-			.then(() => console.log('FRIENDS: ', friends));
+			});
 	};
 
 	useEffect(() => {
@@ -145,7 +146,6 @@ const Desktop = () => {
 	 */
 	useEffect(() => {
 		const handleLoggedIn = (data: number) => {
-			console.log('---------------handle logged in----------------');
 			setFriends((prevFriends) =>
 				prevFriends.map((friend) => {
 					if (
@@ -153,6 +153,7 @@ const Desktop = () => {
 						(friend.onlineStatus === false || friend.onlineStatus === undefined)
 					) {
 						nbFriendsOnline++;
+						SetNbOnline(nbFriendsOnline);
 						return { ...friend, onlineStatus: true };
 					} else {
 						return friend;
@@ -176,6 +177,8 @@ const Desktop = () => {
 						(friend.onlineStatus === false || friend.onlineStatus === undefined)
 					) {
 						nbFriendsOnline++;
+						SetNbOnline(nbFriendsOnline);
+
 						return { ...friend, onlineStatus: true };
 					} else {
 						return friend;
@@ -193,6 +196,8 @@ const Desktop = () => {
 				prevFriends.map((friend) => {
 					if (friend.id === data && friend.onlineStatus === true) {
 						nbFriendsOnline--;
+						SetNbOnline(nbFriendsOnline);
+
 						return { ...friend, onlineStatus: false };
 					} else {
 						return friend;
@@ -263,6 +268,8 @@ const Desktop = () => {
 						isMyFriend={false}
 						onCloseClick={() => setProfileWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
+						nbOnline={nbOnline}
+						setNbOnline={SetNbOnline}
 					/>
 				)}
 				{openFriendsWindow && (
@@ -271,7 +278,8 @@ const Desktop = () => {
 						onCloseClick={() => setFriendsWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
 						friends={friends}
-						nbFriendsOnline={nbFriendsOnline}
+						nbFriendsOnline={nbOnline}
+						setNbFriendsOnline={SetNbOnline}
 						onBadgeClick={handleBadgeClick}
 						setFriends={setFriends}
 					/>
@@ -282,6 +290,8 @@ const Desktop = () => {
 						onCloseClick={() => setShowFriendProfile('')}
 						windowDragConstraintRef={windowDragConstraintRef}
 						isMyFriend={true}
+						nbOnline={nbOnline}
+						setNbOnline={SetNbOnline}
 					></Profile>
 				)}
 				{chatWindowIsOpen && (

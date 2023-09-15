@@ -37,12 +37,6 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 
 	const [friendIsPlaying, setFriendIsPlaying] = useState(false);
 
-	useEffect(() => {
-		if (onlineIndicator === undefined)
-			console.log('online indicator is undefined');
-		console.log('ONLINE INDICATOR: ', onlineIndicator);
-	});
-
 	return (
 		<ShadowWrapper
 			shadow={isEmptyBadge ? true : shadow}
