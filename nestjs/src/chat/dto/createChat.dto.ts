@@ -1,4 +1,5 @@
 import {
+	IsAlphanumeric,
 	IsBoolean,
 	IsNotEmpty,
 	IsNumber,
@@ -28,4 +29,9 @@ export class CreateChatDTO {
 	@IsNotEmpty()
 	@IsNumber()
 	userId?: number;
+
+	@IsOptional()
+	@IsNotEmpty()
+	@IsString()
+	name?: string;
 }

@@ -18,6 +18,12 @@ import Title from '../Profile/Components/Title/Title';
 import InputField from '../Profile/Components/InputField/InputField';
 import useAuth from 'src/hooks/userAuth';
 import DOMPurify from 'dompurify';
+import {
+	fetchChannels,
+	leaveChannelQuery,
+	sendMessageQuery,
+} from 'src/utils/queries';
+import { IChatStruct } from '../PrivateMessages/PrivateMessages';
 
 export interface IChatWindowProps {
 	onCloseClick: () => void;
@@ -25,7 +31,9 @@ export interface IChatWindowProps {
 	name: string;
 	chatId: number;
 	messages: IMessage[];
+	isChannel?: boolean;
 	setMessages: Dispatch<SetStateAction<IMessage[]>>;
+	setChatsList: Dispatch<SetStateAction<IChatStruct[]>>;
 }
 
 export interface IMessage {
@@ -59,6 +67,8 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	chatId,
 	messages,
 	setMessages,
+	setChatsList,
+	isChannel = false,
 }) => {
 	/* ********************************************************************* */
 	/* ******************************* FRONT ******************************* */
@@ -94,10 +104,32 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 		container?.scrollIntoView({ behavior: 'smooth' });
 	}, [messages]);
 
+	/* ************************** links functions ************************** */
 	const openSettingsPanel = () => {
 		setSettingsPanelIsOpen(!settingsPanelIsOpen);
 	};
 
+	const inviteToChannel = () => {};
+
+	const leaveChannel = () => {
+		if (!userData) return;
+		console.warn(
+			'leaveChannel: chatId: ' + chatId + ' - userData.id: ' + userData.id,
+		);
+		leaveChannelQuery(accessToken, chatId, userData?.id)
+			.then(async () => {
+				fetchChannels(accessToken)
+					.then((data) => setChatsList(data))
+					.catch((e) => {
+						console.error('Error fetching channels: ', e);
+					});
+			})
+			.catch((e) => {
+				console.error('Error leaving channel - chatWindow: ', e);
+			});
+	};
+
+	/* ********************************************************************* */
 	// empty the textarea when changing active chat
 	useEffect(() => {
 		setTextareaContent('');
@@ -121,17 +153,10 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	}, [chatId]);
 
 	const sendMessage = async () => {
-		console.log('accessToken', accessToken);
-		await fetch('/api/chat/sendMessage', {
-			method: 'PUT',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${accessToken}`,
-			},
-			credentials: 'include',
-			body: JSON.stringify({ message: textareaContent, chatId: chatId }),
+		sendMessageQuery(accessToken, textareaContent, chatId).catch((e) => {
+			console.error('Could not send message to the database');
 		});
-
+		// socket sending message
 		userData?.chatSocket?.sendMessage(
 			textareaContent,
 			chatId,
@@ -150,6 +175,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 			login: userData ? userData?.login : '',
 		});
 		setMessages(updatedMessages);
+
 		setTextareaContent('');
 		setTextareaIsEmpty(true);
 	};
@@ -160,16 +186,24 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 
 	return (
 		<Window
-			windowTitle={`Chat with ${name}`}
+			windowTitle={isChannel ? name : `Chat with ${name}`}
 			onCloseClick={onCloseClick}
 			windowDragConstraintRef={windowDragConstraintRef}
-			links={[
-				{ name: 'Profile', onClick: () => null },
-				{ name: 'Play', onClick: () => null },
-				{ name: 'Block', onClick: () => null },
-				{ name: 'Delete chat', onClick: () => null },
-				{ name: 'Settings', onClick: openSettingsPanel },
-			]}
+			links={
+				isChannel
+					? [
+							{ name: 'Invite', onClick: inviteToChannel },
+							{ name: 'Leave', onClick: leaveChannel },
+							{ name: 'Settings', onClick: openSettingsPanel },
+					  ]
+					: [
+							{ name: 'Profile', onClick: () => null },
+							{ name: 'Play', onClick: () => null },
+							{ name: 'Block', onClick: () => null },
+							{ name: 'Delete chat', onClick: () => null },
+							{ name: 'Settings', onClick: openSettingsPanel },
+					  ]
+			}
 			useBeigeBackground={true}
 		>
 			<div className="chat-wrapper">

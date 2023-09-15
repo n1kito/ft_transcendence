@@ -1,6 +1,7 @@
 import {
 	Body,
 	Controller,
+	Delete,
 	Get,
 	HttpStatus,
 	Param,
@@ -15,6 +16,7 @@ import { CustomRequest } from 'src/user/user.controller';
 import { SendMessageDTO } from './dto/sendMessage.dto';
 import { TokenService } from 'src/token/token.service';
 import { CreateChatDTO } from './dto/createChat.dto';
+import { LeaveChannelDTO } from './dto/leaveChannel.dto';
 
 @Controller('chat')
 export class ChatController {
@@ -62,7 +64,8 @@ export class ChatController {
 		}
 	}
 
-	@Put('/createChatPrivateMessage/:userId')
+	// create a private message chat with the user and the targeted user
+	@Put('/createChat/')
 	async createChat(
 		@Body(new ValidationPipe()) createChat: CreateChatDTO,
 		@Req() request: CustomRequest,
@@ -75,7 +78,8 @@ export class ChatController {
 			const chatId = await this.chatService.createChat(userId, createChat);
 			// create both chat sessions
 			await this.chatService.createChatSession(userId, chatId);
-			await this.chatService.createChatSession(createChat.userId, chatId);
+			if (createChat.userId)
+				await this.chatService.createChatSession(createChat.userId, chatId);
 			return { chatId: chatId };
 		} catch (e) {
 			console.error('error creating a private message: ', e);
@@ -94,6 +98,22 @@ export class ChatController {
 			await this.chatService.sendMessage(userId, sendMessage);
 		} catch (e) {
 			console.error('error sending a message', e);
+		}
+	}
+
+	@Delete('/leaveChannel')
+	async leaveChannel(
+		@Body() leaveChannel: LeaveChannelDTO,
+		// @Body(new ValidationPipe()) leaveChannel: LeaveChannelDTO,
+		@Req() request: CustomRequest,
+	) {
+		try {
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			await this.chatService.leaveChannel(userId, leaveChannel.chatId);
+		} catch (e) {
+			console.error('👋👋👋error leaving channel', e);
 		}
 	}
 }

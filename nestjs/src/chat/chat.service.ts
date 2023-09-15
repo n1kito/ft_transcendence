@@ -77,6 +77,20 @@ export class ChatService {
 		});
 		return res;
 	}
+
+	async getChannelRoom(chatId: number) {
+		const res = await this.prisma.chat.findFirst({
+			where: {
+				id: chatId,
+				isChannel: true,
+			},
+			include: {
+				participants: true,
+			},
+		});
+		return res;
+	}
+
 	// create Chat
 	async createChat(userId: number, content: CreateChatDTO) {
 		const chat = await this.prisma.chat.create({
@@ -85,6 +99,7 @@ export class ChatService {
 				isPrivate: content.isPrivate,
 				isProtected: content.isProtected,
 				password: content.password,
+				name: content.name,
 			},
 		});
 		return chat.id;
@@ -109,5 +124,33 @@ export class ChatService {
 				content: content.message,
 			},
 		});
+	}
+
+	// leave channel
+	async leaveChannel(userId: number, chatId: number) {
+		try {
+			this.prisma.chatSession
+				.deleteMany({
+					where: { chatId: chatId, userId: userId },
+				})
+				.then(async () => {
+					const response = await this.getChannelRoom(chatId);
+					// if no one is here anymore, delete the chat
+					if (!response.participants.length) {
+						await this.prisma.message.deleteMany({
+							where: {
+								chatId: chatId,
+							},
+						});
+						await this.prisma.chat.delete({
+							where: {
+								id: chatId,
+							},
+						});
+					}
+				});
+		} catch (e) {
+			console.error('could not leave channel: ', e);
+		}
 	}
 }
