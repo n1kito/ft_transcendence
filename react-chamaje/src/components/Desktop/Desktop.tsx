@@ -143,6 +143,7 @@ const Desktop = () => {
 	 */
 	useEffect(() => {
 		const handleLoggedIn = (data: number) => {
+			console.log('---------------handle logged in----------------');
 			setFriends((prevFriends) =>
 				prevFriends.map((friend) => {
 					if (
@@ -204,8 +205,6 @@ const Desktop = () => {
 	/* **************************** FRIENDS ******************************** */
 	/* ********************************************************************* */
 
-	// const [showFriendProfile, setShowFriendProfile] = useState('');
-
 	const handleBadgeClick = (friendLogin: string) => {
 		setShowFriendProfile(friendLogin);
 		console.log('👀 handleBadgeClick - friend login: ', friendLogin);
@@ -218,7 +217,7 @@ const Desktop = () => {
 		}
 		return () => {
 			// setShowFriendProfile('');
-			// alert();
+			alert();
 		};
 	}, [showFriendProfile]);
 
@@ -272,6 +271,7 @@ const Desktop = () => {
 						friends={friends}
 						nbFriendsOnline={nbFriendsOnline}
 						onBadgeClick={handleBadgeClick}
+						setFriends={setFriends}
 					/>
 				)}
 				{showFriendProfile && (

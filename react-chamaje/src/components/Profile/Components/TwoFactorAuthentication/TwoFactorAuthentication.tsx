@@ -126,8 +126,6 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 			// verifyin user's 2FA autentication (meaning validation code
 			// is verified by google auth), turn off 2FA and close window
 			if (!isProcessFinishedRef.current) {
-				// alert();
-
 				turnOff2fa();
 				setTwoFactorAuthWindowisOpen(false);
 			}

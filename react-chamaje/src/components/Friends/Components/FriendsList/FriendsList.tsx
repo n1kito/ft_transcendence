@@ -18,6 +18,7 @@ interface IFriendsListProps {
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
 	friends: IFriendStruct[];
 	nbFriendsOnline: number;
+	setFriends: React.Dispatch<React.SetStateAction<IFriendStruct[]>>;
 }
 
 const FriendsList: React.FC<IFriendsListProps> = ({
@@ -26,7 +27,9 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 	onCloseClick,
 	windowDragConstraintRef,
 	onBadgeClick,
+	setFriends,
 }) => {
+	const { userData, setUserData } = useContext(UserContext);
 	const { accessToken } = useAuth();
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [searchedLogin, setSearchedLogin] = useState('');
@@ -40,8 +43,28 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 		setSearchUserSuccess('');
 	};
 
+	const fetchFriend = async () => {
+		fetch('/api/user/friends', {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				console.log('🩵 friends list before: ', friends);
+				setFriends(data);
+				const updatedUserData = {
+					...userData,
+					friends: data,
+				};
+				console.log('🩵 friends list after: ', friends, updatedUserData, data);
+				setIsFriendAdded(false);
+			});
+	};
+
 	const addFriend = async () => {
-		alert('add friend');
 		try {
 			const response = await fetch(`api/user/${searchedLogin}/add`, {
 				method: 'PUT',
@@ -61,6 +84,30 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 			throw new Error('internal error');
 		}
 	};
+
+	const handleFriendAdded = (userId: number) => {
+		setFriends((prevFriends) =>
+			prevFriends.map((friend) => {
+				if (
+					friend.id === userId &&
+					(friend.onlineStatus === false || friend.onlineStatus === undefined)
+				) {
+					nbFriendsOnline++;
+					return { ...friend, onlineStatus: true };
+				} else {
+					return friend;
+				}
+			}),
+		);
+	};
+
+	useEffect(() => {
+		if (isFriendAdded) {
+			console.log('🩵 just added a friend, fetching friend');
+			fetchFriend();
+			userData?.chatSocket?.onClientLogIn(handleFriendAdded);
+		}
+	}, [isFriendAdded]);
 
 	return (
 		<Window
@@ -87,7 +134,7 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 						onlineIndicator={friend.onlineStatus}
 						isClickable={true}
 						onClick={() => {
-							alert(friend.login);
+							// alert(friend.login);
 							onBadgeClick(friend.login);
 						}}
 					/>

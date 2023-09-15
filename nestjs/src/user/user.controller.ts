@@ -220,7 +220,6 @@ export class UserController {
 		@Res() response: Response,
 	) {
 		try {
-			console.log('🌝 friend login: ', login);
 			const userId = this.userService.authenticateUser(request);
 
 			// retrieve friend's user id

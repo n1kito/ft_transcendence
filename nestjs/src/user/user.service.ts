@@ -315,7 +315,7 @@ export class UserService {
 	async addFriend(userId: number, friendUserIdToAdd: number) {
 		try {
 			// Retrieve user's data including its friends list
-			const user = await this.prisma.user.findUnique({
+			let user = await this.prisma.user.findUnique({
 				where: {
 					id: userId,
 				},
@@ -335,25 +335,23 @@ export class UserService {
 				throw new Error('Friend already exists in the list');
 			}
 
-			// Add the new friend to the friends array
-			const updatedFriends = [
-				...user.friends,
-				{
-					id: friendUserIdToAdd,
-				},
-			];
-
-			// Set the updated friends array
-			const updatedUser = await this.prisma.user.update({
+			user = await this.prisma.user.update({
 				where: {
 					id: userId,
 				},
 				data: {
 					friends: {
-						set: updatedFriends,
+						connect: {
+							id: friendUserIdToAdd, // Assuming 'id' is the field used to identify friends
+						},
 					},
 				},
+				include: {
+					friends: true,
+				},
 			});
-		} catch (error) {}
+		} catch (error) {
+			console.error('👕add friend:', error);
+		}
 	}
 }

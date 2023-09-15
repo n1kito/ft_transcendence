@@ -19,6 +19,7 @@ class WebSocketService {
 		try {
 			// Listen for the 'connect' event
 			this.socket.on('connect', () => {
+				console.log('🟢 connection');
 				this.sendServerConnection();
 			});
 			// Listen for the 'disconnect' event prevent reconnection from wanted disconnection
@@ -31,6 +32,8 @@ class WebSocketService {
 					this.socket.connect();
 				} else {
 					// this.endConnection(this.userId);
+					console.log('🔴 disconnection');
+					alert();
 					this.socket.disconnect();
 				}
 			});
@@ -45,6 +48,7 @@ class WebSocketService {
 
 	sendServerConnection() {
 		try {
+			console.log('🟢 server connection');
 			this.socket.emit('ServerConnection', this.userId);
 		} catch (e) {
 			console.error(e, ': WebSocketService sendServerConnection');
