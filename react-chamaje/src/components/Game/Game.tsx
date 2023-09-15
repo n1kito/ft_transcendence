@@ -14,6 +14,7 @@ import { GameContext } from '../../contexts/GameContext';
 import { useGameSocket } from '../../hooks/useGameSocket';
 import { join } from 'path';
 import GameCanvas from './Components/GameCanvas/GameCanvas';
+import { Game as GameObject } from './Components/GameCanvas/Entities/Game';
 
 export interface ICanvasProps {
 	width: number;
@@ -63,38 +64,49 @@ const Game: React.FC<IGameProps> = ({
 	windowDragConstraintRef,
 	opponentId = undefined,
 }) => {
-	// Canvas states
-	const initialPaddleWidth = 5;
-	const initialCanvasHeight = 500;
-	const initialPaddleHeight = initialCanvasHeight * 0.2;
+	// Canvas ref
+	const canvasRef = useRef<HTMLCanvasElement | null>(null);
+	// gameInstance
+	const gameInstance = useRef<GameObject | null>(null);
+
+	// // Canvas states
 	const [canvasSize, setCanvasSize] = useState<ICanvasProps>({
 		width: 700,
-		height: initialCanvasHeight,
-	});
-	const [paddle1Position, setPaddle1Position] = useState<IPaddleProps>({
-		width: initialPaddleWidth,
-		height: initialPaddleHeight,
-		x: 0,
-		y: initialCanvasHeight / 2 - initialPaddleHeight / 2,
-	});
-	const [paddle2Position, setPaddle2Position] = useState<IPaddleProps>(() => {
-		return {
-			width: initialPaddleWidth,
-			height: initialPaddleHeight,
-			x: canvasSize.width - initialPaddleWidth,
-			y: canvasSize.height / 2 - initialPaddleHeight / 2,
-		};
-	});
-	const [ballPosition, setBallPosition] = useState<IBallProps>({
-		x: canvasSize.width / 2,
-		y: canvasSize.height / 2,
-		radius: 10,
+		height: 500,
 	});
 
 	// Import the game context, so it can be used everywhere
 	const { gameData, updateGameData, resetGameData } = useContext(GameContext);
 	// use our socket hook
-	const { joinRoom, requestOpponentInfo, setPlayer1AsReady } = useGameSocket();
+	const {
+		updatePlayerPosition,
+		joinRoom,
+		requestOpponentInfo,
+		setPlayer1AsReady,
+	} = useGameSocket();
+	// Create a ref to out context's socket
+
+	useEffect(() => {
+		if (canvasRef.current) {
+			const ctx = canvasRef.current.getContext('2d');
+			if (ctx)
+				gameInstance.current = new GameObject(
+					canvasRef,
+					ctx,
+					updatePlayerPosition,
+				);
+		}
+
+		return () => {
+			gameInstance.current?.cancelGameLoop();
+			gameInstance.current?.removeEventListeners();
+		};
+	}, []);
+
+	useEffect(() => {
+		if (gameData.gameIsPlaying) gameInstance.current?.gameLoop();
+		else gameInstance.current?.cancelGameLoop();
+	}, [gameData.gameIsPlaying]);
 
 	// If we're connected to the socket and don't have a room, ask for one
 	useEffect(() => {
@@ -133,10 +145,11 @@ const Game: React.FC<IGameProps> = ({
 			<div className={`game-wrapper`}>
 				{!gameData.gameCanStart && <GameOverlay />}
 				<GameCanvas
-					paddle1Props={paddle1Position}
-					paddle2Props={paddle2Position}
-					ballProps={ballPosition}
+					// paddle1Props={paddle1Position}
+					// paddle2Props={paddle2Position}
+					// ballProps={ballPosition}
 					canvasProps={canvasSize}
+					ref={canvasRef}
 				/>
 			</div>
 		</Window>

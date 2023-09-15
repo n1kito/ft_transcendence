@@ -68,6 +68,9 @@ export const useGameSocket = () => {
 					'Too many connections, please close some tabs and refresh !',
 			});
 		});
+		gameData.socket.on('error', (error) => {
+			console.error('General Error:', error);
+		});
 		// Listen for the 'disconnect' event prevent reconnection from wanted disconnection
 		gameData.socket.on('disconnect', (reason) => {
 			if (
@@ -171,5 +174,18 @@ export const useGameSocket = () => {
 		});
 	};
 
-	return { joinRoom, requestOpponentInfo, setPlayer1AsReady };
+	const updatePlayerPosition = (direction: string) => {
+		socketLog(`sending paddle movement: ${direction}`);
+		socketRef.current?.emit('paddle-movement', {
+			playerNumber: userData?.id,
+			direction: direction,
+		});
+	};
+
+	return {
+		updatePlayerPosition,
+		joinRoom,
+		requestOpponentInfo,
+		setPlayer1AsReady,
+	};
 };

@@ -220,7 +220,7 @@ export class GameGateway
 		client.to(roomId).emit('opponent-is-ready');
 	}
 
-	@SubscribeMessage('padde-movement')
+	@SubscribeMessage('paddle-movement')
 	async handlePaddleUp(
 		clientSocket: Socket,
 		data: { playerNumber: number; direction: string },

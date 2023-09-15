@@ -66,9 +66,12 @@ export class Game {
 
 	private gradient: CanvasGradient;
 
+	private updatePlayerPosition: (direction: string) => void;
+
 	constructor(
 		canvasRef: React.MutableRefObject<HTMLCanvasElement | null>,
 		gameContext: CanvasRenderingContext2D,
+		updatePlayerPosition: (direction: string) => void,
 	) {
 		// Init the canvas reference
 		this.canvasRef = canvasRef;
@@ -83,6 +86,9 @@ export class Game {
 		this.paddleHeight = this.canvasSize.height * 0.2;
 		const paddleWidth = 5,
 			ballSize = 15;
+
+		// Init updatePlayerPosition
+		this.updatePlayerPosition = updatePlayerPosition;
 
 		// Create player1 paddle
 		this.paddlePlayer = new Paddle(
@@ -113,15 +119,15 @@ export class Game {
 		this.setupEventListeners();
 
 		// Bind the loop method to the current instance of our game class
-		this.gameLoop = this.gameLoop.bind(this);
+		// this.gameLoop = this.gameLoop.bind(this);
 	}
 
 	// calls all the functions needed to update the game state
-	gameLoop(): void {
+	gameLoop = (): void => {
 		this.update(); // TODO: this should be here
 		this.draw();
 		this.animationFrameId = requestAnimationFrame(this.gameLoop);
-	}
+	};
 
 	cancelGameLoop(): void {
 		if (this.animationFrameId != undefined)
@@ -138,14 +144,16 @@ export class Game {
 		window.removeEventListener('keydown', this.handleKeyPress);
 	}
 
-	handleKeyPress(event: KeyboardEvent): void {
+	handleKeyPress = (event: KeyboardEvent): void => {
 		if (event.key === 'ArrowUp') {
-			console.log('Wanna go up ?');
+			console.log('[🕹️] up');
+			this.updatePlayerPosition('up');
 		}
 		if (event.key === 'ArrowDown') {
-			console.log('Wanna go down ?');
+			console.log('[🕹️] down');
+			this.updatePlayerPosition('down');
 		}
-	}
+	};
 
 	update(): void {
 		this.paddlePlayer.update(this.canvasSize);
