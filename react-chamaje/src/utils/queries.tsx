@@ -1,4 +1,29 @@
 /* ********************************************************************* */
+/* ******************************* CHAT ******************************** */
+/* ********************************************************************* */
+
+export async function leaveChat(accessToken: string, chatId: number) {
+	try {
+		const response = await fetch('api/chat/leaveChannel', {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+			body: JSON.stringify({
+				chatId: chatId,
+			}),
+		});
+		if (!response.ok) throw new Error('Error leaving chat - response');
+		return response.json();
+	} catch (e) {
+		console.error('Error leaving chat - queries catch: ', e);
+		throw new Error('' + e);
+	}
+}
+
+/* ********************************************************************* */
 /* ***************************** CHANNELS ****************************** */
 /* ********************************************************************* */
 
@@ -39,37 +64,15 @@ export async function createChannel(accessToken: string, channelName: string) {
 		if (!response.ok) throw new Error('Error creating channel');
 		return response.json();
 	} catch (e) {
-		console.error('Error creating channelfet: ' + e);
+		console.error('Error creating channel: ' + e);
 		throw new Error('' + e);
 	}
 }
 
-export async function leaveChannelQuery(
-	accessToken: string,
-	chatId: number,
-	userId: number,
-) {
+export async function joinChannel(accessToken: string, channelName: string) {
 	try {
-		const response = await fetch('api/chat/leaveChannel', {
-			method: 'DELETE',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${accessToken}`,
-			},
-			credentials: 'include',
-			body: JSON.stringify({
-				chatId: chatId,
-			}),
-		});
-		if (!response.ok) {
-			console.warn('response', response);
-			throw new Error('Error leaving channel - response');
-		} else {
-			console.warn('response', response);
-		}
 	} catch (e) {
-		console.warn('chatId: ', chatId);
-		console.error('Error leaving channel - quesries catch: ', e);
+		console.error('Error joinning channel: ' + e);
 		throw new Error('' + e);
 	}
 }
@@ -125,6 +128,7 @@ export async function createChatPrivateMessage(
 		throw new Error('' + e);
 	}
 }
+
 /* ********************************************************************* */
 /* ***************************** MESSAGES ****************************** */
 /* ********************************************************************* */
@@ -160,8 +164,11 @@ export async function sendMessageQuery(
 			credentials: 'include',
 			body: JSON.stringify({ message: message, chatId: chatId }),
 		});
-		if (!response.ok) throw new Error('Could not fetch messages');
-		return response.json();
+		if (!response.ok) {
+			throw new Error('Could not send message');
+		}
+
+		// return response.json();
 	} catch (e) {
 		console.error('Error sending message: ' + e);
 		throw new Error('' + e);

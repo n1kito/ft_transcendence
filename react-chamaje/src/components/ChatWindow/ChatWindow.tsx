@@ -20,7 +20,8 @@ import useAuth from 'src/hooks/userAuth';
 import DOMPurify from 'dompurify';
 import {
 	fetchChannels,
-	leaveChannelQuery,
+	fetchPrivateMessages,
+	leaveChat,
 	sendMessageQuery,
 } from 'src/utils/queries';
 import { IChatStruct } from '../PrivateMessages/PrivateMessages';
@@ -32,6 +33,7 @@ export interface IChatWindowProps {
 	chatId: number;
 	messages: IMessage[];
 	isChannel?: boolean;
+	setChatWindowIsOpen: Dispatch<SetStateAction<boolean>>;
 	setMessages: Dispatch<SetStateAction<IMessage[]>>;
 	setChatsList: Dispatch<SetStateAction<IChatStruct[]>>;
 }
@@ -69,6 +71,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	setMessages,
 	setChatsList,
 	isChannel = false,
+	setChatWindowIsOpen,
 }) => {
 	/* ********************************************************************* */
 	/* ******************************* FRONT ******************************* */
@@ -108,21 +111,20 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	const openSettingsPanel = () => {
 		setSettingsPanelIsOpen(!settingsPanelIsOpen);
 	};
+	/* ********************************************************************* */
+	/* ********************** channel links functions ********************** */
 
 	const inviteToChannel = () => {};
 
 	const leaveChannel = () => {
-		if (!userData) return;
-		console.warn(
-			'leaveChannel: chatId: ' + chatId + ' - userData.id: ' + userData.id,
-		);
-		leaveChannelQuery(accessToken, chatId, userData?.id)
+		leaveChat(accessToken, chatId)
 			.then(async () => {
 				fetchChannels(accessToken)
 					.then((data) => setChatsList(data))
 					.catch((e) => {
 						console.error('Error fetching channels: ', e);
 					});
+				setChatWindowIsOpen(false);
 			})
 			.catch((e) => {
 				console.error('Error leaving channel - chatWindow: ', e);
@@ -130,6 +132,23 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	};
 
 	/* ********************************************************************* */
+	/* ************************* PM links functions ************************ */
+	const leavePM = () => {
+		leaveChat(accessToken, chatId)
+			.then(async () => {
+				fetchPrivateMessages(accessToken)
+					.then((data) => setChatsList(data))
+					.catch((e) => {
+						console.error('Error fetching private messages: ', e);
+					});
+				setChatWindowIsOpen(false);
+			})
+			.catch((e) => {
+				console.error('Error leaving chat - chatWindow: ', e);
+			});
+	};
+	/* ********************************************************************* */
+
 	// empty the textarea when changing active chat
 	useEffect(() => {
 		setTextareaContent('');
@@ -153,31 +172,33 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	}, [chatId]);
 
 	const sendMessage = async () => {
-		sendMessageQuery(accessToken, textareaContent, chatId).catch((e) => {
-			console.error('Could not send message to the database');
-		});
-		// socket sending message
-		userData?.chatSocket?.sendMessage(
-			textareaContent,
-			chatId,
-			userData.login,
-			userData.image,
-		);
-		// display users' own message by updating the messages[]
-		const updatedMessages: IMessage[] = messages.map((val) => {
-			return val;
-		});
-		updatedMessages.push({
-			chatId: chatId,
-			sentById: userData ? userData.id : 0,
-			sentAt: new Date(),
-			content: textareaContent,
-			login: userData ? userData?.login : '',
-		});
-		setMessages(updatedMessages);
-
-		setTextareaContent('');
-		setTextareaIsEmpty(true);
+		sendMessageQuery(accessToken, textareaContent, chatId)
+			.then(() => {
+				// socket sending message
+				userData?.chatSocket?.sendMessage(
+					textareaContent,
+					chatId,
+					userData.login,
+					userData.image,
+				);
+				// display users' own message by updating the messages[]
+				const updatedMessages: IMessage[] = messages.map((val) => {
+					return val;
+				});
+				updatedMessages.push({
+					chatId: chatId,
+					sentById: userData ? userData.id : 0,
+					sentAt: new Date(),
+					content: textareaContent,
+					login: userData ? userData?.login : '',
+				});
+				setMessages(updatedMessages);
+				setTextareaContent('');
+				setTextareaIsEmpty(true);
+			})
+			.catch((e) => {
+				console.error('Could not send message to the database: ', e);
+			});
 	};
 
 	/* ********************************************************************* */
@@ -200,7 +221,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							{ name: 'Profile', onClick: () => null },
 							{ name: 'Play', onClick: () => null },
 							{ name: 'Block', onClick: () => null },
-							{ name: 'Delete chat', onClick: () => null },
+							{ name: 'Leave chat', onClick: leavePM },
 							{ name: 'Settings', onClick: openSettingsPanel },
 					  ]
 			}

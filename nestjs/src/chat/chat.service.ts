@@ -5,6 +5,7 @@ import {
 	NotFoundException,
 	Param,
 	Req,
+	Res,
 } from '@nestjs/common';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { CustomRequest } from 'src/user/user.controller';
@@ -13,12 +14,27 @@ import { ValidationError, validate } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 import { CustomException } from 'src/user/user.service';
 import { CreateChatDTO } from './dto/createChat.dto';
+import { Response } from 'express';
 
 @Injectable()
 export class ChatService {
 	private errors: { field: string; message: string; statusCode: number }[] = [];
 
 	constructor(private readonly prisma: PrismaService) {}
+
+	// true if the user is in the chat, false otherwise
+	async isUserInChat(userId: number, chatId: number) {
+		const response = await this.prisma.chat.findUnique({
+			where: { id: chatId },
+			select: { participants: true },
+		});
+		if (response.participants) {
+			response.participants.map((current) => {
+				if (current.userId === userId) return true;
+			});
+		}
+		return false;
+	}
 
 	// get messages from chat
 	async getChatMessages(
@@ -91,6 +107,12 @@ export class ChatService {
 		return res;
 	}
 
+	async getChatByName(name: string) {
+		const res = await this.prisma.chat.findFirst({
+			where: { name: name },
+		});
+		return res;
+	}
 	// create Chat
 	async createChat(userId: number, content: CreateChatDTO) {
 		const chat = await this.prisma.chat.create({
@@ -126,7 +148,8 @@ export class ChatService {
 		});
 	}
 
-	// leave channel
+	// leave channel: first delete the chat session, if the user was alone in
+	// this convo, delete all the messages and then the chat
 	async leaveChannel(userId: number, chatId: number) {
 		try {
 			this.prisma.chatSession
@@ -134,20 +157,37 @@ export class ChatService {
 					where: { chatId: chatId, userId: userId },
 				})
 				.then(async () => {
-					const response = await this.getChannelRoom(chatId);
-					// if no one is here anymore, delete the chat
-					if (!response.participants.length) {
-						await this.prisma.message.deleteMany({
-							where: {
-								chatId: chatId,
-							},
+					this.getChannelRoom(chatId)
+						.then((response) => {
+							if (!response.participants || !response.participants.length) {
+								this.prisma.message
+									.deleteMany({
+										where: {
+											chatId: chatId,
+										},
+									})
+									.then(() => {
+										this.prisma.chat
+											.delete({
+												where: {
+													id: chatId,
+												},
+											})
+											.catch((e) => {
+												console.error('Could not delete chat: ', e);
+											});
+									})
+									.catch((e) => {
+										console.error('Could not delete messages: ', e);
+									});
+							}
+						})
+						.catch((e) => {
+							console.error('Error getting the channel room');
 						});
-						await this.prisma.chat.delete({
-							where: {
-								id: chatId,
-							},
-						});
-					}
+				})
+				.catch((e) => {
+					console.error('something went wrong when deleting the channel');
 				});
 		} catch (e) {
 			console.error('could not leave channel: ', e);

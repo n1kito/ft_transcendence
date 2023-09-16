@@ -357,35 +357,39 @@ export class UserController {
 		@Req() request: CustomRequest,
 		@Param('userId') userId: number,
 	) {
-		// this contains an array of the chat sessions
-		const chatSessions = await this.userService.getChatSessions(request.userId);
-
-		// this contains an array of the chat rooms joined that are not channels
-		const chatPromises = chatSessions.map(async (currentChat) => {
-			const room = await this.chatService.getChannelRoom(
-				currentChat.chatId,
+		try {
+			// this contains an array of the chat sessions
+			const chatSessions = await this.userService.getChatSessions(request.userId);
+	
+			// this contains an array of the chat rooms joined that are not channels
+			const chatPromises = chatSessions.map(async (currentChat) => {
+				const room = await this.chatService.getChannelRoom(
+					currentChat.chatId,
+				);
+				return room; // Return the result of each asynchronous operation
+			});
+			// the filter(Boolean) throws away every null/undefined object
+			const chatRoomsResults = await Promise.all(chatPromises);
+			const chatRoomsFiltered = chatRoomsResults.filter(Boolean);
+	
+			// this contains for each room joined, the id of the room, the participants,
+			// the name of the channel
+			const rooms = await Promise.all(
+				chatRoomsFiltered.map(async (currentRoom) => {
+					return {
+						chatId: currentRoom.id,
+						participants: currentRoom.participants.map((currentParticipant) => {
+							return currentParticipant.userId;
+						}),
+						name: currentRoom.name,
+					};
+				}),
 			);
-			return room; // Return the result of each asynchronous operation
-		});
-		// the filter(Boolean) throws away every null/undefined object
-		const chatRoomsResults = await Promise.all(chatPromises);
-		const chatRoomsFiltered = chatRoomsResults.filter(Boolean);
-
-		// this contains for each room joined, the id of the room, the participants,
-		// the name of the channel
-		const rooms = await Promise.all(
-			chatRoomsFiltered.map(async (currentRoom) => {
-				return {
-					chatId: currentRoom.id,
-					participants: currentRoom.participants.map((currentParticipant) => {
-						return currentParticipant.userId;
-					}),
-					name: currentRoom.name,
-				};
-			}),
-		);
-		console.log('rooms', rooms);
-		return rooms;
+			console.log('rooms', rooms);
+			return rooms;
+		} catch (e) {
+			console.error('Could not fetch channels: ', e)
+		}
 	}
 
 	// get messages from chat

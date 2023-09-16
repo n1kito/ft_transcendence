@@ -303,6 +303,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					messages={messages}
 					setMessages={setMessages}
 					setChatsList={setPrivateMessages}
+					setChatWindowIsOpen={setChatWindowIsOpen}
 				/>
 			)}
 		</>

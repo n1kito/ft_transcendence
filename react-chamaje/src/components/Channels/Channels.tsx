@@ -79,13 +79,15 @@ const Channels: React.FC<IChannelsProps> = ({
 				})
 				.catch((e) => {
 					console.error('Error creating channel: ', e);
-					setSettingsError('Could not create that channel')
+					setSettingsError('Could not create that channel');
 				});
 		}
 	};
 
 	const joinChannel = () => {};
 
+	// every time I put a char in this, it fetches everything...
+	// no it does not but it rerenders my list
 	const handleChannelInput = (channel: string) => {
 		setChannelInput(channel);
 	};
@@ -104,6 +106,10 @@ const Channels: React.FC<IChannelsProps> = ({
 	useEffect(() => {
 		console.log('chatWindowId', chatWindowId);
 	}, [chatWindowId]);
+
+	useEffect(() => {
+		console.log('channelsList', channelsList);
+	}, [channelsList]);
 
 	/* ********************************************************************* */
 	/* ******************************* RETURN ******************************* */
@@ -147,7 +153,6 @@ const Channels: React.FC<IChannelsProps> = ({
 				<div className="channels-list-wrapper">
 					{channelsList.length > 0 ? (
 						channelsList.map((room, index) => {
-							console.warn('room', room);
 							// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
 							return (
 								<FriendBadge
@@ -168,6 +173,7 @@ const Channels: React.FC<IChannelsProps> = ({
 							onClick={() => {
 								setTimeout(() => {
 									setSettingsPanelIsOpen(true);
+									setSettingsMode('create');
 								}, 100);
 							}}
 						/>
@@ -202,6 +208,7 @@ const Channels: React.FC<IChannelsProps> = ({
 					setMessages={setMessages}
 					setChatsList={setChannelsList}
 					isChannel={true}
+					setChatWindowIsOpen={setChatWindowIsOpen}
 				/>
 			)}
 		</>

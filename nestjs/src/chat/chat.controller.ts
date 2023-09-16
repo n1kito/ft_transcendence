@@ -10,6 +10,7 @@ import {
 	Res,
 	ValidationPipe,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { ChatService } from './chat.service';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { CustomRequest } from 'src/user/user.controller';
@@ -54,9 +55,14 @@ export class ChatController {
 	async getChatMessages(
 		@Req() request: CustomRequest,
 		@Param('chatId') chatId: number,
+		@Res() res: Response,
 	) {
 		try {
 			this.tokenService.ExtractUserId(request.headers['authorization']);
+			if (!this.chatService.isUserInChat) {
+				res.status(403);
+				return;
+			}
 			const messages = await this.chatService.getChatMessages(request, chatId);
 			return messages;
 		} catch (e) {
@@ -69,20 +75,44 @@ export class ChatController {
 	async createChat(
 		@Body(new ValidationPipe()) createChat: CreateChatDTO,
 		@Req() request: CustomRequest,
+		@Res() response: Response,
 	) {
 		// TODO: should I check that this chat does not already exist?
 		try {
 			const userId = this.tokenService.ExtractUserId(
 				request.headers['authorization'],
 			);
-			const chatId = await this.chatService.createChat(userId, createChat);
-			// create both chat sessions
-			await this.chatService.createChatSession(userId, chatId);
-			if (createChat.userId)
-				await this.chatService.createChatSession(createChat.userId, chatId);
-			return { chatId: chatId };
+			let retChatId: number;
+			if (createChat.name) {
+				this.chatService
+					.getChatByName(createChat.name)
+					.then(async () => {
+						this.chatService
+							.createChat(userId, createChat)
+							.then(async (chatId) => {
+								console.log('🛑🛑🛑chatId🛑🛑🛑', chatId);
+								await this.chatService.createChatSession(userId, chatId);
+								retChatId = chatId;
+								// return { chatId: chatId };
+								response.status(200).json({ chatId: retChatId });
+							});
+					})
+					.catch(() => {
+						console.error('this chat already exists');
+					});
+			}
+			// } else {
+			// 	chatId = await this.chatService.createChat(userId, createChat);
+			// }
+			// const chatId = await this.chatService.createChat(userId, createChat);
+			// // create both chat sessions
+			// await this.chatService.createChatSession(userId, chatId);
+			// if (createChat.userId)
+			// 	await this.chatService.createChatSession(createChat.userId, chatId);
+			// return { chatId: chatId };
 		} catch (e) {
 			console.error('error creating a private message: ', e);
+			response.status(400);
 		}
 	}
 
@@ -90,30 +120,54 @@ export class ChatController {
 	async sendMessage(
 		@Body(new ValidationPipe()) sendMessage: SendMessageDTO,
 		@Req() request: CustomRequest,
+		@Res() res: Response,
 	) {
 		try {
 			const userId = this.tokenService.ExtractUserId(
 				request.headers['authorization'],
 			);
 			await this.chatService.sendMessage(userId, sendMessage);
+			res.status(201).json({ message: 'Message sent successfully' });
 		} catch (e) {
 			console.error('error sending a message', e);
+			res.status(404).json({ message: 'Could not send message' });
 		}
 	}
 
 	@Delete('/leaveChannel')
 	async leaveChannel(
-		@Body() leaveChannel: LeaveChannelDTO,
-		// @Body(new ValidationPipe()) leaveChannel: LeaveChannelDTO,
+		// @Body() leaveChannel: LeaveChannelDTO,
+		@Body(new ValidationPipe()) leaveChannel: LeaveChannelDTO,
 		@Req() request: CustomRequest,
+		@Res() response: Response,
 	) {
 		try {
 			const userId = this.tokenService.ExtractUserId(
 				request.headers['authorization'],
 			);
 			await this.chatService.leaveChannel(userId, leaveChannel.chatId);
+			response.status(200).json({ message: 'Channel left successfully' });
 		} catch (e) {
 			console.error('👋👋👋error leaving channel', e);
+			response
+				.status(400)
+				.json({ message: 'Something went wrong leaving the channel' });
 		}
 	}
+
+	// @Delete('/leavePM')
+	// async leavePM(
+	// 	@Body() leaveChannel: LeaveChannelDTO,
+	// 	// @Body(new ValidationPipe()) leaveChannel: LeaveChannelDTO,
+	// 	@Req() request: CustomRequest,
+	// ) {
+	// 	try {
+	// 		const userId = this.tokenService.ExtractUserId(
+	// 			request.headers['authorization'],
+	// 		);
+	// 		await this.chatService.leaveChannel(userId, leaveChannel.chatId);
+	// 	} catch (e) {
+	// 		console.error('👋👋👋error leaving channel', e);
+	// 	}
+	// }
 }
