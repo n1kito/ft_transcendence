@@ -69,6 +69,8 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
 	// We use our initial state above to initialize it
 	const [gameData, setGameData] = useState<IGameDataProps>(defaultGameState);
 
+	// TODO: remove this and corresponding logs
+	// Logs the updates to gameData as they happen
 	useEffect(() => {
 		const gameDataLog = { ...gameData, socket: 'not loggable' };
 		console.log(
@@ -78,18 +80,10 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
 		);
 	}, [gameData]);
 
-	const logContext = (content: string) => {
-		console.log(
-			`%c GameDataUpdated %c ${content}`,
-			'background:blue; color:turquoise',
-			'',
-		);
-	};
-
 	// We want a helper function that will allow us to update one, many or all
 	// properties of the game state without having to override the entire thing manually
 	const updateGameData = (updates: Partial<IGameDataProps>) => {
-		setGameData((prevGameData) => ({
+		setGameData((prevGameData: IGameDataProps) => ({
 			...prevGameData,
 			...updates,
 		}));
@@ -103,7 +97,15 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
 	// Helper function to reset the game state to its initial state in one function call
 	const resetGameData = () => {
 		logContext('reset the gameData context');
-		updateGameData(defaultGameState);
+		setGameData(defaultGameState);
+	};
+
+	const logContext = (content: string) => {
+		console.log(
+			`%c GameDataUpdated %c ${content}`,
+			'background:blue; color:turquoise',
+			'',
+		);
 	};
 
 	// Return a provider that will now make the gameData and its helper functions available

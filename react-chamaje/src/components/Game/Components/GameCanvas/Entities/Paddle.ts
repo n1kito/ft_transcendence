@@ -18,7 +18,7 @@ export default class Paddle extends GameEntity {
 		// to avoid infinite matches
 		this.y = Math.max(
 			screenPaddleGap,
-			// TODO: check the use of ! for conditional shit. This should never be undefined so I don't see why it's typed as such
+			// TODO: check the use of ! for conditionals. This should never be undefined so I don't see why it's typed as such
 			Math.min(
 				this.y,
 				canvasRef.current!.height - this.height - screenPaddleGap,

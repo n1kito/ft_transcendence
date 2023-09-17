@@ -26,6 +26,7 @@ model User {
     email     String   @unique
     image     String?
     createdAt DateTime @default(now())
+	updatedAt DateTime @updatedAt
     token     String?
 
     // Friendship system
@@ -39,35 +40,54 @@ model User {
     image_is_locked Boolean @default(false)
 
     // Games logic
-    gamesPlayed gameSession[]
+	gamesPlayedAsPlayer1 gameSession[] @relation("player1")
+	gamesPlayedAsPlayer2 gameSession[] @relation("player2")
+	gamesWon gameSession[] @relation("winner")
 
     // Profile variables
     // These could be resolved upon fetch requests, but more efficient to store them directly
     killCount Int @default(0)
+
+	// Bestie logic
+	bestie	User? @relation("Bestie", fields: [bestieId], references: [id])
+	bestieId Int? @unique
+	bestiedBy User[] @relation("Bestie")
 
     // Target logic
     target                 User?   @relation("Target", fields: [targetId], references: [id])
     targetId               Int?
     targetedBy             User[]  @relation("Target")
     targetDiscoveredByUser Boolean @default(false)
+
+	// Rival logic
+	rival				User? @relation("Rival", fields: [rivalId], references: [id])
+	rivalId				Int?
+	rivalOf				User[] @relation("Rival")
 }	
 
-// TODO: give a status to the actual game ? Like WAITING / FINISHED
-// TODO: should all games have an obligatory room ? Because we might end up with a lot of rooms after the matches are done.
-
-model Game {
-    id         Int           @id @default(autoincrement())
-    playedAt   DateTime      @default(now())
-    players    gameSession[]
+// TODO: update this
+enum GameStatus {
+    Waiting // Waiting for the game to start
+    Ready // Players are ready to start the game (they pressed the play button)
+    Playing // Player is currently in a game
+    Finished // Player finished the game
 }
 
 model gameSession {
     id           Int              @id @default(autoincrement())
-    user         User             @relation(fields: [userId], references: [id])
-    userId       Int
-    game         Game             @relation(fields: [gameId], references: [id])
-    gameId       Int
-    score        Int              @default(0)
-    isWinner     Boolean          @default(false)
-    playerStatus PlayerGameStatus @default(Waiting)
+	createdAt	DateTime @default(now())
+	updatedAt	DateTime @updatedAt
+	user1Id		Int
+	user2Id		Int
+	winnerId	Int?
+	user1Score	Int?
+	user2Score	Int?
+	status		GameStatus @default(Waiting)
+	roomId		String
+	user1IsReady	Boolean
+	user2IsReady	Boolean
+
+	user1	User @relation("player1", fields: [user1Id], references: [id])
+	user2 User @relation("player2", fields: [user2Id], references: [id])
+	winner User? @relation("winner", fields: [winnerId], references: [id])
 }

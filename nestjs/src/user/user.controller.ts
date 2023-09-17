@@ -13,15 +13,66 @@ import {
 	Res,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { PrismaClient } from '@prisma/client';
-import { Request, response, Response } from 'express';
+import { Prisma, PrismaClient, User } from '@prisma/client';
+import { Request, Response } from 'express';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
-import { validate } from 'class-validator';
+// TODO: importing the types in here gives an error on nestjs compilation
+// however it works in react so I'm not sure what the issue is, probably the js transpilation
+// not working correctly or the path resolution I don't know.
+// import { IUserData, IMatchHistory } from '@shared/user-types';
 
 export interface CustomRequest extends Request {
 	userId: number;
 }
+
+export interface IMatchHistory {
+	player1Login: string;
+	player1Score: number;
+	player1Image: string;
+	player2Login: string;
+	player2Score: number;
+	player2Image: string;
+}
+
+interface IUserData {
+	// User informatiom
+	id?: number;
+	login: string;
+	image: string;
+	email?: string;
+	// Profile information
+	killCount?: number;
+	rank?: number;
+	winRate?: number;
+	gamesCount: number;
+	// Target
+	targetLogin?: string;
+	targetImage?: string;
+	targetDiscoveredByUser: boolean;
+	// Bestie
+	bestieLogin?: string;
+	// Rival
+	rivalLogin?: string;
+	rivalImage?: string;
+	// Games
+	matchHistory?: IMatchHistory[];
+}
+
+export type UserWithRelations = Prisma.UserGetPayload<{
+	include: {
+		gamesPlayedAsPlayer1: {
+			include: { user1: true; user2: true };
+		};
+		gamesPlayedAsPlayer2: {
+			include: { user1: true; user2: true };
+		};
+		gamesWon: true;
+		target: true;
+		rival: true;
+		bestie: true;
+	};
+}>;
 
 @Controller('user')
 export class UserController {
@@ -30,69 +81,69 @@ export class UserController {
 		private readonly prisma: PrismaService,
 	) {}
 
-	@Get('me')
-	async getMyinfo(@Req() request: CustomRequest) {
-		const userId = this.userService.authenticateUser(request); // TODO: should there be a try/catch here? The authenticateUser() method does throw an error
+	// @Get('me')
+	// async getMyinfo(@Req() request: CustomRequest) {
+	// 	const userId = this.userService.authenticateUser(request); // TODO: should there be a try/catch here? The authenticateUser() method does throw an error
 
-		// Fetch the user information from the database using the userId
-		const user = await this.prisma.user.findUnique({
-			where: { id: request.userId },
-			include: { gamesPlayed: true, target: true }, // Include the gamesPlayed relation
-		});
+	// 	// Fetch the user information from the database using the userId
+	// 	const user = await this.prisma.user.findUnique({
+	// 		where: { id: request.userId },
+	// 		include: { gamesPlayed: true, target: true }, // Include the gamesPlayed relation
+	// 	});
 
-		// Handle case when user is not found
-		if (!user) {
-			return { message: 'User not found' };
-		}
+	// 	// Handle case when user is not found
+	// 	if (!user) {
+	// 		return { message: 'User not found' };
+	// 	}
 
-		// Get user games count
-		const gamesCount = user.gamesPlayed.length;
-		// await this.prisma.game.count({
-		// 	where: {
-		// 		OR: [{ player1Id: user.id }, { player2Id: user.id }],
-		// 	},
-		// });
+	// 	// Get user games count
+	// 	const gamesCount = user.gamesPlayed.length;
+	// 	// await this.prisma.game.count({
+	// 	// 	where: {
+	// 	// 		OR: [{ player1Id: user.id }, { player2Id: user.id }],
+	// 	// 	},
+	// 	// });
 
-		// Bestie logic
-		const bestieUser = await this.userService.findUserBestie(user.id);
+	// 	// Bestie logic
+	// 	const bestieUser = await this.userService.findUserBestie(user.id);
 
-		// Target logic
-		const targetLogin = user?.target?.login;
-		const targetImage = user?.target?.image;
-		// Rival logic
-		const { rivalLogin, rivalImage } = await this.userService.findUserRival(
-			user.id,
-		);
+	// 	// Target logic
+	// 	const targetLogin = user?.target?.login;
+	// 	const targetImage = user?.target?.image;
+	// 	// Rival logic
+	// 	const { rivalLogin, rivalImage } = await this.userService.findUserRival(
+	// 		user.id,
+	// 	);
 
-		// get user's rank
-		const usersWithHigherKillCountThanOurUser = await this.prisma.user.count({
-			where: {
-				killCount: {
-					gt: await this.prisma.user
-						.findUnique({
-							where: { id: user.id },
-							select: { killCount: true },
-						})
-						.then((user) => user?.killCount || 0),
-				},
-			},
-		});
-		const userRank = usersWithHigherKillCountThanOurUser + 1;
-		// Return the user information
-		return {
-			...user,
-			targetLogin,
-			targetImage,
-			gamesCount,
-			bestieLogin: bestieUser.bestieLogin,
-			bestieImage: bestieUser.bestieImage,
-			rivalLogin,
-			rivalImage,
-			killCount: user.killCount,
-			winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
-			rank: userRank,
-		};
-	}
+	// 	// get user's rank
+	// 	const usersWithHigherKillCountThanOurUser = await this.prisma.user.count({
+	// 		where: {
+	// 			killCount: {
+	// 				gt: await this.prisma.user
+	// 					.findUnique({
+	// 						where: { id: user.id },
+	// 						select: { killCount: true },
+	// 					})
+	// 					.then((user) => user?.killCount || 0),
+	// 			},
+	// 		},
+	// 	});
+	// 	const userRank = usersWithHigherKillCountThanOurUser + 1;
+	// 	// Return the user information
+	// 	return {
+	// 		...user,
+	// 		targetLogin,
+	// 		targetImage,
+	// 		gamesCount,
+	// 		bestieLogin: bestieUser.bestieLogin,
+	// 		bestieImage: bestieUser.bestieImage,
+	// 		rivalLogin,
+	// 		rivalImage,
+	// 		killCount: user.killCount,
+	// 		winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
+	// 		rank: userRank,
+	// 	};
+	// }
 
 	@Put('me/update')
 	async updateMyUser(
@@ -150,98 +201,68 @@ export class UserController {
 		return friends;
 	}
 
-	// TODO: why do we have this and the /me endpoint ?
-	// TODO: switch this endpoint to userID
-	// TODO: move the logics to user.service.ts ?
-	// TODO: Is this correctly authenticated ?
+	// TODO: the logic needs to be moved to the service but the types make that so complicated
 	@Get(':login')
 	async getUserInfo(
 		@Param('login') login: string,
 		@Req() request: CustomRequest,
-	) {
-		const user = await this.prisma.user.findUnique({
-			where: { login },
-			include: { gamesPlayed: true },
-		});
-		if (!user) {
-			// Handle case when user is not found
-			return { message: 'User not found' };
-		}
-		// identify the login associated with the ID the request is coming from
-		const userRequesting = await this.prisma.user.findUnique({
-			where: { id: request.userId },
-		});
-		const userRequestingLogin = userRequesting?.login;
-		// get how many games the player has played by counting the games where user
-		// was user player1 or player2
-		const gamesCount = user.gamesPlayed.length;
-		// get user's rank
-		const usersWithHigherKillCountThanOurUser = await this.prisma.user.count({
-			where: {
-				killCount: {
-					gt: await this.prisma.user
-						.findUnique({
-							where: { id: user.id },
-							select: { killCount: true },
-						})
-						.then((user) => user?.killCount || 0),
-				},
-			},
-		});
-		// Bestie logic
-		const bestieUser = await this.userService.findUserBestie(user.id);
-		// Rank logic
-		const userRank = usersWithHigherKillCountThanOurUser + 1;
-		// Target logic
-		const targetUser = await this.prisma.user.findUnique({
-			where: { id: user.targetId },
-		});
-		// Rival logic
-		const { rivalLogin, rivalImage } = await this.userService.findUserRival(
-			user.id,
-		);
-		// Match history logic
-		let matchHistory;
+	): Promise<IUserData> {
+		console.log(`[🙆🏻‍♂️] User data requested via /user/${login}`);
 		try {
-			matchHistory = await this.userService.getUserMatchHistory(user.id);
+			// Try to authenticate the user
+			const requestingUserId: number =
+				this.userService.authenticateUser(request);
+			// Find the database entry corresponding to the user
+			const requestingUser: UserWithRelations =
+				await this.userService.getUserByIdWithRelations(requestingUserId);
+			// See if the user requesting the info is requesting their own information
+			const userWantsTheirOwnInfo: boolean =
+				login === 'me' || requestingUser.login === login;
+			// If the user is trying to fetch someone else's information, retrieve that
+			let requestedUser: UserWithRelations;
+			if (userWantsTheirOwnInfo) requestedUser = requestingUser;
+			else
+				requestedUser = await this.userService.getUserByLoginWithRelations(
+					login,
+				);
+
+			// Calculate the dynamic information
+			const calculatedRank = await this.userService.calculateRank(
+				requestedUser,
+			);
+			const totalGameCount =
+				this.userService.calculateTotalGameCount(requestedUser);
+			// TODO: this does not get logged
+			console.log('total game count', totalGameCount);
+			const calculatedWinRate =
+				this.userService.calculateWinRate(requestedUser);
+
+			// Match history
+			let matchHistory: IMatchHistory[] | undefined = undefined;
+			if (totalGameCount > 0)
+				matchHistory = this.userService.getUserMatchHistory(
+					requestedUser.gamesPlayedAsPlayer1,
+					requestedUser.gamesPlayedAsPlayer2,
+				);
+
+			return {
+				login: requestedUser.login,
+				image: requestedUser.image,
+				email: userWantsTheirOwnInfo ? requestedUser.email : undefined,
+				killCount: requestedUser.killCount,
+				rank: calculatedRank || undefined,
+				winRate: calculatedWinRate,
+				gamesCount: totalGameCount,
+				// Target
+				targetLogin: requestedUser.target?.login,
+				targetImage: requestedUser.target?.image,
+				targetDiscoveredByUser: requestedUser.targetDiscoveredByUser,
+				// Bestie
+				bestieLogin: requestedUser.bestie?.login,
+				matchHistory: matchHistory,
+			};
 		} catch (error) {
-			console.log('Error retrieving match history: ', error);
+			throw new NotFoundException(error);
 		}
-		// if the login of the user who sent the request is the same as the login of the user they want the info of,
-		// we return more information
-		if (userRequestingLogin && userRequestingLogin === login)
-			return {
-				...user,
-				gamesCount: gamesCount,
-				killCount: user.killCount,
-				winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
-				rank: userRank,
-				targetLogin: targetUser.login,
-				targetImage: targetUser.image,
-				bestieLogin: bestieUser.bestieLogin,
-				bestieImage: bestieUser.bestieImage,
-				matchHistory: matchHistory,
-				rivalLogin,
-				rivalImage,
-			};
-		// else, we only return what is needed for the profile component
-		else
-			return {
-				login: user.login,
-				image: user.image,
-				// add profile information
-				gamesCount: gamesCount,
-				killCount: user.killCount,
-				winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
-				rank: userRank,
-				targetLogin: targetUser.login,
-				targetImage: targetUser.image,
-				targetDiscoveredByUser: user.targetDiscoveredByUser,
-				bestieLogin: bestieUser.bestieLogin,
-				bestieImage: bestieUser.bestieImage,
-				matchHistory: matchHistory,
-				rivalLogin,
-				rivalImage,
-			};
 	}
 }

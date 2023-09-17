@@ -1,18 +1,12 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import './Desktop.css';
 import DesktopIcon from './Components/DesktopIcon/DesktopIcon';
-import cupcakeIcon from './Components/DesktopIcon/images/CUPCAKE.svg';
-import Window from '../Window/Window';
 import { useNavigate } from 'react-router-dom';
-import FriendsList from '../Friends/Components/FriendsList/FriendsList';
 import { UserContext } from '../../contexts/UserContext';
 import useAuth from '../../hooks/userAuth';
-import ProfileSettings from '../Profile/Components/ProfileSettings/ProfileSettings';
-import { AuthContext } from '../../contexts/AuthContext';
 import Profile from '../Profile/Profile';
 import PrivateMessages from '../PrivateMessages/PrivateMessages';
 import { AnimatePresence } from 'framer-motion';
-import ChatWindow from '../ChatWindow/ChatWindow';
 import Channels from '../Channels/Channels';
 
 import ProfileIcon from './Icons/CARD.svg';
@@ -26,15 +20,15 @@ import { GameProvider } from '../../contexts/GameContext';
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
 	let iconId = 0;
-	const { userData, setUserData } = useContext(UserContext);
-	const [openFriendsWindow, setFriendsWindowIsOpen] = useState(false);
-	const [openProfileWindow, setProfileWindowIsOpen] = useState(false);
+	const { userData, updateUserData } = useContext(UserContext);
+	const [friendsWindowIsOpen, setFriendsWindowIsOpen] = useState(false);
+	const [profileWindowIsOpen, setProfileWindowIsOpen] = useState(false);
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
 	const [channelsWindowIsOpen, setChannelsWindowIsOpen] = useState(false);
 	const [gameWindowIsOpen, setGameWindowIsOpen] = useState(false);
 
-	const navigate = useNavigate();
-	const { isAuthentificated, refreshToken, logOut, accessToken } = useAuth();
+	// const navigate = useNavigate();
+	const { isAuthentificated, logOut, accessToken } = useAuth();
 	const windowDragConstraintRef = useRef(null);
 
 	// if (isAuthentificated) {
@@ -46,7 +40,7 @@ const Desktop = () => {
 			// Feth the user data from the server
 			try {
 				// user/me
-				const response = await fetch('/api/user/me', {
+				const response = await fetch(`/api/user/${'mjallada'}`, {
 					method: 'GET',
 					credentials: 'include',
 					headers: {
@@ -55,9 +49,11 @@ const Desktop = () => {
 				});
 				if (response.ok) {
 					const data = await response.json();
+					console.log('Fetched user data:', data);
 					// Set the user data in the context
-					setUserData(data);
+					updateUserData(data);
 				} else {
+					console.error('Could not fetch user data');
 					logOut();
 				}
 			} catch (error) {
@@ -66,12 +62,12 @@ const Desktop = () => {
 		};
 
 		if (isAuthentificated) fetchUserData();
-	}, [setUserData, isAuthentificated]);
+	}, [isAuthentificated]);
 
-	const friendsClickHandler = () => {
-		setFriendsWindowIsOpen(true);
-		navigate('/friends');
-	};
+	// const friendsClickHandler = () => {
+	// 	setFriendsWindowIsOpen(true);
+	// 	navigate('/friends');
+	// };
 
 	return (
 		<div className="desktopWrapper" ref={windowDragConstraintRef}>
@@ -85,7 +81,7 @@ const Desktop = () => {
 				name="Profile"
 				iconSrc={ProfileIcon}
 				id={++iconId}
-				onDoubleClick={() => setProfileWindowIsOpen}
+				onDoubleClick={() => setProfileWindowIsOpen(true)}
 			/>
 			<DesktopIcon
 				name="Chat"
@@ -106,7 +102,7 @@ const Desktop = () => {
 				onDoubleClick={() => setFriendsWindowIsOpen(true)}
 			/>
 			<AnimatePresence>
-				{openProfileWindow && (
+				{profileWindowIsOpen && (
 					<Profile
 						login="mjallada"
 						onCloseClick={() => setProfileWindowIsOpen(false)}

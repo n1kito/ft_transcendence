@@ -4,11 +4,15 @@ import Title from '../Title/Title';
 import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import MatchHistoryBadge from './Components/MatchHistoryBadge/MatchHistoryBadge';
 import m3gan from '../../../../images/m3gan.jpg';
-import { UserContext, UserData } from '../../../../contexts/UserContext';
+import { UserContext } from '../../../../contexts/UserContext';
 import { profile } from 'console';
+import {
+	IUserData,
+	IMatchHistory,
+} from '../../../../../../shared-lib/types/user-types';
 
 interface IMatchHistoryProps {
-	profileData: UserData;
+	profileData: IUserData;
 }
 
 const MatchHistory: React.FC<IMatchHistoryProps> = ({ profileData }) => {
@@ -20,7 +24,7 @@ const MatchHistory: React.FC<IMatchHistoryProps> = ({ profileData }) => {
 			<ShadowWrapper>
 				{matchHistory && matchHistory.length > 0 ? (
 					<div className="history-badges">
-						{matchHistory.map((match, index) => {
+						{matchHistory.map((match: IMatchHistory, index: number) => {
 							const userIsPlayer1 = profileData?.login === match.player1Login;
 							const adversaryLogin = userIsPlayer1
 								? match.player2Login

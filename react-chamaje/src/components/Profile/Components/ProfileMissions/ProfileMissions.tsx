@@ -23,7 +23,13 @@ const ProfileMissions: React.FC<IProfileMissionsProps> = ({
 
 	return isOwnProfile || (rivalLogin && rivalLogin.length > 0) ? (
 		<div className="profile-missions-wrapper">
-			<Title toolTip="Your rival is the person who's beat you the most 💀\nYour target is a random person you should destroy 🔫">
+			<Title
+				toolTip={`${
+					rivalLogin
+						? 'Your rival is the person who has beat you the most 💀\n'
+						: ''
+				}Your target is a random person you should destroy 🔫`}
+			>
 				Missions
 			</Title>
 			<div className="profile-missions">

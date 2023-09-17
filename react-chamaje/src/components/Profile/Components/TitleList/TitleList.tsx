@@ -1,18 +1,17 @@
-import React, { ReactNode, useContext, useEffect, useState } from 'react';
+import React from 'react';
 import './TitleList.css';
 import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import Title from '../Title/Title';
 import burgerIcon from './icons/burger-icon.svg';
-import { UserContext, UserData } from '../../../../contexts/UserContext';
 import AchievementBadge from '../AchievementBadge/AchievementBadge';
+import { IUserData } from '../../../../../../shared-lib/types/user-types';
 
 interface ITitleListProps {
-	profileData: UserData;
+	profileData: IUserData;
 }
 
+// TODO: I might want to use the userContext here instead of passing the data ?
 const TitleList: React.FC<ITitleListProps> = ({ profileData }) => {
-	// const { userData } = useContext(UserContext);
-	console.log({ profileData });
 	return (
 		<div className="title-list-wrapper">
 			<ShadowWrapper shadow={true}>
