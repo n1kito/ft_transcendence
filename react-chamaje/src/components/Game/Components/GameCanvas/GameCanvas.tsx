@@ -7,9 +7,6 @@ import { useGameSocket } from '../../../../hooks/useGameSocket';
 
 interface IGameCanvasProps {
 	canvasProps: ICanvasProps;
-	// paddle1Props: IPaddleProps;
-	// paddle2Props: IPaddleProps;
-	// ballProps: IBallProps;
 }
 
 // Used a forwardRef here. It's a ref that is created by the parent component (Game)

@@ -1,39 +1,34 @@
-// export default class Paddle {
-// 	x: number;
-// 	y: number;
-// 	width: number;
-// 	height: number;
-// 	speed: number;
-// 	direction: number; // -1 for up, +1 for down
+import { GameEntity, PaddleDirection } from './Shared';
 
-// 	constructor(x: number, y: number, width: number, height: number) {
-// 		this.x = x;
-// 		this.y = y;
-// 		this.width = width;
-// 		this.height = height;
-
-// 		this.speed = 12;
-// 		this.direction = 0; // Stationary by default
-// 	}
-
-// 	draw(ctx: CanvasRenderingContext2D): void {
-// 		ctx.fillRect(this.x, this.y, this.width, this.height);
-// 	}
-
-// 	move(canvas: HTMLCanvasElement): void {
-// 		// Calculate the new y coordinate of the paddle
-// 		this.y += this.speed * this.direction;
-// 		// Make sure the y coordinates are never < 0 or > canvasHeight - paddleHeight
-// 		this.y = Math.max(0, Math.min(this.y, canvas.height - this.height));
-// 	}
-// }
-
-class Paddle extends GameEntity {
-	private speed: number = 10;
+export default class Paddle extends GameEntity {
+	private speed: number = 15;
+	private direction: number;
 
 	constructor(x: number, y: number, width: number, height: number) {
 		super(x, y, width, height);
+		this.direction = 0;
 	}
 
-	update();
+	update(canvasRef: React.MutableRefObject<HTMLCanvasElement | null>) {
+		const screenPaddleGap: number = 0.075 * canvasRef.current!.height;
+		// Calculate the new y coordinate of the paddle
+		this.y += this.speed * this.direction;
+		// Make sure the y coordinates are never < 0 or > canvasHeight - paddleHeight
+		// However, to respect the original 1972 game, the paddles leave a gap at the top and the bottom of the playground,
+		// to avoid infinite matches
+		this.y = Math.max(
+			screenPaddleGap,
+			// TODO: check the use of ! for conditional shit. This should never be undefined so I don't see why it's typed as such
+			Math.min(
+				this.y,
+				canvasRef.current!.height - this.height - screenPaddleGap,
+			),
+		);
+	}
+
+	setDirection(direction: PaddleDirection) {
+		if (direction === PaddleDirection.up) this.direction = -1;
+		else if (direction === PaddleDirection.down) this.direction = 1;
+		else this.direction = 0;
+	}
 }

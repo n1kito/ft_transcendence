@@ -174,8 +174,8 @@ export const useGameSocket = () => {
 		});
 	};
 
-	const updatePlayerPosition = (direction: string) => {
-		socketLog(`sending paddle movement: ${direction}`);
+	const broadcastPlayerPosition = (direction: string) => {
+		// socketLog(`sending paddle movement: ${direction}`);
 		socketRef.current?.emit('paddle-movement', {
 			playerNumber: userData?.id,
 			direction: direction,
@@ -183,7 +183,7 @@ export const useGameSocket = () => {
 	};
 
 	return {
-		updatePlayerPosition,
+		broadcastPlayerPosition,
 		joinRoom,
 		requestOpponentInfo,
 		setPlayer1AsReady,

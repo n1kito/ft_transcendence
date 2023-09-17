@@ -1,77 +1,34 @@
-export class GameEntity {
-	x: number;
-	y: number;
-	width: number;
-	height: number;
-
-	constructor(x: number, y: number, width: number, height: number) {
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-	}
-
-	draw(context: CanvasRenderingContext2D): void {
-		// setup the visual style
-		context.fillStyle = 'white';
-		context.shadowColor = 'pink';
-		context.shadowBlur = 20;
-		context.shadowOffsetX = 0;
-		context.shadowOffsetY = 0;
-
-		// draw the entity
-		context.fillRect(this.x, this.y, this.width, this.height);
-	}
-}
-
-class Paddle extends GameEntity {
-	private speed: number = 10;
-
-	constructor(x: number, y: number, width: number, height: number) {
-		super(x, y, width, height);
-	}
-	update(canvasSize: ICanvasSizeProps) {}
-}
-
-class Ball extends GameEntity {
-	constructor(x: number, y: number, width: number, height: number) {
-		super(x, y, width, height);
-	}
-	update(
-		playerPadde: Paddle,
-		opponentPaddle: Paddle,
-		canvasSize: ICanvasSizeProps,
-	) {}
-}
-
-interface ICanvasSizeProps {
-	width: number;
-	height: number;
-}
+import { PaddleDirection } from './Shared';
+import Paddle from './Paddle';
+import Ball from './Ball';
 
 export class Game {
 	// private gameCanvas: React.MutableRefObject<HTMLCanvasElement>;
-	private canvasRef:
-		| React.MutableRefObject<HTMLCanvasElement | null>
-		| undefined;
+	private canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
 	private gameContext: CanvasRenderingContext2D;
 	private animationFrameId: number | undefined;
+
+	private TICK_RATE = 1000 / 60; // we want 60 updates per second (in milliseconds, so we can use the value with Date.now()
+	private lastTick = Date.now();
 
 	private paddlePlayer: Paddle;
 	private paddleOpponent: Paddle;
 	private ball: Ball;
 
-	private canvasSize: ICanvasSizeProps;
+	private playerScore: number = 0;
+	private opponentScore: number = 0;
+
+	private canvasSize: { width: number; height: number };
 	private paddleHeight: number;
 
 	private gradient: CanvasGradient;
 
-	private updatePlayerPosition: (direction: string) => void;
+	private broadcastPlayerPosition: (direction: string) => void;
 
 	constructor(
 		canvasRef: React.MutableRefObject<HTMLCanvasElement | null>,
 		gameContext: CanvasRenderingContext2D,
-		updatePlayerPosition: (direction: string) => void,
+		broadcastPlayerPosition: (direction: string) => void,
 	) {
 		// Init the canvas reference
 		this.canvasRef = canvasRef;
@@ -87,8 +44,8 @@ export class Game {
 		const paddleWidth = 5,
 			ballSize = 15;
 
-		// Init updatePlayerPosition
-		this.updatePlayerPosition = updatePlayerPosition;
+		// Init broadcastPlayerPosition
+		this.broadcastPlayerPosition = broadcastPlayerPosition;
 
 		// Create player1 paddle
 		this.paddlePlayer = new Paddle(
@@ -100,9 +57,11 @@ export class Game {
 		// Create opponent paddle
 		this.paddleOpponent = new Paddle(
 			this.canvasSize.width - paddleWidth,
-			this.canvasSize.height / 2 - this.paddleHeight / 2,
+			// this.canvasSize.height / 2 - this.paddleHeight / 2,
+			0,
 			paddleWidth,
-			this.paddleHeight,
+			// this.paddleHeight,
+			this.canvasSize.height,
 		);
 		// Create ball
 		this.ball = new Ball(
@@ -117,14 +76,19 @@ export class Game {
 
 		// Setup event listeners on canvas
 		this.setupEventListeners();
-
-		// Bind the loop method to the current instance of our game class
-		// this.gameLoop = this.gameLoop.bind(this);
 	}
 
 	// calls all the functions needed to update the game state
 	gameLoop = (): void => {
-		this.update(); // TODO: this should be here
+		let dateNow = Date.now();
+		let timeSinceLastTick = dateNow - this.lastTick;
+
+		if (timeSinceLastTick >= this.TICK_RATE) {
+			this.update();
+			this.lastTick = dateNow - (timeSinceLastTick % this.TICK_RATE);
+			// this.log(`Scores: ${this.playerScore}/${this.opponentScore}`);
+		}
+
 		this.draw();
 		this.animationFrameId = requestAnimationFrame(this.gameLoop);
 	};
@@ -137,33 +101,51 @@ export class Game {
 	setupEventListeners(): void {
 		this.log('adding event listeners');
 		window.addEventListener('keydown', this.handleKeyPress);
+		window.addEventListener('keyup', this.handleKeyRelease);
 	}
 
 	removeEventListeners(): void {
 		this.log('removing event listeners');
 		window.removeEventListener('keydown', this.handleKeyPress);
+		window.removeEventListener('keyup', this.handleKeyRelease);
 	}
 
 	handleKeyPress = (event: KeyboardEvent): void => {
 		if (event.key === 'ArrowUp') {
 			console.log('[🕹️] up');
-			this.updatePlayerPosition('up');
+			this.broadcastPlayerPosition('up');
+			// change the direction of the paddle
+			this.paddlePlayer.setDirection(PaddleDirection.up);
 		}
 		if (event.key === 'ArrowDown') {
 			console.log('[🕹️] down');
-			this.updatePlayerPosition('down');
+			this.broadcastPlayerPosition('down');
+			// change the direction of the paddle
+			this.paddlePlayer.setDirection(PaddleDirection.down);
+		}
+	};
+
+	handleKeyRelease = (event: KeyboardEvent): void => {
+		if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+			// this.broadcastPlayerPosition('immobile');
+			this.paddlePlayer.setDirection(PaddleDirection.immobile);
 		}
 	};
 
 	update(): void {
-		this.paddlePlayer.update(this.canvasSize);
-		this.paddleOpponent.update(this.canvasSize);
-		this.ball.update(this.paddlePlayer, this.paddleOpponent, this.canvasSize);
+		this.paddlePlayer.update(this.canvasRef);
+		this.paddleOpponent.update(this.canvasRef);
+		this.ball.update(
+			this.paddlePlayer,
+			this.paddleOpponent,
+			this.canvasRef,
+			this.handleScoreUpdate,
+		);
 	}
 
 	// draws all of our elements on the canvas
 	draw(): void {
-		this.log('draw()');
+		// this.log('draw()');
 		// Clear our canvas
 		this.gameContext.clearRect(
 			0,
@@ -173,6 +155,8 @@ export class Game {
 		);
 		// Draw our net
 		this.drawNet();
+		// Draw our scores
+		this.drawScores();
 		// Draw our paddles
 		this.paddlePlayer.draw(this.gameContext);
 		this.paddleOpponent.draw(this.gameContext);
@@ -191,6 +175,27 @@ export class Game {
 			this.canvasSize.height,
 		);
 	}
+
+	drawScores(): void {
+		const fontSize = this.canvasSize.height / 6;
+		this.gameContext.font = `${fontSize}px VT323`;
+		this.gameContext.textAlign = 'center';
+		this.gameContext.fillText(
+			`${this.playerScore}`,
+			this.canvasSize.width * 0.25,
+			this.canvasSize.height * 0.9,
+		);
+		this.gameContext.fillText(
+			`${this.opponentScore}`,
+			this.canvasSize.width * 0.75,
+			this.canvasSize.height * 0.9,
+		);
+	}
+
+	handleScoreUpdate = (won: boolean) => {
+		if (won) this.playerScore++;
+		else this.opponentScore++;
+	};
 
 	initGradient(): CanvasGradient {
 		const gradient: CanvasGradient = this.gameContext.createLinearGradient(
@@ -211,5 +216,12 @@ export class Game {
 
 	log(message: string): void {
 		console.log(`%c Game %c ${message}`, 'background:green;color:yellow', '');
+	}
+
+	// Updates the locally stored variables for the canvas size
+	updateCanvasSize() {
+		if (!this.canvasRef || !this.canvasRef.current) return;
+		this.canvasSize.height = this.canvasRef.current?.height;
+		this.canvasSize.width = this.canvasRef.current?.width;
 	}
 }

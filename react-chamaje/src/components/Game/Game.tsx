@@ -79,7 +79,7 @@ const Game: React.FC<IGameProps> = ({
 	const { gameData, updateGameData, resetGameData } = useContext(GameContext);
 	// use our socket hook
 	const {
-		updatePlayerPosition,
+		broadcastPlayerPosition,
 		joinRoom,
 		requestOpponentInfo,
 		setPlayer1AsReady,
@@ -93,13 +93,14 @@ const Game: React.FC<IGameProps> = ({
 				gameInstance.current = new GameObject(
 					canvasRef,
 					ctx,
-					updatePlayerPosition,
+					broadcastPlayerPosition,
 				);
 		}
 
 		return () => {
 			gameInstance.current?.cancelGameLoop();
 			gameInstance.current?.removeEventListeners();
+			resetGameData(); // TODO: this does not seem to log shit
 		};
 	}, []);
 
@@ -136,7 +137,11 @@ const Game: React.FC<IGameProps> = ({
 
 	return (
 		<Window
-			windowTitle="Game"
+			windowTitle={
+				gameData.opponentInfo
+					? `Game against ${gameData.opponentInfo.login}`
+					: 'Game'
+			}
 			onCloseClick={onCloseClick}
 			windowDragConstraintRef={windowDragConstraintRef}
 			resizable={true}

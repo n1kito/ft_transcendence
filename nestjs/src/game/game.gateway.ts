@@ -188,9 +188,9 @@ export class GameGateway
 				id: roomId,
 			});
 			// if the room is full, let both players know
-			if (this.gameService.isRoomFull(roomId)) {
+			// if (this.gameService.isRoomFull(roomId)) {
 				this.server.in(roomId).emit('room-is-full');
-			}
+			// }
 		} catch (error) {
 			console.error('Could not join game room: ', error);
 			client.emit('error-joining-room');

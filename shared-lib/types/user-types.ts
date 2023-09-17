@@ -1,4 +1,4 @@
-export interface IMatchHistory {
+export interface SharedIMatchHistory {
 	player1Login: string;
 	player1Score: number;
 	player1Image: string;

@@ -33,8 +33,8 @@ export interface IGameDataProps {
 // Initial state of the gameData
 const defaultGameState: IGameDataProps = {
 	socket: undefined,
-	gameCanStart: true,
-	gameIsPlaying: true,
+	gameCanStart: false,
+	gameIsPlaying: false,
 	player1Ready: false,
 	player2Ready: false,
 	roomIsFull: false,
@@ -78,6 +78,14 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
 		);
 	}, [gameData]);
 
+	const logContext = (content: string) => {
+		console.log(
+			`%c GameDataUpdated %c ${content}`,
+			'background:blue; color:turquoise',
+			'',
+		);
+	};
+
 	// We want a helper function that will allow us to update one, many or all
 	// properties of the game state without having to override the entire thing manually
 	const updateGameData = (updates: Partial<IGameDataProps>) => {
@@ -85,26 +93,17 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
 			...prevGameData,
 			...updates,
 		}));
-		if ('socket' in updates)
-			console.log(
-				`%c GameDataUpdated %c socket ${
-					updates.socket != undefined ? 'added' : 'removed'
-				}`,
-				'background:blue; color:turquoise',
-				'',
-			);
-		else {
-			console.log(
-				`%c GameDataUpdated %c ${JSON.stringify(updates, null, 4)}`,
-				'background:blue; color:turquoise',
-				'',
-			);
+		if ('socket' in updates) {
+			logContext(`socket ${updates.socket != undefined ? 'added' : 'removed'}`);
+		} else {
+			logContext(JSON.stringify(updates, null, 4));
 		}
 	};
 
 	// Helper function to reset the game state to its initial state in one function call
 	const resetGameData = () => {
-		setGameData(defaultGameState);
+		logContext('reset the gameData context');
+		updateGameData(defaultGameState);
 	};
 
 	// Return a provider that will now make the gameData and its helper functions available
