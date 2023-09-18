@@ -23,7 +23,7 @@ export default class Ball extends GameEntity {
 	update(
 		playerPaddle: Paddle,
 		opponentPaddle: Paddle,
-		canvasRef: React.MutableRefObject<HTMLCanvasElement | null>,
+		canvasSize: { width: number; height: number },
 		playerScored: (won: boolean) => void,
 	) {
 		// ball predicted ghost shape
@@ -34,9 +34,9 @@ export default class Ball extends GameEntity {
 			height: this.height + Math.abs(this.yVelocity * this.speed),
 		};
 
-		if (!canvasRef.current) return;
-		const canvasHeight = canvasRef.current.height;
-		const canvasWidth = canvasRef.current.width;
+		const canvasHeight = canvasSize.height;
+		const canvasWidth = canvasSize.width;
+
 		const canvasCenter = canvasWidth / 2 - this.width / 2;
 
 		// check for top collision

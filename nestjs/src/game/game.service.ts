@@ -17,22 +17,37 @@ export class GameService {
 	// The requesting user joins a game with no opponent in mind
 	// (meaning it's not from a chat invite)
 	handleSoloRoomAssignment(userId: number): string {
-		// Find either a room with someone waiting, a room with only us inside, or generate a new room ID
-		const roomId =
-			this.findRoomWithOpponentWaiting(userId) ||
-			this.findSoloRoom(userId) ||
-			this.createNewRoom(userId);
-		// If our user is not already in the room,
-		// add our user to that room
-		if (
-			this.roomsMap[roomId].length === 0 ||
-			this.roomsMap[roomId][0] != userId
-		) {
-			this.roomsMap[roomId].push(userId);
-			console.log(`[🏓] User ${userId} was just added to room #${roomId}`);
+		// Find a room the user might already be playing in
+		const roomUserIsAlreadyPlayingIn =
+			this.findRoomUserIsAlreadyPlayingIn(userId);
+		if (roomUserIsAlreadyPlayingIn) {
+			console.log(
+				`[🏓] User ${userId} was already playing in room #${roomUserIsAlreadyPlayingIn}`,
+			);
+			return roomUserIsAlreadyPlayingIn;
 		}
+		// Find a room with an opponent waiting for a partner
+		const roomWhereOpponentIsWaiting = this.findRoomWithOpponentWaiting(userId);
+		if (roomWhereOpponentIsWaiting) {
+			this.roomsMap[roomWhereOpponentIsWaiting].push(userId);
+			console.log(
+				`[🏓] Added user ${userId} to #${roomWhereOpponentIsWaiting}, where someone was waiting`,
+			);
+			return roomWhereOpponentIsWaiting;
+		}
+		// Find a room where our user is alone
+		const roomWithOnlyUser = this.findSoloRoom(userId);
+		if (roomWithOnlyUser) {
+			console.log(
+				`[🏓] Found room ${roomWithOnlyUser} where user ${userId} was alone.`,
+			);
+			return roomWithOnlyUser;
+		}
+		// Create a new room
+		const newRoom = this.createNewRoom(userId);
+		this.roomsMap[newRoom].push(userId);
 		// Return the room Id
-		return roomId;
+		return newRoom;
 	}
 
 	findRoomWithOpponentWaiting(userId: number): string | undefined {
@@ -72,14 +87,36 @@ export class GameService {
 		return soloRoomId;
 	}
 
+	findRoomUserIsAlreadyPlayingIn(userId: number): string | undefined {
+		const currentRoom: string | undefined = Object.keys(this.roomsMap).find(
+			(roomId) => {
+				// Retrieve the players in the room
+				const players = this.roomsMap[roomId];
+				// Returns whether there is only one player in it or not
+				// and if that player is not us
+				return (
+					players.length === 2 && (players[0] == userId || players[1] == userId)
+				);
+			},
+		);
+		if (currentRoom)
+			console.log(
+				`[🏓] Found a room user was already playing in:`,
+				this.roomsMap[currentRoom],
+			);
+		else console.log(`[🏓] Found no room user was already playing in.`);
+		// If a room with an opponent is found, return its id, or return nothing
+		return currentRoom;
+	}
+
 	createNewRoom(userId: number): string {
-		console.log('[🏓] Generating a new room Id and creating the room');
 		let roomId;
 		do {
 			roomId = `${userId}-room-${randomBytes(5).toString('hex')}`;
 		} while (this.roomsMap[roomId]);
 		// Create the entry in the map
 		this.roomsMap[roomId] = [];
+		console.log(`[🏓] User ${userId} created room ${roomId}`);
 		return roomId;
 	}
 

@@ -1,4 +1,4 @@
-import { GameEntity, PaddleDirection } from './Shared';
+import { GameEntity } from './Shared';
 
 export default class Paddle extends GameEntity {
 	private speed: number = 15;
@@ -9,8 +9,8 @@ export default class Paddle extends GameEntity {
 		this.direction = 0;
 	}
 
-	update(canvasRef: React.MutableRefObject<HTMLCanvasElement | null>) {
-		const screenPaddleGap: number = 0.075 * canvasRef.current!.height;
+	update(canvasSize: { width: number; height: number }) {
+		const screenPaddleGap: number = 0.075 * canvasSize.height;
 		// Calculate the new y coordinate of the paddle
 		this.y += this.speed * this.direction;
 		// Make sure the y coordinates are never < 0 or > canvasHeight - paddleHeight
@@ -19,16 +19,13 @@ export default class Paddle extends GameEntity {
 		this.y = Math.max(
 			screenPaddleGap,
 			// TODO: check the use of ! for conditionals. This should never be undefined so I don't see why it's typed as such
-			Math.min(
-				this.y,
-				canvasRef.current!.height - this.height - screenPaddleGap,
-			),
+			Math.min(this.y, canvasSize.height - this.height - screenPaddleGap),
 		);
 	}
 
-	setDirection(direction: PaddleDirection) {
-		if (direction === PaddleDirection.up) this.direction = -1;
-		else if (direction === PaddleDirection.down) this.direction = 1;
+	setDirection(direction: string) {
+		if (direction === 'up') this.direction = -1;
+		else if (direction === 'down') this.direction = 1;
 		else this.direction = 0;
 	}
 }

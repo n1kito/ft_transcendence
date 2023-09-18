@@ -176,11 +176,15 @@ export const useGameSocket = () => {
 		});
 	};
 
-	const broadcastPlayerPosition = (direction: string) => {
+	const broadcastPlayerPosition = (
+		direction: string,
+		inputSequenceNumber: number,
+	) => {
 		// socketLog(`sending paddle movement: ${direction}`);
 		socketRef.current?.emit('paddle-movement', {
 			playerNumber: userData?.id,
 			direction: direction,
+			inputSequenceNumber: inputSequenceNumber,
 		});
 	};
 

@@ -99,9 +99,9 @@ const GameSelectionScreen: React.FC<IGameSelectionScreenProps> = () => {
 						Try to find another opponent ?
 					</Tooltip>
 					<Button
-						onClick={() =>
-							window.alert('this should trigger a new game matching process')
-						}
+						onClick={() => {
+							resetGameData();
+						}} // TODO: this will not work, our user needs to be removed from their current room}
 						disabled={gameData.player1Ready || !gameData.opponentInfo}
 						baseColor={[300, 91, 84]}
 					>

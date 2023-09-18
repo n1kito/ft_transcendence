@@ -146,10 +146,6 @@ export class GameGateway
 			socketOwnerId,
 			'opponent-was-disconnected',
 		);
-		// TODO: this is not correct because if they come back they should be
-		// put in the room they were already in, so they can continue their game
-		// Remove the player from all the rooms they were in
-		this.gameService.removePlayerFromOpponentRooms(socketOwnerId);
 		// TODO: make this longer, update it in the front screen as well
 		// Wait 5 seconds, and if player does not reconnect, let the other
 		// player know they have left
@@ -159,6 +155,8 @@ export class GameGateway
 				console.log(
 					'[❌] Client has not reconnected in the last 10 seconds. They are not coming back.',
 				);
+				// Remove the player from all the rooms they were in
+				this.gameService.removePlayerFromOpponentRooms(socketOwnerId);
 				// Clean up the user's non-played matches from the database
 				// A non-played match is a match where both scores are 0 and there is no set winner
 				// TODO: check that my definition of a "non-played match" makes sense
@@ -250,6 +248,15 @@ export class GameGateway
 		await this.gameService.DBUpdatePlayerReadyStatus(userId, roomId, true);
 		// Notify the other users in the room that their opponent is ready
 		client.to(roomId).emit('opponent-is-ready');
+	}
+
+	// Handle when player asks to be removed from their current room
+	@SubscribeMessage('leave-current-room')
+	async handlePlayerLeavesRoom(data: { userId: number }) {
+		console.log(
+			`[🧹] Player ${data.userId} asked to be removed from their active room`,
+		);
+		this.gameService.removePlayerFromOpponentRooms(data.userId);
 	}
 
 	@SubscribeMessage('paddle-movement')

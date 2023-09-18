@@ -1,6 +1,7 @@
 import { PaddleDirection } from './Shared';
 import Paddle from './Paddle';
 import Ball from './Ball';
+import { ICurrentGameState } from './../../../../../../shared-lib/types/game-types';
 
 export class Game {
 	// private gameCanvas: React.MutableRefObject<HTMLCanvasElement>;
@@ -10,6 +11,12 @@ export class Game {
 
 	private TICK_RATE = 1000 / 60; // we want 60 updates per second (in milliseconds, so we can use the value with Date.now()
 	private lastTick = Date.now();
+	private inputSequenceNumber = 0; // this is used to track the number of each client input
+	// used to store all of the inputs that have not been confirmed by the server yet
+	private unconfirmedInputs: Array<{
+		sequenceNumber: number;
+		direction: string;
+	}> = [];
 
 	private paddlePlayer: Paddle;
 	private paddleOpponent: Paddle;
@@ -23,7 +30,10 @@ export class Game {
 
 	private gradient: CanvasGradient;
 
-	private broadcastPlayerPosition: (direction: string) => void;
+	private broadcastPlayerPosition: (
+		direction: string,
+		inputSequenceNumber: number,
+	) => void;
 
 	constructor(
 		canvasRef: React.MutableRefObject<HTMLCanvasElement | null>,
@@ -111,26 +121,72 @@ export class Game {
 	}
 
 	handleKeyPress = (event: KeyboardEvent): void => {
+		let direction = null;
 		if (event.key === 'ArrowUp') {
 			console.log('[🕹️] up');
-			this.broadcastPlayerPosition('up');
+			direction = 'up';
+			// this.broadcastPlayerPosition('up');
 			// change the direction of the paddle
-			this.paddlePlayer.setDirection(PaddleDirection.up);
+			// this.paddlePlayer.setDirection(PaddleDirection.up);
 		}
 		if (event.key === 'ArrowDown') {
 			console.log('[🕹️] down');
-			this.broadcastPlayerPosition('down');
+			direction = 'down';
+			// this.broadcastPlayerPosition('down');
 			// change the direction of the paddle
-			this.paddlePlayer.setDirection(PaddleDirection.down);
+			// this.paddlePlayer.setDirection(PaddleDirection.down);
+		}
+		// If a direction was registered
+		if (direction) {
+			this.inputSequenceNumber++; //increase the sequence number of the input
+			this.broadcastPlayerPosition(direction, this.inputSequenceNumber); // send it to the server
+			this.paddlePlayer.setDirection(direction); // update the player's direction
+			// add the action to the array of actions that have not yet been confirmed by the server
+			this.unconfirmedInputs.push({
+				sequenceNumber: this.inputSequenceNumber,
+				direction: direction,
+			});
 		}
 	};
 
 	handleKeyRelease = (event: KeyboardEvent): void => {
 		if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
 			// this.broadcastPlayerPosition('immobile');
-			this.paddlePlayer.setDirection(PaddleDirection.immobile);
+			this.inputSequenceNumber++;
+			this.broadcastPlayerPosition('immobile', this.inputSequenceNumber);
+			this.paddlePlayer.setDirection('immobile');
+			this.unconfirmedInputs.push({
+				sequenceNumber: this.inputSequenceNumber,
+				direction: 'immobile',
+			});
 		}
 	};
+
+	applyServerUpdate(
+		gameStateFromServer: ICurrentGameState,
+		lastProcessedInputSeqNum: number,
+	): void {
+		// Remove inputs that the server has already processed
+		while (
+			this.unconfirmedInputs.length > 0 &&
+			this.unconfirmedInputs[0].sequenceNumber <= lastProcessedInputSeqNum
+		) {
+			this.unconfirmedInputs.shift();
+		}
+
+		// Set our local state to the state from the server
+		// TODO: Also update the other elements like paddles and ball position, and current power up
+		this.playerScore = gameStateFromServer.player1Score;
+		this.opponentScore = gameStateFromServer.player2Score;
+
+		// Reapply unconfirmed inputs
+		this.unconfirmedInputs.forEach((input) => {
+			// In this case, we are simply setting the paddle direction again.
+			// Depending on your game's complexity, you might need to reapply more game logic.
+			this.paddlePlayer.setDirection(input.direction);
+			this.paddlePlayer.update(this.canvasRef); // This is a simplified version. Depending on your game logic, you might have to simulate more than just one update here.
+		});
+	}
 
 	update(): void {
 		this.paddlePlayer.update(this.canvasRef);
