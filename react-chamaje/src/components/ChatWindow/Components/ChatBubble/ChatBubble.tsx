@@ -9,7 +9,6 @@ interface IChatBubbleProps {
 	senderAvatar?: string;
 	time?: string;
 	children: ReactNode;
-	isLast?: boolean;
 	// messageRef?: RefObject<HTMLDivElement>;
 }
 
@@ -19,7 +18,6 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 	time = '',
 	senderAvatar = '',
 	children,
-	isLast = false,
 	// messageRef,
 }) => {
 	const [tooltipVisible, setTooltipVisible] = useState(false);

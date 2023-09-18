@@ -303,52 +303,61 @@ export class UserController {
 	async getPrivateMessages(
 		@Req() request: CustomRequest,
 		@Param('userId') userId: number,
+		@Res() res: Response,
 	) {
-		// this contains an array of the chat sessions
-		const chatSessions = await this.userService.getChatSessions(request.userId);
-
-		// this contains an array of the chat rooms joined that are not channels
-		const chatPromises = chatSessions.map(async (currentChat) => {
-			const room = await this.chatService.getPrivateMessageRoom(
-				currentChat.chatId,
+		try {
+			// this contains an array of the chat sessions
+			const chatSessions = await this.userService.getChatSessions(
+				request.userId,
 			);
-			return room; // Return the result of each asynchronous operation
-		});
-		// the filter(Boolean) throws away every null/undefined object
-		const chatRoomsResults = await Promise.all(chatPromises);
-		const chatRoomsFiltered = chatRoomsResults.filter(Boolean);
 
-		// this contains for each room joined, the id of the room, the participants,
-		// the name of the other user and its image
-		const rooms = await Promise.all(
-			chatRoomsFiltered.map(async (currentRoom) => {
-				let name: string;
-				let avatar: string;
-				await Promise.all(
-					currentRoom.participants.map(async (currentParticipant) => {
-						if (currentParticipant.userId !== request.userId) {
-							const participantData =
-								await this.userService.getPublicDataFromUserId(
-									currentParticipant.userId,
-								);
-							name = participantData.login;
-							avatar = participantData.image;
-						}
-					}),
+			// this contains an array of the chat rooms joined that are not channels
+			const chatPromises = chatSessions.map(async (currentChat) => {
+				const room = await this.chatService.getPrivateMessageRoom(
+					currentChat.chatId,
 				);
+				return room; // Return the result of each asynchronous operation
+			});
+			// the filter(Boolean) throws away every null/undefined object
+			const chatRoomsResults = await Promise.all(chatPromises);
+			const chatRoomsFiltered = chatRoomsResults.filter(Boolean);
 
-				return {
-					chatId: currentRoom.id,
-					participants: currentRoom.participants.map((currentParticipant) => {
-						return currentParticipant.userId;
-					}),
-					name: name,
-					avatar: avatar,
-				};
-			}),
-		);
-		console.log('rooms', rooms);
-		return rooms;
+			// this contains for each room joined, the id of the room, the participants,
+			// the name of the other user and its image
+			const rooms = await Promise.all(
+				chatRoomsFiltered.map(async (currentRoom) => {
+					let name: string;
+					let avatar: string;
+					await Promise.all(
+						currentRoom.participants.map(async (currentParticipant) => {
+							if (currentParticipant.userId !== request.userId) {
+								const participantData =
+									await this.userService.getPublicDataFromUserId(
+										currentParticipant.userId,
+									);
+								name = participantData.login;
+								avatar = participantData.image;
+							}
+						}),
+					);
+
+					return {
+						chatId: currentRoom.id,
+						participants: currentRoom.participants.map((currentParticipant) => {
+							return currentParticipant.userId;
+						}),
+						name: name,
+						avatar: avatar,
+					};
+				}),
+			);
+			console.log('rooms', rooms);
+			res.status(200).json(rooms);
+			// return rooms;
+		} catch (e) {
+			res.status(401).json({ message: 'Could not fetch private messages' });
+			console.error('Could not retreive private messages: ', e);
+		}
 	}
 
 	// get channels
@@ -359,19 +368,19 @@ export class UserController {
 	) {
 		try {
 			// this contains an array of the chat sessions
-			const chatSessions = await this.userService.getChatSessions(request.userId);
-	
+			const chatSessions = await this.userService.getChatSessions(
+				request.userId,
+			);
+
 			// this contains an array of the chat rooms joined that are not channels
 			const chatPromises = chatSessions.map(async (currentChat) => {
-				const room = await this.chatService.getChannelRoom(
-					currentChat.chatId,
-				);
+				const room = await this.chatService.getChannelRoom(currentChat.chatId);
 				return room; // Return the result of each asynchronous operation
 			});
 			// the filter(Boolean) throws away every null/undefined object
 			const chatRoomsResults = await Promise.all(chatPromises);
 			const chatRoomsFiltered = chatRoomsResults.filter(Boolean);
-	
+
 			// this contains for each room joined, the id of the room, the participants,
 			// the name of the channel
 			const rooms = await Promise.all(
@@ -388,7 +397,7 @@ export class UserController {
 			console.log('rooms', rooms);
 			return rooms;
 		} catch (e) {
-			console.error('Could not fetch channels: ', e)
+			console.error('Could not fetch channels: ', e);
 		}
 	}
 

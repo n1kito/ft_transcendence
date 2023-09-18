@@ -40,11 +40,50 @@ const Channels: React.FC<IChannelsProps> = ({
 
 	const { accessToken } = useAuth();
 
+
+	/* ********************************************************************* */
+	/* ***************************** WEBSOCKET ***************************** */
+	/* ********************************************************************* */
+
+	// LISTENER: when receiving a message in active chat
+	// listen for a message everytime the chatId changes
+	useEffect(() => {
+		if (!userData || !userData.chatSocket) {
+			console.warn('your userData was not set up yet');
+			return;
+		}
+		const onReceiveMessage = (message: IMessage) => {
+			// if it is the active chat, load message
+			if (message.chatId === chatWindowId) {
+				const updatedMessages: IMessage[] = messages.map((val) => {
+					return val;
+				});
+				updatedMessages.push(message);
+				setMessages(updatedMessages);
+			} else {
+				console.log(
+					'%cYou received a message from another chat',
+					'color:lightblue;',
+				);
+			}
+		};
+		// userData?.chatSocket?.onReceiveMessage(onReceiveMessage);
+		userData?.chatSocket?.onReceiveMessage(onReceiveMessage);
+
+		// stop listening to messages
+		// TODO: need to change that because I am not sure it will stop listening to the right room
+		return () => {
+			userData.chatSocket?.offReceiveMessage(onReceiveMessage);
+		};
+	}, [chatWindowId, messages]);
+
+
 	// on click on an avatar, check if a PM conversation exists.
 	// If it does, open the window, set the userId and chatId, and fetch
 	// the messages.
 	// Otherwise open clean the messages and open the window
 	const openPrivateMessageWindow: any = (roomId: number) => {
+		console.log('roomId', roomId);
 		const chatId = channelsList.map((currentChat) => {
 			if (roomId === currentChat.chatId) {
 				setChatWindowId(currentChat.chatId);
@@ -67,19 +106,23 @@ const Channels: React.FC<IChannelsProps> = ({
 	const createNewChannel = () => {
 		if (channelInput) {
 			createChannel(accessToken, channelInput)
-				.then(() => {
-					fetchChannels(accessToken)
-						.then((data) => {
-							setChannelsList(data);
-						})
-						.catch((e) => {
-							console.error('Error fetching channels: ', e);
-						});
+				.then((room) => {
+					const updatedChannelsList = channelsList.map((current) => {
+						return current;
+					});
+					console.log('room', room);
+					updatedChannelsList.push({
+						chatId: room.chatId,
+						participants: [userData?.id ? userData.id : 0],
+						name: channelInput,
+					});
+					setChannelsList(updatedChannelsList);
 					setSettingsPanelIsOpen(false);
 				})
+				.then(() => setChannelInput(''))
 				.catch((e) => {
-					console.error('Error creating channel: ', e);
-					setSettingsError('Could not create that channel');
+					console.error('Error creating channel: ', e.message);
+					setSettingsError(e.message);
 				});
 		}
 	};
@@ -100,7 +143,7 @@ const Channels: React.FC<IChannelsProps> = ({
 	}, [messages]);
 
 	useEffect(() => {
-		console.log('Is the Chatwindow open ?', chatWindowIsOpen);
+		console.log('chatWindowIsOpen', chatWindowIsOpen);
 	}, [chatWindowIsOpen]);
 
 	useEffect(() => {
@@ -110,6 +153,10 @@ const Channels: React.FC<IChannelsProps> = ({
 	useEffect(() => {
 		console.log('channelsList', channelsList);
 	}, [channelsList]);
+
+	useEffect(() => {
+		console.log('chatWindowName', chatWindowName);
+	}, [chatWindowName]);
 
 	/* ********************************************************************* */
 	/* ******************************* RETURN ******************************* */
@@ -183,7 +230,7 @@ const Channels: React.FC<IChannelsProps> = ({
 					<SettingsWindow settingsWindowVisible={setSettingsPanelIsOpen}>
 						<Title highlightColor="yellow">Channel name</Title>
 						<div className="settings-form">
-							<InputField onChange={handleChannelInput}></InputField>
+							<InputField onChange={handleChannelInput} error={settingsError}></InputField>
 							<Button
 								onClick={() => {
 									settingsMode === 'create'
@@ -207,6 +254,7 @@ const Channels: React.FC<IChannelsProps> = ({
 					messages={messages}
 					setMessages={setMessages}
 					setChatsList={setChannelsList}
+					chatsList={channelsList}
 					isChannel={true}
 					setChatWindowIsOpen={setChatWindowIsOpen}
 				/>

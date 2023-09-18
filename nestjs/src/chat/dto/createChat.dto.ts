@@ -1,10 +1,10 @@
 import {
-	IsAlphanumeric,
 	IsBoolean,
 	IsNotEmpty,
 	IsNumber,
 	IsOptional,
 	IsString,
+	NotContains,
 } from 'class-validator';
 
 export class CreateChatDTO {
@@ -30,8 +30,11 @@ export class CreateChatDTO {
 	@IsNumber()
 	userId?: number;
 
+	// TODO: do I need to escape more characters?
 	@IsOptional()
 	@IsNotEmpty()
 	@IsString()
+	@NotContains('/')
+	@NotContains('\\')
 	name?: string;
 }

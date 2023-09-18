@@ -21,7 +21,9 @@ import DOMPurify from 'dompurify';
 import {
 	fetchChannels,
 	fetchPrivateMessages,
+	getChatInfo,
 	leaveChat,
+	makePrivate,
 	sendMessageQuery,
 } from 'src/utils/queries';
 import { IChatStruct } from '../PrivateMessages/PrivateMessages';
@@ -36,6 +38,7 @@ export interface IChatWindowProps {
 	setChatWindowIsOpen: Dispatch<SetStateAction<boolean>>;
 	setMessages: Dispatch<SetStateAction<IMessage[]>>;
 	setChatsList: Dispatch<SetStateAction<IChatStruct[]>>;
+	chatsList: IChatStruct[];
 }
 
 export interface IMessage {
@@ -70,6 +73,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	messages,
 	setMessages,
 	setChatsList,
+	chatsList,
 	isChannel = false,
 	setChatWindowIsOpen,
 }) => {
@@ -80,6 +84,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	const [textareaIsFocused, setTextareaIsFocused] = useState(false);
 	const [textareaIsEmpty, setTextareaIsEmpty] = useState(true);
 	const [textareaContent, setTextareaContent] = useState('');
+	const [pwdContent, setPwdContent] = useState('');
 
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [channelIsPrivate, setChannelIsPrivate] = useState(false);
@@ -101,6 +106,11 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 		}
 	};
 
+	const handlePwdInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+		const newValue = event.target.value;
+		setPwdContent(newValue);
+	};
+
 	// get the user to the last message
 	useEffect(() => {
 		const container = chatContentRef.current;
@@ -119,11 +129,19 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	const leaveChannel = () => {
 		leaveChat(accessToken, chatId)
 			.then(async () => {
-				fetchChannels(accessToken)
-					.then((data) => setChatsList(data))
-					.catch((e) => {
-						console.error('Error fetching channels: ', e);
-					});
+				const updatedChannelsList = chatsList.filter(
+					(channel) => channel.chatId !== chatId,
+				);
+				setChatsList(updatedChannelsList);
+				// fetchChannels(accessToken)
+				// 	.then((data) => {
+				// 		const updatedChannelsList = chatsList.filter((channel) => channel.chatId !== chatId);
+
+				// 		setChatsList(updatedChannelsList);
+				// 	})
+				// 	.catch((e) => {
+				// 		console.error('Error fetching channels: ', e);
+				// 	});
 				setChatWindowIsOpen(false);
 			})
 			.catch((e) => {
@@ -153,6 +171,9 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	useEffect(() => {
 		setTextareaContent('');
 		setTextareaIsEmpty(true);
+		getChatInfo(accessToken, chatId).then((chatInfo: IChatInfo) => {
+			setChannelIsPrivate(chatInfo.isPrivate);
+		});
 	}, [chatId]);
 	/* ********************************************************************* */
 	/* ******************************** CHAT ******************************* */
@@ -240,6 +261,15 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							__html: DOMPurify.sanitize(messageWithNewlines),
 						});
 						const isLast = index === messages.length - 1;
+						if (isLast)
+							console.log(
+								'currentMessage.content',
+								currentMessage.content,
+								'messages.length',
+								messages.length,
+								'index',
+								index,
+							);
 
 						return (
 							<ChatBubble
@@ -252,7 +282,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 								sender={currentMessage.login}
 								time={date.toLocaleString('en-US', dateFormatOptions)}
 								senderAvatar={currentMessage.avatar}
-								isLast={isLast}
 							>
 								{
 									<div
@@ -295,14 +324,25 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 					<Title highlightColor="yellow">Visibility</Title>
 					<Button
 						baseColor={channelIsPrivate ? [111, 60, 84] : [40, 100, 80]}
-						onClick={() => setChannelIsPrivate(!channelIsPrivate)}
+						onClick={() => {
+							console.log('am i doing something?');
+							makePrivate(accessToken, chatId, !channelIsPrivate);
+							setChannelIsPrivate(!channelIsPrivate);
+						}}
 					>
 						make {channelIsPrivate ? 'public' : 'private'}
 					</Button>
 					<Title highlightColor="yellow">Channel password</Title>
 					<div className="settings-form">
 						<InputField value="password"></InputField>
-						<Button>update</Button>
+						{/* <InputField value="password" onChange={handlePwdInput}></InputField> */}
+						<Button
+							onClick={() => {
+								// setPassword();
+							}}
+						>
+							update
+						</Button>
 					</div>
 				</SettingsWindow>
 			)}

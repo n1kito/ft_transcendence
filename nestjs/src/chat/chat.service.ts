@@ -113,6 +113,7 @@ export class ChatService {
 		});
 		return res;
 	}
+
 	// create Chat
 	async createChat(userId: number, content: CreateChatDTO) {
 		const chat = await this.prisma.chat.create({
@@ -191,6 +192,21 @@ export class ChatService {
 				});
 		} catch (e) {
 			console.error('could not leave channel: ', e);
+		}
+	}
+
+	async setPrivacySettings(chatId: number, toPrivate: boolean) {
+		try {
+			await this.prisma.chat.update({
+				where: {
+					id: chatId,
+				},
+				data: {
+					isPrivate: toPrivate,
+				}
+			})
+		} catch (e) {
+			console.error('Could set chat privacy settings')
 		}
 	}
 }

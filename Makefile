@@ -22,6 +22,9 @@ logs-back:
 logs-front:
 	docker logs react-container;\
 
+logs-nginx:
+	docker logs chamaje-nginx-1\
+
 restart:
 	docker compose restart
 

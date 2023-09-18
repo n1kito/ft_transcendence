@@ -104,6 +104,9 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 		console.log(' PrivateMessage - chatWindowId', chatWindowId);
 	}, [chatWindowId]);
 
+	useEffect(() => {
+		console.log(' PrivateMessage - searchUserSuccess', searchUserSuccess);
+	}, [searchUserSuccess]);
 	/* ********************************************************************* */
 	/* ******************************* LOGIC ******************************* */
 	/* ********************************************************************* */
@@ -181,17 +184,21 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					}
 					console.log('response data', data);
 					// if the user is found, create the PM and update the PM list
-					if (!userData) return;
+					if (!userData) {
+						console.log('userdata was not set sorrrrrry');
+						return;
+					}
 					createChatPrivateMessage(data.id, userData.id, accessToken)
 						.then(() => {
 							setSearchUserSuccess('Chat created successfully!');
-							fetchPrivateMessages(accessToken)
-								.then((data) => {
-									setPrivateMessages(data);
-								})
-								.catch((e) => {
-									console.error('Error fetching private conversations: ', e);
-								});
+
+							// fetchPrivateMessages(accessToken)
+							// 	.then((data) => {
+							// 		setPrivateMessages(data);
+							// 	})
+							// 	.catch((e) => {
+							// 		console.error('Error fetching private conversations: ', e);
+							// 	});
 							setSettingsPanelIsOpen(false);
 						})
 						.catch((e) => {
@@ -303,6 +310,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					messages={messages}
 					setMessages={setMessages}
 					setChatsList={setPrivateMessages}
+					chatsList={privateMessages}
 					setChatWindowIsOpen={setChatWindowIsOpen}
 				/>
 			)}
