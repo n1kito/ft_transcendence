@@ -1,36 +1,42 @@
-export async function findUserByLogin(login: string, accessToken: string) {
+export async function fetchFriends(accessToken: string) {
 	try {
-		const response = await fetch('api/user/byLogin/' + login, {
+		const response = await fetch('/api/user/friends', {
 			method: 'GET',
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
 			},
 			credentials: 'include',
 		});
-		if (!response.ok) throw new Error('Could not find user');
-		return response.json();
-	} catch (e) {
-		console.error('Could not find user: ', e);
-		throw new Error('' + e);
+
+		if (response.ok) {
+			const data = await response.json();
+			return data.friends;
+			return response.json();
+		}
+	} catch (error) {
+		throw error;
 	}
 }
 
-// export async fetchFriend = async () => {
-//     try {
-//         const response = await fetch('/api/user/friends', {
-//             method: 'GET',
-//             headers: {
-//                 Authorization: `Bearer ${accessToken}`,
-//             },
-//             credentials: 'include',
-//         });
-
-//         if (response.ok) {
-//             const data = await response.json();
-//             return data.friends;
-//         }
-//     } catch (error) {
-//         console.error('Error fetching friends:', error);
-//         throw error; // Rethrow the error to handle it elsewhere if needed
-//     }
-// };
+export async function addFriend(searchedLogin: string, accessToken: string) {
+	try {
+		const response = await fetch(`api/user/${searchedLogin}/add`, {
+			method: 'PUT',
+			credentials: 'include',
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		});
+		if (!response.ok) {
+			const data = await response.json();
+			console.warn('--------------', data);
+			// alert(message);
+			throw new Error(data.message);
+		}
+		// const data = await response.json();
+		// console.warn(data);
+		return response.json();
+	} catch (error) {
+		throw error;
+	}
+}

@@ -239,18 +239,19 @@ export class UserController {
 			const friend = await this.prisma.user.findUnique({
 				where: { login: login },
 			});
+			if (!friend)
+				return response.status(404).json({ message: 'User not found' });
+
 			if (userId === friend.id) {
 				return response.status(401).json({ message: 'Cannot add yourself' });
 			}
-
-			if (!friend)
-				return response.status(404).json({ message: 'User not found' });
 
 			await this.userService.addFriend(userId, friend.id);
 			return response
 				.status(200)
 				.json({ message: 'Friend added successfully' });
 		} catch (error) {
+			console.error(error);
 			return response.status(500).json({
 				error: error,
 			});

@@ -11,6 +11,7 @@ import SettingsWindow from 'src/components/Profile/Components/Shared/SettingsWin
 import Title from 'src/components/Profile/Components/Title/Title';
 import InputField from 'src/components/Profile/Components/InputField/InputField';
 import Button from 'src/components/Shared/Button/Button';
+import { addFriend, fetchFriends } from 'src/utils/FriendsQueries';
 
 interface IFriendsListProps {
 	onCloseClick: () => void;
@@ -45,61 +46,53 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 		setSearchUserSuccess('');
 	};
 
-	const fetchFriend = async () => {
-		try {
-			const response = await fetch('/api/user/friends', {
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-				credentials: 'include',
-			});
-
-			if (response.ok) {
-				const data = await response.json();
-				return data.friends;
-			}
-		} catch (error) {
-			console.error('Error fetching friends:', error);
-			throw error; // Rethrow the error to handle it elsewhere if needed
-		}
-	};
-
-	const addFriend = async () => {
-		try {
-			const response = await fetch(`api/user/${searchedLogin}/add`, {
-				method: 'PUT',
-				credentials: 'include',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-			});
-			if (response.ok) {
+	const handleAddFriend = async () => {
+		console.log('login: ', searchedLogin, accessToken);
+		addFriend(searchedLogin, accessToken)
+			.then(async (data) => {
 				setSettingsPanelIsOpen(false);
 				setIsFriendAdded(true);
-			} else {
-				const Error = await response.json();
-				setSearchUserError(Error.message);
-			}
-		} catch (error) {
-			throw new Error('internal error');
-		}
+			})
+			.catch((error) => {
+				alert();
+				// console.error(error);
+				setSearchUserError(error.message);
+			});
+		// try {
+		// 	const response = await fetch(`api/user/${searchedLogin}/add`, {
+		// 		method: 'PUT',
+		// 		credentials: 'include',
+		// 		headers: {
+		// 			Authorization: `Bearer ${accessToken}`,
+		// 		},
+		// 	});
+		// 	if (response.ok) {
+		// 		setSettingsPanelIsOpen(false);
+		// 		setIsFriendAdded(true);
+		// 	} else {
+		// 		const Error = await response.json();
+		// 		setSearchUserError(Error.message);
+		// 	}
+		// } catch (error) {
+		// 	throw new Error('internal error');
+		// }
 	};
 
 	useEffect(() => {
-		const fetchData = async () => {
-			const updatedFriends = await fetchFriend();
-			// update friends list with the newly added friend
-			setFriends(updatedFriends);
-			// ping friends to get updated online status
-			userData?.chatSocket?.sendServerConnection();
-			// end IsFriendAdded state
-			setIsFriendAdded(false);
-		};
-
 		// if a friend is successfully added then update friendslist
 		if (isFriendAdded) {
-			fetchData();
+			fetchFriends(accessToken)
+				.then(async (data) => {
+					// Update friends state
+					setFriends(data);
+					// Ping friends to get updated online status
+					userData?.chatSocket?.sendServerConnection();
+					// End isFriendAdded state
+					setIsFriendAdded(false);
+				})
+				.catch((error) => {
+					console.error('could not fetch friends: ', error);
+				});
 		}
 		return () => {};
 	}, [isFriendAdded]);
@@ -148,7 +141,7 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 
 						<Button
 							onClick={() => {
-								addFriend();
+								handleAddFriend();
 							}}
 						>
 							Add friend

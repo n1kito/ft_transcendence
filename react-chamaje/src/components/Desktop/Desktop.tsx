@@ -24,6 +24,7 @@ import ChatIcon from './Icons/PC.svg';
 import FriendsIcon from './Icons/NOTEBOOK.svg';
 import GameIcon from './Icons/CD.svg';
 import Channels from '../Channels/Channels';
+import { fetchFriends } from 'src/utils/FriendsQueries';
 
 // Friend structure to keep track of them and their online/ingame status
 export interface IFriendStruct {
@@ -119,35 +120,18 @@ const Desktop = () => {
 	 */
 
 	const [friends, setFriends] = useState<IFriendStruct[]>([]);
-	// TODO: instead of just storing them in a State, the user context should simply be updated so all other components that use it can be re-rendered (I think)
-	// TODO: if the user is not auth the map method cannot iterate since the friends variable is not an array. Should not be an issue since only logged in users can access the desktop but it might be better to think ahead for this
-	const fetchFriend = async () => {
-		try {
-			const response = await fetch('/api/user/friends', {
-				method: 'GET',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-				credentials: 'include',
-			});
 
-			if (response.ok) {
-				const data = await response.json();
-				return data.friends;
-			}
-		} catch (error) {
-			console.error('Error fetching friends:', error);
-			throw error; // Rethrow the error to handle it elsewhere if needed
-		}
-	};
-
+	// fetch user's friend to set friends state
 	useEffect(() => {
-		const fetchData = async () => {
-			const friends = await fetchFriend();
-			setFriends(friends);
-		};
-
-		if (isAuthentificated) fetchData(); // Call the async function to fetch and update friends
+		if (isAuthentificated) {
+			fetchFriends(accessToken)
+				.then(async (data) => {
+					setFriends(data);
+				})
+				.catch((error) => {
+					console.error('could not fetch friends: ', error);
+				});
+		}
 	}, []);
 
 	/**
@@ -235,7 +219,7 @@ const Desktop = () => {
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const updatedFriends = await fetchFriend();
+			const updatedFriends = await fetchFriends(accessToken);
 			setFriends(updatedFriends);
 			userData?.chatSocket?.sendServerConnection();
 		};
