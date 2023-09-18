@@ -182,8 +182,11 @@ export class GameSocket {
 				// look out for when opponent might be temporarily disconnected
 				this.socket?.on('opponent-was-disconnected', () => {
 					this.log('Opponent was disconnected but might come back !');
-					this.updateGameData({ player2Ready: false });
-					this.updateGameData({ opponentIsReconnecting: true });
+					this.updateGameData({
+						opponentIsReconnecting: true,
+						player2Ready: false,
+						gameIsPlaying: false,
+					});
 					// this.setPlayer2Ready(false);
 					// this.setOpponentIsReconnecting(true);
 				});
@@ -191,14 +194,14 @@ export class GameSocket {
 				// look out for when opponent might be disconnected
 				this.socket?.on('opponent-left', () => {
 					this.log('Opponent left for good :(');
-					// Let the game know that player2 is not ready
+					// Let the game know that there is no player 2
 					this.updateGameData({
 						opponentIsReconnecting: false,
 						opponentInfo: undefined,
+						gameIsPlaying: false,
+						player1Ready: false,
+						player2Ready: false,
 					});
-					// this.setOpponentIsReconnecting(false);
-					// And that actually we don't have a player2 anymore
-					// this.setOpponentInfo(undefined);
 				});
 			});
 			// if there was an error joining a room

@@ -1,17 +1,11 @@
-import React, { useContext, useEffect, useState } from 'react';
-import FriendBadge from '../../../Friends/Components/FriendBadge/FriendBadge';
-import { UserContext } from '../../../../contexts/UserContext';
-import Tooltip from '../../../Shared/Tooltip/Tooltip';
-import Button from '../../../Shared/Button/Button';
+import React, { useContext, useEffect } from 'react';
 import './GameOverlay.css';
 import GameSelectionScreen from './Components/GameSelectionScreen/GameSelectionScreen';
 import GameErrorScreen from './Components/GameErrorScreen/GameErrorScreen';
-import GameOpponentDisconnectScreen from './Components/GameWaitScreen/GameOpponentDisconnectScreen';
+import GameOpponentDisconnectScreen from './Components/GameDisconnectScreen/GameOpponentDisconnectScreen';
 import { GameContext } from '../../../../contexts/GameContext';
 
-interface IGameOverlayProps {}
-
-const GameOverlay: React.FC<IGameOverlayProps> = () => {
+const GameOverlay = () => {
 	const { gameData } = useContext(GameContext);
 
 	return (
@@ -22,7 +16,9 @@ const GameOverlay: React.FC<IGameOverlayProps> = () => {
 				!gameData.connectionErrorStatus && <GameSelectionScreen />}
 			{(!gameData.connectedToServer || gameData.connectionErrorStatus) &&
 				!gameData.opponentIsReconnecting && <GameErrorScreen />}
-			{gameData.opponentIsReconnecting && <GameOpponentDisconnectScreen />}
+			{gameData.connectedToServer && gameData.opponentIsReconnecting && (
+				<GameOpponentDisconnectScreen />
+			)}
 		</div>
 	);
 };

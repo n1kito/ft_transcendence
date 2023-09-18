@@ -17,18 +17,26 @@ export class GameService {
 	// The requesting user joins a game with no opponent in mind
 	// (meaning it's not from a chat invite)
 	handleSoloRoomAssignment(userId: number): string {
-		// Find either a room with someone waiting, or generate a new room ID
+		// Find either a room with someone waiting, a room with only us inside, or generate a new room ID
 		const roomId =
-			this.findRoomWithOpponentWaiting(userId) || this.createNewRoom(userId);
-		// Add our user to that room
-		this.roomsMap[roomId].push(userId);
-		console.log(`[🏓] User ${userId} was just added to room #${roomId}`);
+			this.findRoomWithOpponentWaiting(userId) ||
+			this.findSoloRoom(userId) ||
+			this.createNewRoom(userId);
+		// If our user is not already in the room,
+		// add our user to that room
+		if (
+			this.roomsMap[roomId].length === 0 ||
+			this.roomsMap[roomId][0] != userId
+		) {
+			this.roomsMap[roomId].push(userId);
+			console.log(`[🏓] User ${userId} was just added to room #${roomId}`);
+		}
 		// Return the room Id
 		return roomId;
 	}
 
 	findRoomWithOpponentWaiting(userId: number): string | undefined {
-		const soloRoomId: string | undefined = Object.keys(this.roomsMap).find(
+		const opponentRoomId: string | undefined = Object.keys(this.roomsMap).find(
 			(roomId) => {
 				// Retrieve the players in the room
 				const players = this.roomsMap[roomId];
@@ -37,12 +45,29 @@ export class GameService {
 				return players.length === 1 && players[0] != userId;
 			},
 		);
-		if (soloRoomId)
+		if (opponentRoomId)
 			console.log(
 				`[🏓] Found a room with someone waiting:`,
-				this.roomsMap[soloRoomId],
+				this.roomsMap[opponentRoomId],
 			);
 		else console.log(`[🏓] Found no room with someone waiting.`);
+		// If a room with an opponent is found, return its id, or return nothing
+		return opponentRoomId;
+	}
+
+	findSoloRoom(userId: number) {
+		const soloRoomId: string | undefined = Object.keys(this.roomsMap).find(
+			(roomId) => {
+				const players = this.roomsMap[roomId];
+				return players.length === 1 && players[0] === userId;
+			},
+		);
+		if (soloRoomId)
+			console.log(
+				`[🏓] Found a room user was alone in:`,
+				this.roomsMap[soloRoomId],
+			);
+		else console.log(`[🏓] Found no room user was solo in.`);
 		// If a solo room is found, return its id, or return nothing
 		return soloRoomId;
 	}
@@ -59,6 +84,7 @@ export class GameService {
 	}
 
 	isRoomFull(roomId: string): boolean {
+		console.log('current state of rooms: ', this.roomsMap);
 		return this.roomsMap[roomId] && this.roomsMap[roomId].length === 2;
 	}
 
@@ -158,6 +184,7 @@ export class GameService {
 
 	// Creates a gameSession entry in the db with both user information
 	async createDBGameEntry(roomId: string) {
+		console.log('[🔠] Creating game entry in database');
 		try {
 			const player1Id = this.roomsMap[roomId][0];
 			const player2Id = this.roomsMap[roomId][1];
@@ -179,7 +206,11 @@ export class GameService {
 	}
 
 	// Marks player as ready in a specific room
-	async markPlayerAsReadyInDB(playerId: number, roomId: string) {
+	async DBUpdatePlayerReadyStatus(
+		playerId: number,
+		roomId: string,
+		status: boolean,
+	) {
 		// Find the corresponding session
 		const gameSession = await this.prisma.gameSession.findFirst({
 			where: {
@@ -191,13 +222,27 @@ export class GameService {
 		if (gameSession.user1Id === playerId)
 			return this.prisma.gameSession.update({
 				where: { id: gameSession.id },
-				data: { user1IsReady: true },
+				data: { user1IsReady: status },
 			});
 		if (gameSession.user2Id === playerId)
 			return this.prisma.gameSession.update({
 				where: { id: gameSession.id },
-				data: { user2IsReady: true },
+				data: { user2IsReady: status },
 			});
 		else throw new Error('Player not found in the session');
+	}
+
+	async DBCleanUpEmptyGameSessions() {
+		const deletedGameSessions = await this.prisma.gameSession.deleteMany({
+			where: {
+				user1Score: 0,
+				user2Score: 0,
+				winner: undefined,
+			},
+		});
+		if (deletedGameSessions.count)
+			console.log(
+				`[🔠🧹] Cleaned up ${deletedGameSessions.count} empty game sessions`,
+			);
 	}
 }

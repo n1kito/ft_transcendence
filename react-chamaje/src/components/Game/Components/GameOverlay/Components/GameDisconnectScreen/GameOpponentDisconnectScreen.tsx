@@ -10,18 +10,24 @@ interface IOpponentDisconnectScreenProps {}
 const GameOpponentDisconnectScreen: React.FC<
 	IOpponentDisconnectScreenProps
 > = () => {
-	const { gameData, updateGameData } = useContext(GameContext);
-	const [waitTime, setWaitTime] = useState(5);
+	const { gameData, updateGameData, resetGameData } = useContext(GameContext);
+	const [waitTime, setWaitTime] = useState(10);
 	const [userWantToLeave, setUserWantsToLeave] = useState(false);
 	const [tooltipVisible, setTooltipVisible] = useState(false);
 
 	useEffect(() => {
 		if (waitTime == 0) {
-			updateGameData({
-				opponentIsReconnecting: false,
-				opponentInfo: undefined,
-			});
-			console.log('Opponent is no longer reconnecting');
+			// TODO: not sure this is necessary since the server sends an update
+			// when a player who disconnected is not coming back
+			// updateGameData({
+			// 	opponentIsReconnecting: false,
+			// 	opponentInfo: undefined,
+			// 	roomIsFull: false,
+			// 	player2Ready: false,
+			// 	gameIsPlaying: false,
+			// });
+			console.log('Not waiting for reconnection anymore');
+			resetGameData();
 			return;
 		}
 		setTimeout(() => {
@@ -29,14 +35,14 @@ const GameOpponentDisconnectScreen: React.FC<
 		}, 1000);
 	}, [waitTime]);
 
-	if (userWantToLeave) return null;
 	return (
 		<>
 			<GameScreenTitle>
 				{`${gameData.opponentInfo?.login || 'Opponent'}`} left :(
 			</GameScreenTitle>
 			<span className="game-opponent-disconnect-message">
-				let's wait a bit and see if they come back shall we ? ({waitTime})
+				let's wait a bit and see if they come back shall we ? ({waitTime})<br />
+				game will start over
 			</span>
 			<div
 				className="game-opponent-disconnect-button"
@@ -46,7 +52,7 @@ const GameOpponentDisconnectScreen: React.FC<
 				<Tooltip isVisible={tooltipVisible} position="bottom">
 					Ask to be paired with someone else
 				</Tooltip>
-				<Button onClick={() => setUserWantsToLeave(true)}>no thanks</Button>
+				<Button onClick={() => resetGameData()}>no thanks</Button>
 			</div>
 		</>
 	);

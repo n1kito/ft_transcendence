@@ -56,8 +56,10 @@ export class GameGateway
 		this.socketOwners = {};
 	}
 
-	afterInit(server: Server) {
+	async afterInit(server: Server) {
 		console.log('[🦄] Server initialized !');
+		// Cleanup all phantom game sessions
+		await this.gameService.DBCleanUpEmptyGameSessions();
 	}
 
 	// TODO: only allow our user to have one socket at a time ?
@@ -96,7 +98,7 @@ export class GameGateway
 		}
 	}
 
-	handleDisconnect(client: Socket) {
+	async handleDisconnect(client: Socket) {
 		// When a client disconnects, we want to set all of their game sessions
 		// as waiting, so we can handle reconnection later
 		// this.setAllUserGameSessionsTo(123, PlayerGameStatus.Waiting);
@@ -144,6 +146,25 @@ export class GameGateway
 			socketOwnerId,
 			'opponent-was-disconnected',
 		);
+		// TODO: this is not correct because if they come back they should be
+		// put in the room they were already in, so they can continue their game
+		// Remove the player from all the rooms they were in
+		this.gameService.removePlayerFromOpponentRooms(socketOwnerId);
+		// TODO: make this longer, update it in the front screen as well
+		// Wait 5 seconds, and if player does not reconnect, let the other
+		// player know they have left
+		setTimeout(async () => {
+			// If the userId has not been added back to the array of users
+			if (!this.userSockets[socketOwnerId]) {
+				console.log(
+					'[❌] Client has not reconnected in the last 10 seconds. They are not coming back.',
+				);
+				// Clean up the user's non-played matches from the database
+				// A non-played match is a match where both scores are 0 and there is no set winner
+				// TODO: check that my definition of a "non-played match" makes sense
+				await this.gameService.DBCleanUpEmptyGameSessions();
+			}
+		}, 10000);
 	}
 
 	private findSocketOwner(socketId: string): number | null {
@@ -190,9 +211,10 @@ export class GameGateway
 			// if the room is full
 			if (this.gameService.isRoomFull(roomId)) {
 				// TODO: should this be done when room is full or when both users are ready ?
-				// What if the room is created but one of the players leave before the match can even start?
+				// What if the room is created but one of the players leaves before the match can even start?
 				// Create a db game entry with both users
 				await this.gameService.createDBGameEntry(roomId);
+				console.log(`[🏓] Notifying everyone that the current room is full`);
 				this.server.in(roomId).emit('room-is-full');
 			}
 		} catch (error) {
@@ -225,7 +247,7 @@ export class GameGateway
 		console.log(`CURRENT MAP: ${JSON.stringify(this.userSockets, null, 2)}`);
 		const { userId, roomId } = data;
 		// Update the database gameSession entry
-		await this.gameService.markPlayerAsReadyInDB(userId, roomId);
+		await this.gameService.DBUpdatePlayerReadyStatus(userId, roomId, true);
 		// Notify the other users in the room that their opponent is ready
 		client.to(roomId).emit('opponent-is-ready');
 	}

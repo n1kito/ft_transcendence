@@ -51,6 +51,7 @@ const defaultGameState: IGameDataProps = {
 interface GameContextType {
 	gameData: IGameDataProps;
 	updateGameData: (updates: Partial<IGameDataProps>) => void;
+	eraseGameData: () => void;
 	resetGameData: () => void;
 }
 
@@ -58,6 +59,9 @@ export const GameContext = createContext<GameContextType>({
 	gameData: defaultGameState,
 	updateGameData: () => {
 		throw new Error('setGameData function must be overriden');
+	},
+	eraseGameData: () => {
+		throw new Error('resetGameData function must be overriden');
 	},
 	resetGameData: () => {
 		throw new Error('resetGameData function must be overriden');
@@ -95,9 +99,17 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
 	};
 
 	// Helper function to reset the game state to its initial state in one function call
-	const resetGameData = () => {
-		logContext('reset the gameData context');
+	const eraseGameData = () => {
+		logContext('erase the current gameData, including the socket');
 		setGameData(defaultGameState);
+	};
+
+	const resetGameData = () => {
+		logContext('reset the gameData context, excluding the socket');
+		const resetGameValues: Partial<IGameDataProps> = defaultGameState;
+		delete resetGameValues.socket;
+		delete resetGameValues.connectedToServer;
+		updateGameData(resetGameValues);
 	};
 
 	const logContext = (content: string) => {
@@ -111,7 +123,9 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
 	// Return a provider that will now make the gameData and its helper functions available
 	// for all its children components
 	return (
-		<GameContext.Provider value={{ gameData, updateGameData, resetGameData }}>
+		<GameContext.Provider
+			value={{ gameData, updateGameData, resetGameData, eraseGameData }}
+		>
 			{children}
 		</GameContext.Provider>
 	);

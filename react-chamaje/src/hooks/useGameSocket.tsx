@@ -105,7 +105,7 @@ export const useGameSocket = () => {
 				// set the socket to monitor/receive opponent information
 				socketRef.current?.on(`room-is-full`, () => {
 					socketLog('Got notified that the room is full');
-					updateGameData({ roomIsFull: true });
+					updateGameData({ roomIsFull: true, opponentIsReconnecting: false });
 				});
 				// and request that information
 				socketRef.current?.on(
@@ -129,8 +129,12 @@ export const useGameSocket = () => {
 				socketRef.current?.on('opponent-was-disconnected', () => {
 					// TODO: I DO NOT RECEIVE THIS ANYMORE, WHAT IS THE FUCK
 					socketLog('Opponent was disconnected but might come back !');
-					updateGameData({ player2Ready: false });
-					updateGameData({ opponentIsReconnecting: true });
+					updateGameData({
+						opponentIsReconnecting: true,
+						player1Ready: false,
+						player2Ready: false,
+						gameIsPlaying: false,
+					});
 					// setPlayer2Ready(false);
 					// setOpponentIsReconnecting(true);
 				});
@@ -138,14 +142,11 @@ export const useGameSocket = () => {
 				// look out for when opponent might be disconnected
 				socketRef.current?.on('opponent-left', () => {
 					socketLog('Opponent left for good :(');
-					// Let the game know that player2 is not ready
-					updateGameData({
-						opponentIsReconnecting: false,
-						opponentInfo: undefined,
-					});
-					// setOpponentIsReconnecting(false);
-					// And that actually we don't have a player2 anymore
-					// setOpponentInfo(undefined);
+					// Let's reset the game state in that case
+					// It will trigger a new room assignation and
+					// the server will make sure to find the room we're
+					// already in
+					// resetGameData();
 				});
 				// if there was an error joining a room
 				socketRef.current?.on('error-joining-room', () => {

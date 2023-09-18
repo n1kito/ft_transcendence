@@ -76,7 +76,8 @@ const Game: React.FC<IGameProps> = ({
 	});
 
 	// Import the game context, so it can be used everywhere
-	const { gameData, updateGameData, resetGameData } = useContext(GameContext);
+	const { gameData, updateGameData, resetGameData, eraseGameData } =
+		useContext(GameContext);
 	// use our socket hook
 	const {
 		broadcastPlayerPosition,
@@ -100,7 +101,7 @@ const Game: React.FC<IGameProps> = ({
 		return () => {
 			gameInstance.current?.cancelGameLoop();
 			gameInstance.current?.removeEventListeners();
-			resetGameData(); // TODO: this does not seem to log shit
+			eraseGameData(); // TODO: this does not seem to log shit
 		};
 	}, []);
 
@@ -137,11 +138,7 @@ const Game: React.FC<IGameProps> = ({
 
 	return (
 		<Window
-			windowTitle={
-				gameData.opponentInfo
-					? `fighting ${gameData.opponentInfo.login}`
-					: 'Game'
-			}
+			windowTitle="Game"
 			onCloseClick={onCloseClick}
 			windowDragConstraintRef={windowDragConstraintRef}
 			resizable={true}

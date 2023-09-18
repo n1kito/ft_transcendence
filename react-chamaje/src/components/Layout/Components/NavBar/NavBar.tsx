@@ -4,12 +4,14 @@ import Lock from './Components/Lock/Lock';
 import Clock from './Components/Clock/Clock';
 import { UserContext } from '../../../../contexts/UserContext';
 import FullscreenTrigger from './Components/FullscreenTrigger/FullscreenTrigger';
+import useAuth from '../../../../hooks/userAuth';
 export interface navBarProps {
 	isLoggedIn?: boolean;
 }
 
 const NavBar: React.FC<navBarProps> = ({ isLoggedIn = true }) => {
 	const { userData } = useContext(UserContext);
+	const { isAuthentificated } = useAuth();
 
 	return (
 		<div className={`navBar ${isLoggedIn ? 'loggedIn' : ''}`}>
@@ -25,15 +27,17 @@ const NavBar: React.FC<navBarProps> = ({ isLoggedIn = true }) => {
 			<div className="toolBox">
 				<span>{userData ? userData.login : ''}</span>
 				<FullscreenTrigger />
-				<img
-					className="userAvatar"
-					src={
-						userData
-							? userData.image
-							: 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Anna_Wintour_2019_crop_%28cropped%29.jpg'
-					}
-				/>
-				<Lock />
+				{isAuthentificated && (
+					<img
+						className="userAvatar"
+						src={
+							userData
+								? userData.image
+								: 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Anna_Wintour_2019_crop_%28cropped%29.jpg'
+						}
+					/>
+				)}
+				{isAuthentificated && <Lock />}
 				<Clock />
 			</div>
 		</div>
