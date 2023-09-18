@@ -131,12 +131,10 @@ const Desktop = () => {
 				credentials: 'include',
 			});
 
-			if (!response.ok) {
-				throw new Error('Failed to fetch friends');
+			if (response.ok) {
+				const data = await response.json();
+				return data.friends;
 			}
-
-			const data = await response.json();
-			return data;
 		} catch (error) {
 			console.error('Error fetching friends:', error);
 			throw error; // Rethrow the error to handle it elsewhere if needed
@@ -149,7 +147,7 @@ const Desktop = () => {
 			setFriends(friends);
 		};
 
-		fetchData(); // Call the async function to fetch and update friends
+		if (isAuthentificated) fetchData(); // Call the async function to fetch and update friends
 	}, []);
 
 	/**
@@ -166,14 +164,6 @@ const Desktop = () => {
 						friend.id === data &&
 						(friend.onlineStatus === false || friend.onlineStatus === undefined)
 					) {
-						console.log(
-							'🟢 1 - friend login: ',
-							friend.login,
-							'\ndata: ',
-							data,
-						);
-						// nbFriendsOnline++;
-						// SetNbOnline(nbFriendsOnline);
 						return { ...friend, onlineStatus: true };
 					} else {
 						return friend;
@@ -196,9 +186,6 @@ const Desktop = () => {
 						friend.id === data &&
 						(friend.onlineStatus === false || friend.onlineStatus === undefined)
 					) {
-						// nbFriendsOnline++;
-						// SetNbOnline(nbFriendsOnline);
-
 						return { ...friend, onlineStatus: true };
 					} else {
 						return friend;
@@ -215,9 +202,6 @@ const Desktop = () => {
 			setFriends((prevFriends) =>
 				prevFriends.map((friend) => {
 					if (friend.id === data && friend.onlineStatus === true) {
-						// nbFriendsOnline--;
-						// SetNbOnline(nbFriendsOnline);
-
 						return { ...friend, onlineStatus: false };
 					} else {
 						return friend;
@@ -229,21 +213,14 @@ const Desktop = () => {
 	}, [userData]);
 
 	useEffect(() => {
-		console.log('🤍 online: ', nbOnline);
-	}, [nbOnline]);
-
-	useEffect(() => {
-		console.log('🤍 friends: ', friends);
 		updateNbOnline();
 	}, [friends]);
 
 	const updateNbOnline = () => {
 		let nbFriendsOnline = 0;
 		friends.map((currentFriend) => {
-			console.log('🍔 current friend: ', currentFriend);
 			currentFriend.onlineStatus ? ++nbFriendsOnline : nbFriendsOnline;
 		});
-		console.log('🍔 nb online: ', nbFriendsOnline);
 		SetNbOnline(nbFriendsOnline);
 	};
 
@@ -257,14 +234,13 @@ const Desktop = () => {
 	};
 
 	useEffect(() => {
-		if (showFriendProfile === '') {
-			console.log('friend profile close');
-			fetchFriend();
-			// userData?.chatSocket?.endConnection();
-		}
-		return () => {
-			// setShowFriendProfile('');
+		const fetchData = async () => {
+			const updatedFriends = await fetchFriend();
+			setFriends(updatedFriends);
+			userData?.chatSocket?.sendServerConnection();
 		};
+		if (showFriendProfile === '') fetchData();
+		return () => {};
 	}, [showFriendProfile]);
 
 	return (

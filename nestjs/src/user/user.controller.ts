@@ -86,7 +86,10 @@ export class UserController {
 	// TODO: change route to user/me/friends or something, I just created a separate one to avoid with the /user/me routes Jee created
 	// TODO: move the logic to the service file
 	@Get('friends')
-	async getUserFriends(@Req() request: CustomRequest) {
+	async getUserFriends(
+		@Req() request: CustomRequest,
+		@Res() response: Response,
+	) {
 		// Retrieve the entry corresponding to the user requesting those changes
 		const userRequesting = await this.prisma.user.findUnique({
 			where: { id: request.userId },
@@ -94,15 +97,25 @@ export class UserController {
 				friends: true,
 			},
 		});
+		if (!userRequesting)
+			return response.status(401).json({ message: 'unauthorized request' });
 		// TODO: select more fields
 		// Only select some fields for each friend
-		const friends = userRequesting.friends.map((currentFriend) => ({
-			id: currentFriend.id,
-			login: currentFriend.login,
-			image: currentFriend.image,
-			onlineStatus: false,
-		}));
-		return friends;
+		try {
+			const friends = userRequesting.friends.map((currentFriend) => ({
+				id: currentFriend.id,
+				login: currentFriend.login,
+				image: currentFriend.image,
+				onlineStatus: false,
+			}));
+			return response.status(200).json({ friends });
+		} catch (error) {
+			console.error('FRIENDS ERROR: ', error);
+			return response
+				.status(400)
+				.json({ message: 'Could not retrieve friends' });
+		}
+		// return friends;
 	}
 
 	@Get(':login')

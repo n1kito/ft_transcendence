@@ -46,22 +46,23 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 	};
 
 	const fetchFriend = async () => {
-		fetch('/api/user/friends', {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-			},
-			credentials: 'include',
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				setFriends(data);
-				setIsFriendAdded(false);
-				userData?.chatSocket?.sendServerConnection();
-			})
-			.then(() => {
-				console.log('LIST - FRIENDS: ', friends);
+		try {
+			const response = await fetch('/api/user/friends', {
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+				credentials: 'include',
 			});
+
+			if (response.ok) {
+				const data = await response.json();
+				return data.friends;
+			}
+		} catch (error) {
+			console.error('Error fetching friends:', error);
+			throw error; // Rethrow the error to handle it elsewhere if needed
+		}
 	};
 
 	const addFriend = async () => {
@@ -86,18 +87,22 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 	};
 
 	useEffect(() => {
+		const fetchData = async () => {
+			const updatedFriends = await fetchFriend();
+			// update friends list with the newly added friend
+			setFriends(updatedFriends);
+			// ping friends to get updated online status
+			userData?.chatSocket?.sendServerConnection();
+			// end IsFriendAdded state
+			setIsFriendAdded(false);
+		};
+
+		// if a friend is successfully added then update friendslist
 		if (isFriendAdded) {
-			fetchFriend();
+			fetchData();
 		}
 		return () => {};
 	}, [isFriendAdded]);
-
-	useEffect(() => {
-		console.log('🍰 Friends list:', friends);
-		friends.map((currentFriend) => {
-			console.log('current friend is: ', currentFriend.onlineStatus);
-		});
-	});
 
 	return (
 		<Window
@@ -115,19 +120,20 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 			]}
 		>
 			<div className="friendsList">
-				{friends.map((friend, index) => (
-					// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
-					<FriendBadge
-						key={index}
-						badgeTitle={friend.login}
-						badgeImageUrl={`http://localhost:3000${friend.image}`}
-						onlineIndicator={friend.onlineStatus}
-						isClickable={true}
-						onClick={() => {
-							onBadgeClick(friend.login);
-						}}
-					/>
-				))}
+				{friends &&
+					friends.map((friend, index) => (
+						// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
+						<FriendBadge
+							key={index}
+							badgeTitle={friend.login}
+							badgeImageUrl={`http://localhost:3000${friend.image}`}
+							onlineIndicator={friend.onlineStatus}
+							isClickable={true}
+							onClick={() => {
+								onBadgeClick(friend.login);
+							}}
+						/>
+					))}
 			</div>
 			{settingsPanelIsOpen && (
 				<SettingsWindow settingsWindowVisible={setSettingsPanelIsOpen}>
