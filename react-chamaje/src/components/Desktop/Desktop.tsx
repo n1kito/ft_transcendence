@@ -40,7 +40,7 @@ const Desktop = () => {
 			// Feth the user data from the server
 			try {
 				// user/me
-				const response = await fetch(`/api/user/${'mjallada'}`, {
+				const response = await fetch(`/api/user/${'me'}`, {
 					method: 'GET',
 					credentials: 'include',
 					headers: {

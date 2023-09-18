@@ -9,7 +9,7 @@ up:
 down:
 	docker compose down -v;\
 
-run: down
+run: down update-shared-lib
 	rm -rf nestjs/prisma/migrations;\
 	docker compose up;\
 
@@ -33,6 +33,10 @@ restart-back:
 
 restart-front:
 	docker restart react-container;\
+
+update-shared-lib:
+	cp -r --update ./shared-lib ./nestjs;\
+	cp -r --update ./shared-lib ./react-chamaje;\
 
 clean:
 	docker system prune --force;\

@@ -17,7 +17,7 @@ import { CustomRequest, UserWithRelations } from './user.controller';
 import { Prisma, User, gameSession } from '@prisma/client';
 import { plainToClass } from 'class-transformer';
 // import { IMatchHistory } from 'shared-types';
-import { IMatchHistory } from './user.controller';
+import { IMatchHistory } from 'shared-lib/types/user-types';
 
 //  custom exception class to store an array of errors each containing
 // `statusCode` `field` and `message` properties.
@@ -258,13 +258,16 @@ export class UserService {
 		return user.gamesPlayedAsPlayer1.length + user.gamesPlayedAsPlayer2.length;
 	}
 
-	calculateWinRate(user: UserWithRelations): number {
+	calculateWinRate(user: UserWithRelations): number | undefined {
 		return user.gamesWon.length > 0
 			? (user.gamesWon.length / this.calculateTotalGameCount(user)) * 100
-			: 0;
+			: undefined;
 	}
 
-	async calculateRank(user: UserWithRelations): number {
+	// This returns the rank of our user, following each user's number of wins
+	// If two users have the same number of wins, the user who has won most
+	// recently takes the higher rank.
+	async calculateRank(userId: number): Promise<number | undefined> {
 		// Aggregate and sort our winners
 		const leaderboard = await this.prisma.gameSession.groupBy({
 			by: ['winnerId'],
@@ -286,12 +289,8 @@ export class UserService {
 					},
 				},
 			],
-		});
-		// TODO: this does not get logged
-		console.log('leaderboard:', leaderboard);
-		// also I get a rand of 50 when I've played like two games
+		});;
 		// Find Rank
-		const userId = user.id;
 		const userRank =
 			leaderboard.findIndex((entry) => entry.winnerId === userId) + 1;
 		return userRank > 0 ? userRank : undefined;

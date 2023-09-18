@@ -26,7 +26,7 @@ model User {
     email     String   @unique
     image     String?
     createdAt DateTime @default(now())
-	updatedAt DateTime @updatedAt
+    updatedAt DateTime @updatedAt
     token     String?
 
     // Friendship system
@@ -40,18 +40,18 @@ model User {
     image_is_locked Boolean @default(false)
 
     // Games logic
-	gamesPlayedAsPlayer1 gameSession[] @relation("player1")
-	gamesPlayedAsPlayer2 gameSession[] @relation("player2")
-	gamesWon gameSession[] @relation("winner")
+    gamesPlayedAsPlayer1 gameSession[] @relation("player1")
+    gamesPlayedAsPlayer2 gameSession[] @relation("player2")
+    gamesWon             gameSession[] @relation("winner")
 
     // Profile variables
     // These could be resolved upon fetch requests, but more efficient to store them directly
     killCount Int @default(0)
 
-	// Bestie logic
-	bestie	User? @relation("Bestie", fields: [bestieId], references: [id])
-	bestieId Int? @unique
-	bestiedBy User[] @relation("Bestie")
+    // Bestie logic
+    bestie    User?  @relation("Bestie", fields: [bestieId], references: [id])
+    bestieId  Int?   @unique
+    bestiedBy User[] @relation("Bestie")
 
     // Target logic
     target                 User?   @relation("Target", fields: [targetId], references: [id])
@@ -59,11 +59,11 @@ model User {
     targetedBy             User[]  @relation("Target")
     targetDiscoveredByUser Boolean @default(false)
 
-	// Rival logic
-	rival				User? @relation("Rival", fields: [rivalId], references: [id])
-	rivalId				Int?
-	rivalOf				User[] @relation("Rival")
-}	
+    // Rival logic
+    rival   User?  @relation("Rival", fields: [rivalId], references: [id])
+    rivalId Int?
+    rivalOf User[] @relation("Rival")
+}
 
 // TODO: update this
 enum GameStatus {
@@ -74,20 +74,20 @@ enum GameStatus {
 }
 
 model gameSession {
-    id           Int              @id @default(autoincrement())
-	createdAt	DateTime @default(now())
-	updatedAt	DateTime @updatedAt
-	user1Id		Int
-	user2Id		Int
-	winnerId	Int?
-	user1Score	Int?
-	user2Score	Int?
-	status		GameStatus @default(Waiting)
-	roomId		String
-	user1IsReady	Boolean
-	user2IsReady	Boolean
+    id           Int        @id @default(autoincrement())
+    createdAt    DateTime   @default(now())
+    updatedAt    DateTime   @updatedAt
+    user1Id      Int
+    user2Id      Int
+    winnerId     Int?
+    user1Score   Int        @default(0)
+    user2Score   Int        @default(0)
+    status       GameStatus @default(Waiting)
+    roomId       String
+    user1IsReady Boolean    @default(false)
+    user2IsReady Boolean    @default(false)
 
-	user1	User @relation("player1", fields: [user1Id], references: [id])
-	user2 User @relation("player2", fields: [user2Id], references: [id])
-	winner User? @relation("winner", fields: [winnerId], references: [id])
+    user1  User  @relation("player1", fields: [user1Id], references: [id])
+    user2  User  @relation("player2", fields: [user2Id], references: [id])
+    winner User? @relation("winner", fields: [winnerId], references: [id])
 }

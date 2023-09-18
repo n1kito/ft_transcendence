@@ -178,7 +178,7 @@ export class GameGateway
 			}
 			// otherwise, user just wants to play and should be assigned a room
 			else {
-				console.log('[🏓] User would like to be paired with someone');
+				console.log(`[🏓] User ${userId} would like to be paired with someone`);
 				roomId = this.gameService.handleSoloRoomAssignment(userId);
 			}
 			// Add our player to the target socket room
@@ -187,10 +187,14 @@ export class GameGateway
 			client.emit('room-joined', {
 				id: roomId,
 			});
-			// if the room is full, let both players know
-			// if (this.gameService.isRoomFull(roomId)) {
+			// if the room is full
+			if (this.gameService.isRoomFull(roomId)) {
+				// TODO: should this be done when room is full or when both users are ready ?
+				// What if the room is created but one of the players leave before the match can even start?
+				// Create a db game entry with both users
+				await this.gameService.createDBGameEntry(roomId);
 				this.server.in(roomId).emit('room-is-full');
-			// }
+			}
 		} catch (error) {
 			console.error('Could not join game room: ', error);
 			client.emit('error-joining-room');
@@ -211,11 +215,17 @@ export class GameGateway
 		client.emit('server-opponent-info', opponentInformation);
 	}
 
+	// TODO: this should be try/catched
 	// Player notifies that it's ready
 	@SubscribeMessage('player-is-ready')
-	async handlePlayerIsReady(client: Socket, data: { roomId: string }) {
+	async handlePlayerIsReady(
+		client: Socket,
+		data: { userId: number; roomId: string },
+	) {
 		console.log(`CURRENT MAP: ${JSON.stringify(this.userSockets, null, 2)}`);
-		const { roomId } = data;
+		const { userId, roomId } = data;
+		// Update the database gameSession entry
+		await this.gameService.markPlayerAsReadyInDB(userId, roomId);
 		// Notify the other users in the room that their opponent is ready
 		client.to(roomId).emit('opponent-is-ready');
 	}

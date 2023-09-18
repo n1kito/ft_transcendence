@@ -130,7 +130,7 @@ const Game: React.FC<IGameProps> = ({
 
 	useEffect(() => {
 		if (gameData.player1Ready && gameData.player2Ready)
-			updateGameData({ gameCanStart: true });
+			updateGameData({ gameIsPlaying: true });
 	}, [gameData.player1Ready, gameData.player2Ready]);
 
 	//
@@ -139,7 +139,7 @@ const Game: React.FC<IGameProps> = ({
 		<Window
 			windowTitle={
 				gameData.opponentInfo
-					? `Game against ${gameData.opponentInfo.login}`
+					? `fighting ${gameData.opponentInfo.login}`
 					: 'Game'
 			}
 			onCloseClick={onCloseClick}
@@ -148,7 +148,7 @@ const Game: React.FC<IGameProps> = ({
 		>
 			{/* TODO: add the player information above the canvas game */}
 			<div className={`game-wrapper`}>
-				{!gameData.gameCanStart && <GameOverlay />}
+				{!gameData.gameIsPlaying && <GameOverlay />}
 				<GameCanvas
 					// paddle1Props={paddle1Position}
 					// paddle2Props={paddle2Position}

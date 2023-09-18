@@ -18,7 +18,7 @@ const GameOverlay: React.FC<IGameOverlayProps> = () => {
 		<div className="game-overlay-wrapper">
 			{gameData.connectedToServer &&
 				!gameData.opponentIsReconnecting &&
-				!gameData.gameCanStart &&
+				!gameData.gameIsPlaying &&
 				!gameData.connectionErrorStatus && <GameSelectionScreen />}
 			{(!gameData.connectedToServer || gameData.connectionErrorStatus) &&
 				!gameData.opponentIsReconnecting && <GameErrorScreen />}

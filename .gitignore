@@ -41,3 +41,7 @@ npm-debug.log*
 
 # Ignore Postgresql data files
 *.pgdata
+
+# Ignore shared-lib folders in all subfolder except the root folder
+**/shared-lib/
+!./shared-lib/

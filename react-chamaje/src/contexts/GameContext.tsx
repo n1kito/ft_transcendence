@@ -14,7 +14,7 @@ interface IOpponentInfoProps {
 
 export interface IGameDataProps {
 	socket: Socket | undefined;
-	gameCanStart: boolean;
+	// gameCanStart: boolean;
 	gameIsPlaying: boolean;
 	player1Ready: boolean;
 	player2Ready: boolean;
@@ -33,7 +33,7 @@ export interface IGameDataProps {
 // Initial state of the gameData
 const defaultGameState: IGameDataProps = {
 	socket: undefined,
-	gameCanStart: false,
+	// gameCanStart: false,
 	gameIsPlaying: false,
 	player1Ready: false,
 	player2Ready: false,

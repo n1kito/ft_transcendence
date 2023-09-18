@@ -17,46 +17,10 @@ import { Prisma, PrismaClient, User } from '@prisma/client';
 import { Request, Response } from 'express';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
-// TODO: importing the types in here gives an error on nestjs compilation
-// however it works in react so I'm not sure what the issue is, probably the js transpilation
-// not working correctly or the path resolution I don't know.
-// import { IUserData, IMatchHistory } from '@shared/user-types';
+import { IUserData, IMatchHistory } from 'shared-lib/types/user-types';
 
 export interface CustomRequest extends Request {
 	userId: number;
-}
-
-export interface IMatchHistory {
-	player1Login: string;
-	player1Score: number;
-	player1Image: string;
-	player2Login: string;
-	player2Score: number;
-	player2Image: string;
-}
-
-interface IUserData {
-	// User informatiom
-	id?: number;
-	login: string;
-	image: string;
-	email?: string;
-	// Profile information
-	killCount?: number;
-	rank?: number;
-	winRate?: number;
-	gamesCount: number;
-	// Target
-	targetLogin?: string;
-	targetImage?: string;
-	targetDiscoveredByUser: boolean;
-	// Bestie
-	bestieLogin?: string;
-	// Rival
-	rivalLogin?: string;
-	rivalImage?: string;
-	// Games
-	matchHistory?: IMatchHistory[];
 }
 
 export type UserWithRelations = Prisma.UserGetPayload<{
@@ -201,7 +165,6 @@ export class UserController {
 		return friends;
 	}
 
-	// TODO: the logic needs to be moved to the service but the types make that so complicated
 	@Get(':login')
 	async getUserInfo(
 		@Param('login') login: string,
@@ -227,14 +190,11 @@ export class UserController {
 				);
 
 			// Calculate the dynamic information
-			const calculatedRank = await this.userService.calculateRank(
-				requestedUser,
-			);
+			const calculatedRank: number | undefined =
+				await this.userService.calculateRank(requestedUser.id);
 			const totalGameCount =
 				this.userService.calculateTotalGameCount(requestedUser);
-			// TODO: this does not get logged
-			console.log('total game count', totalGameCount);
-			const calculatedWinRate =
+			const calculatedWinRate: number | undefined =
 				this.userService.calculateWinRate(requestedUser);
 
 			// Match history
@@ -246,11 +206,12 @@ export class UserController {
 				);
 
 			return {
+				id: userWantsTheirOwnInfo ? requestedUser.id : undefined,
 				login: requestedUser.login,
 				image: requestedUser.image,
 				email: userWantsTheirOwnInfo ? requestedUser.email : undefined,
 				killCount: requestedUser.killCount,
-				rank: calculatedRank || undefined,
+				rank: calculatedRank,
 				winRate: calculatedWinRate,
 				gamesCount: totalGameCount,
 				// Target

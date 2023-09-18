@@ -170,6 +170,7 @@ export const useGameSocket = () => {
 
 	const setPlayer1AsReady = () => {
 		socketRef.current?.emit('player-is-ready', {
+			userId: userData.id,
 			roomId: gameData.roomId,
 		});
 	};
