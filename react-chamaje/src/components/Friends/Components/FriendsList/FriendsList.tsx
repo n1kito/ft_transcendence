@@ -56,11 +56,8 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 			.then((response) => response.json())
 			.then((data) => {
 				setFriends(data);
-				let nb = nbFriendsOnline;
-				console.log('🍕🍕🍕 nb online friends: ', nbFriendsOnline, nb);
-				// if (nb) setNbFriendsOnline(--nb);
-				userData?.chatSocket?.sendServerConnection();
 				setIsFriendAdded(false);
+				userData?.chatSocket?.sendServerConnection();
 			})
 			.then(() => {
 				console.log('LIST - FRIENDS: ', friends);
@@ -94,6 +91,13 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 		}
 		return () => {};
 	}, [isFriendAdded]);
+
+	useEffect(() => {
+		console.log('🍰 Friends list:', friends);
+		friends.map((currentFriend) => {
+			console.log('current friend is: ', currentFriend.onlineStatus);
+		});
+	});
 
 	return (
 		<Window

@@ -90,6 +90,7 @@ const Desktop = () => {
 	};
 	useEffect(() => {
 		if (isAuthentificated) fetchUserData();
+		console.log('socket id: ');
 		return () => {
 			userData?.chatSocket?.endConnection();
 			// when unmounting desktop component, reset userData
@@ -121,21 +122,34 @@ const Desktop = () => {
 	// TODO: instead of just storing them in a State, the user context should simply be updated so all other components that use it can be re-rendered (I think)
 	// TODO: if the user is not auth the map method cannot iterate since the friends variable is not an array. Should not be an issue since only logged in users can access the desktop but it might be better to think ahead for this
 	const fetchFriend = async () => {
-		fetch('/api/user/friends', {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-			},
-			credentials: 'include',
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				setFriends(data);
+		try {
+			const response = await fetch('/api/user/friends', {
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+				credentials: 'include',
 			});
+
+			if (!response.ok) {
+				throw new Error('Failed to fetch friends');
+			}
+
+			const data = await response.json();
+			return data;
+		} catch (error) {
+			console.error('Error fetching friends:', error);
+			throw error; // Rethrow the error to handle it elsewhere if needed
+		}
 	};
 
 	useEffect(() => {
-		fetchFriend();
+		const fetchData = async () => {
+			const friends = await fetchFriend();
+			setFriends(friends);
+		};
+
+		fetchData(); // Call the async function to fetch and update friends
 	}, []);
 
 	/**
@@ -152,8 +166,14 @@ const Desktop = () => {
 						friend.id === data &&
 						(friend.onlineStatus === false || friend.onlineStatus === undefined)
 					) {
-						nbFriendsOnline++;
-						SetNbOnline(nbFriendsOnline);
+						console.log(
+							'🟢 1 - friend login: ',
+							friend.login,
+							'\ndata: ',
+							data,
+						);
+						// nbFriendsOnline++;
+						// SetNbOnline(nbFriendsOnline);
 						return { ...friend, onlineStatus: true };
 					} else {
 						return friend;
@@ -176,8 +196,8 @@ const Desktop = () => {
 						friend.id === data &&
 						(friend.onlineStatus === false || friend.onlineStatus === undefined)
 					) {
-						nbFriendsOnline++;
-						SetNbOnline(nbFriendsOnline);
+						// nbFriendsOnline++;
+						// SetNbOnline(nbFriendsOnline);
 
 						return { ...friend, onlineStatus: true };
 					} else {
@@ -195,8 +215,8 @@ const Desktop = () => {
 			setFriends((prevFriends) =>
 				prevFriends.map((friend) => {
 					if (friend.id === data && friend.onlineStatus === true) {
-						nbFriendsOnline--;
-						SetNbOnline(nbFriendsOnline);
+						// nbFriendsOnline--;
+						// SetNbOnline(nbFriendsOnline);
 
 						return { ...friend, onlineStatus: false };
 					} else {
@@ -207,6 +227,25 @@ const Desktop = () => {
 		};
 		userData?.chatSocket?.onLogOut(handleLoggedOut);
 	}, [userData]);
+
+	useEffect(() => {
+		console.log('🤍 online: ', nbOnline);
+	}, [nbOnline]);
+
+	useEffect(() => {
+		console.log('🤍 friends: ', friends);
+		updateNbOnline();
+	}, [friends]);
+
+	const updateNbOnline = () => {
+		let nbFriendsOnline = 0;
+		friends.map((currentFriend) => {
+			console.log('🍔 current friend: ', currentFriend);
+			currentFriend.onlineStatus ? ++nbFriendsOnline : nbFriendsOnline;
+		});
+		console.log('🍔 nb online: ', nbFriendsOnline);
+		SetNbOnline(nbFriendsOnline);
+	};
 
 	/* ********************************************************************* */
 	/* **************************** FRIENDS ******************************** */
@@ -270,6 +309,7 @@ const Desktop = () => {
 						windowDragConstraintRef={windowDragConstraintRef}
 						nbOnline={nbOnline}
 						setNbOnline={SetNbOnline}
+						nbFriendsOnline={nbFriendsOnline}
 					/>
 				)}
 				{openFriendsWindow && (
@@ -292,6 +332,7 @@ const Desktop = () => {
 						isMyFriend={true}
 						nbOnline={nbOnline}
 						setNbOnline={SetNbOnline}
+						nbFriendsOnline={nbFriendsOnline}
 					></Profile>
 				)}
 				{chatWindowIsOpen && (

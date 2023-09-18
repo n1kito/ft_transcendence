@@ -36,6 +36,7 @@ export interface ProfileProps {
 	onCloseClick: () => void;
 	nbOnline: number;
 	setNbOnline: React.Dispatch<React.SetStateAction<number>>;
+	nbFriendsOnline: number;
 }
 
 const Profile: React.FC<ProfileProps> = ({
@@ -45,6 +46,7 @@ const Profile: React.FC<ProfileProps> = ({
 	onCloseClick,
 	nbOnline,
 	setNbOnline,
+	nbFriendsOnline,
 }) => {
 	const { accessToken, isTwoFAEnabled, setIsTwoFAEnabled, logOut } = useAuth();
 	const { userData, setUserData } = useContext(UserContext);
@@ -213,8 +215,8 @@ const Profile: React.FC<ProfileProps> = ({
 				},
 			});
 			if (response.ok) {
-				let nb = nbOnline;
-				if (nb) setNbOnline(--nb);
+				nbFriendsOnline--;
+				setNbOnline(nbFriendsOnline);
 				setSettingsPanelIsOpen(false);
 				onCloseClick();
 			} else if (response.status === 500 || response.status === 404) {

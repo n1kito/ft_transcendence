@@ -19,7 +19,7 @@ class WebSocketService {
 		try {
 			// Listen for the 'connect' event
 			this.socket.on('connect', () => {
-				console.log('🟢 connection');
+				console.log('🟢 connection socket id:', this.socket.id);
 				this.sendServerConnection();
 			});
 			// Listen for the 'disconnect' event prevent reconnection from wanted disconnection
@@ -44,6 +44,10 @@ class WebSocketService {
 
 	getSocket(): Socket {
 		return this.socket;
+	}
+
+	getSocketId(): string {
+		return this.socket.id;
 	}
 
 	sendServerConnection() {
@@ -74,4 +78,5 @@ class WebSocketService {
 		this.socket.on('ClientLogOut', callback);
 	}
 }
+
 export default WebSocketService;

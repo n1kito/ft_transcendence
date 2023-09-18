@@ -12,6 +12,11 @@ import { Server, Socket } from 'socket.io';
 import * as jwt from 'jsonwebtoken';
 import { disconnect } from 'process';
 
+interface IFriend {
+	userId: number;
+	login: string;
+}
+
 function decodeToken(client: Socket): any {
 	return jwt.verify(
 		client.handshake.auth.accessToken,
@@ -68,5 +73,22 @@ export class ConnectionStatusGateway
 		client.disconnect();
 
 		// client.disconnect();
+	}
+
+	@SubscribeMessage('AddFriend')
+	handleSendMessage(
+		@MessageBody() content: IFriend,
+		@ConnectedSocket() client: Socket,
+	): void {
+		// const messageToSend: IMessage = {
+		// 	chatId: content.chatId,
+		// 	sentById: content.userId,
+		// 	sentAt: new Date(),
+		// 	content: content.message,
+		// 	login: content.login,
+		// 	avatar: content.avatar,
+		// };
+		// sends the message to everyone except the sender
+		client.to(content.toString()).emit('receiveMessage');
 	}
 }
