@@ -80,7 +80,6 @@ const Profile: React.FC<ProfileProps> = ({
 	/**************************************************************************************/
 	const fetchProfileData = async () => {
 		try {
-			console.log('----------- login: ', login);
 			const response = await fetch(`/api/user/${login}`, {
 				method: 'GET',
 				credentials: 'include',
@@ -115,7 +114,6 @@ const Profile: React.FC<ProfileProps> = ({
 
 	useEffect(() => {
 		if (isOwnProfile && userData?.login !== profileData?.login) {
-			alert();
 			setProfileData(userData);
 		}
 	}, [userData]);
@@ -230,12 +228,49 @@ const Profile: React.FC<ProfileProps> = ({
 
 	useEffect(() => {
 		return () => {
-			// alert();
-			// if (setShowFriendProfile) setShowFriendProfile(false);
 			if (login && setLogin) setLogin('');
-			// onCloseClick();
 		};
 	});
+
+	/**************************************************************************************/
+	/* Change Avatar                                                                      */
+	/**************************************************************************************/
+	const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+	const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files ? event.target.files[0] : null;
+		setSelectedFile(file);
+		console.log('📸📸📸 selected file:', file, selectedFile);
+	};
+
+	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		console.log(selectedFile);
+	};
+	const uploadNewAvatar = async () => {
+		console.log('📸📸📸 About to upload new avatar!');
+		try {
+			if (!selectedFile) throw new Error('no file selected');
+			const formData = new FormData();
+			formData.append('file', selectedFile); // Add the selected file to the FormData
+			const response = await fetch('api/user/upload', {
+				method: 'PUT',
+				credentials: 'include',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+				body: formData,
+			});
+			if (response.ok) {
+				console.log('avatar ok!');
+			} else if (response.status === 500) {
+				const messageError = await response.json();
+				console.error(messageError);
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	};
 
 	return (
 		<Window
@@ -292,6 +327,8 @@ const Profile: React.FC<ProfileProps> = ({
 							<ProfilePicBadge
 								picture={profileData.image}
 								isModifiable={isOwnProfile}
+								setSettingsPanelIsOpen={setSettingsPanelIsOpen}
+								setSettingsMode={setSettingsMode}
 							/>
 							<Title bigTitle={true}>{profileData?.login}</Title>
 							<TitleList profileData={profileData} />
@@ -320,10 +357,17 @@ const Profile: React.FC<ProfileProps> = ({
 					settingsWindowVisible={setSettingsPanelIsOpen}
 				>
 					<Title highlightColor="yellow">
-						{settingsMode === 'Delete Profile' || 'Delete Friend'
+						{settingsMode === 'Delete Profile' ||
+						settingsMode === 'Delete Friend'
 							? `${settingsMode} ?`
-							: settingsMode}
+							: `${settingsMode}`}
 					</Title>
+					{settingsMode === 'Change Avatar' && (
+						<form onSubmit={handleSubmit}>
+							<input type="file" onChange={handleFileInput} />
+							<Button onClick={uploadNewAvatar}>upload</Button>
+						</form>
+					)}
 					{settingsMode === 'Two-Factor Authentication' && (
 						<Button
 							baseColor={isTwoFAEnabled ? [40, 100, 80] : [111, 60, 84]}

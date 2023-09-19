@@ -1,17 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './ProfilePicBadge.css';
 import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import pen from './images/edit-pen-svgrepo-com.svg';
+import useAuth from 'src/hooks/userAuth';
 
 export interface ProfilePicBadgeProps {
 	picture: string;
 	isModifiable?: boolean;
+	setSettingsPanelIsOpen?: React.Dispatch<React.SetStateAction<boolean>>;
+	setSettingsMode?: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const ProfilePicBadge: React.FC<ProfilePicBadgeProps> = ({
 	picture,
 	isModifiable = false,
+	setSettingsPanelIsOpen,
+	setSettingsMode,
 }) => {
+	const { accessToken } = useAuth();
+
 	return (
 		<div className="profile-pic-badge-wrapper">
 			<ShadowWrapper shadow={true}>
@@ -25,7 +32,16 @@ const ProfilePicBadge: React.FC<ProfilePicBadgeProps> = ({
 				></div>
 				{isModifiable && (
 					<div className="modify-button">
-						<ShadowWrapper shadow={true} isClickable={true}>
+						<ShadowWrapper
+							shadow={true}
+							isClickable={true}
+							onClick={() => {
+								setSettingsPanelIsOpen
+									? setSettingsPanelIsOpen(true)
+									: undefined;
+								setSettingsMode ? setSettingsMode('Change Avatar') : '';
+							}}
+						>
 							<img src={pen}></img>
 						</ShadowWrapper>
 					</div>

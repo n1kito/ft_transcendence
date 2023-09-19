@@ -305,8 +305,8 @@ export class UserController {
 		}
 	}
 
-	@Put(':id/upload')
-	@UseInterceptors(FileInterceptor('file'))
+	@Put('upload')
+	@UseInterceptors(FileInterceptor('file', { dest: './images' }))
 	async uploadAvatar(
 		@UploadedFile(
 			new ParseFilePipe({

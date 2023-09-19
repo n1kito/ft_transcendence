@@ -356,4 +356,18 @@ export class UserService {
 			throw new Error('could not add friend: internal error');
 		}
 	}
+
+	async uploadAvatar(
+		avatar: Express.Multer.File,
+		userId: number,
+	): Promise<any> {
+		const user = await this.prisma.findUserById(userId);
+		if (!user) {
+			throw 'User not found';
+		}
+		const formData = new FormData();
+		formData.append('image', avatar.buffer.toString('base64'));
+		console.log('--------form data:', formData);
+		// return imageData;
+	}
 }

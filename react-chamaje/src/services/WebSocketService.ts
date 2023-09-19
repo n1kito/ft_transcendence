@@ -33,7 +33,6 @@ class WebSocketService {
 				} else {
 					// this.endConnection(this.userId);
 					console.log('🔴 disconnection');
-					alert();
 					this.socket.disconnect();
 				}
 			});
