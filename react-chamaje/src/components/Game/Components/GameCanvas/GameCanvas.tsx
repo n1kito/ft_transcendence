@@ -1,9 +1,6 @@
 import React, { forwardRef, useContext, useEffect, useRef } from 'react';
 import './GameCanvas.css';
-import { ICanvasProps, IPaddleProps, IBallProps } from '../../Game';
-import { Game } from './Entities/Game';
-import { GameContext } from '../../../../contexts/GameContext';
-import { useGameSocket } from '../../../../hooks/useGameSocket';
+import { ICanvasProps } from '../../Game';
 
 interface IGameCanvasProps {
 	canvasProps: ICanvasProps;

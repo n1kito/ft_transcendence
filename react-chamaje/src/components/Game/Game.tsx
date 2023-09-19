@@ -1,20 +1,10 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import './Game.css';
 import Window from '../Window/Window';
-import Button from '../Shared/Button/Button';
-import Tooltip from '../Shared/Tooltip/Tooltip';
-import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/SettingsWindow';
-import FriendBadge from '../Friends/Components/FriendBadge/FriendBadge';
-import { UserContext } from '../../contexts/UserContext';
-import useAuth from '../../hooks/userAuth';
-import { Socket, io } from 'socket.io-client';
-import { GameSocket } from '../../services/GameSocket';
 import GameOverlay from './Components/GameOverlay/GameOverlay';
 import { GameContext } from '../../contexts/GameContext';
 import { useGameSocket } from '../../hooks/useGameSocket';
-import { join } from 'path';
 import GameCanvas from './Components/GameCanvas/GameCanvas';
-import { Game as GameObject } from './Components/GameCanvas/Entities/Game';
 import { GameRenderer } from './Components/GameCanvas/Entities/GameRenderer';
 
 export interface ICanvasProps {
@@ -64,6 +54,7 @@ const Game: React.FC<IGameProps> = ({
 		useContext(GameContext);
 	// use our socket hook
 	const {
+		socketRef,
 		broadcastPlayerPosition,
 		joinRoom,
 		requestOpponentInfo,
@@ -72,10 +63,13 @@ const Game: React.FC<IGameProps> = ({
 	// Create a ref to out context's socket
 
 	useEffect(() => {
+		// If the HTML canvas element has loaded,
+		// we generate an instance of the GameRenderer class/engine
 		if (canvasRef && canvasRef.current) {
 			const ctx = canvasRef.current.getContext('2d');
 			if (ctx)
 				gameInstance.current = new GameRenderer(
+					socketRef,
 					canvasRef,
 					ctx,
 					broadcastPlayerPosition,
@@ -94,19 +88,19 @@ const Game: React.FC<IGameProps> = ({
 		else gameInstance.current?.cancelGameLoop();
 	}, [gameData.gameIsPlaying]);
 
-	// If we're connected to the socket and don't have a room, ask for one
-	useEffect(() => {
-		if (gameData.connectedToServer && !gameData.roomId) {
-			joinRoom();
-		}
-	}, [gameData.connectedToServer, gameData.roomId]);
+	// // If we're connected to the socket and don't have a room, ask for one
+	// useEffect(() => {
+	// 	if (gameData.connectedToServer && !gameData.roomId) {
+	// 		joinRoom();
+	// 	}
+	// }, [gameData.connectedToServer, gameData.roomId]);
 
 	// if we're in a room and it's full, ask for our opponent's information
-	useEffect(() => {
-		if (gameData.roomIsFull) {
-			requestOpponentInfo();
-		}
-	}, [gameData.roomIsFull]);
+	// useEffect(() => {
+	// 	if (gameData.roomIsFull) {
+	// 		requestOpponentInfo();
+	// 	}
+	// }, [gameData.roomIsFull]);
 
 	// notify the server when player is ready
 	useEffect(() => {
@@ -123,12 +117,15 @@ const Game: React.FC<IGameProps> = ({
 	return (
 		<Window
 			windowTitle="Game"
-			onCloseClick={onCloseClick}
+			onCloseClick={() => {
+				console.log('Player intentionally closed the window.');
+				onCloseClick();
+			}}
 			windowDragConstraintRef={windowDragConstraintRef}
 			resizable={true}
 		>
 			{/* TODO: add the player information above the canvas game */}
-			<div className={`game-wrapper`}>
+			<div className="game-wrapper">
 				{!gameData.gameIsPlaying && <GameOverlay />}
 				<GameCanvas
 					// paddle1Props={paddle1Position}

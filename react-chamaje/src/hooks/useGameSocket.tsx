@@ -188,7 +188,14 @@ export const useGameSocket = () => {
 		});
 	};
 
+	const notifyPlayerLeft = () => {
+		socketRef.current?.emit('player-left', {
+			playerId: userData?.id,
+		});
+	};
+
 	return {
+		socketRef,
 		broadcastPlayerPosition,
 		joinRoom,
 		requestOpponentInfo,

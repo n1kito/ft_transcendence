@@ -23,6 +23,7 @@ import { GameService } from './game/game.service';
 		GameModule,
 	],
 	controllers: [AppController],
-	providers: [AppService, PrismaService, GameService],
+	// providers: [AppService, PrismaService, GameService],
+	providers: [AppService],
 })
 export class AppModule {}

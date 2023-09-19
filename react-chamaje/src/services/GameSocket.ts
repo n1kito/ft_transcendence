@@ -135,95 +135,95 @@ export class GameSocket {
 		);
 	}
 
-	// join a game room
-	joinGameRoom(opponentId?: number) {
-		this.log('Asking for a room...');
-		try {
-			// ask the server to assign us a room
-			this.socket?.emit('join-room', {
-				userId: this.userId,
-				opponentId: opponentId,
-			});
-			// if the server succeeds
-			// TODO: type the roomInfo so we know what to expect
-			// Maybe store all types in a separate file ?
-			this.socket?.on('room-joined', (roomInfo) => {
-				this.log(`Server put us in room ${roomInfo.id}.`);
-				// let the front know we have been assigned a room
-				this.updateGameData({ roomId: roomInfo.id });
-				// this.setPlayerInRoom(true);
+	// // join a game room
+	// joinGameRoom(opponentId?: number) {
+	// 	this.log('Asking for a room...');
+	// 	try {
+	// 		// ask the server to assign us a room
+	// 		this.socket?.emit('join-room', {
+	// 			userId: this.userId,
+	// 			opponentId: opponentId,
+	// 		});
+	// 		// if the server succeeds
+	// 		// TODO: type the roomInfo so we know what to expect
+	// 		// Maybe store all types in a separate file ?
+	// 		this.socket?.on('room-joined', (roomInfo) => {
+	// 			this.log(`Server put us in room ${roomInfo.id}.`);
+	// 			// let the front know we have been assigned a room
+	// 			this.updateGameData({ roomId: roomInfo.id });
+	// 			// this.setPlayerInRoom(true);
 
-				// set the socket to monitor/receive opponent information
-				this.socket?.on(`room-is-full`, () => {
-					this.log('Got notified that the room is full');
-					this.updateGameData({ roomIsFull: true });
-					// this.socket?.emit('request-opponent-info', {
-					// 	userId: this.userId,
-					// 	roomId: this.gameData.roomId,
-					// });
-				});
-				// and request that information
-				this.socket?.on(
-					'server-opponent-info',
-					(opponentInfo: { login: string; image: string }) => {
-						this.log(`My opponent: ${JSON.stringify(opponentInfo, null, 2)}`);
-						this.log('Opponent information received');
-						this.updateGameData({ opponentInfo: opponentInfo });
-						// this.setOpponentInfo(opponentInfo);
-					},
-				);
+	// 			// set the socket to monitor/receive opponent information
+	// 			this.socket?.on(`room-is-full`, () => {
+	// 				this.log('Got notified that the room is full');
+	// 				this.updateGameData({ roomIsFull: true });
+	// 				// this.socket?.emit('request-opponent-info', {
+	// 				// 	userId: this.userId,
+	// 				// 	roomId: this.gameData.roomId,
+	// 				// });
+	// 			});
+	// 			// and request that information
+	// 			this.socket?.on(
+	// 				'server-opponent-info',
+	// 				(opponentInfo: { login: string; image: string }) => {
+	// 					this.log(`My opponent: ${JSON.stringify(opponentInfo, null, 2)}`);
+	// 					this.log('Opponent information received');
+	// 					this.updateGameData({ opponentInfo: opponentInfo });
+	// 					// this.setOpponentInfo(opponentInfo);
+	// 				},
+	// 			);
 
-				// look out for when the opponent is ready
-				this.socket?.on('opponent-is-ready', () => {
-					this.updateGameData({ player2Ready: true });
-					// this.setPlayer2Ready(true);
-				});
+	// 			// look out for when the opponent is ready
+	// 			this.socket?.on('opponent-is-ready', () => {
+	// 				this.updateGameData({ player2Ready: true });
+	// 				// this.setPlayer2Ready(true);
+	// 			});
 
-				// look out for when opponent might be temporarily disconnected
-				this.socket?.on('opponent-was-disconnected', () => {
-					this.log('Opponent was disconnected but might come back !');
-					this.updateGameData({
-						opponentIsReconnecting: true,
-						player2Ready: false,
-						gameIsPlaying: false,
-					});
-					// this.setPlayer2Ready(false);
-					// this.setOpponentIsReconnecting(true);
-				});
+	// 			// look out for when opponent might be temporarily disconnected
+	// 			this.socket?.on('opponent-was-disconnected', () => {
+	// 				this.log('Opponent was disconnected but might come back !');
+	// 				this.updateGameData({
+	// 					opponentIsReconnecting: true,
+	// 					player2Ready: false,
+	// 					gameIsPlaying: false,
+	// 				});
+	// 				// this.setPlayer2Ready(false);
+	// 				// this.setOpponentIsReconnecting(true);
+	// 			});
 
-				// look out for when opponent might be disconnected
-				this.socket?.on('opponent-left', () => {
-					this.log('Opponent left for good :(');
-					// Let the game know that there is no player 2
-					this.updateGameData({
-						opponentIsReconnecting: false,
-						opponentInfo: undefined,
-						gameIsPlaying: false,
-						player1Ready: false,
-						player2Ready: false,
-					});
-				});
-			});
-			// if there was an error joining a room
-			this.socket?.on('error-joining-room', () => {
-				this.log('error joining room');
-				throw new Error('error joining room');
-			});
-		} catch (error) {
-			this.updateGameData({
-				connectionErrorStatus: 'Could not join room: ' + error,
-			});
-			// this.setConnectionStatus('Could not join room: ' + error);
-		}
-	}
+	// 			// look out for when opponent might be disconnected
+	// 			this.socket?.on('opponent-left', () => {
+	// 				this.log('Opponent left for good :(');
+	// 				// Let the game know that there is no player 2
+	// 				this.updateGameData({
+	// 					opponentIsReconnecting: false,
+	// 					opponentInfo: undefined,
+	// 					gameIsPlaying: false,
+	// 					player1Ready: false,
+	// 					player2Ready: false,
+	// 				});
+	// 			});
+	// 		});
+	// 		// if there was an error joining a room
+	// 		this.socket?.on('error-joining-room', () => {
+	// 			this.log('error joining room');
+	// 			throw new Error('error joining room');
+	// 		});
+	// 	} catch (error) {
+	// 		this.updateGameData({
+	// 			connectionErrorStatus: 'Could not join room: ' + error,
+	// 		});
+	// 		// this.setConnectionStatus('Could not join room: ' + error);
+	// 	}
+	// }
 
-	requestOpponentInfo() {
-		this.log(`Requesting opponent info for room: ${this.gameData.roomId}`);
-		this.socket?.emit('request-opponent-info', {
-			userId: this.userId,
-			roomId: this.gameData.roomId,
-		});
-	}
+	// requestOpponentInfo() {
+	// 	this.log(`Requesting opponent info for room: ${this.gameData.roomId}`);
+	// 	this.socket?.emit('request-opponent-info', {
+	// 		userId: this.userId,
+	// 		roomId: this.gameData.roomId,
+	// 	});
+	// }
 
 	notifyPlayer1Ready() {
 		this.socket?.emit('player-is-ready', {

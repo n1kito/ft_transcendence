@@ -1,7 +1,10 @@
+import { Socket } from 'socket.io-client';
 import { GameLogic } from './GameLogic';
 
 export class GameRenderer {
 	private gameLogic: GameLogic;
+
+	private socket: Socket | null;
 
 	// private canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
 	private gameContext: CanvasRenderingContext2D;
@@ -10,7 +13,10 @@ export class GameRenderer {
 
 	private animationFrameId: number | undefined;
 
+	private keysPressed = {};
+
 	constructor(
+		socket: React.MutableRefObject<Socket | null>,
 		canvasRef: React.MutableRefObject<HTMLCanvasElement | null>,
 		gameContext: CanvasRenderingContext2D,
 		broadcastPlayerPosition: (
@@ -18,6 +24,7 @@ export class GameRenderer {
 			inputSequenceNumber: number,
 		) => void,
 	) {
+		this.socket = socket.current;
 		// Storing the game logic instance
 		this.gameLogic = new GameLogic(
 			{ width: canvasRef.current!.width, height: canvasRef.current!.height },
@@ -34,6 +41,12 @@ export class GameRenderer {
 		this.setupEventListeners();
 	}
 
+	/*
+	░█▀▀░█▀█░█▄█░█▀▀░░░█░░░█▀█░█▀█░█▀█
+	░█░█░█▀█░█░█░█▀▀░░░█░░░█░█░█░█░█▀▀
+	░▀▀▀░▀░▀░▀░▀░▀▀▀░░░▀▀▀░▀▀▀░▀▀▀░▀░░
+	*/
+
 	// calls all the functions needed to update the game state
 	gameLoop = (): void => {
 		this.gameLogic.updateGameState();
@@ -45,6 +58,12 @@ export class GameRenderer {
 		if (this.animationFrameId != undefined)
 			window.cancelAnimationFrame(this.animationFrameId);
 	}
+
+	/*
+	░█░░░▀█▀░█▀▀░▀█▀░█▀▀░█▀█░█▀▀░█▀▄░█▀▀
+	░█░░░░█░░▀▀█░░█░░█▀▀░█░█░█▀▀░█▀▄░▀▀█
+	░▀▀▀░▀▀▀░▀▀▀░░▀░░▀▀▀░▀░▀░▀▀▀░▀░▀░▀▀▀
+	*/
 
 	setupEventListeners(): void {
 		this.log('adding event listeners');
@@ -105,6 +124,12 @@ export class GameRenderer {
 			});
 		}
 	};
+
+	/*
+	░█▀▄░█▀▄░█▀█░█░█░▀█▀░█▀█░█▀▀
+	░█░█░█▀▄░█▀█░█▄█░░█░░█░█░█░█
+	░▀▀░░▀░▀░▀░▀░▀░▀░▀▀▀░▀░▀░▀▀▀
+	*/
 
 	// draws all of our elements on the canvas
 	draw(): void {
@@ -175,6 +200,11 @@ export class GameRenderer {
 		return gradient;
 	}
 
+	/*
+	░█░█░▀█▀░▀█▀░█░░░█▀▀
+	░█░█░░█░░░█░░█░░░▀▀█
+	░▀▀▀░░▀░░▀▀▀░▀▀▀░▀▀▀
+	*/
 	log(message: string): void {
 		console.log(`%c Game %c ${message}`, 'background:green;color:yellow', '');
 	}

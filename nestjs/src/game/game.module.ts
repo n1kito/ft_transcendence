@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule, Scope } from '@nestjs/common';
 import { GameController } from './game.controller';
 import { UserService } from 'src/user/user.service';
 import { AuthMiddleWare } from 'src/middleware/auth.middleware';
@@ -11,7 +11,13 @@ import AuthService from 'src/auth/auth.service';
 @Module({
 	imports: [TokenModule],
 	controllers: [GameController],
-	providers: [GameService, PrismaService, UserService, AuthService, GameGateway],
+	providers: [
+		PrismaService,
+		UserService,
+		AuthService,
+		GameGateway,
+		GameService,
+	],
 })
 export class GameModule {}
 

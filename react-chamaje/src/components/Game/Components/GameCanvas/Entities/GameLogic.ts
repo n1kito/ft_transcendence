@@ -12,12 +12,14 @@ export class GameLogic {
 		direction: string;
 	}> = [];
 
+	private frontEndPLayers = {};
+
 	public paddlePlayer: Paddle;
 	public paddleOpponent: Paddle;
 	public ball: Ball;
 
-	public playerScore: number = 0;
-	public opponentScore: number = 0;
+	public playerScore = 0;
+	public opponentScore = 0;
 
 	public canvasSize: { width: number; height: number };
 
@@ -64,15 +66,16 @@ export class GameLogic {
 		);
 	}
 
+	// TODO: let's remove the tick rate for now, it should be handled differently
 	updateGameState(): void {
-		let dateNow = Date.now();
-		let timeSinceLastTick = dateNow - this.lastTick;
+		// let dateNow = Date.now();
+		// let timeSinceLastTick = dateNow - this.lastTick;
 
-		if (timeSinceLastTick >= this.TICK_RATE) {
-			this.updateElementsState();
-			this.lastTick = dateNow - (timeSinceLastTick % this.TICK_RATE);
-			// this.log(`Scores: ${this.playerScore}/${this.opponentScore}`);
-		}
+		// if (timeSinceLastTick >= this.TICK_RATE) {
+		// this.updateElementsState();
+		// this.lastTick = dateNow - (timeSinceLastTick % this.TICK_RATE);
+		// this.log(`Scores: ${this.playerScore}/${this.opponentScore}`);
+		// }
 		this.updateElementsState();
 	}
 
@@ -91,4 +94,12 @@ export class GameLogic {
 		if (won) this.playerScore++;
 		else this.opponentScore++;
 	};
+
+	log(message: string): void {
+		console.log(
+			`%c GameLogic %c ${message}`,
+			'background:orange;color:yellow',
+			'',
+		);
+	}
 }
