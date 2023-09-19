@@ -32,17 +32,19 @@ import { deleteFriend } from 'src/utils/FriendsQueries';
 // TODO: find a way to make the shaddow wrapper widht's 100% so if fills the sidebar
 export interface ProfileProps {
 	login: string | undefined;
+	setLogin?: React.Dispatch<React.SetStateAction<string>>;
 	isMyFriend: boolean | false;
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
 	onCloseClick: () => void;
 	nbOnline: number;
 	setNbOnline: React.Dispatch<React.SetStateAction<number>>;
 	nbFriendsOnline: number;
-	setShowFriendProfile?: React.Dispatch<React.SetStateAction<string>>;
+	setShowFriendProfile?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Profile: React.FC<ProfileProps> = ({
 	login,
+	setLogin,
 	isMyFriend,
 	windowDragConstraintRef,
 	onCloseClick,
@@ -98,8 +100,6 @@ const Profile: React.FC<ProfileProps> = ({
 	useEffect(() => {
 		// If we're not on our own profile, fetch our friend's information
 		Promise.resolve().then(async () => {
-			console.log('----------- login: ', login);
-
 			if (!isOwnProfile) {
 				await fetchProfileData();
 			} else {
@@ -109,13 +109,15 @@ const Profile: React.FC<ProfileProps> = ({
 
 		return () => {
 			setProfileData(null);
-			if (setShowFriendProfile) setShowFriendProfile('');
+			if (login && setLogin) setLogin('');
 		};
-	}, []);
+	}, [login]);
 
 	useEffect(() => {
-		if (isOwnProfile && userData?.login !== profileData?.login)
+		if (isOwnProfile && userData?.login !== profileData?.login) {
+			alert();
 			setProfileData(userData);
+		}
 	}, [userData]);
 
 	/**************************************************************************************/
@@ -229,7 +231,8 @@ const Profile: React.FC<ProfileProps> = ({
 	useEffect(() => {
 		return () => {
 			// alert();
-			// if (setShowFriendProfile) setShowFriendProfile('');
+			// if (setShowFriendProfile) setShowFriendProfile(false);
+			if (login && setLogin) setLogin('');
 			// onCloseClick();
 		};
 	});

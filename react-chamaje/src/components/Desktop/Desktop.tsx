@@ -44,7 +44,9 @@ const Desktop = () => {
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
 	const [channelsWindowIsOpen, setChannelsWindowIsOpen] = useState(false);
 
-	const [showFriendProfile, setShowFriendProfile] = useState('');
+	const [showFriendProfile, setShowFriendProfile] = useState(false);
+
+	const [friendLogin, setFriendLogin] = useState('');
 
 	const [nbOnline, SetNbOnline] = useState(0);
 
@@ -73,7 +75,6 @@ const Desktop = () => {
 			});
 			if (response.ok) {
 				const data = await response.json();
-				console.log(data);
 				const mySocket = new WebSocketService(accessToken, data.id);
 				const updatedData = {
 					...data,
@@ -212,8 +213,8 @@ const Desktop = () => {
 	/* ********************************************************************* */
 
 	const handleBadgeClick = (friendLogin: string) => {
-		setShowFriendProfile(friendLogin);
-		console.log('👀 handleBadgeClick - friend login: ', friendLogin);
+		setFriendLogin(friendLogin);
+		setShowFriendProfile(true);
 	};
 
 	useEffect(() => {
@@ -222,7 +223,8 @@ const Desktop = () => {
 			setFriends(updatedFriends);
 			userData?.chatSocket?.sendServerConnection();
 		};
-		if (showFriendProfile === '') fetchData();
+		if (showFriendProfile === false) fetchData();
+		fetchData();
 		return () => {};
 	}, [showFriendProfile]);
 
@@ -263,6 +265,7 @@ const Desktop = () => {
 					<Profile
 						key="profile-window"
 						login={userData?.login}
+						setLogin={setFriendLogin}
 						isMyFriend={false}
 						onCloseClick={() => setProfileWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
@@ -282,10 +285,12 @@ const Desktop = () => {
 						setFriends={setFriends}
 					/>
 				)}
-				{showFriendProfile && (
+				{openFriendsWindow && showFriendProfile && (
 					<Profile
-						login={showFriendProfile}
-						onCloseClick={() => setShowFriendProfile('')}
+						login={friendLogin}
+						onCloseClick={() => {
+							setProfileWindowIsOpen(false), setShowFriendProfile(false);
+						}}
 						windowDragConstraintRef={windowDragConstraintRef}
 						isMyFriend={true}
 						nbOnline={nbOnline}

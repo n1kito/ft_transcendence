@@ -34,7 +34,7 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 	const { accessToken } = useAuth();
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [searchedLogin, setSearchedLogin] = useState('');
-	const [searchUserError, setSearchUserError] = useState(' ');
+	const [searchUserError, setSearchUserError] = useState('');
 	const [searchUserSuccess, setSearchUserSuccess] = useState('');
 	const [isFriendAdded, setIsFriendAdded] = useState(false);
 
@@ -82,7 +82,9 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 					console.error('could not fetch friends: ', error);
 				});
 		}
-		return () => {};
+		return () => {
+			setSearchUserError('');
+		};
 	}, [isFriendAdded]);
 
 	return (
@@ -131,7 +133,7 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 							onClick={() => {
 								handleAddFriend();
 							}}
-							// disabled={!!searchUserError}
+							disabled={!!searchUserError}
 						>
 							Add friend
 						</Button>
