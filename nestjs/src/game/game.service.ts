@@ -93,6 +93,10 @@ export class GameService {
 			socket.emit('identification_ok');
 
 			// TODO: Do we want to do this ? Let's keep if for later
+			// TODO: If we allow our user to join different rooms, we just
+			// need to make sure they're not being added to a room they are
+			// already in. This would be handled by assignRoom()
+
 			// // Look for the user in the list of connected clients
 			// if (this.isUserAlreadyConnected(userId)) {
 			// 	console.log(
