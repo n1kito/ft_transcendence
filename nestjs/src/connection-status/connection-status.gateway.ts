@@ -71,24 +71,5 @@ export class ConnectionStatusGateway
 		console.log('\n🔴🔴' + data + ' just left!🔴🔴\n');
 		this.server.emit('ClientLogOut', data);
 		client.disconnect();
-
-		// client.disconnect();
-	}
-
-	@SubscribeMessage('AddFriend')
-	handleSendMessage(
-		@MessageBody() content: IFriend,
-		@ConnectedSocket() client: Socket,
-	): void {
-		// const messageToSend: IMessage = {
-		// 	chatId: content.chatId,
-		// 	sentById: content.userId,
-		// 	sentAt: new Date(),
-		// 	content: content.message,
-		// 	login: content.login,
-		// 	avatar: content.avatar,
-		// };
-		// sends the message to everyone except the sender
-		client.to(content.toString()).emit('receiveMessage');
 	}
 }

@@ -19,7 +19,7 @@ class WebSocketService {
 		try {
 			// Listen for the 'connect' event
 			this.socket.on('connect', () => {
-				console.log('🟢 connection socket id:', this.socket.id);
+				console.log('🟢 ', this.userId, ' just connected');
 				this.sendServerConnection();
 			});
 			// Listen for the 'disconnect' event prevent reconnection from wanted disconnection
@@ -52,7 +52,7 @@ class WebSocketService {
 
 	sendServerConnection() {
 		try {
-			console.log('🟢 server connection');
+			console.log('🟢 ping server !');
 			this.socket.emit('ServerConnection', this.userId);
 		} catch (e) {
 			console.error(e, ': WebSocketService sendServerConnection');

@@ -133,6 +133,7 @@ const ProfileSettings: React.FC = () => {
 						value={username}
 						onChange={handleUsernameChange}
 						error={usernameError}
+						maxlength={8}
 					/>
 					<InputField
 						value={email}

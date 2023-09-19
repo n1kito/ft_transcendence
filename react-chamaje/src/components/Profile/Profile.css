@@ -58,7 +58,7 @@
 	flex: 1;
 }
 
-.delete-profile-wrapper {
+.delete-settings-wrapper {
 	display: flex;
 	flex-direction: row;
 	gap: 2rem;

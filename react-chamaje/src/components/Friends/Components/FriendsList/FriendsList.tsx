@@ -20,13 +20,11 @@ interface IFriendsListProps {
 	friends: IFriendStruct[];
 	setFriends: React.Dispatch<React.SetStateAction<IFriendStruct[]>>;
 	nbFriendsOnline: number;
-	setNbFriendsOnline: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const FriendsList: React.FC<IFriendsListProps> = ({
 	friends,
 	nbFriendsOnline,
-	setNbFriendsOnline,
 	onCloseClick,
 	windowDragConstraintRef,
 	onBadgeClick,
@@ -36,46 +34,36 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 	const { accessToken } = useAuth();
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [searchedLogin, setSearchedLogin] = useState('');
-	const [searchUserError, setSearchUserError] = useState('');
+	const [searchUserError, setSearchUserError] = useState(' ');
 	const [searchUserSuccess, setSearchUserSuccess] = useState('');
 	const [isFriendAdded, setIsFriendAdded] = useState(false);
 
-	const handleLoginChange = (login: string) => {
-		setSearchedLogin(login);
-		setSearchUserError('');
+	const handleLoginChange = (username: string) => {
+		setSearchedLogin(username);
+		// setSearchUserError('');
 		setSearchUserSuccess('');
+		const usernameRegex = /^[A-Za-z0-9-_\\.]*$/;
+
+		if (!username) setSearchUserError(' ');
+		else if (!usernameRegex.test(username))
+			return setSearchUserError('only letters and numbers');
+		else if (username.length < 4) setSearchUserError(' ');
+		else {
+			setSearchUserError('');
+		}
 	};
 
+	// on `Add Friend` button click, send request to add
+	// `searchedLogin` as friend.
 	const handleAddFriend = async () => {
-		console.log('login: ', searchedLogin, accessToken);
 		addFriend(searchedLogin, accessToken)
 			.then(async (data) => {
 				setSettingsPanelIsOpen(false);
 				setIsFriendAdded(true);
 			})
 			.catch((error) => {
-				alert();
-				// console.error(error);
 				setSearchUserError(error.message);
 			});
-		// try {
-		// 	const response = await fetch(`api/user/${searchedLogin}/add`, {
-		// 		method: 'PUT',
-		// 		credentials: 'include',
-		// 		headers: {
-		// 			Authorization: `Bearer ${accessToken}`,
-		// 		},
-		// 	});
-		// 	if (response.ok) {
-		// 		setSettingsPanelIsOpen(false);
-		// 		setIsFriendAdded(true);
-		// 	} else {
-		// 		const Error = await response.json();
-		// 		setSearchUserError(Error.message);
-		// 	}
-		// } catch (error) {
-		// 	throw new Error('internal error');
-		// }
 	};
 
 	useEffect(() => {
@@ -143,6 +131,7 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 							onClick={() => {
 								handleAddFriend();
 							}}
+							// disabled={!!searchUserError}
 						>
 							Add friend
 						</Button>

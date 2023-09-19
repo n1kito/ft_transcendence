@@ -91,7 +91,6 @@ const Desktop = () => {
 	};
 	useEffect(() => {
 		if (isAuthentificated) fetchUserData();
-		console.log('socket id: ');
 		return () => {
 			userData?.chatSocket?.endConnection();
 			// when unmounting desktop component, reset userData
@@ -279,7 +278,6 @@ const Desktop = () => {
 						windowDragConstraintRef={windowDragConstraintRef}
 						friends={friends}
 						nbFriendsOnline={nbOnline}
-						setNbFriendsOnline={SetNbOnline}
 						onBadgeClick={handleBadgeClick}
 						setFriends={setFriends}
 					/>
@@ -293,6 +291,7 @@ const Desktop = () => {
 						nbOnline={nbOnline}
 						setNbOnline={SetNbOnline}
 						nbFriendsOnline={nbFriendsOnline}
+						setShowFriendProfile={setShowFriendProfile}
 					></Profile>
 				)}
 				{chatWindowIsOpen && (

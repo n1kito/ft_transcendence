@@ -29,12 +29,27 @@ export async function addFriend(searchedLogin: string, accessToken: string) {
 		});
 		if (!response.ok) {
 			const data = await response.json();
-			console.warn('--------------', data);
-			// alert(message);
 			throw new Error(data.message);
 		}
-		// const data = await response.json();
-		// console.warn(data);
+		return response.json();
+	} catch (error) {
+		throw error;
+	}
+}
+
+export async function deleteFriend(searchedLogin: string, accessToken: string) {
+	try {
+		const response = await fetch(`api/user/${searchedLogin}/delete`, {
+			method: 'DELETE',
+			credentials: 'include',
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+		});
+		if (!response.ok) {
+			const data = await response.json();
+			throw new Error(data.message);
+		}
 		return response.json();
 	} catch (error) {
 		throw error;

@@ -12,6 +12,8 @@ import {
 	Put,
 	Req,
 	Res,
+	Search,
+	ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { PrismaClient } from '@prisma/client';
@@ -20,6 +22,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { validate } from 'class-validator';
 import { twoFactorAuthenticationCodeDto } from 'src/auth/dto/two-factor-auth-code.dto';
+import { SearchUserDto } from './dto/search-user.dto';
 
 export interface CustomRequest extends Request {
 	userId: number;
@@ -233,6 +236,18 @@ export class UserController {
 		@Res() response: Response,
 	) {
 		try {
+			// init searchUserDto
+			const searchUserDto = new SearchUserDto();
+			searchUserDto.login = login;
+
+			// Validate the searchUserDto
+			const errors = await validate(searchUserDto);
+
+			if (errors.length > 0) {
+				return response.status(400).json({ message: 'Validation failed' });
+			}
+
+			// const loginn = JSON.stringify(login);
 			const userId = this.userService.authenticateUser(request);
 
 			// retrieve friend's user id

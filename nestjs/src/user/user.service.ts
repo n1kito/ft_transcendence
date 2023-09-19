@@ -352,7 +352,7 @@ export class UserService {
 				},
 			});
 		} catch (error) {
-			console.error('----------------------------------');
+			console.error('----------------------------------', error);
 			throw new Error('could not add friend: internal error');
 		}
 	}

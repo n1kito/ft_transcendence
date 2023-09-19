@@ -1,5 +1,5 @@
 import {
-	IsAlpha,
+	IsAlphanumeric,
 	IsBoolean,
 	IsEmail,
 	IsNotEmpty,
@@ -11,7 +11,7 @@ import {
 
 export class UpdateUserDto {
 	@IsOptional()
-	@IsAlpha()
+	@IsAlphanumeric()
 	@IsString()
 	@IsNotEmpty()
 	@MinLength(4)

@@ -27,6 +27,7 @@ import SettingsWindow from './Components/Shared/SettingsWindow/SettingsWindow';
 import TwoFactorAuthentication from './Components/TwoFactorAuthentication/TwoFactorAuthentication';
 import InputField from './Components/InputField/InputField';
 import { useNavigate } from 'react-router-dom';
+import { deleteFriend } from 'src/utils/FriendsQueries';
 
 // TODO: find a way to make the shaddow wrapper widht's 100% so if fills the sidebar
 export interface ProfileProps {
@@ -37,6 +38,7 @@ export interface ProfileProps {
 	nbOnline: number;
 	setNbOnline: React.Dispatch<React.SetStateAction<number>>;
 	nbFriendsOnline: number;
+	setShowFriendProfile?: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const Profile: React.FC<ProfileProps> = ({
@@ -47,6 +49,7 @@ const Profile: React.FC<ProfileProps> = ({
 	nbOnline,
 	setNbOnline,
 	nbFriendsOnline,
+	setShowFriendProfile,
 }) => {
 	const { accessToken, isTwoFAEnabled, setIsTwoFAEnabled, logOut } = useAuth();
 	const { userData, setUserData } = useContext(UserContext);
@@ -75,6 +78,7 @@ const Profile: React.FC<ProfileProps> = ({
 	/**************************************************************************************/
 	const fetchProfileData = async () => {
 		try {
+			console.log('----------- login: ', login);
 			const response = await fetch(`/api/user/${login}`, {
 				method: 'GET',
 				credentials: 'include',
@@ -94,6 +98,8 @@ const Profile: React.FC<ProfileProps> = ({
 	useEffect(() => {
 		// If we're not on our own profile, fetch our friend's information
 		Promise.resolve().then(async () => {
+			console.log('----------- login: ', login);
+
 			if (!isOwnProfile) {
 				await fetchProfileData();
 			} else {
@@ -103,6 +109,7 @@ const Profile: React.FC<ProfileProps> = ({
 
 		return () => {
 			setProfileData(null);
+			if (setShowFriendProfile) setShowFriendProfile('');
 		};
 	}, []);
 
@@ -205,28 +212,27 @@ const Profile: React.FC<ProfileProps> = ({
 	/**************************************************************************************/
 	const [isFriendDeleted, setIsFriendDeleted] = useState(false);
 
-	const deleteFriend = async () => {
-		try {
-			const response = await fetch(`api/user/${login}/delete`, {
-				method: 'DELETE',
-				credentials: 'include',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-			});
-			if (response.ok) {
-				nbFriendsOnline--;
-				setNbOnline(nbFriendsOnline);
-				setSettingsPanelIsOpen(false);
-				onCloseClick();
-			} else if (response.status === 500 || response.status === 404) {
-				const messageError = await response.json();
-				console.error(messageError);
-			}
-		} catch (error) {
-			throw new Error('internal error');
-		}
+	const handleDeleteFriend = async () => {
+		if (login)
+			deleteFriend(login, accessToken)
+				.then(async (data) => {
+					nbFriendsOnline--;
+					setNbOnline(nbFriendsOnline);
+					setSettingsPanelIsOpen(false);
+					onCloseClick();
+				})
+				.catch((error) => {
+					console.error(error);
+				});
 	};
+
+	useEffect(() => {
+		return () => {
+			// alert();
+			// if (setShowFriendProfile) setShowFriendProfile('');
+			// onCloseClick();
+		};
+	});
 
 	return (
 		<Window
@@ -335,7 +341,7 @@ const Profile: React.FC<ProfileProps> = ({
 					)}
 
 					{settingsMode === 'Delete Profile' && (
-						<div className="delete-profile-wrapper">
+						<div className="delete-settings-wrapper">
 							<Button
 								baseColor={[111, 60, 84]}
 								onClick={() => {
@@ -356,11 +362,11 @@ const Profile: React.FC<ProfileProps> = ({
 					)}
 
 					{settingsMode === 'Delete Friend' && (
-						<div className="delete-friend-wrapper">
+						<div className="delete-settings-wrapper">
 							<Button
 								baseColor={[111, 60, 84]}
 								onClick={() => {
-									deleteFriend();
+									handleDeleteFriend();
 								}}
 							>
 								yes
