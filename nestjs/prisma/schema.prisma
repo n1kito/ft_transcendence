@@ -96,6 +96,9 @@ model chatSession {
 
     User   User? @relation(fields: [userId], references: [id])
     userId Int?
+
+    isOwner Boolean?
+    isAdmin Boolean?
     // lastOpen ? So we know when new msg
     // isChannel, isPrivate, isProtected here ?
 }

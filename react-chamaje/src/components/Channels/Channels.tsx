@@ -8,7 +8,12 @@ import Title from '../Profile/Components/Title/Title';
 import InputField from '../Profile/Components/InputField/InputField';
 import { IChatStruct } from '../PrivateMessages/PrivateMessages';
 import useAuth from 'src/hooks/userAuth';
-import { createChannel, fetchChannels, fetchMessages } from 'src/utils/queries';
+import {
+	createChannel,
+	fetchChannels,
+	fetchMessages,
+	joinChannel,
+} from 'src/utils/queries';
 import { UserContext } from 'src/contexts/UserContext';
 import ChatWindow, { IMessage } from '../ChatWindow/ChatWindow';
 
@@ -39,7 +44,6 @@ const Channels: React.FC<IChannelsProps> = ({
 	const { userData } = useContext(UserContext);
 
 	const { accessToken } = useAuth();
-
 
 	/* ********************************************************************* */
 	/* ***************************** WEBSOCKET ***************************** */
@@ -76,7 +80,6 @@ const Channels: React.FC<IChannelsProps> = ({
 			userData.chatSocket?.offReceiveMessage(onReceiveMessage);
 		};
 	}, [chatWindowId, messages]);
-
 
 	// on click on an avatar, check if a PM conversation exists.
 	// If it does, open the window, set the userId and chatId, and fetch
@@ -127,7 +130,28 @@ const Channels: React.FC<IChannelsProps> = ({
 		}
 	};
 
-	const joinChannel = () => {};
+	const handleJoinChannel = () => {
+		if (channelInput) {
+			joinChannel(accessToken, channelInput)
+				.then((data) => {
+					setChannelInput('');
+					setSettingsPanelIsOpen(false);
+					const updatedChannelsList = channelsList.map((current) => {
+						return current;
+					});
+					updatedChannelsList.push({
+						chatId: data.chatId,
+						participants: data.participants,
+						name: channelInput,
+					});
+					setChannelsList(updatedChannelsList);
+					console.log('Channel joined successfully');
+				})
+				.catch((e) => {
+					console.error('Could not join channel: ', e.message);
+				});
+		}
+	};
 
 	// every time I put a char in this, it fetches everything...
 	// no it does not but it rerenders my list
@@ -230,12 +254,15 @@ const Channels: React.FC<IChannelsProps> = ({
 					<SettingsWindow settingsWindowVisible={setSettingsPanelIsOpen}>
 						<Title highlightColor="yellow">Channel name</Title>
 						<div className="settings-form">
-							<InputField onChange={handleChannelInput} error={settingsError}></InputField>
+							<InputField
+								onChange={handleChannelInput}
+								error={settingsError}
+							></InputField>
 							<Button
 								onClick={() => {
 									settingsMode === 'create'
 										? createNewChannel()
-										: joinChannel();
+										: handleJoinChannel();
 								}}
 							>
 								{settingsMode} channel

@@ -30,11 +30,13 @@ export class CreateChatDTO {
 	@IsNumber()
 	userId?: number;
 
-	// TODO: do I need to escape more characters?
+	// TODO: do I need to escape more characters? (add '!' ?)
 	@IsOptional()
 	@IsNotEmpty()
 	@IsString()
 	@NotContains('/')
 	@NotContains('\\')
+	@NotContains(';')
 	name?: string;
+
 }

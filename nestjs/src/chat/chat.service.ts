@@ -28,10 +28,9 @@ export class ChatService {
 			where: { id: chatId },
 			select: { participants: true },
 		});
-		if (response.participants) {
-			response.participants.map((current) => {
-				if (current.userId === userId) return true;
-			});
+		if (!response.participants) return false;
+		for (const current of response.participants) {
+			if (current.userId === userId) return true;
 		}
 		return false;
 	}
@@ -81,39 +80,6 @@ export class ChatService {
 		return messagesWithLogin;
 	}
 
-	async getPrivateMessageRoom(chatId: number) {
-		const res = await this.prisma.chat.findFirst({
-			where: {
-				id: chatId,
-				isChannel: false,
-			},
-			include: {
-				participants: true,
-			},
-		});
-		return res;
-	}
-
-	async getChannelRoom(chatId: number) {
-		const res = await this.prisma.chat.findFirst({
-			where: {
-				id: chatId,
-				isChannel: true,
-			},
-			include: {
-				participants: true,
-			},
-		});
-		return res;
-	}
-
-	async getChatByName(name: string) {
-		const res = await this.prisma.chat.findFirst({
-			where: { name: name },
-		});
-		return res;
-	}
-
 	// create Chat
 	async createChat(userId: number, content: CreateChatDTO) {
 		const chat = await this.prisma.chat.create({
@@ -151,7 +117,7 @@ export class ChatService {
 
 	// leave channel: first delete the chat session, if the user was alone in
 	// this convo, delete all the messages and then the chat
-	async leaveChannel(userId: number, chatId: number) {
+	async leaveChat(userId: number, chatId: number) {
 		try {
 			this.prisma.chatSession
 				.deleteMany({
@@ -160,6 +126,7 @@ export class ChatService {
 				.then(async () => {
 					this.getChannelRoom(chatId)
 						.then((response) => {
+							// if there was only 1 user, delete everything
 							if (!response.participants || !response.participants.length) {
 								this.prisma.message
 									.deleteMany({
@@ -181,6 +148,18 @@ export class ChatService {
 									.catch((e) => {
 										console.error('Could not delete messages: ', e);
 									});
+							} else {
+								console.log('👋👋👋👋👋👋response.participants.at(0) : ', response.participants.at(0))
+								// if there was people remaining, put the first one to have joined as owner
+								this.prisma.chatSession.update({
+									where: { id: response.participants.at(0).id },
+									data: {
+										isOwner: true,
+										isAdmin: true,
+									},
+								}).then((data)=>{
+									console.log('data', data)
+								})
 							}
 						})
 						.catch((e) => {
@@ -195,6 +174,10 @@ export class ChatService {
 		}
 	}
 
+	/* ********************************************************************* */
+	/* ***************************** CHANNELS ****************************** */
+	/* ********************************************************************* */
+
 	async setPrivacySettings(chatId: number, toPrivate: boolean) {
 		try {
 			await this.prisma.chat.update({
@@ -203,10 +186,84 @@ export class ChatService {
 				},
 				data: {
 					isPrivate: toPrivate,
-				}
-			})
+				},
+			});
 		} catch (e) {
-			console.error('Could set chat privacy settings')
+			console.error('Could not set chat privacy settings');
 		}
+	}
+
+	async getChannelRoom(chatId: number) {
+		const res = await this.prisma.chat.findFirst({
+			where: {
+				id: chatId,
+				isChannel: true,
+			},
+			include: {
+				participants: true,
+			},
+		});
+		return res;
+	}
+
+	async getChatByName(name: string) {
+		const res = await this.prisma.chat.findFirst({
+			where: { name: name },
+			include: { participants: true },
+		});
+		return res;
+	}
+
+	async getAdminInfo(chatId: number, userId: number) {
+		const res = await this.prisma.chatSession.findFirst({
+			where: {
+				chatId: chatId,
+				userId: userId,
+			},
+			select: {
+				isAdmin: true,
+				isOwner: true,
+			},
+		});
+		return res;
+	}
+
+	// create a chat session for the creator of a channel
+	async createOwnerChannelSession(userId: number, chatId: number) {
+		await this.prisma.chatSession.create({
+			data: {
+				chatId: chatId,
+				userId: userId,
+				isOwner: true,
+				isAdmin: true,
+			},
+		});
+	}
+
+	async setPassword(chatId: number, newPassword: string) {
+		await this.prisma.chat.update({
+			where: { id: chatId },
+			data: {
+				password: newPassword.length ? newPassword : null,
+				isProtected: newPassword.length ? true : false,
+			},
+		});
+	}
+
+	/* ********************************************************************* */
+	/* ************************* PRIVATE MESSAGES ************************** */
+	/* ********************************************************************* */
+
+	async getPrivateMessageRoom(chatId: number) {
+		const res = await this.prisma.chat.findFirst({
+			where: {
+				id: chatId,
+				isChannel: false,
+			},
+			include: {
+				participants: true,
+			},
+		});
+		return res;
 	}
 }

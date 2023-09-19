@@ -21,10 +21,12 @@ import DOMPurify from 'dompurify';
 import {
 	fetchChannels,
 	fetchPrivateMessages,
+	getAdminRights,
 	getChatInfo,
 	leaveChat,
 	makePrivate,
 	sendMessageQuery,
+	setNewPassword,
 } from 'src/utils/queries';
 import { IChatStruct } from '../PrivateMessages/PrivateMessages';
 
@@ -50,19 +52,20 @@ export interface IMessage {
 	avatar?: string;
 }
 
+interface IChatInfo {
+	isChannel: boolean;
+	isPrivate: boolean;
+	isProtected: boolean;
+}
+
 const dateFormatOptions: Intl.DateTimeFormatOptions = {
 	year: '2-digit',
 	month: '2-digit',
 	day: '2-digit',
 	hour: '2-digit',
 	minute: '2-digit',
-	hour12: true, // Use 24-hour format
+	hour12: true,
 };
-interface IChatInfo {
-	isChannel: boolean;
-	isPrivate: boolean;
-	isProtected: boolean;
-}
 
 const ChatWindow: React.FC<IChatWindowProps> = ({
 	// userId,
@@ -88,6 +91,8 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [channelIsPrivate, setChannelIsPrivate] = useState(false);
+	const [isOwner, setIsOwner] = useState(false);
+	const [isAdmin, setIsAdmin] = useState(false);
 
 	const { userData } = useContext(UserContext);
 	const chatContentRef = useRef<HTMLDivElement>(null);
@@ -106,8 +111,8 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 		}
 	};
 
-	const handlePwdInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-		const newValue = event.target.value;
+	const handlePwdInput = (newValue: string) => {
+		// const newValue = event.target.value;
 		setPwdContent(newValue);
 	};
 
@@ -133,15 +138,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 					(channel) => channel.chatId !== chatId,
 				);
 				setChatsList(updatedChannelsList);
-				// fetchChannels(accessToken)
-				// 	.then((data) => {
-				// 		const updatedChannelsList = chatsList.filter((channel) => channel.chatId !== chatId);
-
-				// 		setChatsList(updatedChannelsList);
-				// 	})
-				// 	.catch((e) => {
-				// 		console.error('Error fetching channels: ', e);
-				// 	});
 				setChatWindowIsOpen(false);
 			})
 			.catch((e) => {
@@ -192,6 +188,21 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 		// };
 	}, [chatId]);
 
+	// every time we change room, check if we are the owner (if its a channel)
+	useEffect(() => {
+		if (isChannel) {
+			getAdminRights(accessToken, chatId)
+				.then((data) => {
+					setIsAdmin(data.isAdmin);
+					setIsOwner(data.isOwner);
+				})
+				.catch((e) => {
+					setIsAdmin(false);
+					setIsOwner(false);
+				});
+		}
+	}, [chatId]);
+
 	const sendMessage = async () => {
 		sendMessageQuery(accessToken, textareaContent, chatId)
 			.then(() => {
@@ -221,6 +232,21 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 				console.error('Could not send message to the database: ', e);
 			});
 	};
+	/* ********************************************************************* */
+	/* ******************************* DEBUG ******************************* */
+	/* ********************************************************************* */
+
+	useEffect(() => {
+		console.log('isOwner', isOwner);
+	}, [isOwner]);
+
+	useEffect(() => {
+		console.log('isAdmin', isAdmin);
+	}, [isAdmin]);
+
+	useEffect(() => {
+		console.log('pwdContent', pwdContent);
+	}, [pwdContent]);
 
 	/* ********************************************************************* */
 	/* ******************************* RETURN ****************************** */
@@ -234,9 +260,13 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 			links={
 				isChannel
 					? [
-							{ name: 'Invite', onClick: inviteToChannel },
+							isOwner || isAdmin || !channelIsPrivate
+								? { name: 'Invite', onClick: inviteToChannel }
+								: { name: '' },
 							{ name: 'Leave', onClick: leaveChannel },
-							{ name: 'Settings', onClick: openSettingsPanel },
+							isOwner || isAdmin
+								? { name: 'Settings', onClick: openSettingsPanel }
+								: { name: '' },
 					  ]
 					: [
 							{ name: 'Profile', onClick: () => null },
@@ -261,18 +291,9 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							__html: DOMPurify.sanitize(messageWithNewlines),
 						});
 						const isLast = index === messages.length - 1;
-						if (isLast)
-							console.log(
-								'currentMessage.content',
-								currentMessage.content,
-								'messages.length',
-								messages.length,
-								'index',
-								index,
-							);
-
 						return (
 							<ChatBubble
+								userId={currentMessage.sentById}
 								key={index}
 								wasSent={
 									userData && currentMessage.sentById === userData.id
@@ -324,21 +345,30 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 					<Title highlightColor="yellow">Visibility</Title>
 					<Button
 						baseColor={channelIsPrivate ? [111, 60, 84] : [40, 100, 80]}
-						onClick={() => {
-							console.log('am i doing something?');
-							makePrivate(accessToken, chatId, !channelIsPrivate);
-							setChannelIsPrivate(!channelIsPrivate);
+						onClick={async () => {
+							makePrivate(accessToken, chatId, !channelIsPrivate)
+								.then(() => {
+									setChannelIsPrivate(!channelIsPrivate);
+								})
+								.catch((e) => {
+									console.error('Could not make private: ', e.message);
+								});
 						}}
 					>
 						make {channelIsPrivate ? 'public' : 'private'}
 					</Button>
 					<Title highlightColor="yellow">Channel password</Title>
 					<div className="settings-form">
-						<InputField value="password"></InputField>
-						{/* <InputField value="password" onChange={handlePwdInput}></InputField> */}
+						<InputField onChange={handlePwdInput}></InputField>
 						<Button
-							onClick={() => {
-								// setPassword();
+							onClick={async () => {
+								setNewPassword(accessToken, chatId, pwdContent)
+									.then(() => {
+										setPwdContent('');
+									})
+									.catch((e) => {
+										console.error('Could not set the password');
+									});
 							}}
 						>
 							update

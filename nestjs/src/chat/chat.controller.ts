@@ -19,6 +19,9 @@ import { TokenService } from 'src/token/token.service';
 import { CreateChatDTO } from './dto/createChat.dto';
 import { LeaveChannelDTO } from './dto/leaveChannel.dto';
 import { SetPrivateDTO } from './dto/setPrivate.dto';
+import { SetPasswordDTO } from './dto/setPassword.dto';
+import { ValidationError } from 'class-validator';
+import { JoinChannelDTO } from './dto/joinChannel.dto';
 
 @Controller('chat')
 export class ChatController {
@@ -35,8 +38,8 @@ export class ChatController {
 		@Param('chatId') chatId: number,
 	) {
 		try {
-			const chatIdNb = +chatId
-			this.tokenService.ExtractUserId(request.headers['authorization']);
+			const chatIdNb = +chatId;
+			this.tokenService.ExtractUserId(request.headers['authorization'])
 			const response = await this.prisma.chat.findUnique({
 				where: {
 					id: chatIdNb,
@@ -61,13 +64,14 @@ export class ChatController {
 	) {
 		try {
 			console.error('🛑🛑🛑', chatId);
-			this.tokenService.ExtractUserId(request.headers['authorization']);
-			const isUserInChat = await this.chatService.isUserInChat;
+			const nbChatId = +chatId
+			const userId = this.tokenService.ExtractUserId(request.headers['authorization']);
+			const isUserInChat = await this.chatService.isUserInChat(userId, nbChatId);
 			if (!isUserInChat) {
 				res.status(403).json({ message: 'You are not in this chat' });
 				return;
 			}
-			const messages = await this.chatService.getChatMessages(request, chatId);
+			const messages = await this.chatService.getChatMessages(request, nbChatId);
 			res.status(200).json(messages);
 		} catch (e) {
 			console.error('error fetching messages: ', e);
@@ -98,7 +102,10 @@ export class ChatController {
 							.createChat(userId, createChat)
 							.then(async (chatId) => {
 								console.log('🛑🛑🛑chatId🛑🛑🛑', chatId);
-								await this.chatService.createChatSession(userId, chatId);
+								await this.chatService.createOwnerChannelSession(
+									userId,
+									chatId,
+								);
 								response.status(200).json({ chatId: chatId });
 							})
 							.catch((e) => {
@@ -122,35 +129,6 @@ export class ChatController {
 		} catch (e) {
 			console.error('error creating a private message: ', e);
 			response.status(401).json({ message: e.message });
-			// response.status(400);
-		}
-	}
-
-	@Put('/setPrivate')
-	async setPrivate(
-		@Body(new ValidationPipe()) setPrivate: SetPrivateDTO,
-		@Req() request: CustomRequest,
-		@Res() res: Response,
-	) {
-		try {
-			const userId = this.tokenService.ExtractUserId(
-				request.headers['authorization'],
-			);
-			const isUserInChat = await this.chatService.isUserInChat;
-			if (!isUserInChat) {
-				res.status(403).json({ message: 'You are not in this chat' });
-				return;
-			}
-			this.chatService
-				.setPrivacySettings(setPrivate.chatId, setPrivate.toPrivate)
-				.then(() => {
-					console.log('👋👋👋👋👋👋👋👋👋👋👋👋', setPrivate.toPrivate);
-					res
-						.status(200)
-						.json({ message: 'switched chat privacy settings successfully' });
-				});
-		} catch (e) {
-			res.status(401).json({ message: e.message });
 		}
 	}
 
@@ -164,6 +142,11 @@ export class ChatController {
 			const userId = this.tokenService.ExtractUserId(
 				request.headers['authorization'],
 			);
+			const isUserInChat = await this.chatService.isUserInChat(userId, sendMessage.chatId);
+			if (!isUserInChat) {
+				res.status(403).json({ message: 'You are not in this chat' });
+				return;
+			}
 			await this.chatService.sendMessage(userId, sendMessage);
 			res.status(201).json({ message: 'Message sent successfully' });
 		} catch (e) {
@@ -172,8 +155,8 @@ export class ChatController {
 		}
 	}
 
-	@Delete('/leaveChannel')
-	async leaveChannel(
+	@Delete('/leaveChat')
+	async leaveChat(
 		// @Body() leaveChannel: LeaveChannelDTO,
 		@Body(new ValidationPipe()) leaveChannel: LeaveChannelDTO,
 		@Req() request: CustomRequest,
@@ -183,7 +166,12 @@ export class ChatController {
 			const userId = this.tokenService.ExtractUserId(
 				request.headers['authorization'],
 			);
-			await this.chatService.leaveChannel(userId, leaveChannel.chatId);
+			const isUserInChat = await this.chatService.isUserInChat(userId, leaveChannel.chatId);
+			if (!isUserInChat) {
+				response.status(403).json({ message: 'You are not in this chat' });
+				return;
+			}
+			await this.chatService.leaveChat(userId, leaveChannel.chatId);
 			response.status(200).json({ message: 'Channel left successfully' });
 		} catch (e) {
 			console.error('👋👋👋error leaving channel', e);
@@ -193,19 +181,149 @@ export class ChatController {
 		}
 	}
 
-	// @Delete('/leavePM')
-	// async leavePM(
-	// 	@Body() leaveChannel: LeaveChannelDTO,
-	// 	// @Body(new ValidationPipe()) leaveChannel: LeaveChannelDTO,
-	// 	@Req() request: CustomRequest,
-	// ) {
-	// 	try {
-	// 		const userId = this.tokenService.ExtractUserId(
-	// 			request.headers['authorization'],
-	// 		);
-	// 		await this.chatService.leaveChannel(userId, leaveChannel.chatId);
-	// 	} catch (e) {
-	// 		console.error('👋👋👋error leaving channel', e);
-	// 	}
-	// }
+	/* ********************************************************************* */
+	/* ***************************** CHANNELS ****************************** */
+	/* ********************************************************************* */
+
+	@Put('/joinChannel')
+	async joinChannel(
+		@Body(new ValidationPipe()) validatedData: JoinChannelDTO,
+		@Req() request: CustomRequest,
+		@Res() response: Response,
+	) {
+		try {
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			this.chatService
+				.getChatByName(validatedData.name)
+				.then(async (data) => {
+					const isUserInChat = await this.chatService.isUserInChat(
+						userId,
+						data.id,
+					);
+					if (isUserInChat) {
+						response
+							.status(400)
+							.json({ message: 'You are already in this chat' });
+						return;
+					}
+					this.chatService
+						.createChatSession(userId, data.id)
+						.then(() => {
+							response
+								.status(200)
+								.json({ chatId: data.id, participants: data.participants });
+						})
+						.catch((e) => {
+							console.error('error joining a channel: ', e);
+							response
+								.status(400)
+								.json({ message: 'Could not join the channel' });
+						});
+				})
+				.catch(() => {
+					response.status(404).json({ message: 'Could not find channel' });
+				});
+		} catch (e) {
+			response.status(401).json({ message: e.message });
+		}
+	}
+
+	@Put('/setPrivate')
+	async setPrivate(
+		@Body(new ValidationPipe()) setPrivate: SetPrivateDTO,
+		@Req() request: CustomRequest,
+		@Res() res: Response,
+	) {
+		try {
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			const isUserInChat = await this.chatService.isUserInChat(
+				userId,
+				setPrivate.chatId,
+			);
+			if (!isUserInChat) {
+				res.status(403).json({ message: 'You are not in this chat' });
+				return;
+			}
+			this.chatService.getAdminInfo(setPrivate.chatId, userId).then((data) => {
+				if (data.isAdmin || data.isOwner) {
+					this.chatService
+						.setPrivacySettings(setPrivate.chatId, setPrivate.toPrivate)
+						.then(() => {
+							res.status(200).json({
+								message: 'switched chat privacy settings successfully',
+							});
+						});
+				} else {
+					res
+						.status(403)
+						.json({ message: "You don't have sufficient admin rights" });
+				}
+			});
+		} catch (e) {
+			console.error('👋👋👋👋👋👋👋👋👋👋👋👋set private error: ', e);
+			res.status(401).json({ message: e.message });
+		}
+	}
+
+	@Get('/getOwnAdminInfo/:chatId')
+	async getOwnAdminInfo(
+		@Req() request: CustomRequest,
+		@Res() res: Response,
+		@Param('chatId') chatId: number,
+	) {
+		try {
+			const nbChatId: number = +chatId;
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			this.chatService
+				.getAdminInfo(nbChatId, userId)
+				.then((data) => {
+					res
+						.status(200)
+						.json({ isAdmin: data.isAdmin, isOwner: data.isOwner });
+				})
+				.catch((e) => {
+					throw new Error('Could not find your session');
+				});
+		} catch (e) {
+			res.status(401).json({ message: e.message });
+		}
+	}
+
+	@Put('/setPassword')
+	async setPassword(
+		@Req() request: CustomRequest,
+		@Body(new ValidationPipe()) validatedData: SetPasswordDTO,
+		@Res() response: Response,
+	) {
+		try {
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			this.chatService
+				.getAdminInfo(validatedData.chatId, userId)
+				.then((data) => {
+					if (data.isAdmin || data.isOwner) {
+						this.chatService
+							.setPassword(validatedData.chatId, validatedData.newPassword)
+							.then(() => {
+								response.status(200).json({
+									message: 'changed password successfully',
+								});
+							});
+					} else {
+						response
+							.status(403)
+							.json({ message: "You don't have sufficient admin rights" });
+					}
+				});
+		} catch (e) {
+			response.status(401).json({ message: e.message });
+		}
+	}
 }

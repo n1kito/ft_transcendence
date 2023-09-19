@@ -4,7 +4,7 @@
 
 export async function leaveChat(accessToken: string, chatId: number) {
 	try {
-		const response = await fetch('api/chat/leaveChannel', {
+		const response = await fetch('api/chat/leaveChat', {
 			method: 'DELETE',
 			headers: {
 				'Content-Type': 'application/json',
@@ -15,11 +15,15 @@ export async function leaveChat(accessToken: string, chatId: number) {
 				chatId: chatId,
 			}),
 		});
-		if (!response.ok) throw new Error('Error leaving chat - response');
+		if (!response.ok) {
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
 		return response.json();
 	} catch (e) {
-		console.error('Error leaving chat - queries catch: ', e);
-		throw new Error('' + e);
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error('' + e.message);
+		} else throw new Error('Something went wrong leaving chat');
 	}
 }
 
@@ -56,11 +60,15 @@ export async function fetchChannels(accessToken: string) {
 			},
 			credentials: 'include',
 		});
-		if (!response.ok) throw new Error('Could not fetch channel rooms');
+		if (!response.ok) {
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
 		return response.json();
 	} catch (e) {
-		console.error('Error fetching channel: ', e);
-		throw new Error('' + e);
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error(e.message);
+		} else throw new Error('Something went wrong fetching channels');
 	}
 }
 
@@ -79,6 +87,8 @@ export async function createChannel(accessToken: string, channelName: string) {
 				isPrivate: true,
 				isProtected: false,
 				name: channelName,
+				isOwner: true,
+				isAdmin: true,
 			}),
 		});
 		if (!response.ok) {
@@ -95,9 +105,26 @@ export async function createChannel(accessToken: string, channelName: string) {
 
 export async function joinChannel(accessToken: string, channelName: string) {
 	try {
+		const response = await fetch('api/chat/joinChannel', {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+			body: JSON.stringify({
+				name: channelName,
+			}),
+		});
+		if (!response.ok) {
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
+		return response.json();
 	} catch (e) {
-		console.error('Error joinning channel: ' + e);
-		throw new Error('' + e);
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error(e.message);
+		} else throw new Error('Something went wrong joining channel');
 	}
 }
 
@@ -107,7 +134,7 @@ export async function makePrivate(
 	toPrivate: boolean,
 ) {
 	try {
-		const response = await fetch('api/chat/setPrivate/', {
+		const response = await fetch('api/chat/setPrivate', {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json',
@@ -127,8 +154,62 @@ export async function makePrivate(
 	} catch (e) {
 		if (e instanceof Error && typeof e.message === 'string') {
 			console.error('Error making private: ' + e.message);
-			throw new Error('' + e.message);
+			throw new Error(e.message);
 		} else throw new Error('Something went wrong making private');
+	}
+}
+
+export async function getAdminRights(accessToken: string, chatId: number) {
+	try {
+		const response = await fetch('/api/chat/getOwnAdminInfo/' + chatId, {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+		});
+		if (!response.ok) {
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
+		return response.json();
+	} catch (e) {
+		if (e instanceof Error && typeof e.message === 'string') {
+			console.error('Error getting your admin informations: ' + e.message);
+			throw new Error('' + e.message);
+		} else
+			throw new Error('Something went wrong getting your admin informations');
+	}
+}
+
+export async function setNewPassword(
+	accessToken: string,
+	chatId: number,
+	newPassword: string,
+) {
+	try {
+		const response = await fetch('api/chat/setPassword', {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+			body: JSON.stringify({
+				chatId: chatId,
+				newPassword: newPassword,
+			}),
+		});
+		if (!response.ok) {
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
+		return response.json();
+	} catch (e) {
+		if (e instanceof Error && typeof e.message === 'string') {
+			console.error('Error setting password: ' + e.message);
+			throw new Error('' + e.message);
+		} else throw new Error('Something went wrongsetting password');
 	}
 }
 
@@ -146,11 +227,16 @@ export async function fetchPrivateMessages(accessToken: string) {
 			credentials: 'include',
 		});
 		console.warn('is it working?');
-		if (!response.ok) throw new Error('Could not fetch private message rooms');
+		if (!response.ok) {
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
 		return response.json();
 	} catch (e) {
-		console.error('Error fetching private message rooms: ' + e);
-		throw new Error('' + e);
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error(e.message);
+		} else
+			throw new Error('Something went wrong fetching private message rooms');
 	}
 }
 
@@ -177,11 +263,16 @@ export async function createChatPrivateMessage(
 				userId: correspondantId,
 			}),
 		});
-		if (!response.ok) throw new Error('Error creating chat');
+		if (!response.ok) {
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
 		return response.json();
 	} catch (e) {
-		console.error('Error creating private message room: ' + e);
-		throw new Error('' + e);
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error(e.message);
+		} else
+			throw new Error('Something went wrong creating private message room');
 	}
 }
 
@@ -197,11 +288,15 @@ export async function fetchMessages(chatId: number, accessToken: string) {
 			},
 			credentials: 'include',
 		});
-		if (!response.ok) throw new Error('Could not fetch messages');
+		if (!response.ok) {
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
 		return response.json();
 	} catch (e) {
-		console.error('Error fetching messages: ' + e);
-		throw new Error('' + e);
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error(e.message);
+		} else throw new Error('Something went wrong fetching messages');
 	}
 }
 
@@ -221,13 +316,14 @@ export async function sendMessageQuery(
 			body: JSON.stringify({ message: message, chatId: chatId }),
 		});
 		if (!response.ok) {
-			throw new Error('Could not send message');
+			const responseError = await response.json();
+			throw new Error(responseError.message);
 		}
-
 		// return response.json();
 	} catch (e) {
-		console.error('Error sending message: ' + e);
-		throw new Error('' + e);
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error(e.message);
+		} else throw new Error('Something went wrong sending messages');
 	}
 }
 
@@ -243,10 +339,14 @@ export async function findUserByLogin(login: string, accessToken: string) {
 			},
 			credentials: 'include',
 		});
-		if (!response.ok) throw new Error('Could not find user');
+		if (!response.ok) {
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
 		return response.json();
 	} catch (e) {
-		console.error('Could not find user: ', e);
-		throw new Error('' + e);
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error(e.message);
+		} else throw new Error('Something went wrong finding user');
 	}
 }
