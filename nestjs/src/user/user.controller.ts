@@ -4,15 +4,20 @@ import {
 	ConflictException,
 	Controller,
 	Delete,
+	FileTypeValidator,
 	Get,
 	HttpException,
 	HttpStatus,
+	MaxFileSizeValidator,
 	NotFoundException,
 	Param,
+	ParseFilePipe,
 	Put,
 	Req,
 	Res,
 	Search,
+	UploadedFile,
+	UseInterceptors,
 	ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
@@ -23,6 +28,7 @@ import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { validate } from 'class-validator';
 import { twoFactorAuthenticationCodeDto } from 'src/auth/dto/two-factor-auth-code.dto';
 import { SearchUserDto } from './dto/search-user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 export interface CustomRequest extends Request {
 	userId: number;
@@ -273,6 +279,7 @@ export class UserController {
 		}
 	}
 
+	// TODO: add DTO
 	@Delete(':login/delete')
 	async deleteFriend(
 		@Param('login') login: string,
@@ -296,5 +303,23 @@ export class UserController {
 				error: error,
 			});
 		}
+	}
+
+	@Put(':id/upload')
+	@UseInterceptors(FileInterceptor('file'))
+	async uploadAvatar(
+		@UploadedFile(
+			new ParseFilePipe({
+				validators: [
+					new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
+					new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 4 }),
+				],
+			}),
+		)
+		file: Express.Multer.File,
+		@Param() params,
+	) {
+		console.log('File: ', file);
+		// return this.userService.uploadAvatar(file, params.id);
 	}
 }
