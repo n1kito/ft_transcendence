@@ -112,7 +112,7 @@ export class GameService {
 			// that they have an opponent
 			if (this.isRoomFull(assignedRoomId)) {
 				console.log(
-					'[🛏] Room is FULL. Sending players their opponent information',
+					'[🏠] Room is FULL. Sending players their opponent information',
 				);
 				// TODO: this should actually just send them each other's information ?
 				this.server.in(assignedRoomId).emit('room-is-full');
@@ -133,21 +133,21 @@ export class GameService {
 			socket.id,
 		);
 
-		// Remove the client from the connectedClients map
-		this.connectedClients.delete(socket.id);
-
 		// Remove the client from their current room
 		const currentRoomId = this.connectedClients.get(socket.id)?.roomId;
 		if (currentRoomId && this.rooms[currentRoomId]) {
 			delete this.rooms[currentRoomId].players[socket.id];
-			console.log(`[🛏] Removing [%s] from room %s`, socket.id, currentRoomId);
+			console.log(`[🏠] Removing [%s] from room %s`, socket.id, currentRoomId);
 
 			// If the room has no players left, delete the room itself
 			if (Object.keys(this.rooms[currentRoomId].players).length === 0) {
-				console.log(`[🛏] Room ${currentRoomId} was empty, removing it !`);
+				console.log(`[🏠] Room ${currentRoomId} was empty, removing it !`);
 				delete this.rooms[currentRoomId];
 			}
 		}
+
+		// Remove the client from the connectedClients map
+		this.connectedClients.delete(socket.id);
 	}
 
 	// isUserAlreadyConnected(userId): boolean {
@@ -247,9 +247,15 @@ export class GameService {
 	*/
 
 	assignRoom(socketId: string, userId: number): string {
-		// If the server is already processing rooms, wait so we don't create
-		// race conditions
-		while (this.isProcessingRooms) {}
+		// TODO: this should be a mutex not an infinite loop, because otherwise
+		// it will make the entire server lag everytime someone is assigned a room
+		// // If the server is already processing rooms, wait so we don't create
+		// // race conditions
+		while (this.isProcessingRooms) {
+			console.log(
+				'[🏠] Waiting for the room assignment process to be unlocked !',
+			);
+		}
 
 		// If not, lock it
 		this.isProcessingRooms = true;
@@ -292,8 +298,11 @@ export class GameService {
 			this.connectedClients.get(socketId).roomId = targetRoomId;
 
 		console.log(
-			`[🛏] user #${userId} via socket [${socketId}] was assigned to room #${targetRoomId}`,
+			`[🏠] user #${userId} via socket [${socketId}] was assigned to room #${targetRoomId}`,
 		);
+
+		// Unlock room processing lock, otherwise nothing else can happen
+		this.isProcessingRooms = false;
 
 		return targetRoomId;
 	}
