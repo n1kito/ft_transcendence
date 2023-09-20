@@ -91,6 +91,20 @@ export class GameGateway
 	░▀▀▀░▀░▀░▀░▀░▀▀▀░░░▀░▀░▀▀▀░░▀░░▀▀▀░▀▀▀░▀░▀░▀▀▀
 	*/
 
+	@SubscribeMessage('player-is-ready')
+	handlePlayerIsReady(clientSocket: Socket) {
+		this.gameService.broadcastPlayerIsReady(clientSocket);
+		this.gameService.setPlayerAsReady(clientSocket);
+	}
+
+	@SubscribeMessage('player-moved')
+	handlePlayerMovement(
+		clientSocket: Socket,
+		{ direction }: { direction: 'up' | 'down' | 'immobile' },
+	) {
+		this.gameService.handlePlayerMovement(clientSocket, direction);
+	}
+
 	// // Send users their opponent's information
 	// @SubscribeMessage('request-opponent-info')
 	// async handleOpponentInfoRequest(

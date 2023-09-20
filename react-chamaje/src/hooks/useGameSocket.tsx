@@ -1,10 +1,9 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { UserContext } from '../contexts/UserContext';
-import { GameContext } from '../contexts/GameContext';
+import { GameContext, IGameState } from '../contexts/GameContext';
 import { Socket, io } from 'socket.io-client';
-import { useIsomorphicLayoutEffect } from 'framer-motion';
 import useAuth from './userAuth';
-import { GameSocket } from '../services/GameSocket';
+import type { IPlayerInformation } from '../../../shared-lib/types/game';
 
 export const useGameSocket = () => {
 	// Import necessary contexts
@@ -83,77 +82,97 @@ export const useGameSocket = () => {
 				if (gameData.socket) gameData.socket.disconnect();
 			}
 		});
+
+		gameData.socket.on('opponent-info', (information: IPlayerInformation) => {
+			socketLog(
+				`Received opponent's information: ${JSON.stringify(
+					information,
+					null,
+					4,
+				)}`,
+			);
+			updateGameData({ opponentInfo: information });
+		});
+
+		gameData.socket.on('opponent-is-ready', () => {
+			updateGameData({ player2Ready: true });
+		});
+
+		gameData.socket.on('game-has-started', () => {
+			socketLog('The game has staaaaaarted');
+			updateGameData({ gameIsPlaying: true });
+		});
+
+		// gameData.socket.on('game-state-update', (serverGameState: IGameState) => {
+		// 	socketLog('received game state update');
+		// 	updateGameData({ gameState: serverGameState });
+		// });
 	}, [gameData.socket]);
 
 	// room joining logic
 	const joinRoom = () => {
 		socketLog('Asking for a room...');
 		try {
-			// ask the server to assign us a room
-			socketRef.current?.emit('join-room', {
-				userId: userData?.id,
-				opponentId: undefined, // TODO: this should not be undefined when opened from a chat
-			});
-
-			// if the server succeeds
-			socketRef.current?.on('room-joined', (roomInfo) => {
-				socketLog(`Server put us in room ${roomInfo.id}.`);
-				// let the front know we have been assigned a room
-				updateGameData({ roomId: roomInfo.id });
-				// setPlayerInRoom(true);
-
-				// set the socket to monitor/receive opponent information
-				socketRef.current?.on(`room-is-full`, () => {
-					socketLog('Got notified that the room is full');
-					updateGameData({ roomIsFull: true, opponentIsReconnecting: false });
-				});
-				// and request that information
-				socketRef.current?.on(
-					'server-opponent-info',
-					(opponentInfo: { login: string; image: string }) => {
-						socketLog(`My opponent: ${JSON.stringify(opponentInfo, null, 2)}`);
-						socketLog('Opponent information received');
-						updateGameData({ opponentInfo: opponentInfo });
-						// setOpponentInfo(opponentInfo);
-					},
-				);
-
-				// look out for when the opponent is ready
-				socketRef.current?.on('opponent-is-ready', () => {
-					socketLog('Got news that our opponent is ready');
-					updateGameData({ player2Ready: true });
-					// setPlayer2Ready(true);
-				});
-
-				// look out for when opponent might be temporarily disconnected
-				socketRef.current?.on('opponent-was-disconnected', () => {
-					// TODO: I DO NOT RECEIVE THIS ANYMORE, WHAT IS THE FUCK
-					socketLog('Opponent was disconnected but might come back !');
-					updateGameData({
-						opponentIsReconnecting: true,
-						player1Ready: false,
-						player2Ready: false,
-						gameIsPlaying: false,
-					});
-					// setPlayer2Ready(false);
-					// setOpponentIsReconnecting(true);
-				});
-
-				// look out for when opponent might be disconnected
-				socketRef.current?.on('opponent-left', () => {
-					socketLog('Opponent left for good :(');
-					// Let's reset the game state in that case
-					// It will trigger a new room assignation and
-					// the server will make sure to find the room we're
-					// already in
-					// resetGameData();
-				});
-				// if there was an error joining a room
-				socketRef.current?.on('error-joining-room', () => {
-					socketLog('error joining room');
-					throw new Error('error joining room');
-				});
-			});
+			// // ask the server to assign us a room
+			// socketRef.current?.emit('join-room', {
+			// 	userId: userData?.id,
+			// 	opponentId: undefined, // TODO: this should not be undefined when opened from a chat
+			// });
+			// // if the server succeeds
+			// socketRef.current?.on('room-joined', (roomInfo) => {
+			// 	socketLog(`Server put us in room ${roomInfo.id}.`);
+			// 	// let the front know we have been assigned a room
+			// 	updateGameData({ roomId: roomInfo.id });
+			// 	// setPlayerInRoom(true);
+			// 	// set the socket to monitor/receive opponent information
+			// 	socketRef.current?.on(`room-is-full`, () => {
+			// 		socketLog('Got notified that the room is full');
+			// 		updateGameData({ roomIsFull: true, opponentIsReconnecting: false });
+			// 	});
+			// 	// and request that information
+			// 	socketRef.current?.on(
+			// 		'server-opponent-info',
+			// 		(opponentInfo: { login: string; image: string }) => {
+			// 			socketLog(`My opponent: ${JSON.stringify(opponentInfo, null, 2)}`);
+			// 			socketLog('Opponent information received');
+			// 			updateGameData({ opponentInfo: opponentInfo });
+			// 			// setOpponentInfo(opponentInfo);
+			// 		},
+			// 	);
+			// 	// look out for when the opponent is ready
+			// 	socketRef.current?.on('opponent-is-ready', () => {
+			// 		socketLog('Got news that our opponent is ready');
+			// 		updateGameData({ player2Ready: true });
+			// 		// setPlayer2Ready(true);
+			// 	});
+			// 	// look out for when opponent might be temporarily disconnected
+			// 	socketRef.current?.on('opponent-was-disconnected', () => {
+			// 		// TODO: I DO NOT RECEIVE THIS ANYMORE, WHAT IS THE FUCK
+			// 		socketLog('Opponent was disconnected but might come back !');
+			// 		updateGameData({
+			// 			opponentIsReconnecting: true,
+			// 			player1Ready: false,
+			// 			player2Ready: false,
+			// 			gameIsPlaying: false,
+			// 		});
+			// 		// setPlayer2Ready(false);
+			// 		// setOpponentIsReconnecting(true);
+			// 	});
+			// 	// look out for when opponent might be disconnected
+			// 	socketRef.current?.on('opponent-left', () => {
+			// 		socketLog('Opponent left for good :(');
+			// 		// Let's reset the game state in that case
+			// 		// It will trigger a new room assignation and
+			// 		// the server will make sure to find the room we're
+			// 		// already in
+			// 		// resetGameData();
+			// 	});
+			// 	// if there was an error joining a room
+			// 	socketRef.current?.on('error-joining-room', () => {
+			// 		socketLog('error joining room');
+			// 		throw new Error('error joining room');
+			// 	});
+			// });
 		} catch (error) {
 			updateGameData({
 				connectionErrorStatus: 'Could not join room: ' + error,
@@ -169,7 +188,7 @@ export const useGameSocket = () => {
 		});
 	};
 
-	const setPlayer1AsReady = () => {
+	const notifyPlayerIsReady = () => {
 		socketRef.current?.emit('player-is-ready', {
 			userId: userData.id,
 			roomId: gameData.roomId,
@@ -194,11 +213,16 @@ export const useGameSocket = () => {
 		});
 	};
 
+	const startGame = () => {
+		socketRef.current?.emit('game started');
+	};
+
 	return {
 		socketRef,
 		broadcastPlayerPosition,
 		joinRoom,
 		requestOpponentInfo,
-		setPlayer1AsReady,
+		setPlayer1AsReady: notifyPlayerIsReady,
+		startGame,
 	};
 };

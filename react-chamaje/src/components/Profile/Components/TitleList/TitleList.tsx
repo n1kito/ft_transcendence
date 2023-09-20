@@ -4,7 +4,7 @@ import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import Title from '../Title/Title';
 import burgerIcon from './icons/burger-icon.svg';
 import AchievementBadge from '../AchievementBadge/AchievementBadge';
-import { IUserData } from '../../../../../../shared-lib/types/user-types';
+import { IUserData } from '../../../../../../shared-lib/types/user';
 
 interface ITitleListProps {
 	profileData: IUserData;

@@ -1,7 +1,8 @@
+import { IPlayerState } from '../../../../../../../shared-lib/types/game';
 import { GameEntity } from './Shared';
 
 export default class Paddle extends GameEntity {
-	private speed: number = 15;
+	private speed: number = 25;
 	private direction: number;
 
 	constructor(x: number, y: number, width: number, height: number) {
@@ -27,5 +28,12 @@ export default class Paddle extends GameEntity {
 		if (direction === 'up') this.direction = -1;
 		else if (direction === 'down') this.direction = 1;
 		else this.direction = 0;
+	}
+
+	serverUpdate(playerState: IPlayerState) {
+		this.x = playerState.x;
+		this.y = playerState.y;
+		this.width = playerState.width;
+		this.height = playerState.height;
 	}
 }

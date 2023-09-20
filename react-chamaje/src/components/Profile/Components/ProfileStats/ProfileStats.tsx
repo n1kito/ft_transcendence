@@ -3,7 +3,7 @@ import './ProfileStats.css';
 import StatBadge from '../StatBadge/StatBadge';
 import Title from '../Title/Title';
 import { UserContext } from '../../../../contexts/UserContext';
-import { IUserData } from '../../../../../../shared-lib/types/user-types';
+import { IUserData } from '../../../../../../shared-lib/types/user';
 import Tooltip from '../../../Shared/Tooltip/Tooltip';
 
 interface ProfileStatsProps {

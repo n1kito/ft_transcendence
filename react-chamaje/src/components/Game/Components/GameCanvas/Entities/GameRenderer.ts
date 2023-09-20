@@ -2,7 +2,7 @@ import { Socket } from 'socket.io-client';
 import { GameLogic } from './GameLogic';
 
 export class GameRenderer {
-	private gameLogic: GameLogic;
+	gameLogic: GameLogic;
 
 	private socket: Socket | null;
 
@@ -14,6 +14,10 @@ export class GameRenderer {
 	private animationFrameId: number | undefined;
 
 	private keysPressed = {};
+
+	lastUpdate: number;
+	accumulator: number = 0;
+	fixedDeltaTime: number = 1000 / 60; // 60 updates per second
 
 	constructor(
 		socket: React.MutableRefObject<Socket | null>,
@@ -39,6 +43,8 @@ export class GameRenderer {
 
 		// Setup event listeners on canvas
 		this.setupEventListeners();
+
+		this.lastUpdate = performance.now();
 	}
 
 	/*
@@ -49,7 +55,16 @@ export class GameRenderer {
 
 	// calls all the functions needed to update the game state
 	gameLoop = (): void => {
-		this.gameLogic.updateGameState();
+		const currentTimestamp = performance.now();
+		const timeSinceLastUpdate = currentTimestamp - this.lastUpdate;
+		this.lastUpdate = currentTimestamp;
+		this.accumulator += timeSinceLastUpdate;
+
+		while (this.accumulator >= this.fixedDeltaTime) {
+			this.gameLogic.updateGameState();
+			this.accumulator -= this.fixedDeltaTime;
+		}
+
 		this.draw();
 		this.animationFrameId = requestAnimationFrame(this.gameLoop);
 	};
@@ -95,33 +110,37 @@ export class GameRenderer {
 		}
 		// If a direction was registered
 		if (direction) {
-			this.gameLogic.inputSequenceNumber++; //increase the sequence number of the input
-			this.gameLogic.broadcastPlayerPosition(
-				direction,
-				this.gameLogic.inputSequenceNumber,
-			); // send it to the server
+			this.socket?.emit('player-moved', { direction: direction });
+			// this.gameLogic.inputSequenceNumber++; //increase the sequence number of the input
+			// this.gameLogic.broadcastPlayerPosition(
+			// 	direction,
+			// 	this.gameLogic.inputSequenceNumber,
+			// ); // send it to the server
 			this.gameLogic.paddlePlayer.setDirection(direction); // update the player's direction
-			// add the action to the array of actions that have not yet been confirmed by the server
-			this.gameLogic.unconfirmedInputs.push({
-				sequenceNumber: this.gameLogic.inputSequenceNumber,
-				direction: direction,
-			});
+			// // add the action to the array of actions that have not yet been confirmed by the server
+			// this.gameLogic.unconfirmedInputs.push({
+			// 	sequenceNumber: this.gameLogic.inputSequenceNumber,
+			// 	direction: direction,
+			// });
 		}
 	};
 
 	handleKeyRelease = (event: KeyboardEvent): void => {
 		if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-			// this.broadcastPlayerPosition('immobile');
-			this.gameLogic.inputSequenceNumber++;
-			this.gameLogic.broadcastPlayerPosition(
-				'immobile',
-				this.gameLogic.inputSequenceNumber,
-			);
+			// // this.broadcastPlayerPosition('immobile');
+			// this.gameLogic.inputSequenceNumber++;
+			// this.gameLogic.broadcastPlayerPosition(
+			// 	'immobile',
+			// 	this.gameLogic.inputSequenceNumber,
+			// );
 			this.gameLogic.paddlePlayer.setDirection('immobile');
-			this.gameLogic.unconfirmedInputs.push({
-				sequenceNumber: this.gameLogic.inputSequenceNumber,
-				direction: 'immobile',
-			});
+			// this.gameLogic.unconfirmedInputs.push({
+			// 	sequenceNumber: this.gameLogic.inputSequenceNumber,
+			// 	direction: 'immobile',
+			// });
+
+			// Send the new direction to the backend
+			this.socket?.emit('player-moved', { direction: 'immobile' });
 		}
 	};
 

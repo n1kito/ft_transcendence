@@ -1,5 +1,6 @@
 import { GameEntity } from './Shared';
 import Paddle from './Paddle';
+import { IBallState } from '../../../../../../../shared-lib/types/game';
 
 export default class Ball extends GameEntity {
 	private BASE_SPEED: number = 6;
@@ -128,5 +129,12 @@ export default class Ball extends GameEntity {
 		const speedIncrease = speedMultiplier * (this.MAX_SPEED - this.speed);
 		this.speed += speedIncrease;
 		if (this.speed > this.MAX_SPEED) this.speed = this.MAX_SPEED;
+	}
+
+	serverUpdate(newState: IBallState) {
+		this.x = newState.x;
+		this.y = newState.y;
+		this.width = newState.width;
+		this.height = newState.height;
 	}
 }

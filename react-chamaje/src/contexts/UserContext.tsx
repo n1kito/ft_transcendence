@@ -5,7 +5,7 @@ import React, {
 	useEffect,
 	useState,
 } from 'react';
-import { IUserData, IMatchHistory } from '../../../shared-lib/types/user-types';
+import { IUserData, IMatchHistory } from '../../../shared-lib/types/user';
 
 // export interface IMatchHistory {
 // 	player1Login: string;

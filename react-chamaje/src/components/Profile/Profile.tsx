@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import './Profile.css';
 import ProfilePicBadge from './Components/ProfilePicBadge/ProfilePicBadge';
 import { UserContext } from '../../contexts/UserContext';
-import { IUserData } from '../../../../shared-lib/types/user-types';
+import { IUserData } from '../../../../shared-lib/types/user';
 import placeholderImage from '../../images/placeholder-image.png';
 import Title from './Components/Title/Title';
 // import ShadowWrapper from '../Shared/ShadowWrapper/ShadowWrapper';

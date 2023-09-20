@@ -58,7 +58,7 @@ const Game: React.FC<IGameProps> = ({
 		broadcastPlayerPosition,
 		joinRoom,
 		requestOpponentInfo,
-		setPlayer1AsReady,
+		setPlayer1AsReady: notifyPlayerIsReady,
 	} = useGameSocket();
 	// Create a ref to out context's socket
 
@@ -104,13 +104,22 @@ const Game: React.FC<IGameProps> = ({
 
 	// notify the server when player is ready
 	useEffect(() => {
-		if (gameData.player1Ready) setPlayer1AsReady();
+		if (gameData.player1Ready) notifyPlayerIsReady();
 	}, [gameData.player1Ready]);
 
 	useEffect(() => {
-		if (gameData.player1Ready && gameData.player2Ready)
-			updateGameData({ gameIsPlaying: true });
-	}, [gameData.player1Ready, gameData.player2Ready]);
+		// Everytime the server sends a state update, we need to apply it
+		console.log('Game state changed, we need update it !');
+		// TODO: this seems a bit annoying, since the logic is what really interacts
+		// with react events, maybe the renderer should be instantiated in the logic
+		// and not the other way arround ?
+		gameInstance.current?.gameLogic.gameStateServerUpdate(gameData.gameState);
+	}, [gameData.gameState]);
+
+	// useEffect(() => {
+	// 	if (gameData.player1Ready && gameData.player2Ready)
+	// 		updateGameData({ gameIsPlaying: true });
+	// }, [gameData.player1Ready, gameData.player2Ready]);
 
 	//
 

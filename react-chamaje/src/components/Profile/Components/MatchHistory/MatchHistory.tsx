@@ -9,7 +9,7 @@ import { profile } from 'console';
 import {
 	IUserData,
 	IMatchHistory,
-} from '../../../../../../shared-lib/types/user-types';
+} from '../../../../../../shared-lib/types/user';
 
 interface IMatchHistoryProps {
 	profileData: IUserData;

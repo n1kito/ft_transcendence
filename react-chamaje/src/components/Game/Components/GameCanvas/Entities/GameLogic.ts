@@ -1,6 +1,7 @@
 import Paddle from './Paddle';
 import Ball from './Ball';
-import { ICurrentGameState } from '../../../../../../shared-lib/types/game-types';
+import { IGameState } from '../../../../../../../shared-lib/types/game';
+// import { ICurrentGameState } from '@sharedTypes/game';
 
 export class GameLogic {
 	private TICK_RATE = 1000 / 60; // we want 60 updates per second (in milliseconds, so we can use the value with Date.now()
@@ -40,7 +41,7 @@ export class GameLogic {
 		// Init default values
 		const paddleWidth = 5;
 		const paddleHeight = canvasSize.height * 0.2;
-		const ballSize = 15;
+		const ballSize = 10;
 		this.broadcastPlayerPosition = broadcastPlayerPosition;
 
 		// Create player1 paddle
@@ -55,7 +56,7 @@ export class GameLogic {
 			this.canvasSize.width - paddleWidth,
 			0,
 			paddleWidth,
-			this.canvasSize.height,
+			paddleHeight,
 		);
 		// Create ball
 		this.ball = new Ball(
@@ -77,6 +78,20 @@ export class GameLogic {
 		// this.log(`Scores: ${this.playerScore}/${this.opponentScore}`);
 		// }
 		this.updateElementsState();
+	}
+
+	gameStateServerUpdate(newState: IGameState | undefined) {
+		if (!newState) return;
+		// Update the player positions
+		this.paddlePlayer.serverUpdate(newState.player1);
+		this.paddleOpponent.serverUpdate(newState.player2);
+
+		// Update the player scores
+		this.playerScore = newState.player1.score;
+		this.opponentScore = newState.player2.score;
+
+		// Update the ball
+		this.ball.serverUpdate(newState.ball);
 	}
 
 	updateElementsState(): void {

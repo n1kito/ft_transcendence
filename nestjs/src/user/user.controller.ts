@@ -17,7 +17,7 @@ import { Prisma, PrismaClient, User } from '@prisma/client';
 import { Request, Response } from 'express';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
-import { IUserData, IMatchHistory } from 'shared-lib/types/user-types';
+import { IUserData, IMatchHistory } from 'shared-lib/types/user';
 
 export interface CustomRequest extends Request {
 	userId: number;

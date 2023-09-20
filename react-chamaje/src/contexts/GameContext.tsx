@@ -6,10 +6,28 @@ import React, {
 	useState,
 } from 'react';
 import { Socket } from 'socket.io-client';
+import { IPlayerInformation } from '../../../shared-lib/types/game';
 
-interface IOpponentInfoProps {
-	login: string;
-	image: string;
+interface IPlayerState {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+	score: number;
+}
+interface IBallState {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+}
+interface IGeneralAssetsState {}
+
+export interface IGameState {
+	player1: IPlayerState;
+	player2: IPlayerState;
+	ball: IBallState;
+	// general: IGeneralAssetsState;
 }
 
 export interface IGameDataProps {
@@ -18,12 +36,12 @@ export interface IGameDataProps {
 	gameIsPlaying: boolean;
 	player1Ready: boolean;
 	player2Ready: boolean;
-	roomIsFull: boolean;
 	roomId: string | undefined;
 	userWonGame: boolean;
 	userLostGame: boolean;
-	opponentInfo: IOpponentInfoProps | undefined;
+	opponentInfo: IPlayerInformation | undefined;
 	opponentIsReconnecting: boolean;
+	gameState: IGameState | undefined;
 	// Connection information
 	connectedToServer: boolean;
 	connectionErrorStatus: string | null;
@@ -37,12 +55,12 @@ const defaultGameState: IGameDataProps = {
 	gameIsPlaying: false,
 	player1Ready: false,
 	player2Ready: false,
-	roomIsFull: false,
 	roomId: undefined,
 	userWonGame: false,
 	userLostGame: false,
 	opponentInfo: undefined,
 	opponentIsReconnecting: false,
+	gameState: undefined,
 	// Connection information
 	connectedToServer: false,
 	connectionErrorStatus: null,

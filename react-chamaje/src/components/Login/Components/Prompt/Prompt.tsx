@@ -6,12 +6,14 @@ interface PromptProps {
 	instruction?: string;
 	type?: string;
 	redirUrl?: string;
+	activePrompt?: boolean;
 }
 
 const Prompt: React.FC<PromptProps> = ({
 	instruction = 'instruction',
 	type = 'input',
 	redirUrl = '',
+	activePrompt = true,
 }) => {
 	const labelWidth = instruction.length * 0.5;
 
@@ -45,7 +47,7 @@ const Prompt: React.FC<PromptProps> = ({
 						strings: instruction,
 						autoStart: true,
 						loop: false,
-						cursor: '',
+						cursor: `${activePrompt ? '|' : ''}`,
 						delay: 20,
 					}}
 				/>

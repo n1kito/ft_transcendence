@@ -17,7 +17,7 @@ import { CustomRequest, UserWithRelations } from './user.controller';
 import { Prisma, User, gameSession } from '@prisma/client';
 import { plainToClass } from 'class-transformer';
 // import { IMatchHistory } from 'shared-types';
-import { IMatchHistory } from 'shared-lib/types/user-types';
+import { IMatchHistory } from 'shared-lib/types/user';
 
 //  custom exception class to store an array of errors each containing
 // `statusCode` `field` and `message` properties.
