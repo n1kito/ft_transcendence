@@ -109,7 +109,6 @@ const ProfileSettings: React.FC = () => {
 				setUserData(updatedUserData);
 			}
 			const responseData = await response.clone().json();
-			console.log(responseData);
 			if (response.status === 409 || response.status === 400) {
 				responseData.errors.forEach((error: any) => {
 					if (error.field === 'login') {

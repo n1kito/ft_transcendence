@@ -66,3 +66,11 @@
 	flex-wrap: nowrap;
 	align-items: center;
 }
+
+.select-file {
+	font-family: 'Roboto Mono', monospace;
+}
+
+.change-avatar-file {
+	font-family: 'Roboto Mono', monospace;
+}

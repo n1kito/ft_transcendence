@@ -16,6 +16,8 @@ import {
 	Req,
 	Res,
 	Search,
+	StreamableFile,
+	UnauthorizedException,
 	UploadedFile,
 	UseInterceptors,
 	ValidationPipe,
@@ -29,6 +31,7 @@ import { validate } from 'class-validator';
 import { twoFactorAuthenticationCodeDto } from 'src/auth/dto/two-factor-auth-code.dto';
 import { SearchUserDto } from './dto/search-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 export interface CustomRequest extends Request {
 	userId: number;
@@ -253,7 +256,6 @@ export class UserController {
 				return response.status(400).json({ message: 'Validation failed' });
 			}
 
-			// const loginn = JSON.stringify(login);
 			const userId = this.userService.authenticateUser(request);
 
 			// retrieve friend's user id
@@ -290,13 +292,13 @@ export class UserController {
 			const userId = this.userService.authenticateUser(request);
 
 			// retrieve friend's user id
-			const friend = await this.prisma.user.findUnique({
+			const plop = await this.prisma.user.findUnique({
 				where: { login: login },
 			});
 
-			if (!friend) response.status(404).json({ message: 'Friend not found' });
+			if (!plop) response.status(404).json({ message: 'Friend not found' });
 
-			await this.userService.deleteFriend(userId, friend.id);
+			await this.userService.deleteFriend(userId, plop.id);
 			response.status(200).json({ message: 'Friend deleted successfully' });
 		} catch (error) {
 			return response.status(500).json({
@@ -306,8 +308,33 @@ export class UserController {
 	}
 
 	@Put('upload')
-	@UseInterceptors(FileInterceptor('file', { dest: './images' }))
+	@UseInterceptors(
+		FileInterceptor('file', {
+			storage: diskStorage({
+				destination: './images',
+				filename: (request: CustomRequest, file, cb) => {
+					// /api/images/userId.jpeg
+
+					// extract user id
+					const userId = request.userId;
+
+					// extract mimetype line from file's data and split
+					const parts = file.mimetype.split('/');
+					// if not only one '/' is found throw error
+					if (parts.length !== 2) throw new Error('Invalid mimetype format');
+					// get part after '/'
+					const extensionName = parts[1];
+					// this should be the extension name
+					const newFilename = `${userId}_${Date.now()}.${extensionName}`;
+					// callback with the newfilename as argument
+					cb(null, newFilename);
+				},
+			}),
+		}),
+	)
 	async uploadAvatar(
+		@Req() request: CustomRequest,
+		@Res() response: Response,
 		@UploadedFile(
 			new ParseFilePipe({
 				validators: [
@@ -317,9 +344,19 @@ export class UserController {
 			}),
 		)
 		file: Express.Multer.File,
-		@Param() params,
 	) {
-		console.log('File: ', file);
-		// return this.userService.uploadAvatar(file, params.id);
+		try {
+			const userId = this.userService.authenticateUser(request);
+			if (!userId)
+				return response.status(401).json({ message: 'User is unauthorized' });
+
+			let imagePath = await this.userService.uploadAvatar(file, userId);
+			console.log('🍧 image path:', imagePath);
+			if (imagePath) {
+				return response.status(200).json({ image: imagePath });
+			}
+		} catch (error) {
+			response.status(400).json({ message: error });
+		}
 	}
 }

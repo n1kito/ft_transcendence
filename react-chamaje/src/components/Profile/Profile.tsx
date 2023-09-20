@@ -28,6 +28,7 @@ import TwoFactorAuthentication from './Components/TwoFactorAuthentication/TwoFac
 import InputField from './Components/InputField/InputField';
 import { useNavigate } from 'react-router-dom';
 import { deleteFriend } from 'src/utils/FriendsQueries';
+import { fetchUserData } from 'src/utils/UserQueries';
 
 // TODO: find a way to make the shaddow wrapper widht's 100% so if fills the sidebar
 export interface ProfileProps {
@@ -72,6 +73,7 @@ const Profile: React.FC<ProfileProps> = ({
 	const [deleteProfileWindowisOpen, setDeleteProfileWindowisOpen] =
 		useState(false);
 	const navigate = useNavigate();
+	const [changedAvatar, setChangedAvatar] = useState(false);
 
 	// TODO: fetch profile data should be a separate service so we don't rewrite the function in multiple components
 
@@ -247,6 +249,7 @@ const Profile: React.FC<ProfileProps> = ({
 		event.preventDefault();
 		console.log(selectedFile);
 	};
+
 	const uploadNewAvatar = async () => {
 		console.log('📸📸📸 About to upload new avatar!');
 		try {
@@ -263,6 +266,16 @@ const Profile: React.FC<ProfileProps> = ({
 			});
 			if (response.ok) {
 				console.log('avatar ok!');
+				const data = await response.json();
+				console.log(data.image, userData);
+
+				const updatedUserData = {
+					...userData,
+					image: data.image,
+				};
+				// setUserData(updatedUserData);
+				setChangedAvatar(true);
+				setSettingsPanelIsOpen(false);
 			} else if (response.status === 500) {
 				const messageError = await response.json();
 				console.error(messageError);
@@ -271,6 +284,21 @@ const Profile: React.FC<ProfileProps> = ({
 			console.error(error);
 		}
 	};
+
+	useEffect(() => {
+		if (changedAvatar) {
+			fetchUserData(accessToken)
+				.then(async (data) => {
+					console.log('🍧🍧🍧 updated avatar: ', data);
+					// data.image = '/api/images/chucky.jpg';
+					setUserData(data);
+					setProfileData(data);
+				})
+				.catch((error) => {
+					console.error('could not update user data:', error);
+				});
+		}
+	}, [changedAvatar]);
 
 	return (
 		<Window
@@ -363,8 +391,12 @@ const Profile: React.FC<ProfileProps> = ({
 							: `${settingsMode}`}
 					</Title>
 					{settingsMode === 'Change Avatar' && (
-						<form onSubmit={handleSubmit}>
-							<input type="file" onChange={handleFileInput} />
+						<form className="select-file" onSubmit={handleSubmit}>
+							<input
+								className="change-avatar-file"
+								type="file"
+								onChange={handleFileInput}
+							/>
 							<Button onClick={uploadNewAvatar}>upload</Button>
 						</form>
 					)}

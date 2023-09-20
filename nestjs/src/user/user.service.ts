@@ -16,6 +16,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CustomRequest } from './user.controller';
 import { Prisma } from '@prisma/client';
 import { plainToClass } from 'class-transformer';
+import * as fs from 'fs';
+
 // import { IMatchHistory } from 'shared-types';
 
 interface IMatchHistory {
@@ -352,22 +354,45 @@ export class UserService {
 				},
 			});
 		} catch (error) {
-			console.error('----------------------------------', error);
-			throw new Error('could not add friend: internal error');
+			throw new Error('could not add friend');
 		}
 	}
 
 	async uploadAvatar(
 		avatar: Express.Multer.File,
 		userId: number,
-	): Promise<any> {
-		const user = await this.prisma.findUserById(userId);
+	): Promise<string> {
+		let user = await this.prisma.findUserById(userId);
 		if (!user) {
 			throw 'User not found';
 		}
-		const formData = new FormData();
-		formData.append('image', avatar.buffer.toString('base64'));
-		console.log('--------form data:', formData);
-		// return imageData;
+
+		// TODO: seems useless
+		// delete old avatar
+		// const filePath = './images/brocoli.jpeg';
+
+		// fs.unlink(filePath, (err) => {
+		// 	if (err) {
+		// 		console.error('Error deleting file:', err);
+		// 	} else {
+		// 		console.log('File deleted successfully');
+		// 	}
+		// });
+		try {
+			// set the avatar's path
+			let imagePath = `/api/images/${avatar.filename}`;
+			// update image path in database
+			user = await this.prisma.user.update({
+				where: {
+					id: userId,
+				},
+				data: {
+					image: imagePath,
+				},
+			});
+			return imagePath;
+		} catch (error) {
+			throw new Error('Could not update avatar');
+		}
 	}
 }

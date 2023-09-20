@@ -80,6 +80,7 @@ const Desktop = () => {
 					...data,
 					chatSocket: mySocket,
 				};
+				console.log('🍧 data:', data);
 				// Set the user data in the context
 				setUserData(updatedData);
 				setIsTwoFAEnabled(data.isTwoFactorAuthenticationEnabled);
