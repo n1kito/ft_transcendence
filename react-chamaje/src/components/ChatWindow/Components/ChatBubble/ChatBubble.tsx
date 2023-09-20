@@ -26,7 +26,7 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 	const [profileIsOpen, setProfileIsOpen] = useState(false);
 
 	const openFriendProfile = () => {
-		setProfileIsOpen(true)
+		setProfileIsOpen(true);
 		window.alert(`This should open ${sender}'s profile`);
 	};
 

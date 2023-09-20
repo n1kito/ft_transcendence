@@ -185,13 +185,21 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					console.log('response data', data);
 					// if the user is found, create the PM and update the PM list
 					if (!userData) {
-						console.log('userdata was not set sorrrrrry');
 						return;
 					}
 					createChatPrivateMessage(data.id, userData.id, accessToken)
-						.then(() => {
+						.then((room) => {
 							setSearchUserSuccess('Chat created successfully!');
-
+							const updatedPrivateMessages = privateMessages.map((current) => {
+								return current;
+							});
+							console.log('room', room);
+							updatedPrivateMessages.push({
+								chatId: room.chatId,
+								participants: [userData?.id ? userData.id : 0, data.id],
+								name: searchedLogin,
+							});
+							setPrivateMessages(updatedPrivateMessages);
 							// fetchPrivateMessages(accessToken)
 							// 	.then((data) => {
 							// 		setPrivateMessages(data);

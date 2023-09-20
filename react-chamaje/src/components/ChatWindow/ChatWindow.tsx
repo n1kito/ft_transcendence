@@ -150,11 +150,15 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	const leavePM = () => {
 		leaveChat(accessToken, chatId)
 			.then(async () => {
-				fetchPrivateMessages(accessToken)
-					.then((data) => setChatsList(data))
-					.catch((e) => {
-						console.error('Error fetching private messages: ', e);
-					});
+				// fetchPrivateMessages(accessToken)
+				// 	.then((data) => setChatsList(data))
+				// 	.catch((e) => {
+				// 		console.error('Error fetching private messages: ', e);
+				// 	});
+				const updatedChannelsList = chatsList.filter(
+					(privateMessage) => privateMessage.chatId !== chatId,
+				);
+				setChatsList(updatedChannelsList);
 				setChatWindowIsOpen(false);
 			})
 			.catch((e) => {
