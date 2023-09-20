@@ -7,7 +7,10 @@ export async function fetchFriends(accessToken: string) {
 			},
 			credentials: 'include',
 		});
-
+		if (!response.ok) {
+			const data = await response.json();
+			throw new Error(data.message);
+		}
 		if (response.ok) {
 			const data = await response.json();
 			return data.friends;

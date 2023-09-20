@@ -55,7 +55,7 @@ const Profile: React.FC<ProfileProps> = ({
 	setShowFriendProfile,
 }) => {
 	const { accessToken, isTwoFAEnabled, setIsTwoFAEnabled, logOut } = useAuth();
-	const { userData, setUserData } = useContext(UserContext);
+	const { userData, updateUserData } = useContext(UserContext);
 	const [profileData, setProfileData] = useState<UserData | null>(null); // Declare profileData state
 	const isOwnProfile = login == userData?.login;
 
@@ -273,7 +273,8 @@ const Profile: React.FC<ProfileProps> = ({
 					...userData,
 					image: data.image,
 				};
-				// setUserData(updatedUserData);
+				updateUserData(updatedUserData);
+				setProfileData(updatedUserData);
 				setChangedAvatar(true);
 				setSettingsPanelIsOpen(false);
 			} else if (response.status === 500) {
@@ -284,21 +285,6 @@ const Profile: React.FC<ProfileProps> = ({
 			console.error(error);
 		}
 	};
-
-	useEffect(() => {
-		if (changedAvatar) {
-			fetchUserData(accessToken)
-				.then(async (data) => {
-					console.log('🍧🍧🍧 updated avatar: ', data);
-					// data.image = '/api/images/chucky.jpg';
-					setUserData(data);
-					setProfileData(data);
-				})
-				.catch((error) => {
-					console.error('could not update user data:', error);
-				});
-		}
-	}, [changedAvatar]);
 
 	return (
 		<Window
@@ -397,7 +383,12 @@ const Profile: React.FC<ProfileProps> = ({
 								type="file"
 								onChange={handleFileInput}
 							/>
-							<Button onClick={uploadNewAvatar}>upload</Button>
+							<Button
+								onClick={uploadNewAvatar}
+								disabled={selectedFile ? false : true}
+							>
+								upload
+							</Button>
 						</form>
 					)}
 					{settingsMode === 'Two-Factor Authentication' && (

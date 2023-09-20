@@ -38,7 +38,7 @@ let nbFriendsOnline = 0;
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
 	let iconId = 0;
-	const { userData, setUserData } = useContext(UserContext);
+	const { userData, updateUserData, resetUserData } = useContext(UserContext);
 	const [openFriendsWindow, setFriendsWindowIsOpen] = useState(false);
 	const [openProfileWindow, setProfileWindowIsOpen] = useState(false);
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
@@ -82,7 +82,7 @@ const Desktop = () => {
 				};
 				console.log('🍧 data:', data);
 				// Set the user data in the context
-				setUserData(updatedData);
+				updateUserData(updatedData);
 				setIsTwoFAEnabled(data.isTwoFactorAuthenticationEnabled);
 			} else {
 				logOut();
@@ -96,7 +96,7 @@ const Desktop = () => {
 		return () => {
 			userData?.chatSocket?.endConnection();
 			// when unmounting desktop component, reset userData
-			setUserData(null);
+			resetUserData();
 		};
 	}, []);
 
@@ -109,7 +109,7 @@ const Desktop = () => {
 
 	const handleTabClosing = () => {
 		userData?.chatSocket?.endConnection();
-		setUserData(null);
+		resetUserData();
 	};
 
 	/* ********************************************************************* */
@@ -224,8 +224,8 @@ const Desktop = () => {
 			setFriends(updatedFriends);
 			userData?.chatSocket?.sendServerConnection();
 		};
-		if (showFriendProfile === false) fetchData();
-		fetchData();
+		if (isAuthentificated && showFriendProfile === false) fetchData();
+		// fetchData();
 		return () => {};
 	}, [showFriendProfile]);
 

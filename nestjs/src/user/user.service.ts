@@ -367,17 +367,14 @@ export class UserService {
 			throw 'User not found';
 		}
 
-		// TODO: seems useless
-		// delete old avatar
-		// const filePath = './images/brocoli.jpeg';
+		// delete old avatar in ./images
+		// /api/images/7_1695226622661.jpeg
+		// ./images/brocoli.jpeg
 
-		// fs.unlink(filePath, (err) => {
-		// 	if (err) {
-		// 		console.error('Error deleting file:', err);
-		// 	} else {
-		// 		console.log('File deleted successfully');
-		// 	}
-		// });
+		// retrieve avatar name in database
+		const avatarName = user.image.substring(user.image.indexOf('images'));
+		// append it to get filepath
+		const filePath = `./${avatarName}`;
 		try {
 			// set the avatar's path
 			let imagePath = `/api/images/${avatar.filename}`;
@@ -389,6 +386,10 @@ export class UserService {
 				data: {
 					image: imagePath,
 				},
+			});
+			// delete file
+			fs.unlink(filePath, (error) => {
+				if (error) throw error;
 			});
 			return imagePath;
 		} catch (error) {

@@ -17,7 +17,7 @@ type ValidationError = {
 
 const ProfileSettings: React.FC = () => {
 	// Access userData from the UserContext
-	const { userData, setUserData } = useContext(UserContext);
+	const { userData, updateUserData } = useContext(UserContext);
 	const { accessToken } = useAuth();
 
 	// States to hold username and email values
@@ -101,12 +101,12 @@ const ProfileSettings: React.FC = () => {
 					email: email,
 					id: userData?.id || undefined,
 					image: userData?.image || '',
-					friends: userData?.friends || [],
+					// friends: userData?.friends || [],
 					chatSocket: userData?.chatSocket || null,
 					// winRate: userData?.winRate || 0,
 					// gamesCount: userData?.gamesCount || 0,
 				};
-				setUserData(updatedUserData);
+				updateUserData(updatedUserData);
 			}
 			const responseData = await response.clone().json();
 			if (response.status === 409 || response.status === 400) {

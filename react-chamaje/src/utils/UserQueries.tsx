@@ -13,21 +13,6 @@ export async function fetchUserData(accessToken: string) {
 			throw new Error(data.message);
 		}
 		return response.json();
-
-		// if (response.ok) {
-		// 	const data = await response.json();
-		// 	const mySocket = new WebSocketService(accessToken, data.id);
-		// 	const updatedData = {
-		// 		...data,
-		// 		chatSocket: mySocket,
-		// 	};
-		// 	console.log('🍧 data:', data);
-		// 	// Set the user data in the context
-		// 	setUserData(updatedData);
-		// 	setIsTwoFAEnabled(data.isTwoFactorAuthenticationEnabled);
-		// } else {
-		// 	logOut();
-		// }
 	} catch (error) {
 		console.log('Error: ', error);
 	}

@@ -30,7 +30,7 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 	onBadgeClick,
 	setFriends,
 }) => {
-	const { userData, setUserData } = useContext(UserContext);
+	const { userData, updateUserData } = useContext(UserContext);
 	const { accessToken } = useAuth();
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [searchedLogin, setSearchedLogin] = useState('');
