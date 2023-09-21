@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { UserContext } from '../contexts/UserContext';
-import { GameContext, IGameState } from '../contexts/GameContext';
+import { GameContext } from '../contexts/GameContext';
+import { IGameState } from '../../../shared-lib/types/game';
 import { Socket, io } from 'socket.io-client';
 import useAuth from './userAuth';
 import type { IPlayerInformation } from '../../../shared-lib/types/game';
@@ -103,10 +104,10 @@ export const useGameSocket = () => {
 			updateGameData({ gameIsPlaying: true });
 		});
 
-		// gameData.socket.on('game-state-update', (serverGameState: IGameState) => {
-		// 	socketLog('received game state update');
-		// 	updateGameData({ gameState: serverGameState });
-		// });
+		gameData.socket.on('game-state-update', (serverGameState: IGameState) => {
+			// socketLog('received game state update');
+			updateGameData({ gameState: serverGameState });
+		});
 	}, [gameData.socket]);
 
 	// room joining logic
@@ -200,7 +201,7 @@ export const useGameSocket = () => {
 		inputSequenceNumber: number,
 	) => {
 		// socketLog(`sending paddle movement: ${direction}`);
-		socketRef.current?.emit('paddle-movement', {
+		socketRef.current?.emit('player-moved', {
 			playerNumber: userData?.id,
 			direction: direction,
 			inputSequenceNumber: inputSequenceNumber,

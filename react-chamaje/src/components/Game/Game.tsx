@@ -77,15 +77,15 @@ const Game: React.FC<IGameProps> = ({
 		}
 
 		return () => {
-			gameInstance.current?.cancelGameLoop();
+			gameInstance.current?.stopGame();
 			gameInstance.current?.removeEventListeners();
 			eraseGameData(); // TODO: this does not seem to log shit
 		};
 	}, []);
 
 	useEffect(() => {
-		if (gameData.gameIsPlaying) gameInstance.current?.gameLoop();
-		else gameInstance.current?.cancelGameLoop();
+		if (gameData.gameIsPlaying) gameInstance.current?.startGame();
+		else gameInstance.current?.stopGame();
 	}, [gameData.gameIsPlaying]);
 
 	// // If we're connected to the socket and don't have a room, ask for one
@@ -109,7 +109,7 @@ const Game: React.FC<IGameProps> = ({
 
 	useEffect(() => {
 		// Everytime the server sends a state update, we need to apply it
-		console.log('Game state changed, we need update it !');
+		// console.log('Game state changed, we need update it !');
 		// TODO: this seems a bit annoying, since the logic is what really interacts
 		// with react events, maybe the renderer should be instantiated in the logic
 		// and not the other way arround ?

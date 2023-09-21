@@ -1,5 +1,6 @@
 import { Socket } from 'socket.io-client';
-import { GameLogic } from './GameLogic';
+import { GameLogic } from './ClientGameLogic';
+import { IPlayerMovementPayload } from '../../../../../../../shared-lib/types/game';
 
 export class GameRenderer {
 	gameLogic: GameLogic;
@@ -13,11 +14,10 @@ export class GameRenderer {
 
 	private animationFrameId: number | undefined;
 
-	private keysPressed = {};
+	private playerPositionBroadcastInterval: NodeJS.Timer | undefined;
 
-	lastUpdate: number;
-	accumulator: number = 0;
-	fixedDeltaTime: number = 1000 / 60; // 60 updates per second
+	private previousFrameTimeStamp: number = 0;
+	private timeBetweenTwoFrames: number = 0;
 
 	constructor(
 		socket: React.MutableRefObject<Socket | null>,
@@ -43,8 +43,6 @@ export class GameRenderer {
 
 		// Setup event listeners on canvas
 		this.setupEventListeners();
-
-		this.lastUpdate = performance.now();
 	}
 
 	/*
@@ -53,18 +51,33 @@ export class GameRenderer {
 	░▀▀▀░▀░▀░▀░▀░▀▀▀░░░▀▀▀░▀▀▀░▀▀▀░▀░░
 	*/
 
+	startGame = (): void => {
+		this.startBroadcastingToServer();
+		this.animationFrameId = requestAnimationFrame(this.gameLoop);
+	};
+
+	stopGame = (): void => {
+		this.stopBroadcastingToServer();
+		this.cancelGameLoop();
+	};
+
 	// calls all the functions needed to update the game state
-	gameLoop = (): void => {
-		const currentTimestamp = performance.now();
-		const timeSinceLastUpdate = currentTimestamp - this.lastUpdate;
-		this.lastUpdate = currentTimestamp;
-		this.accumulator += timeSinceLastUpdate;
+	gameLoop = (currentFrameTimeStamp: number): void => {
+		// calculate how much time has passed
+		this.timeBetweenTwoFrames =
+			(currentFrameTimeStamp - this.previousFrameTimeStamp) / 1000;
+		this.previousFrameTimeStamp = currentFrameTimeStamp;
 
-		while (this.accumulator >= this.fixedDeltaTime) {
-			this.gameLogic.updateGameState();
-			this.accumulator -= this.fixedDeltaTime;
-		}
+		// // Log the current FPS
+		// const fps = Math.round(1 / this.timeBetweenTwoFrames);
+		// this.log(`${fps} FPS`);
 
+		// Limit the time between two frames to a maximum of 0.1, in case
+		// it goes too high (after switching tabs or on load for example)
+		this.timeBetweenTwoFrames = Math.min(this.timeBetweenTwoFrames, 0.1);
+
+		// Update the game state locally (Client side prediction)
+		this.gameLogic.updateElementsState(this.timeBetweenTwoFrames);
 		this.draw();
 		this.animationFrameId = requestAnimationFrame(this.gameLoop);
 	};
@@ -110,13 +123,15 @@ export class GameRenderer {
 		}
 		// If a direction was registered
 		if (direction) {
-			this.socket?.emit('player-moved', { direction: direction });
-			// this.gameLogic.inputSequenceNumber++; //increase the sequence number of the input
+			// Update the paddle's position
+			this.gameLogic.paddlePlayer.setDirection(direction);
+
+			// give an id to that state and send it to the server
+			// this.gameLogic.inputSequenceId++; //increase the sequence number of the input
 			// this.gameLogic.broadcastPlayerPosition(
 			// 	direction,
-			// 	this.gameLogic.inputSequenceNumber,
-			// ); // send it to the server
-			this.gameLogic.paddlePlayer.setDirection(direction); // update the player's direction
+			// 	this.gameLogic.inputSequenceId,
+			// );
 			// // add the action to the array of actions that have not yet been confirmed by the server
 			// this.gameLogic.unconfirmedInputs.push({
 			// 	sequenceNumber: this.gameLogic.inputSequenceNumber,
@@ -128,21 +143,48 @@ export class GameRenderer {
 	handleKeyRelease = (event: KeyboardEvent): void => {
 		if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
 			// // this.broadcastPlayerPosition('immobile');
-			// this.gameLogic.inputSequenceNumber++;
+			this.gameLogic.paddlePlayer.setDirection('immobile');
+			// this.gameLogic.inputSequenceId++;
 			// this.gameLogic.broadcastPlayerPosition(
 			// 	'immobile',
-			// 	this.gameLogic.inputSequenceNumber,
+			// 	this.gameLogic.inputSequenceId,
 			// );
-			this.gameLogic.paddlePlayer.setDirection('immobile');
 			// this.gameLogic.unconfirmedInputs.push({
 			// 	sequenceNumber: this.gameLogic.inputSequenceNumber,
 			// 	direction: 'immobile',
 			// });
 
 			// Send the new direction to the backend
-			this.socket?.emit('player-moved', { direction: 'immobile' });
+			// this.socket?.emit('player-moved', { direction: 'immobile' });
 		}
 	};
+
+	startBroadcastingToServer() {
+		if (!this.playerPositionBroadcastInterval)
+			this.playerPositionBroadcastInterval = setInterval(() => {
+				this.gameLogic.log('sharing player direction with server');
+				this.gameLogic.latestInputId++;
+				this.gameLogic.untreatedInputs.push({
+					inputSequenceId: this.gameLogic.latestInputId,
+					direction: this.gameLogic.paddlePlayer.getDirection(),
+					frameRate: this.timeBetweenTwoFrames,
+				});
+				console.log(this.gameLogic.untreatedInputs);
+				this.gameLogic.inputSequenceId++;
+				this.gameLogic.broadcastPlayerPosition(
+					this.gameLogic.paddlePlayer.getDirection(),
+					this.gameLogic.inputSequenceId++,
+				);
+			}, 15);
+	}
+
+	// TODO: make sure this is being used somewhere
+	stopBroadcastingToServer() {
+		if (this.playerPositionBroadcastInterval) {
+			clearInterval(this.playerPositionBroadcastInterval);
+			this.playerPositionBroadcastInterval = undefined;
+		}
+	}
 
 	/*
 	░█▀▄░█▀▄░█▀█░█░█░▀█▀░█▀█░█▀▀

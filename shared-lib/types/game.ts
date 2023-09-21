@@ -48,8 +48,15 @@ export interface IBallState {
 interface IGeneralAssetsState {}
 
 export interface IGameState {
+	inputSequenceId: number;
 	player1: IPlayerState;
 	player2: IPlayerState;
 	ball: IBallState;
 	// general: IGeneralAssetsState;
+}
+
+export interface IPlayerMovementPayload {
+	inputSequenceId: number;
+	direction: 'up' | 'down' | 'immobile';
+	frameRate: number;
 }

@@ -10,6 +10,7 @@ import { Server, Socket } from 'socket.io';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { GameService } from './game.service';
 // import { GameRoomStatus, PlayerGameStatus, gameRoom } from '@prisma/client';
+import { IPlayerMovementPayload } from 'shared-lib/types/game';
 
 interface IRoomInformationProps {
 	id: number;
@@ -98,11 +99,12 @@ export class GameGateway
 	}
 
 	@SubscribeMessage('player-moved')
-	handlePlayerMovement(
-		clientSocket: Socket,
-		{ direction }: { direction: 'up' | 'down' | 'immobile' },
-	) {
-		this.gameService.handlePlayerMovement(clientSocket, direction);
+	handlePlayerMovement(clientSocket: Socket, payload: IPlayerMovementPayload) {
+		this.gameService.handlePlayerMovement(
+			clientSocket,
+			payload.direction,
+			payload.inputSequenceId,
+		);
 	}
 
 	// // Send users their opponent's information

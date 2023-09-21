@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import { Socket } from 'socket.io-client';
 import { IPlayerInformation } from '../../../shared-lib/types/game';
+import { IGameState } from '../../../shared-lib/types/game';
 
 interface IPlayerState {
 	x: number;
@@ -22,13 +23,6 @@ interface IBallState {
 	height: number;
 }
 interface IGeneralAssetsState {}
-
-export interface IGameState {
-	player1: IPlayerState;
-	player2: IPlayerState;
-	ball: IBallState;
-	// general: IGeneralAssetsState;
-}
 
 export interface IGameDataProps {
 	socket: Socket | undefined;
@@ -93,14 +87,14 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
 
 	// TODO: remove this and corresponding logs
 	// Logs the updates to gameData as they happen
-	useEffect(() => {
-		const gameDataLog = { ...gameData, socket: 'not loggable' };
-		console.log(
-			`%c GameData %c ${JSON.stringify(gameDataLog, null, 4)}`,
-			'color: yellow; background:magenta',
-			'',
-		);
-	}, [gameData]);
+	// useEffect(() => {
+	// 	const gameDataLog = { ...gameData, socket: 'not loggable' };
+	// 	console.log(
+	// 		`%c GameData %c ${JSON.stringify(gameDataLog, null, 4)}`,
+	// 		'color: yellow; background:magenta',
+	// 		'',
+	// 	);
+	// }, [gameData]);
 
 	// We want a helper function that will allow us to update one, many or all
 	// properties of the game state without having to override the entire thing manually
@@ -109,11 +103,11 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
 			...prevGameData,
 			...updates,
 		}));
-		if ('socket' in updates) {
-			logContext(`socket ${updates.socket != undefined ? 'added' : 'removed'}`);
-		} else {
-			logContext(JSON.stringify(updates, null, 4));
-		}
+		// if ('socket' in updates) {
+		// 	logContext(`socket ${updates.socket != undefined ? 'added' : 'removed'}`);
+		// } else {
+		// 	logContext(JSON.stringify(updates, null, 4));
+		// }
 	};
 
 	// Helper function to reset the game state to its initial state in one function call

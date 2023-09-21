@@ -1,19 +1,25 @@
 import Paddle from './Paddle';
 import Ball from './Ball';
-import { IGameState } from '../../../../../../../shared-lib/types/game';
+import {
+	IGameState,
+	IPlayerMovementPayload,
+	IPlayerState,
+} from '../../../../../../../shared-lib/types/game';
 // import { ICurrentGameState } from '@sharedTypes/game';
 
 export class GameLogic {
 	private TICK_RATE = 1000 / 60; // we want 60 updates per second (in milliseconds, so we can use the value with Date.now()
 	private lastTick = Date.now();
-	public inputSequenceNumber = 0; // this is used to track the number of each client input
+	public inputSequenceId = 0; // this is used to track the number of each client input
 	// used to store all of the inputs that have not been confirmed by the server yet
-	public unconfirmedInputs: Array<{
-		sequenceNumber: number;
-		direction: string;
-	}> = [];
+	// public unconfirmedInputs: Array<{
+	// 	sequenceNumber: number;
+	// 	direction: string;
+	// }> = [];
+	untreatedInputs: IPlayerMovementPayload[] = [];
+	latestInputId = 0;
 
-	private frontEndPLayers = {};
+	// private frontEndPLayers = {};
 
 	public paddlePlayer: Paddle;
 	public paddleOpponent: Paddle;
@@ -54,7 +60,7 @@ export class GameLogic {
 		// Create opponent paddle
 		this.paddleOpponent = new Paddle(
 			this.canvasSize.width - paddleWidth,
-			0,
+			this.canvasSize.height / 2 - paddleHeight / 2,
 			paddleWidth,
 			paddleHeight,
 		);
@@ -67,23 +73,38 @@ export class GameLogic {
 		);
 	}
 
-	// TODO: let's remove the tick rate for now, it should be handled differently
-	updateGameState(): void {
-		// let dateNow = Date.now();
-		// let timeSinceLastTick = dateNow - this.lastTick;
-
-		// if (timeSinceLastTick >= this.TICK_RATE) {
-		// this.updateElementsState();
-		// this.lastTick = dateNow - (timeSinceLastTick % this.TICK_RATE);
-		// this.log(`Scores: ${this.playerScore}/${this.opponentScore}`);
-		// }
-		this.updateElementsState();
-	}
-
 	gameStateServerUpdate(newState: IGameState | undefined) {
 		if (!newState) return;
-		// Update the player positions
+
+		// Update our player's position according to our received state
+		// which is most likely in the past, compared to where we are at right now
 		this.paddlePlayer.serverUpdate(newState.player1);
+
+		console.log('received sequenceid:', newState.inputSequenceId);
+
+		// Find the index of the last event that the server processed
+		const lastTreatedInputIndex = this.untreatedInputs.findIndex((input) => {
+			// Return a condition
+			return newState.inputSequenceId === input.inputSequenceId;
+		});
+		console.log({ lastTreatedInputIndex });
+		if (lastTreatedInputIndex > -1)
+			// Remove the non-needed inputs from our untreated input history
+			this.untreatedInputs.splice(0, lastTreatedInputIndex + 1);
+		// And for each remaining input, apply them to that past position we
+		// acknowledged from the server, so our player can be positioned in
+		// its corrent current state based on its past position and the number
+		// of moves it's done
+		this.untreatedInputs.forEach((input) => {
+			const numberDirection =
+				input.direction === 'up' ? -1 : input.direction === 'down' ? 1 : 0;
+			// For each remaining action we did after our server update,
+			// we update the position relative to the frame rate of our canvas // TODO: I THINK, it's just so fucking confusing
+			this.paddlePlayer.y +=
+				input.frameRate * this.paddlePlayer.speed * numberDirection;
+		});
+
+		// Update the opponent's position
 		this.paddleOpponent.serverUpdate(newState.player2);
 
 		// Update the player scores
@@ -94,14 +115,15 @@ export class GameLogic {
 		this.ball.serverUpdate(newState.ball);
 	}
 
-	updateElementsState(): void {
-		this.paddlePlayer.update(this.canvasSize);
-		this.paddleOpponent.update(this.canvasSize);
+	updateElementsState(timeBetweenTwoFrames: number): void {
+		this.paddlePlayer.update(this.canvasSize, timeBetweenTwoFrames);
+		this.paddleOpponent.update(this.canvasSize, timeBetweenTwoFrames);
 		this.ball.update(
 			this.paddlePlayer,
 			this.paddleOpponent,
 			this.canvasSize,
 			this.handleScoreUpdate,
+			timeBetweenTwoFrames,
 		);
 	}
 

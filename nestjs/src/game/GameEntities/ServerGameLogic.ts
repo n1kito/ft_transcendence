@@ -26,7 +26,7 @@ export class GameLogic {
 	public canvasSize = { width: 700, height: 500 };
 	public paddleWidth = 5;
 	public paddleHeight = this.canvasSize.height * 0.2;
-	public ballSize = 15;
+	public ballSize = 10;
 
 	constructor(
 		player1SocketId: string,
@@ -46,7 +46,7 @@ export class GameLogic {
 		// Add player2 with their corresponding paddle mapped to their socketId
 		this.players[player2SocketId] = new Paddle(
 			this.canvasSize.width - this.paddleWidth,
-			0,
+			this.canvasSize.height / 2 - this.paddleHeight / 2,
 			this.paddleWidth,
 			this.paddleHeight,
 		);
@@ -62,10 +62,13 @@ export class GameLogic {
 		}
 	}
 
-	updateGameState(): void {
+	updateGameState(timeBetweenTwoFrames: number): void {
 		// Update the position of each player
 		for (const playerSocketId in this.players)
-			this.players[playerSocketId].update(this.canvasSize);
+			this.players[playerSocketId].update(
+				this.canvasSize,
+				timeBetweenTwoFrames,
+			);
 		// And the position of the ball
 		const [player1SocketId, player2SocketId] = Object.keys(this.players);
 		this.ball.update(
@@ -73,6 +76,7 @@ export class GameLogic {
 			this.players[player2SocketId],
 			this.canvasSize,
 			this.handleScoreUpdate,
+			timeBetweenTwoFrames,
 		);
 	}
 
@@ -89,6 +93,7 @@ export class GameLogic {
 	setPlayerDirection(
 		playerSocketId: string,
 		direction: 'up' | 'down' | 'immobile',
+		inputSequenceId: number,
 	) {
 		// For convenience, find if we're updating the position of player 1 or 2
 		const playerIndex =
@@ -98,6 +103,7 @@ export class GameLogic {
 			`Updating direction to Player${playerIndex} [${playerSocketId}] to ${direction}`,
 		);
 		this.players[playerSocketId].setDirection(direction);
+		this.players[playerSocketId].latestInputSequenceId = inputSequenceId;
 	}
 
 	broadcastGameState() {
@@ -105,6 +111,8 @@ export class GameLogic {
 		const [player1SocketId, player2SocketId] = Object.keys(this.players);
 		// Creating the state udpdate for player1 (left side of the screen)
 		const player1StateUpdate: IGameState = {
+			// Each player gets their latest input sequence id
+			inputSequenceId: this.players[player1SocketId].latestInputSequenceId,
 			player1: {
 				x: 0,
 				y: this.players[player1SocketId].y,
@@ -129,6 +137,8 @@ export class GameLogic {
 		// Creating the state update for player2 (right side of the screen for us, so things need to be flipped for them,
 		// since both players appear on the left side of their screen)
 		const player2StateUpdate: IGameState = {
+			// Each player gets their latest input sequence id
+			inputSequenceId: this.players[player2SocketId].latestInputSequenceId,
 			// This is their left-hand side player, so player2 for us
 			player1: {
 				x: 0,
@@ -205,12 +215,12 @@ export class GameLogic {
 
 	// Start the game simulation with an interval of 50ms
 	private startGameSimulation() {
-		const gameStateInterval = 50;
+		const gameStateInterval = 10;
 
 		this.log(`Started game simulation at ${gameStateInterval}ms interval`);
 		if (this.gameHasStarted && !this.gameStateUpdateInterval) {
 			this.gameStateUpdateInterval = setInterval(() => {
-				this.updateGameState();
+				this.updateGameState(gameStateInterval / 1000);
 			}, gameStateInterval);
 		}
 	}

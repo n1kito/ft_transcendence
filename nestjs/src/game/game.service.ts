@@ -3,7 +3,7 @@ import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { randomBytes } from 'crypto';
 import { Server, Socket } from 'socket.io';
 import * as jwt from 'jsonwebtoken';
-import { GameLogic } from './GameEntities/GameLogic';
+import { GameLogic } from './GameEntities/ServerGameLogic';
 import { IPlayerInformation } from 'shared-lib/types/game';
 import { resolvePtr } from 'dns';
 // import { IPlayerInformation } from '@types/game-types';
@@ -259,10 +259,11 @@ export class GameService {
 	░█░█░█▀█░█░█░█▀▀
 	░▀▀▀░▀░▀░▀░▀░▀▀▀
 	*/
-	gameLogic;
+	
 	handlePlayerMovement(
 		clientSocket: Socket,
 		direction: 'up' | 'down' | 'immobile',
+		inputSequenceId: number,
 	) {
 		console.log('[🕹️ ] Player moved', direction);
 		const playerRoomId = this.getRoomIdFromSocketId(clientSocket.id);
@@ -272,6 +273,7 @@ export class GameService {
 		this.rooms[playerRoomId].gameInstance.setPlayerDirection(
 			clientSocket.id,
 			direction,
+			inputSequenceId
 		);
 	}
 

@@ -1,8 +1,11 @@
-import { IPlayerState } from '../../../../../../../shared-lib/types/game';
+import {
+	IPlayerMovementPayload,
+	IPlayerState,
+} from '../../../../../../../shared-lib/types/game';
 import { GameEntity } from './Shared';
 
 export default class Paddle extends GameEntity {
-	private speed: number = 25;
+	speed: number = 800;
 	private direction: number;
 
 	constructor(x: number, y: number, width: number, height: number) {
@@ -10,10 +13,13 @@ export default class Paddle extends GameEntity {
 		this.direction = 0;
 	}
 
-	update(canvasSize: { width: number; height: number }) {
+	update(
+		canvasSize: { width: number; height: number },
+		timeBetweenTwoFrames: number,
+	) {
 		const screenPaddleGap: number = 0.075 * canvasSize.height;
 		// Calculate the new y coordinate of the paddle
-		this.y += this.speed * this.direction;
+		this.y += timeBetweenTwoFrames * this.speed * this.direction;
 		// Make sure the y coordinates are never < 0 or > canvasHeight - paddleHeight
 		// However, to respect the original 1972 game, the paddles leave a gap at the top and the bottom of the playground,
 		// to avoid infinite matches
@@ -28,6 +34,12 @@ export default class Paddle extends GameEntity {
 		if (direction === 'up') this.direction = -1;
 		else if (direction === 'down') this.direction = 1;
 		else this.direction = 0;
+	}
+
+	getDirection(): IPlayerMovementPayload['direction'] {
+		if (this.direction == -1) return 'up';
+		else if (this.direction == 1) return 'down';
+		else return 'immobile';
 	}
 
 	serverUpdate(playerState: IPlayerState) {
