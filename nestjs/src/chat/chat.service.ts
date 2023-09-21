@@ -149,17 +149,22 @@ export class ChatService {
 										console.error('Could not delete messages: ', e);
 									});
 							} else {
-								console.log('👋👋👋👋👋👋response.participants.at(0) : ', response.participants.at(0))
+								console.log(
+									'👋👋👋👋👋👋response.participants.at(0) : ',
+									response.participants.at(0),
+								);
 								// if there was people remaining, put the first one to have joined as owner
-								this.prisma.chatSession.update({
-									where: { id: response.participants.at(0).id },
-									data: {
-										isOwner: true,
-										isAdmin: true,
-									},
-								}).then((data)=>{
-									console.log('data', data)
-								})
+								this.prisma.chatSession
+									.update({
+										where: { id: response.participants.at(0).id },
+										data: {
+											isOwner: true,
+											isAdmin: true,
+										},
+									})
+									.then((data) => {
+										console.log('data', data);
+									});
 							}
 						})
 						.catch((e) => {
@@ -265,5 +270,32 @@ export class ChatService {
 			},
 		});
 		return res;
+	}
+
+	async findPrivateMessageByID(firstUserId: number, secondUserId: number) {
+		const chatExists = await this.prisma.chat.findFirst({
+			where: {
+				AND: [
+					{
+						isChannel: false,
+					},
+					{
+						participants: {
+							some: {
+								userId: firstUserId,
+							},
+						},
+					},
+					{
+						participants: {
+							some: {
+								userId: secondUserId,
+							},
+						},
+					},
+				],
+			},
+		});
+		return chatExists;
 	}
 }

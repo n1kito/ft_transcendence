@@ -22,6 +22,7 @@ import { SetPrivateDTO } from './dto/setPrivate.dto';
 import { SetPasswordDTO } from './dto/setPassword.dto';
 import { ValidationError } from 'class-validator';
 import { JoinChannelDTO } from './dto/joinChannel.dto';
+import { errorMonitor } from 'events';
 
 @Controller('chat')
 export class ChatController {
@@ -115,14 +116,23 @@ export class ChatController {
 					.catch((e) => {
 						response.status(401).json({ message: '' + e.message });
 					});
-				// if its a private message
+				// if its a private message and the user does not already have a conv
 			} else if (createChat.userId) {
-				// TODO: function to check if the user has an ongoing conv with the other one
-				this.chatService.createChat(userId, createChat).then(async (chatId) => {
-					await this.chatService.createChatSession(userId, chatId);
-					await this.chatService.createChatSession(createChat.userId, chatId);
-					response.status(200).json({ chatId: chatId });
-				});
+				this.chatService.findPrivateMessageByID(createChat.userId, userId)
+				.then((res) => {
+					if (!res) {
+						this.chatService.createChat(userId, createChat).then(async (chatId) => {
+							await this.chatService.createChatSession(userId, chatId);
+							await this.chatService.createChatSession(createChat.userId, chatId);
+							response.status(200).json({ chatId: chatId });
+						});
+					} else {
+						throw new Error('You already have a conversation with that person')
+					}
+				})
+				.catch((e) => {
+					response.status(401).json({ message: e.message });
+				})
 			} else {
 				response.status(401).json({ message: 'Could not create chat' });
 			}
@@ -206,6 +216,12 @@ export class ChatController {
 						response
 							.status(400)
 							.json({ message: 'You are already in this chat' });
+						return;
+					}
+					if (data.isPrivate)  {
+						response
+							.status(403)
+							.json({ message: 'Could not join the channel' });
 						return;
 					}
 					this.chatService

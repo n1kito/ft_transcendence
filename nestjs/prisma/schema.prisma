@@ -47,11 +47,7 @@ model User {
 
     // Chat logic
     chatsSessions chatSession[]
-    // chatsJoined   Chat[] @relation("contributors")
-    // ownedChannels Chat[] @relation("owners")
     Message       Message[]
-
-    // relation with User[] in Chat. maybe delete ?
 }
 
 model Game {
@@ -73,19 +69,13 @@ model gameSession {
 // Chat logic
 model Chat {
     id           Int           @id @default(autoincrement())
-    // Users       User?     @relation(fields: [userId], references: [id], "contributors")
-    // userId       Int?
     participants chatSession[]
-    messages     Message[] // here or in chatSession?
-    isChannel    Boolean // true if not msg between 2 users
-    isPrivate    Boolean // this will be true if it is a msg between 2 users
-    isProtected  Boolean // true if password
+    messages     Message[] 
+    isChannel    Boolean 
+    isPrivate    Boolean
+    isProtected  Boolean 
     password     String?
     name         String?
-
-    // to delete
-    // owner       User?     @relation(fields: [ownerId], references: [id], "owners")
-    // ownerId      Int?
 }
 
 model chatSession {
@@ -100,7 +90,6 @@ model chatSession {
     isOwner Boolean?
     isAdmin Boolean?
     // lastOpen ? So we know when new msg
-    // isChannel, isPrivate, isProtected here ?
 }
 
 model Message {

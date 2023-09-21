@@ -29,6 +29,7 @@ import {
 	setNewPassword,
 } from 'src/utils/queries';
 import { IChatStruct } from '../PrivateMessages/PrivateMessages';
+// import { IMessage } from 'src/contexts/ChatContext';
 
 export interface IChatWindowProps {
 	onCloseClick: () => void;
