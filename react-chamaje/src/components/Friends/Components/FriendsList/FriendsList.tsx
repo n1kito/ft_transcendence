@@ -109,7 +109,7 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 						<FriendBadge
 							key={index}
 							badgeTitle={friend.login}
-							badgeImageUrl={friend.image}
+							badgeImageUrl={`/api/images/${friend.image}`}
 							onlineIndicator={friend.onlineStatus}
 							isClickable={true}
 							onClick={() => {

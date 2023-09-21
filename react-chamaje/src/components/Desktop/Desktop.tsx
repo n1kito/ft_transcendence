@@ -75,10 +75,13 @@ const Desktop = () => {
 			});
 			if (response.ok) {
 				const data = await response.json();
+
+				// const imagePath = `/api/images/${data.image}`;
 				const mySocket = new WebSocketService(accessToken, data.id);
 				const updatedData = {
 					...data,
 					chatSocket: mySocket,
+					image: `/api/images/${data.image}`,
 				};
 				console.log('🍧 data:', data);
 				// Set the user data in the context
@@ -93,6 +96,7 @@ const Desktop = () => {
 	};
 	useEffect(() => {
 		if (isAuthentificated) fetchUserData();
+
 		return () => {
 			userData?.chatSocket?.endConnection();
 			// when unmounting desktop component, reset userData

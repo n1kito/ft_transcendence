@@ -239,6 +239,7 @@ export class UserController {
 	}
 
 	// TODO: add DTO
+
 	@Put(':login/add')
 	async addFriend(
 		@Param('login') login: string,
@@ -283,6 +284,7 @@ export class UserController {
 	}
 
 	// TODO: add DTO
+	// cannot delete self !
 	@Delete(':login/delete')
 	async deleteFriend(
 		@Param('login') login: string,
@@ -293,13 +295,13 @@ export class UserController {
 			const userId = this.userService.authenticateUser(request);
 
 			// retrieve friend's user id
-			const plop = await this.prisma.user.findUnique({
+			const friend = await this.prisma.user.findUnique({
 				where: { login: login },
 			});
 
-			if (!plop) response.status(404).json({ message: 'Friend not found' });
+			if (!friend) response.status(404).json({ message: 'Friend not found' });
 
-			await this.userService.deleteFriend(userId, plop.id);
+			await this.userService.deleteFriend(userId, friend.id);
 			response.status(200).json({ message: 'Friend deleted successfully' });
 		} catch (error) {
 			return response.status(500).json({

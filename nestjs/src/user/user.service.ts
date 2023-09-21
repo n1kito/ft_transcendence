@@ -264,7 +264,7 @@ export class UserService {
 			};
 		});
 	}
-
+	// TODO: add `delete image` logic
 	async deleteUser(userId: number) {
 		try {
 			const isdeleted = await this.prisma.user.delete({
@@ -367,10 +367,6 @@ export class UserService {
 			throw 'User not found';
 		}
 
-		// delete old avatar in ./images
-		// /api/images/7_1695226622661.jpeg
-		// ./images/brocoli.jpeg
-
 		// retrieve avatar name in database
 		const avatarName = user.image.substring(user.image.indexOf('images'));
 		// append it to get filepath
@@ -389,11 +385,10 @@ export class UserService {
 					image_is_locked: true,
 				},
 			});
-			// delete file
-			if (imageStateinDb)
-				fs.unlink(filePath, (error) => {
-					if (error) throw error;
-				});
+			// delete old avatar
+			fs.unlink(filePath, (error) => {
+				if (error) throw error;
+			});
 			return imagePath;
 		} catch (error) {
 			throw new Error('Could not update avatar');

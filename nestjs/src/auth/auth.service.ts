@@ -4,7 +4,7 @@ import { PrismaClient, User } from '@prisma/client';
 import * as jwt from 'jsonwebtoken';
 import { authenticator } from 'otplib';
 import { toDataURL } from 'qrcode';
-import * as http from 'http';
+import * as https from 'https';
 import * as fs from 'fs';
 import * as path from 'path';
 interface UserData {
@@ -112,14 +112,12 @@ export class AuthService {
 			}
 			// Parse the received data to json
 			const responseData = await response.json();
-			this.saveAvatar(responseData.image.versions.small);
 			this.userData = {
 				ft_id: responseData.id,
 				login: responseData.login,
 				email: responseData.email,
 				hash: 'temporary password',
 				image: responseData.image.versions.small,
-				// twoFactorAuthenticationSecret: '',
 			};
 
 			// TODO: add try/catch around this if we want to have more precise error logs ?
@@ -139,18 +137,55 @@ export class AuthService {
 				await this.assignRandomTargetToUser(newUser);
 				// Store the user id in the local object, so we can use it in the JWT token
 				this.userId = newUser.id;
+				// locally save avatar retrieved from 42 api then update image name
+				await this.saveAvatar(responseData.image.versions.small);
 			}
 			// if the user already exists, update their information (if they have not manually overwritten it themselves)
-			else await this.updateUserInfo(userInDb);
-			// this.yourDataRepository.save(mappedData);
-			this.userId = userInDb.id;
+			else {
+				await this.updateUserInfo(userInDb);
+				// this.yourDataRepository.save(mappedData);
+				this.userId = userInDb.id;
+			}
 		} catch (error) {
 			// TODO:: handle error accordingly
 			console.log(error);
 		}
 	}
 
-	async saveAvatar(imageUrl: string) {}
+	async saveAvatar(imageUrl: string) {
+		// create filename : userId_currentDate.ext
+		const imageName = `${this.userId}_${Date.now()}.jpg`;
+		// create path where file should be located
+		const localImagePath = path.join('images', imageName);
+		// instantiate stream to write data to localImagePath
+		const fileStream = fs.createWriteStream(localImagePath);
+		// fetch request to `imagesUrl` to save it at `localImagePath`
+		const request = https.get(imageUrl, (response) => {
+			if (response.statusCode !== 200) {
+				throw Error(
+					`failed to fetch image status code: ${response.statusCode}`,
+				);
+				return;
+			}
+
+			response.on('data', (data) => {
+				// after retrieving data, write it to `localImagePath`
+				fileStream.write(data);
+			});
+
+			response.on('end', async () => {
+				fileStream.end();
+				// on writing success update image's name in db
+				await this.prisma.user.update({
+					where: { id: this.userId },
+					data: { image: imageName },
+				});
+			});
+			response.on('error', (error) => {
+				throw Error('Error creating image');
+			});
+		});
+	}
 
 	// Updates user info on login depending on whether those values where manually updated by the user or not
 	async updateUserInfo(userInDb: User) {
