@@ -280,4 +280,33 @@ export class UserService {
 		});
 		return response;
 	}
+
+	async blockUser(userId: number, userToBlock: number) {
+		const response = await this.prisma.user.update({
+			where: { id: userId },
+			data: {
+				blockedUsers: {
+					push: userToBlock,
+				},
+			},
+		});
+		return response;
+	}
+
+	// return true if the user is blocked by blocking user
+	async isUserBlockedBy(userId:number, userBlocking: number) {
+		const response = await this.prisma.user.findFirst({
+			where: {
+				id: userBlocking,
+			},
+			select: {
+				blockedUsers: true,
+			}
+		});
+		if (!response.blockedUsers) return false;
+		for (const current of response.blockedUsers) {
+			if (current === userId) return true;
+		}
+		return false;
+	}
 }

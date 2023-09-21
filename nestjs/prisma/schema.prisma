@@ -48,6 +48,8 @@ model User {
     // Chat logic
     chatsSessions chatSession[]
     Message       Message[]
+
+    blockedUsers Int[]
 }
 
 model Game {
@@ -70,10 +72,10 @@ model gameSession {
 model Chat {
     id           Int           @id @default(autoincrement())
     participants chatSession[]
-    messages     Message[] 
-    isChannel    Boolean 
+    messages     Message[]
+    isChannel    Boolean
     isPrivate    Boolean
-    isProtected  Boolean 
+    isProtected  Boolean
     password     String?
     name         String?
 }

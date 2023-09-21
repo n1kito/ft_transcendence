@@ -47,6 +47,31 @@ export async function getChatInfo(accessToken: string, chatId: number) {
 		} else throw new Error('Something went wrong');
 	}
 }
+
+export async function blockUserQuery(accessToken: string, userId: number) {
+	try {
+		const response = await fetch('api/user/blockUser', {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+			body: JSON.stringify({
+				userId: userId,
+			}),
+		});
+		if (!response.ok) {
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
+		return response.json();
+	} catch (e) {
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error(e.message);
+		} else throw new Error('Something went wrong');
+	}
+}
 /* ********************************************************************* */
 /* ***************************** CHANNELS ****************************** */
 /* ********************************************************************* */

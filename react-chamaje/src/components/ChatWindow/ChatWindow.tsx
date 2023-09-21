@@ -19,6 +19,7 @@ import InputField from '../Profile/Components/InputField/InputField';
 import useAuth from 'src/hooks/userAuth';
 import DOMPurify from 'dompurify';
 import {
+	blockUserQuery,
 	fetchChannels,
 	fetchPrivateMessages,
 	getAdminRights,
@@ -67,7 +68,6 @@ const dateFormatOptions: Intl.DateTimeFormatOptions = {
 };
 
 const ChatWindow: React.FC<IChatWindowProps> = ({
-	// userId,
 	name,
 	onCloseClick,
 	windowDragConstraintRef,
@@ -92,7 +92,8 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	const [isAdmin, setIsAdmin] = useState(false);
 
 	const { userData } = useContext(UserContext);
-	const { chatData, updateChatList, getNewChatsList } = useContext(ChatContext);
+	const { chatData, updateChatList, getNewChatsList, updateBlockedUsers } =
+		useContext(ChatContext);
 	const chatContentRef = useRef<HTMLDivElement>(null);
 
 	const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -162,6 +163,26 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 			.catch((e) => {
 				console.error('Error leaving chat - chatWindow: ', e);
 			});
+	};
+
+	const blockUser = () => {
+		for (const key in chatData.chatsList) {
+			const current = chatData.chatsList[key];
+			if (current.chatId === chatId) {
+				for (const pKey in current.participants) {
+					const pCurrent = current.participants[pKey];
+					if (pCurrent !== userData?.id) {
+						blockUserQuery(accessToken, pCurrent)
+							.then(() => {
+								updateBlockedUsers([pCurrent]);
+							})
+							.catch((e) => {
+								console.error('Could not block user: ', e.message);
+							});
+					}
+				}
+			}
+		}
 	};
 	/* ********************************************************************* */
 
@@ -275,7 +296,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 					: [
 							{ name: 'Profile', onClick: () => null },
 							{ name: 'Play', onClick: () => null },
-							{ name: 'Block', onClick: () => null },
+							{ name: 'Block', onClick: blockUser },
 							{ name: 'Leave chat', onClick: leavePM },
 							{ name: 'Settings', onClick: openSettingsPanel },
 					  ]
@@ -295,6 +316,11 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							__html: DOMPurify.sanitize(messageWithNewlines),
 						});
 						const isLast = index === messages.length - 1;
+						for (const currentBlocked of chatData.blockedUsers) {
+							if (currentBlocked === currentMessage.sentById) {
+								return;
+							}
+						}
 						return (
 							<ChatBubble
 								userId={currentMessage.sentById}

@@ -45,7 +45,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	const [chatWindowUserId, setChatWindowUserId] = useState(0);
 	const [chatWindowId, setChatWindowId] = useState(0);
 	const [chatWindowName, setChatWindowName] = useState('');
-	const [privateMessages, setPrivateMessages] = useState<IChatStruct[]>([]);
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [messages, setMessages] = useState<IMessage[]>([]);
 	const [searchedLogin, setSearchedLogin] = useState('');
@@ -64,10 +63,13 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	// listen for a message everytime the chatId changes
 	useEffect(() => {
 		if (!chatData.socket) {
-			console.warn('your socket was not set up yet');
 			return;
 		}
 		const onReceiveMessage = (message: IMessage) => {
+			// if the user was blocked, dont display it
+			for (const current of chatData.blockedUsers) {
+				if (message.sentById === current) return;
+			}
 			// if it is the active chat, load message
 			if (message.chatId === chatWindowId) {
 				const updatedMessages: IMessage[] = messages.map((val) => {
@@ -153,6 +155,10 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 				setChatWindowName(currentChat.name);
 				fetchMessages(currentChat.chatId, accessToken)
 					.then((data) => {
+						// let messagesToDisplay : IMessage[]
+						// for (const current of data) {
+						// 	if (current.sentById === )
+						// }
 						setMessages(data);
 					})
 					.catch((e) => {
@@ -325,7 +331,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 				<ChatWindow
 					onCloseClick={() => setChatWindowIsOpen(false)}
 					windowDragConstraintRef={windowDragConstraintRef}
-					// userId={chatWindowUserId}
 					name={chatWindowName}
 					chatId={chatWindowId}
 					messages={messages}

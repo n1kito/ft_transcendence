@@ -55,10 +55,13 @@ const Channels: React.FC<IChannelsProps> = ({
 	// listen for a message everytime the chatId changes
 	useEffect(() => {
 		if (!chatData.socket) {
-			console.warn('your socket was not set up yet');
 			return;
 		}
 		const onReceiveMessage = (message: IMessage) => {
+			// if the user was blocked, dont display it
+			for (const current of chatData.blockedUsers) {
+				if (message.sentById === current) return;
+			}
 			// if it is the active chat, load message
 			if (message.chatId === chatWindowId) {
 				const updatedMessages: IMessage[] = messages.map((val) => {

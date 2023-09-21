@@ -23,6 +23,7 @@ import { SetPasswordDTO } from './dto/setPassword.dto';
 import { ValidationError } from 'class-validator';
 import { JoinChannelDTO } from './dto/joinChannel.dto';
 import { errorMonitor } from 'events';
+import { BlockUserDTO } from '../user/dto/blockUser.dto';
 
 @Controller('chat')
 export class ChatController {
@@ -161,9 +162,10 @@ export class ChatController {
 			res.status(201).json({ message: 'Message sent successfully' });
 		} catch (e) {
 			console.error('error sending a message', e);
-			res.status(404).json({ message: 'Could not send message' });
+			res.status(400).json(e.message);
 		}
 	}
+
 
 	@Delete('/leaveChat')
 	async leaveChat(
@@ -190,6 +192,7 @@ export class ChatController {
 				.json({ message: 'Something went wrong leaving the channel' });
 		}
 	}
+
 
 	/* ********************************************************************* */
 	/* ***************************** CHANNELS ****************************** */

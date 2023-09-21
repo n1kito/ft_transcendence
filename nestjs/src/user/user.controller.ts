@@ -11,6 +11,7 @@ import {
 	Put,
 	Req,
 	Res,
+	ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { PrismaClient } from '@prisma/client';
@@ -21,6 +22,8 @@ import { validate } from 'class-validator';
 import { get } from 'http';
 import { ChatService } from 'src/chat/chat.service';
 import { pairwise } from 'rxjs';
+import { BlockUserDTO } from './dto/blockUser.dto';
+import { TokenService } from 'src/token/token.service';
 export interface CustomRequest extends Request {
 	userId: number;
 }
@@ -31,6 +34,7 @@ export class UserController {
 		private readonly userService: UserService,
 		private readonly prisma: PrismaService,
 		private readonly chatService: ChatService,
+		private readonly tokenService: TokenService,
 	) {}
 
 	@Get('me')
@@ -425,5 +429,37 @@ export class UserController {
 			content: currentMessage.content,
 		}));
 		return messages;
+	}
+
+	@Put('/blockUser')
+	async blockUser(
+		@Body(new ValidationPipe()) validatedData: BlockUserDTO,
+		@Req() request: CustomRequest,
+		@Res() res: Response,
+	) {
+		try {
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			this.prisma
+				.findUserById(validatedData.userId)
+				.then(() => {
+					this.userService
+						.blockUser(userId, validatedData.userId)
+						.then(() => {
+							res.status(200).json({ message: 'User blocked successfully' });
+						})
+						.catch((e) => {
+							throw new Error('could not block user: ' + e.message);
+						});
+				})
+				.catch(() => {
+					res.status(404).json({ message: 'Could not find user to block' });
+					throw new Error('Could find user to block');
+				});
+		} catch (e) {
+			console.error('error blocking a user', e.message);
+			res.status(400).json(e.message);
+		}
 	}
 }

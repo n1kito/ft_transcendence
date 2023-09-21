@@ -140,7 +140,6 @@ const Desktop = () => {
 	 */
 	useEffect(() => {
 		const handleLoggedIn = (data: number) => {
-			console.log('Someone logged in: ', data);
 			setFriends((prevFriends) =>
 				prevFriends.map((friend) => {
 					if (
@@ -165,7 +164,6 @@ const Desktop = () => {
 	 */
 	useEffect(() => {
 		const handleLoggedInResponse = (data: number) => {
-			console.log('Someone logged in response	: ', data);
 			setFriends((prevFriends) =>
 				prevFriends.map((friend) => {
 					if (
@@ -187,7 +185,6 @@ const Desktop = () => {
 	// listen for a `ClientLogOut`
 	useEffect(() => {
 		const handleLoggedOut = (data: number) => {
-			console.log('Someone logged out: ', data);
 			setFriends((prevFriends) =>
 				prevFriends.map((friend) => {
 					if (friend.id === data && friend.onlineStatus === true) {

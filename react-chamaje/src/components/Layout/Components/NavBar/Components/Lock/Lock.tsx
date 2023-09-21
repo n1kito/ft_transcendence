@@ -11,7 +11,7 @@ const Lock = () => {
 
 	const handleClick = () => {
 		logOut();
-		chatData.socket?.endConnection()
+		chatData.socket?.endConnection();
 		// userData?.chatSocket?.endConnection();
 	};
 	return (

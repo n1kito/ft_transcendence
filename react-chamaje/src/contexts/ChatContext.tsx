@@ -7,44 +7,6 @@ import React, {
 } from 'react';
 import WebSocketService from 'src/services/WebSocketService';
 
-// interface IPlayerState {
-// 	x: number;
-// 	y: number;
-// 	width: number;
-// 	height: number;
-// 	score: number;
-// }
-// interface IBallState {
-// 	x: number;
-// 	y: number;
-// 	width: number;
-// 	height: number;
-// }
-
-// export interface IGameState {
-// 	player1: IPlayerState;
-// 	player2: IPlayerState;
-// 	ball: IBallState;
-// 	// general: IGeneralAssetsState;
-// }
-
-// export interface IChatDataProps {
-// 	socket: Socket | undefined;
-// 	// gameCanStart: boolean;
-// 	gameIsPlaying: boolean;
-// 	player1Ready: boolean;
-// 	player2Ready: boolean;
-// 	roomId: string | undefined;
-// 	userWonGame: boolean;
-// 	userLostGame: boolean;
-// 	opponentInfo: IPlayerInformation | undefined;
-// 	opponentIsReconnecting: boolean;
-// 	gameState: IGameState | undefined;
-// 	// Connection information
-// 	connectedToServer: boolean;
-// 	connectionErrorStatus: string | null;
-// 	//TODO: add other properties
-// }
 
 export interface IChatStruct {
 	chatId: number;
