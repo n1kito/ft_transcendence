@@ -91,7 +91,11 @@ const Profile: React.FC<ProfileProps> = ({
 			});
 			if (response.ok) {
 				const tempProfileData = await response.json();
-				setProfileData(tempProfileData);
+				const updatedProfileData = {
+					...tempProfileData,
+					image: `/api/images/${tempProfileData.image}`,
+				};
+				setProfileData(updatedProfileData);
 			}
 		} catch (error) {
 			console.error('Error: ', error);
@@ -107,7 +111,6 @@ const Profile: React.FC<ProfileProps> = ({
 				setProfileData(userData);
 			}
 		});
-
 		return () => {
 			setProfileData(null);
 			if (login && setLogin) setLogin('');
@@ -242,7 +245,6 @@ const Profile: React.FC<ProfileProps> = ({
 	const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files ? event.target.files[0] : null;
 		setSelectedFile(file);
-		console.log('📸📸📸 selected file:', file, selectedFile);
 	};
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -251,11 +253,12 @@ const Profile: React.FC<ProfileProps> = ({
 	};
 
 	const uploadNewAvatar = async () => {
-		console.log('📸📸📸 About to upload new avatar!');
 		try {
 			if (!selectedFile) throw new Error('no file selected');
+			// create form data
 			const formData = new FormData();
-			formData.append('file', selectedFile); // Add the selected file to the FormData
+			// Add the selected file to the FormData
+			formData.append('file', selectedFile);
 			const response = await fetch('api/user/upload', {
 				method: 'PUT',
 				credentials: 'include',
@@ -265,7 +268,6 @@ const Profile: React.FC<ProfileProps> = ({
 				body: formData,
 			});
 			if (response.ok) {
-				console.log('avatar ok!');
 				const data = await response.json();
 				console.log(data.image, userData);
 

@@ -4,6 +4,7 @@ import Lock from './Components/Lock/Lock';
 import Clock from './Components/Clock/Clock';
 import { UserContext } from '../../../../contexts/UserContext';
 import FullscreenTrigger from './Components/FullscreenTrigger/FullscreenTrigger';
+import AnnaWintour from './../../../../images/Anna_Wintour.jpg';
 export interface navBarProps {
 	isLoggedIn?: boolean;
 }
@@ -28,11 +29,7 @@ const NavBar: React.FC<navBarProps> = ({ isLoggedIn = true }) => {
 				<FullscreenTrigger />
 				<img
 					className="userAvatar"
-					src={
-						userData
-							? userData.image
-							: 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Anna_Wintour_2019_crop_%28cropped%29.jpg'
-					}
+					src={userData ? userData.image : AnnaWintour}
 				/>
 				<Lock />
 				<Clock />

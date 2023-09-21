@@ -298,6 +298,12 @@ export class UserController {
 
 			if (!friend) response.status(404).json({ message: 'Friend not found' });
 
+			if (userId === friend.id) {
+				return response
+					.status(401)
+					.json({ message: 'Cannot deleter yourself' });
+			}
+
 			await this.userService.deleteFriend(userId, friend.id);
 			response.status(200).json({ message: 'Friend deleted successfully' });
 		} catch (error) {
