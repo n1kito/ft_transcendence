@@ -19,6 +19,7 @@ import { plainToClass } from 'class-transformer';
 import * as fs from 'fs';
 import { constants } from 'fs';
 import { error } from 'console';
+import { SearchUserDto } from './dto/search-user.dto';
 // import { IMatchHistory } from 'shared-types';
 
 interface IMatchHistory {
@@ -336,7 +337,7 @@ export class UserService {
 				},
 			});
 
-			if (!user) throw new Error('User not found');
+			if (!user) throw 'User not found';
 
 			// Check if the friend to add already exists in the user's friends list
 			const friendExists = user.friends.some(
@@ -344,7 +345,7 @@ export class UserService {
 			);
 
 			if (friendExists) {
-				throw new Error('Friend already exists in the list');
+				throw 'Already a friend';
 			}
 
 			// update user's friends array with the newly added friend
@@ -364,7 +365,7 @@ export class UserService {
 				},
 			});
 		} catch (error) {
-			throw new Error('could not add friend');
+			throw error;
 		}
 	}
 
@@ -400,5 +401,16 @@ export class UserService {
 		} catch (error) {
 			throw new Error('Could not update avatar');
 		}
+	}
+
+	async validateLoginDto(login: string) {
+		// init searchUserDto
+		const searchUserDto = new SearchUserDto();
+		searchUserDto.login = login;
+
+		// Validate the searchUserDto
+		const errors = await validate(searchUserDto);
+
+		return errors.length > 0 ? true : false;
 	}
 }

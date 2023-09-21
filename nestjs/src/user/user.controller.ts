@@ -247,16 +247,9 @@ export class UserController {
 		@Res() response: Response,
 	) {
 		try {
-			// init searchUserDto
-			const searchUserDto = new SearchUserDto();
-			searchUserDto.login = login;
-
-			// Validate the searchUserDto
-			const errors = await validate(searchUserDto);
-
-			if (errors.length > 0) {
+			const errorDto = await this.userService.validateLoginDto(login);
+			if (errorDto)
 				return response.status(400).json({ message: 'Validation failed' });
-			}
 
 			const userId = this.userService.authenticateUser(request);
 
@@ -276,9 +269,9 @@ export class UserController {
 				.status(200)
 				.json({ message: 'Friend added successfully' });
 		} catch (error) {
-			console.error(error);
-			return response.status(500).json({
-				error: error,
+			console.error('---------------------------------', error);
+			return response.status(400).json({
+				message: error,
 			});
 		}
 	}
@@ -292,6 +285,10 @@ export class UserController {
 		@Res() response: Response,
 	) {
 		try {
+			const errorDto = await this.userService.validateLoginDto(login);
+			if (errorDto)
+				return response.status(400).json({ message: 'Validation failed' });
+
 			const userId = this.userService.authenticateUser(request);
 
 			// retrieve friend's user id
@@ -318,25 +315,15 @@ export class UserController {
 				filename: (request: CustomRequest, file, cb) => {
 					// even if filename if renamed safely after user's id and uid
 					// add an extra layer of security before handling file saving
-
 					// library that clean up files' name
 					const sanitize = require('sanitize-filename');
 					// Sanitize the original filename
 					file.originalname = sanitize(file.originalname);
-
 					// Sanitize the filename base on sanitized original
 					// name used for storage
 					file.filename = sanitize(file.originalname);
-
-					console.log(
-						'🍓sanitized filename : ',
-						file.filename,
-						'\n 🍓originale name:',
-						file.originalname,
-					);
 					// extract user id
 					const userId = request.userId;
-
 					// extract mimetype line from file's data and split
 					const parts = file.mimetype.split('/');
 					// if not only one '/' is found throw error

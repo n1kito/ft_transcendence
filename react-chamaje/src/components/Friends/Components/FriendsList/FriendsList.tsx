@@ -80,6 +80,7 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 				})
 				.catch((error) => {
 					console.error('could not fetch friends: ', error);
+					// setSearchUserError(error.message);
 				});
 		}
 		return () => {

@@ -178,7 +178,7 @@ export class AuthService {
 				// on writing success update image's name in db
 				await this.prisma.user.update({
 					where: { id: this.userId },
-					data: { image: imageName },
+					data: { image: imageName, image_is_locked: true },
 				});
 			});
 			response.on('error', (error) => {
