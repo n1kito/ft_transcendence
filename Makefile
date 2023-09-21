@@ -35,8 +35,8 @@ restart-front:
 	docker restart react-container;\
 
 update-shared-lib:
-	rsync -a --ignore-existing ./shared-lib/ ./nestjs/shared-lib/;\
-	rsync -a --ignore-existing ./shared-lib/ ./react-chamaje/shared-lib/;\
+	rsync -a ./shared-lib/ ./nestjs/shared-lib/;\
+	rsync -a ./shared-lib/ ./react-chamaje/shared-lib/;\
 
 clean:
 	docker system prune --force;\
