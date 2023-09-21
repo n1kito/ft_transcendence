@@ -83,7 +83,6 @@ const Desktop = () => {
 					chatSocket: mySocket,
 					image: `/api/images/${data.image}`,
 				};
-				console.log('🍧 data:', data);
 				// Set the user data in the context
 				updateUserData(updatedData);
 				setIsTwoFAEnabled(data.isTwoFactorAuthenticationEnabled);

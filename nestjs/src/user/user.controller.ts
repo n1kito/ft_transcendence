@@ -369,11 +369,11 @@ export class UserController {
 			if (!userId)
 				return response.status(401).json({ message: 'User is unauthorized' });
 
-			let imagePath = await this.userService.uploadAvatar(file, userId);
-			console.log('🍧 image path:', imagePath);
-			if (imagePath) {
-				return response.status(200).json({ image: imagePath });
-			}
+			await this.userService.uploadAvatar(file, userId);
+			// console.log('🍧 image path:', imagePath);
+			// if (imagePath) {
+			return response.status(200).json({ image: file.filename });
+			// }
 		} catch (error) {
 			response.status(400).json({ message: error });
 		}

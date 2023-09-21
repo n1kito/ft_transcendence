@@ -271,7 +271,7 @@ const Profile: React.FC<ProfileProps> = ({
 
 				const updatedUserData = {
 					...userData,
-					image: data.image,
+					image: `/api/images/${data.image}`,
 				};
 				updateUserData(updatedUserData);
 				setProfileData(updatedUserData);

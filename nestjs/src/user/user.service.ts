@@ -17,7 +17,8 @@ import { CustomRequest } from './user.controller';
 import { Prisma } from '@prisma/client';
 import { plainToClass } from 'class-transformer';
 import * as fs from 'fs';
-
+import { constants } from 'fs';
+import { error } from 'console';
 // import { IMatchHistory } from 'shared-types';
 
 interface IMatchHistory {
@@ -264,17 +265,26 @@ export class UserService {
 			};
 		});
 	}
-	// TODO: add `delete image` logic
+
 	async deleteUser(userId: number) {
 		try {
+			const user = await this.prisma.findUserById(userId);
+			// retrieve user's image name in database and create path
+			const imagePath = `./images/${user.image}`;
+			// delete user
 			const isdeleted = await this.prisma.user.delete({
 				where: { id: userId },
 			});
+			// if success then delete static image file im ./images
+			fs.access(imagePath, constants.F_OK, (err) => {
+				if (err) return;
+				fs.unlink(imagePath, (error) => {
+					if (error) throw error;
+				});
+			});
 		} catch (error) {
-			console.log('Could not delete user:', error.message);
-			throw new Error('Could not delete user');
+			throw Error('Could not delete user');
 		}
-		// console.log('User deleted successfully');
 	}
 
 	async deleteFriend(userId: number, friendUserIdToDelete: number) {
@@ -358,38 +368,35 @@ export class UserService {
 		}
 	}
 
-	async uploadAvatar(
-		avatar: Express.Multer.File,
-		userId: number,
-	): Promise<string> {
+	async uploadAvatar(file: Express.Multer.File, userId: number) {
 		let user = await this.prisma.findUserById(userId);
 		if (!user) {
 			throw 'User not found';
 		}
 
 		// retrieve avatar name in database
-		const avatarName = user.image.substring(user.image.indexOf('images'));
+		const avatarName = user.image;
 		// append it to get filepath
-		const filePath = `./${avatarName}`;
+		const filePath = `./images/${avatarName}`;
+
 		try {
-			// set the avatar's path
-			const imagePath = `/api/images/${avatar.filename}`;
-			const imageStateinDb = user.image_is_locked;
 			// update image path in database
 			user = await this.prisma.user.update({
 				where: {
 					id: userId,
 				},
 				data: {
-					image: imagePath,
+					image: file.filename,
 					image_is_locked: true,
 				},
 			});
-			// delete old avatar
-			fs.unlink(filePath, (error) => {
-				if (error) throw error;
+			// if success delete old avatar
+			fs.access(filePath, constants.F_OK, (err) => {
+				if (err) console.log(`${file} ${err ? 'does not exist' : 'exists'}`);
+				fs.unlink(filePath, (error) => {
+					if (error) throw error;
+				});
 			});
-			return imagePath;
 		} catch (error) {
 			throw new Error('Could not update avatar');
 		}
