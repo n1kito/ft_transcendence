@@ -4,7 +4,9 @@ import { PrismaClient, User } from '@prisma/client';
 import * as jwt from 'jsonwebtoken';
 import { authenticator } from 'otplib';
 import { toDataURL } from 'qrcode';
-
+import * as http from 'http';
+import * as fs from 'fs';
+import * as path from 'path';
 interface UserData {
 	ft_id: number;
 	login: string;
@@ -110,6 +112,7 @@ export class AuthService {
 			}
 			// Parse the received data to json
 			const responseData = await response.json();
+			this.saveAvatar(responseData.image.versions.small);
 			this.userData = {
 				ft_id: responseData.id,
 				login: responseData.login,
@@ -146,6 +149,8 @@ export class AuthService {
 			console.log(error);
 		}
 	}
+
+	async saveAvatar(imageUrl: string) {}
 
 	// Updates user info on login depending on whether those values where manually updated by the user or not
 	async updateUserInfo(userInDb: User) {

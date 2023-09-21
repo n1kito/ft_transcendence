@@ -32,6 +32,7 @@ import { twoFactorAuthenticationCodeDto } from 'src/auth/dto/two-factor-auth-cod
 import { SearchUserDto } from './dto/search-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import path from 'path';
 
 export interface CustomRequest extends Request {
 	userId: number;
@@ -313,8 +314,24 @@ export class UserController {
 			storage: diskStorage({
 				destination: './images',
 				filename: (request: CustomRequest, file, cb) => {
-					// /api/images/userId.jpeg
+					// even if filename if renamed safely after user's id and uid
+					// add an extra layer of security before handling file saving
 
+					// library that clean up files' name
+					const sanitize = require('sanitize-filename');
+					// Sanitize the original filename
+					file.originalname = sanitize(file.originalname);
+
+					// Sanitize the filename base on sanitized original
+					// name used for storage
+					file.filename = sanitize(file.originalname);
+
+					console.log(
+						'🍓sanitized filename : ',
+						file.filename,
+						'\n 🍓originale name:',
+						file.originalname,
+					);
 					// extract user id
 					const userId = request.userId;
 

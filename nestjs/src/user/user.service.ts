@@ -377,7 +377,8 @@ export class UserService {
 		const filePath = `./${avatarName}`;
 		try {
 			// set the avatar's path
-			let imagePath = `/api/images/${avatar.filename}`;
+			const imagePath = `/api/images/${avatar.filename}`;
+			const imageStateinDb = user.image_is_locked;
 			// update image path in database
 			user = await this.prisma.user.update({
 				where: {
@@ -385,12 +386,14 @@ export class UserService {
 				},
 				data: {
 					image: imagePath,
+					image_is_locked: true,
 				},
 			});
 			// delete file
-			fs.unlink(filePath, (error) => {
-				if (error) throw error;
-			});
+			if (imageStateinDb)
+				fs.unlink(filePath, (error) => {
+					if (error) throw error;
+				});
 			return imagePath;
 		} catch (error) {
 			throw new Error('Could not update avatar');
