@@ -43,5 +43,5 @@ npm-debug.log*
 *.pgdata
 
 # Ignore shared-lib folders in all subfolder except the root folder
-**/shared-lib/
-!./shared-lib/
+nestjs/shared-lib/
+react-chamaje/shared-lib/
