@@ -28,8 +28,8 @@ import {
 	sendMessageQuery,
 	setNewPassword,
 } from 'src/utils/queries';
-import { IChatStruct } from '../PrivateMessages/PrivateMessages';
-// import { IMessage } from 'src/contexts/ChatContext';
+// import { IChatStruct } from '../PrivateMessages/PrivateMessages';
+import { ChatContext, IChatStruct, IMessage } from 'src/contexts/ChatContext';
 
 export interface IChatWindowProps {
 	onCloseClick: () => void;
@@ -40,18 +40,16 @@ export interface IChatWindowProps {
 	isChannel?: boolean;
 	setChatWindowIsOpen: Dispatch<SetStateAction<boolean>>;
 	setMessages: Dispatch<SetStateAction<IMessage[]>>;
-	setChatsList: Dispatch<SetStateAction<IChatStruct[]>>;
-	chatsList: IChatStruct[];
 }
 
-export interface IMessage {
-	chatId: number;
-	sentById: number;
-	sentAt: Date;
-	content: string;
-	login: string;
-	avatar?: string;
-}
+// export interface IMessage {
+// 	chatId: number;
+// 	sentById: number;
+// 	sentAt: Date;
+// 	content: string;
+// 	login: string;
+// 	avatar?: string;
+// }
 
 interface IChatInfo {
 	isChannel: boolean;
@@ -76,8 +74,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	chatId,
 	messages,
 	setMessages,
-	setChatsList,
-	chatsList,
 	isChannel = false,
 	setChatWindowIsOpen,
 }) => {
@@ -96,6 +92,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	const [isAdmin, setIsAdmin] = useState(false);
 
 	const { userData } = useContext(UserContext);
+	const { chatData, updateChatList, getNewChatsList } = useContext(ChatContext);
 	const chatContentRef = useRef<HTMLDivElement>(null);
 
 	const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -135,10 +132,10 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	const leaveChannel = () => {
 		leaveChat(accessToken, chatId)
 			.then(async () => {
-				const updatedChannelsList = chatsList.filter(
+				const updatedChatsList = chatData.chatsList.filter(
 					(channel) => channel.chatId !== chatId,
 				);
-				setChatsList(updatedChannelsList);
+				getNewChatsList(updatedChatsList, true);
 				setChatWindowIsOpen(false);
 			})
 			.catch((e) => {
@@ -156,10 +153,10 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 				// 	.catch((e) => {
 				// 		console.error('Error fetching private messages: ', e);
 				// 	});
-				const updatedChannelsList = chatsList.filter(
+				const updatedChatsList = chatData.chatsList.filter(
 					(privateMessage) => privateMessage.chatId !== chatId,
 				);
-				setChatsList(updatedChannelsList);
+				getNewChatsList(updatedChatsList, false);
 				setChatWindowIsOpen(false);
 			})
 			.catch((e) => {
@@ -187,7 +184,8 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	// not an unmounting)
 	useEffect(() => {
 		console.log('chatId in ChatWindow', chatId);
-		if (chatId) userData?.chatSocket?.joinRoom(chatId);
+		if (chatId) chatData.socket?.joinRoom(chatId);
+		// if (chatId) userData?.chatSocket?.joinRoom(chatId);
 		// return () => {
 		// 	userData?.chatSocket?.leaveRoom(chatId);
 		// };
@@ -212,11 +210,12 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 		sendMessageQuery(accessToken, textareaContent, chatId)
 			.then(() => {
 				// socket sending message
-				userData?.chatSocket?.sendMessage(
+				chatData.socket?.sendMessage(
+					// userData?.chatSocket?.sendMessage(
 					textareaContent,
 					chatId,
-					userData.login,
-					userData.image,
+					userData?.login || '',
+					userData?.image || '',
 				);
 				// display users' own message by updating the messages[]
 				const updatedMessages: IMessage[] = messages.map((val) => {

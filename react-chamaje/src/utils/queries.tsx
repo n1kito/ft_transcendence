@@ -226,7 +226,6 @@ export async function fetchPrivateMessages(accessToken: string) {
 			},
 			credentials: 'include',
 		});
-		console.warn('is it working?');
 		if (!response.ok) {
 			const responseError = await response.json();
 			throw new Error(responseError.message);

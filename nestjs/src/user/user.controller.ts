@@ -348,6 +348,7 @@ export class UserController {
 						}),
 						name: name,
 						avatar: avatar,
+						isChannel: false,
 					};
 				}),
 			);
@@ -372,7 +373,7 @@ export class UserController {
 				request.userId,
 			);
 
-			// this contains an array of the chat rooms joined that are not channels
+			// this contains an array of the chat rooms joined that are channels
 			const chatPromises = chatSessions.map(async (currentChat) => {
 				const room = await this.chatService.getChannelRoom(currentChat.chatId);
 				return room; // Return the result of each asynchronous operation
@@ -391,6 +392,7 @@ export class UserController {
 							return currentParticipant.userId;
 						}),
 						name: currentRoom.name,
+						isChannel: true,
 					};
 				}),
 			);

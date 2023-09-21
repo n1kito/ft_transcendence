@@ -6,7 +6,7 @@ import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/Settings
 import Button from '../Shared/Button/Button';
 import Title from '../Profile/Components/Title/Title';
 import InputField from '../Profile/Components/InputField/InputField';
-import { IChatStruct } from '../PrivateMessages/PrivateMessages';
+// import { IChatStruct } from '../PrivateMessages/PrivateMessages';
 import useAuth from 'src/hooks/userAuth';
 import {
 	createChannel,
@@ -15,7 +15,8 @@ import {
 	joinChannel,
 } from 'src/utils/queries';
 import { UserContext } from 'src/contexts/UserContext';
-import ChatWindow, { IMessage } from '../ChatWindow/ChatWindow';
+import ChatWindow from '../ChatWindow/ChatWindow';
+import { ChatContext, IChatStruct, IMessage } from 'src/contexts/ChatContext';
 
 interface IChannelsProps {
 	onCloseClick: () => void;
@@ -26,7 +27,6 @@ const Channels: React.FC<IChannelsProps> = ({
 	onCloseClick,
 	windowDragConstraintRef,
 }) => {
-	const chatsList = [''];
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [settingsMode, setSettingsMode] = useState('');
 	const [settingsError, setSettingsError] = useState('');
@@ -41,9 +41,11 @@ const Channels: React.FC<IChannelsProps> = ({
 	const [messages, setMessages] = useState<IMessage[]>([]);
 
 	const [channelInput, setChannelInput] = useState('');
-	const { userData } = useContext(UserContext);
 
+	const { userData } = useContext(UserContext);
 	const { accessToken } = useAuth();
+	const { chatData, updateChatData, updateChatList, getNewChatsList } =
+		useContext(ChatContext);
 
 	/* ********************************************************************* */
 	/* ***************************** WEBSOCKET ***************************** */
@@ -52,8 +54,8 @@ const Channels: React.FC<IChannelsProps> = ({
 	// LISTENER: when receiving a message in active chat
 	// listen for a message everytime the chatId changes
 	useEffect(() => {
-		if (!userData || !userData.chatSocket) {
-			console.warn('your userData was not set up yet');
+		if (!chatData.socket) {
+			console.warn('your socket was not set up yet');
 			return;
 		}
 		const onReceiveMessage = (message: IMessage) => {
@@ -71,15 +73,16 @@ const Channels: React.FC<IChannelsProps> = ({
 				);
 			}
 		};
+		chatData.socket?.onReceiveMessage(onReceiveMessage);
 		// userData?.chatSocket?.onReceiveMessage(onReceiveMessage);
-		userData?.chatSocket?.onReceiveMessage(onReceiveMessage);
 
 		// stop listening to messages
 		// TODO: need to change that because I am not sure it will stop listening to the right room
 		return () => {
-			userData.chatSocket?.offReceiveMessage(onReceiveMessage);
+			chatData.socket?.offReceiveMessage(onReceiveMessage);
+			// userData.chatSocket?.offReceiveMessage(onReceiveMessage);
 		};
-	}, [chatWindowId, messages]);
+	}, [chatWindowId, messages, chatData.chatsList]);
 
 	// on click on an avatar, check if a PM conversation exists.
 	// If it does, open the window, set the userId and chatId, and fetch
@@ -87,7 +90,7 @@ const Channels: React.FC<IChannelsProps> = ({
 	// Otherwise open clean the messages and open the window
 	const openPrivateMessageWindow: any = (roomId: number) => {
 		console.log('roomId', roomId);
-		const chatId = channelsList.map((currentChat) => {
+		const chatId = chatData.chatsList.map((currentChat) => {
 			if (roomId === currentChat.chatId) {
 				setChatWindowId(currentChat.chatId);
 				setChatWindowName(
@@ -110,16 +113,14 @@ const Channels: React.FC<IChannelsProps> = ({
 		if (channelInput) {
 			createChannel(accessToken, channelInput)
 				.then((room) => {
-					const updatedChannelsList = channelsList.map((current) => {
-						return current;
-					});
-					console.log('room', room);
-					updatedChannelsList.push({
-						chatId: room.chatId,
-						participants: [userData?.id ? userData.id : 0],
-						name: channelInput,
-					});
-					setChannelsList(updatedChannelsList);
+					updateChatList([
+						{
+							chatId: room.chatId,
+							participants: [userData?.id ? userData.id : 0],
+							name: channelInput,
+							isChannel: true,
+						},
+					]);
 					setSettingsPanelIsOpen(false);
 				})
 				.then(() => setChannelInput(''))
@@ -136,15 +137,14 @@ const Channels: React.FC<IChannelsProps> = ({
 				.then((data) => {
 					setChannelInput('');
 					setSettingsPanelIsOpen(false);
-					const updatedChannelsList = channelsList.map((current) => {
-						return current;
-					});
-					updatedChannelsList.push({
-						chatId: data.chatId,
-						participants: data.participants,
-						name: channelInput,
-					});
-					setChannelsList(updatedChannelsList);
+					updateChatList([
+						{
+							chatId: data.chatId,
+							participants: data.participants,
+							name: channelInput,
+							isChannel: true,
+						},
+					]);
 					console.log('Channel joined successfully');
 				})
 				.catch((e) => {
@@ -179,6 +179,9 @@ const Channels: React.FC<IChannelsProps> = ({
 	}, [channelsList]);
 
 	useEffect(() => {
+		console.log('chatData.chatsList', chatData.chatsList);
+	}, [chatData.chatsList]);
+	useEffect(() => {
 		console.log('chatWindowName', chatWindowName);
 	}, [chatWindowName]);
 
@@ -189,7 +192,7 @@ const Channels: React.FC<IChannelsProps> = ({
 	useEffect(() => {
 		fetchChannels(accessToken)
 			.then((data) => {
-				setChannelsList(data);
+				getNewChatsList(data, true);
 			})
 			.catch((e) => {
 				console.error('Error fetching channels: ', e);
@@ -222,20 +225,22 @@ const Channels: React.FC<IChannelsProps> = ({
 				]}
 			>
 				<div className="channels-list-wrapper">
-					{channelsList.length > 0 ? (
-						channelsList.map((room, index) => {
-							// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
-							return (
-								<FriendBadge
-									key={index}
-									badgeTitle={room.name ? room.name : 'Anonymous channel'}
-									isChannelBadge={true}
-									isClickable={true}
-									onClick={() => {
-										openPrivateMessageWindow(room.chatId);
-									}}
-								/>
-							);
+					{chatData.chatsList.length > 0 ? (
+						chatData.chatsList.map((room, index) => {
+							if (room.isChannel) {
+								// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
+								return (
+									<FriendBadge
+										key={index}
+										badgeTitle={room.name ? room.name : 'Anonymous channel'}
+										isChannelBadge={true}
+										isClickable={true}
+										onClick={() => {
+											openPrivateMessageWindow(room.chatId);
+										}}
+									/>
+								);
+							}
 						})
 					) : (
 						<FriendBadge
@@ -280,8 +285,6 @@ const Channels: React.FC<IChannelsProps> = ({
 					chatId={chatWindowId}
 					messages={messages}
 					setMessages={setMessages}
-					setChatsList={setChannelsList}
-					chatsList={channelsList}
 					isChannel={true}
 					setChatWindowIsOpen={setChatWindowIsOpen}
 				/>

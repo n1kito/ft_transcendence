@@ -24,6 +24,7 @@ import ChatIcon from './Icons/PC.svg';
 import FriendsIcon from './Icons/NOTEBOOK.svg';
 import GameIcon from './Icons/CD.svg';
 import Channels from '../Channels/Channels';
+import { ChatContext } from 'src/contexts/ChatContext';
 
 // Friend structure to keep track of them and their online/ingame status
 export interface IFriendStruct {
@@ -38,6 +39,7 @@ const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
 	let iconId = 0;
 	const { userData, setUserData } = useContext(UserContext);
+	const { chatData, updateChatData } = useContext(ChatContext);
 	const [openFriendsWindow, setFriendsWindowIsOpen] = useState(false);
 	const [openProfileWindow, setProfileWindowIsOpen] = useState(false);
 	const [privateMessageWindowIsOpen, setPrivateMessageWindowIsOpen] =
@@ -66,10 +68,13 @@ const Desktop = () => {
 					const mySocket = new WebSocketService(accessToken, data.id);
 					const updatedData = {
 						...data,
-						chatSocket: mySocket,
+						socket: mySocket,
 					};
 					// Set the user data in the context
-					setUserData(updatedData);
+					updateChatData({
+						socket: mySocket,
+					});
+					setUserData(data);
 				} else {
 					logOut();
 				}
@@ -80,7 +85,8 @@ const Desktop = () => {
 
 		if (isAuthentificated) fetchUserData();
 		return () => {
-			userData?.chatSocket?.endConnection();
+			chatData.socket?.endConnection();
+			// userData?.chatSocket?.endConnection();
 			// when unmounting desktop component, reset userData
 			setUserData(null);
 		};
@@ -94,7 +100,8 @@ const Desktop = () => {
 	});
 
 	const handleTabClosing = () => {
-		userData?.chatSocket?.endConnection();
+		chatData.socket?.endConnection();
+		// userData?.chatSocket?.endConnection();
 		logOut();
 		setUserData(null);
 	};
@@ -133,6 +140,7 @@ const Desktop = () => {
 	 */
 	useEffect(() => {
 		const handleLoggedIn = (data: number) => {
+			console.log('Someone logged in: ', data);
 			setFriends((prevFriends) =>
 				prevFriends.map((friend) => {
 					if (
@@ -147,8 +155,9 @@ const Desktop = () => {
 				}),
 			);
 		};
-		userData?.chatSocket?.onClientLogIn(handleLoggedIn);
-	}, [userData]);
+		chatData.socket?.onClientLogIn(handleLoggedIn);
+		// userData?.chatSocket?.onClientLogIn(handleLoggedIn);
+	}, [chatData]);
 
 	/**
 	 * listens for a 'ClientLogInResponse' to check on connection which friends
@@ -156,6 +165,7 @@ const Desktop = () => {
 	 */
 	useEffect(() => {
 		const handleLoggedInResponse = (data: number) => {
+			console.log('Someone logged in response	: ', data);
 			setFriends((prevFriends) =>
 				prevFriends.map((friend) => {
 					if (
@@ -170,12 +180,14 @@ const Desktop = () => {
 				}),
 			);
 		};
-		userData?.chatSocket?.onClientLogInResponse(handleLoggedInResponse);
-	}, [userData]);
+		chatData.socket?.onClientLogInResponse(handleLoggedInResponse);
+		// userData?.chatSocket?.onClientLogInResponse(handleLoggedInResponse);
+	}, [chatData]);
 
 	// listen for a `ClientLogOut`
 	useEffect(() => {
 		const handleLoggedOut = (data: number) => {
+			console.log('Someone logged out: ', data);
 			setFriends((prevFriends) =>
 				prevFriends.map((friend) => {
 					if (friend.id === data && friend.onlineStatus === true) {
@@ -187,8 +199,9 @@ const Desktop = () => {
 				}),
 			);
 		};
-		userData?.chatSocket?.onLogOut(handleLoggedOut);
-	}, [userData]);
+		chatData.socket?.onLogOut(handleLoggedOut);
+		// userData?.chatSocket?.onLogOut(handleLoggedOut);
+	}, [chatData]);
 
 	return (
 		<div className="desktopWrapper" ref={windowDragConstraintRef}>

@@ -6,7 +6,7 @@ interface callbackInterface {
 	(data: any): void;
 }
 class WebSocketService {
-	private socket: Socket;
+	public socket: Socket;
 	private userId: number;
 
 	constructor(accessToken: string, userId: number) {

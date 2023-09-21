@@ -4,7 +4,7 @@ import Window from '../Window/Window';
 import PrivateMessagesList from './Components/PrivateMessagesList/PrivateMessagesList';
 import FriendBadge from '../Friends/Components/FriendBadge/FriendBadge';
 import { IFriendStruct } from '../Desktop/Desktop';
-import ChatWindow, { IMessage } from '../ChatWindow/ChatWindow';
+import ChatWindow from '../ChatWindow/ChatWindow';
 import useAuth from 'src/hooks/userAuth';
 import { UserContext } from 'src/contexts/UserContext';
 import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/SettingsWindow';
@@ -18,6 +18,7 @@ import {
 	fetchPrivateMessages,
 	findUserByLogin,
 } from 'src/utils/queries';
+import { ChatContext, IChatStruct, IMessage } from 'src/contexts/ChatContext';
 
 interface IPrivateMessagesProps {
 	onCloseClick: () => void;
@@ -26,13 +27,13 @@ interface IPrivateMessagesProps {
 	// chatWindowControl: (state: boolean) => void;
 }
 
-export interface IChatStruct {
-	chatId: number;
-	participants: number[];
-	name: string; // for the PM its the login
-	avatar?: string;
-	onlineIndicator?: boolean; // if it is a friend of us, show the online status
-}
+// export interface IChatStruct {
+// 	chatId: number;
+// 	participants: number[];
+// 	name: string; // for the PM its the login
+// 	avatar?: string;
+// 	onlineIndicator?: boolean; // if it is a friend of us, show the online status
+// }
 
 const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	onCloseClick,
@@ -52,6 +53,8 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	const [searchUserSuccess, setSearchUserSuccess] = useState('');
 	const { userData, setUserData } = useContext(UserContext);
 	const { accessToken } = useAuth();
+	const { chatData, updateChatData, updateChatList, getNewChatsList } =
+		useContext(ChatContext);
 
 	/* ********************************************************************* */
 	/* ***************************** WEBSOCKET ***************************** */
@@ -60,8 +63,8 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	// LISTENER: when receiving a message in active chat
 	// listen for a message everytime the chatId changes
 	useEffect(() => {
-		if (!userData || !userData.chatSocket) {
-			console.warn('your userData was not set up yet');
+		if (!chatData.socket) {
+			console.warn('your socket was not set up yet');
 			return;
 		}
 		const onReceiveMessage = (message: IMessage) => {
@@ -79,13 +82,14 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 				);
 			}
 		};
+		chatData.socket?.onReceiveMessage(onReceiveMessage);
 		// userData?.chatSocket?.onReceiveMessage(onReceiveMessage);
-		userData?.chatSocket?.onReceiveMessage(onReceiveMessage);
 
 		// stop listening to messages
 		// TODO: need to change that because I am not sure it will stop listening to the right room
 		return () => {
-			userData.chatSocket?.offReceiveMessage(onReceiveMessage);
+			chatData.socket?.offReceiveMessage(onReceiveMessage);
+			// userData.chatSocket?.offReceiveMessage(onReceiveMessage);
 		};
 	}, [chatWindowId, messages]);
 
@@ -96,17 +100,25 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	useEffect(() => {
 		console.log(' PrivateMessage - messages', messages);
 	}, [messages]);
+	// useEffect(() => {
+	// 	console.log(' PrivateMessage - privateMessages', privateMessages);
+	// }, [privateMessages]);
+
 	useEffect(() => {
-		console.log(' PrivateMessage - privateMessages', privateMessages);
-	}, [privateMessages]);
+		console.log(
+			'%cchatData.chatsList',
+			'background-color: red',
+			chatData.chatsList,
+		);
+	}, [chatData.chatsList]);
 
 	useEffect(() => {
 		console.log(' PrivateMessage - chatWindowId', chatWindowId);
 	}, [chatWindowId]);
 
-	useEffect(() => {
-		console.log(' PrivateMessage - searchUserSuccess', searchUserSuccess);
-	}, [searchUserSuccess]);
+	// useEffect(() => {
+	// 	console.log(' PrivateMessage - searchUserSuccess', searchUserSuccess);
+	// }, [searchUserSuccess]);
 	/* ********************************************************************* */
 	/* ******************************* LOGIC ******************************* */
 	/* ********************************************************************* */
@@ -115,7 +127,8 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	useEffect(() => {
 		fetchPrivateMessages(accessToken)
 			.then((data) => {
-				setPrivateMessages(data);
+				getNewChatsList(data, false);
+				// updateChatList(data);
 			})
 			.catch((e) => {
 				console.error('Error fetching private conversations: ', e);
@@ -129,7 +142,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	// Otherwise open clean the messages and open the window
 	const openPrivateMessageWindow: any = (roomId: number, friendId: number) => {
 		let foundChat = false;
-		const chatId = privateMessages.map((currentChat) => {
+		const chatId = chatData.chatsList.map((currentChat) => {
 			// if (
 			// 	currentChat.participants.length === 2 &&
 			// 	(currentChat.participants.at(0) === friendId ||
@@ -159,7 +172,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					setMessages([]);
 					fetchPrivateMessages(accessToken)
 						.then((data) => {
-							setPrivateMessages(data);
+							updateChatList(data);
 						})
 						.catch((e) => {
 							console.error('Error fetching private conversations: ', e);
@@ -190,19 +203,18 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					createChatPrivateMessage(data.id, userData.id, accessToken)
 						.then((room) => {
 							setSearchUserSuccess('Chat created successfully!');
-							const updatedPrivateMessages = privateMessages.map((current) => {
-								return current;
-							});
-							console.log('room', room);
-							updatedPrivateMessages.push({
-								chatId: room.chatId,
-								participants: [userData?.id ? userData.id : 0, data.id],
-								name: searchedLogin,
-							});
-							setPrivateMessages(updatedPrivateMessages);
+							updateChatList([
+								{
+									chatId: room.chatId,
+									participants: [userData?.id ? userData.id : 0, data.id],
+									name: searchedLogin,
+									isChannel: false,
+								},
+							]);
+
 							// fetchPrivateMessages(accessToken)
 							// 	.then((data) => {
-							// 		setPrivateMessages(data);
+							// 		updateChatList(data);
 							// 	})
 							// 	.catch((e) => {
 							// 		console.error('Error fetching private conversations: ', e);
@@ -249,33 +261,34 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					]}
 				>
 					<PrivateMessagesList>
-						{privateMessages.length > 0 ? (
-							privateMessages.map((room, index) => {
-								// find the other participant id
-								let participantId: number | undefined;
-								userData && room.participants.at(0) !== userData.id
-									? (participantId = room.participants.at(0))
-									: (participantId = room.participants.at(1));
+						{chatData.chatsList.length > 0 ? (
+							chatData.chatsList.map((room, index) => {
+								if (!room.isChannel) {
+									// find the other participant id
+									let participantId: number | undefined;
+									userData && room.participants.at(0) !== userData.id
+										? (participantId = room.participants.at(0))
+										: (participantId = room.participants.at(1));
 
-								// if it is a friend, display onlinestatus
-								const friend = friends.find((friend) => {
-									return friend.id === participantId;
-								});
-								console.warn('You found a friend in me', friend);
+									// if it is a friend, display onlinestatus
+									const friend = friends.find((friend) => {
+										return friend.id === participantId;
+									});
 
-								// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
-								return (
-									<FriendBadge
-										key={index}
-										badgeTitle={room.name}
-										badgeImageUrl={`http://localhost:3000${room.avatar}`}
-										onlineIndicator={friend ? friend.onlineStatus : false}
-										isClickable={true}
-										onClick={() => {
-											openPrivateMessageWindow(room.chatId, participantId);
-										}}
-									/>
-								);
+									// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
+									return (
+										<FriendBadge
+											key={index}
+											badgeTitle={room.name}
+											badgeImageUrl={`http://localhost:3000${room.avatar}`}
+											onlineIndicator={friend ? friend.onlineStatus : false}
+											isClickable={true}
+											onClick={() => {
+												openPrivateMessageWindow(room.chatId, participantId);
+											}}
+										/>
+									);
+								}
 							})
 						) : (
 							<FriendBadge
@@ -317,8 +330,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					chatId={chatWindowId}
 					messages={messages}
 					setMessages={setMessages}
-					setChatsList={setPrivateMessages}
-					chatsList={privateMessages}
 					setChatWindowIsOpen={setChatWindowIsOpen}
 				/>
 			)}
