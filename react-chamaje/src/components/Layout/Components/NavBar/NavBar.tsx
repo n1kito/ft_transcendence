@@ -5,14 +5,17 @@ import Clock from './Components/Clock/Clock';
 import { UserContext } from '../../../../contexts/UserContext';
 import FullscreenTrigger from './Components/FullscreenTrigger/FullscreenTrigger';
 import AnnaWintour from './../../../../images/Anna_Wintour.jpg';
+import useAuth from 'src/hooks/userAuth';
 export interface navBarProps {
 	isLoggedIn?: boolean;
 }
 
+// modified image display when loading page and when login page state
+
 const NavBar: React.FC<navBarProps> = ({ isLoggedIn = true }) => {
 	const navClasses = 'navBar' + `${isLoggedIn ? ' loggedIn' : ''}`;
 	const { userData } = useContext(UserContext);
-
+	const { isAuthentificated } = useAuth();
 	return (
 		<div className={navClasses}>
 			<div className="menuItems">
@@ -29,7 +32,7 @@ const NavBar: React.FC<navBarProps> = ({ isLoggedIn = true }) => {
 				<FullscreenTrigger />
 				<img
 					className="userAvatar"
-					src={userData ? userData.image : AnnaWintour}
+					src={isAuthentificated ? userData.image : AnnaWintour}
 				/>
 				<Lock />
 				<Clock />
