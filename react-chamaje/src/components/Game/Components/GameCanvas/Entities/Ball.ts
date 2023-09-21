@@ -7,9 +7,9 @@ export default class Ball extends GameEntity {
 	// Since our canvas is 700 pixels wide we will put 500 base speed
 	private BASE_SPEED: number = 300;
 	private MAX_SPEED: number = 450;
-	private speed: number = this.BASE_SPEED;
-	private xVelocity: number = 0;
-	private yVelocity: number = 0;
+	speed: number = this.BASE_SPEED;
+	xVelocity: number = 0;
+	yVelocity: number = 0;
 
 	constructor(x: number, y: number, width: number, height: number) {
 		super(x, y, width, height);
@@ -42,6 +42,7 @@ export default class Ball extends GameEntity {
 		const canvasWidth = canvasSize.width;
 		const canvasCenter = canvasWidth / 2 - this.width / 2;
 
+		console.log({ timeBetweenTwoFrames });
 		// update the position of the ball
 		this.x += timeBetweenTwoFrames * this.xVelocity * this.speed;
 		this.y += timeBetweenTwoFrames * this.yVelocity * this.speed;
@@ -147,5 +148,8 @@ export default class Ball extends GameEntity {
 		this.y = newState.y;
 		this.width = newState.width;
 		this.height = newState.height;
+		this.xVelocity = newState.xVelocity;
+		this.yVelocity = newState.yVelocity;
+		this.speed = newState.speed;
 	}
 }

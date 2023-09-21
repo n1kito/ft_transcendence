@@ -42,6 +42,9 @@ export interface IPlayerState {
 export interface IBallState {
 	x: number;
 	y: number;
+	xVelocity: number;
+	yVelocity: number;
+	speed: number;
 	width: number;
 	height: number;
 }
@@ -58,5 +61,7 @@ export interface IGameState {
 export interface IPlayerMovementPayload {
 	inputSequenceId: number;
 	direction: 'up' | 'down' | 'immobile';
-	frameRate: number;
+	ballXVelocity: number;
+	ballYVelocity: number;
+	ballSpeed: number;
 }

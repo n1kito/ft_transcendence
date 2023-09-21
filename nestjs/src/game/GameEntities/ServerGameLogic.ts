@@ -28,6 +28,8 @@ export class GameLogic {
 	public paddleHeight = this.canvasSize.height * 0.2;
 	public ballSize = 10;
 
+	private gameStateInterval = 16.667; // 60 FPS
+
 	constructor(
 		player1SocketId: string,
 		player2SocketId: string,
@@ -95,6 +97,7 @@ export class GameLogic {
 		direction: 'up' | 'down' | 'immobile',
 		inputSequenceId: number,
 	) {
+		console.log({ inputSequenceId });
 		// For convenience, find if we're updating the position of player 1 or 2
 		const playerIndex =
 			Object.keys(this.players).indexOf(playerSocketId) === 0 ? 1 : 2;
@@ -130,6 +133,9 @@ export class GameLogic {
 			ball: {
 				x: this.ball.x,
 				y: this.ball.y,
+				xVelocity: this.ball.xVelocity,
+				yVelocity: this.ball.yVelocity,
+				speed: this.ball.speed,
 				width: this.ball.width,
 				height: this.ball.height,
 			},
@@ -160,6 +166,9 @@ export class GameLogic {
 			ball: {
 				x: this.canvasSize.width - this.ball.x,
 				y: this.ball.y,
+				xVelocity: this.ball.xVelocity,
+				yVelocity: this.ball.yVelocity,
+				speed: this.ball.speed,
 				width: this.ball.width,
 				height: this.ball.height,
 			},
@@ -208,6 +217,11 @@ export class GameLogic {
 		this.log(`Started broadcasting at ${gameBroadcastInterval}ms interval`);
 		if (this.gameHasStarted && !this.gameBroadcastInterval) {
 			this.gameBroadcastInterval = setInterval(() => {
+				console.log(
+					`[Server] Timestamp: ${Date.now()}, BallX: ${this.ball.x}, BallY: ${
+						this.ball.y
+					}`,
+				);
 				this.broadcastGameState();
 			}, gameBroadcastInterval);
 		}
@@ -215,13 +229,18 @@ export class GameLogic {
 
 	// Start the game simulation with an interval of 50ms
 	private startGameSimulation() {
-		const gameStateInterval = 10;
+		// const gameStateInterval = 10;
 
-		this.log(`Started game simulation at ${gameStateInterval}ms interval`);
+		this.log(`Started game simulation at ${this.gameStateInterval}ms interval`);
+		let serverUpdateTime = Date.now();
 		if (this.gameHasStarted && !this.gameStateUpdateInterval) {
+			let currentTime = Date.now();
 			this.gameStateUpdateInterval = setInterval(() => {
-				this.updateGameState(gameStateInterval / 1000);
-			}, gameStateInterval);
+				let currentTime = Date.now();
+				console.log(`Server update time: ${currentTime - serverUpdateTime}ms`);
+				serverUpdateTime = currentTime;
+				this.updateGameState(this.gameStateInterval / 1000);
+			}, this.gameStateInterval);
 		}
 	}
 

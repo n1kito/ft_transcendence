@@ -4,9 +4,9 @@ import Paddle from './Paddle';
 export default class Ball extends GameEntity {
 	private BASE_SPEED: number = 300;
 	private MAX_SPEED: number = 450;
-	private speed: number = this.BASE_SPEED;
-	private xVelocity: number = 0;
-	private yVelocity: number = 0;
+	speed: number = this.BASE_SPEED;
+	xVelocity: number = 0;
+	yVelocity: number = 0;
 
 	constructor(x: number, y: number, width: number, height: number) {
 		super(x, y, width, height);

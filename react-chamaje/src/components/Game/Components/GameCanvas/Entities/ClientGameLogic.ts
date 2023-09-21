@@ -3,8 +3,7 @@ import Ball from './Ball';
 import {
 	IGameState,
 	IPlayerMovementPayload,
-	IPlayerState,
-} from '../../../../../../../shared-lib/types/game';
+} from '../../../../../../shared-lib/types/game';
 // import { ICurrentGameState } from '@sharedTypes/game';
 
 export class GameLogic {
@@ -17,7 +16,6 @@ export class GameLogic {
 	// 	direction: string;
 	// }> = [];
 	untreatedInputs: IPlayerMovementPayload[] = [];
-	latestInputId = 0;
 
 	// private frontEndPLayers = {};
 
@@ -30,17 +28,11 @@ export class GameLogic {
 
 	public canvasSize: { width: number; height: number };
 
-	public broadcastPlayerPosition: (
-		direction: string,
-		inputSequenceNumber: number,
-	) => void;
+	public broadcastPlayerPosition: (payload: IPlayerMovementPayload) => void;
 
 	constructor(
 		canvasSize: { width: number; height: number },
-		broadcastPlayerPosition: (
-			direction: string,
-			inputSequenceNumber: number,
-		) => void,
+		broadcastPlayerPosition: (payload: IPlayerMovementPayload) => void,
 	) {
 		this.canvasSize = canvasSize;
 
@@ -73,24 +65,33 @@ export class GameLogic {
 		);
 	}
 
-	gameStateServerUpdate(newState: IGameState | undefined) {
-		if (!newState) return;
+	gameStateServerUpdate(serverState: IGameState | undefined) {
+		if (!serverState) return;
 
+		// console.log(
+		// 	`[Client] Timestamp: ${Date.now()}, BallX: ${this.ball.x}, BallY: ${
+		// 		this.ball.y
+		// 	}`,
+		// );
+
+		// const oldBallX = this.ball.x;
+		// const oldBallY = this.ball.y;
 		// Update our player's position according to our received state
 		// which is most likely in the past, compared to where we are at right now
-		this.paddlePlayer.serverUpdate(newState.player1);
-
-		console.log('received sequenceid:', newState.inputSequenceId);
+		this.paddlePlayer.serverUpdate(serverState.player1);
+		// Same for the ball
+		// this.ball.serverUpdate(serverState.ball);
 
 		// Find the index of the last event that the server processed
 		const lastTreatedInputIndex = this.untreatedInputs.findIndex((input) => {
 			// Return a condition
-			return newState.inputSequenceId === input.inputSequenceId;
+			return serverState.inputSequenceId === input.inputSequenceId;
 		});
-		console.log({ lastTreatedInputIndex });
-		if (lastTreatedInputIndex > -1)
+		if (lastTreatedInputIndex > -1) {
 			// Remove the non-needed inputs from our untreated input history
 			this.untreatedInputs.splice(0, lastTreatedInputIndex + 1);
+		}
+
 		// And for each remaining input, apply them to that past position we
 		// acknowledged from the server, so our player can be positioned in
 		// its corrent current state based on its past position and the number
@@ -99,31 +100,52 @@ export class GameLogic {
 			const numberDirection =
 				input.direction === 'up' ? -1 : input.direction === 'down' ? 1 : 0;
 			// For each remaining action we did after our server update,
-			// we update the position relative to the frame rate of our canvas // TODO: I THINK, it's just so fucking confusing
+			// we update the position relative to the frame rate of our canvas
 			this.paddlePlayer.y +=
-				input.frameRate * this.paddlePlayer.speed * numberDirection;
+				(1 / 60) * this.paddlePlayer.speed * numberDirection;
+			// this.ball.x += (1 / 60) * input.ballSpeed * input.ballXVelocity;
+			// this.ball.y += (1 / 60) * input.ballSpeed * input.ballYVelocity;
 		});
 
-		// Update the opponent's position
-		this.paddleOpponent.serverUpdate(newState.player2);
+		// if (this.ball.x != oldBallX)
+		// 	console.log(
+		// 		'new coordinates: ' + this.ball.x + ' predicted: ' + oldBallX,
+		// 	);
+		// if (this.ball.y != oldBallY)
+		// 	console.log(
+		// 		'new coordinates: ' + this.ball.y + ' predicted: ' + oldBallY,
+		// 	);
 
-		// Update the player scores
-		this.playerScore = newState.player1.score;
-		this.opponentScore = newState.player2.score;
+		// Update the opponent's position
+		this.paddleOpponent.serverUpdate(serverState.player2);
 
 		// Update the ball
-		this.ball.serverUpdate(newState.ball);
+		// TODO: the ball should actually be tracked like my paddle
+		// and have server reconciliation the same as my paddle
+		// TODO: non pas forcement en fait je peux aussi juste interpoler
+		// puisque le serveur a sa propre logique il saura toujours si un joueur
+		// essaye de tricher pour gagner des points
+		this.ball.serverUpdate(serverState.ball);
+
+		// Update the player scores
+		this.playerScore = serverState.player1.score;
+		this.opponentScore = serverState.player2.score;
 	}
 
-	updateElementsState(timeBetweenTwoFrames: number): void {
-		this.paddlePlayer.update(this.canvasSize, timeBetweenTwoFrames);
-		this.paddleOpponent.update(this.canvasSize, timeBetweenTwoFrames);
+	updateElementsState(deltaTime: number): void {
+		// console.log(
+		// 	`[Client - Post Update] Timestamp: ${Date.now()}, BallX: ${
+		// 		this.ball.x
+		// 	}, BallY: ${this.ball.y}`,
+		// );
+		this.paddlePlayer.update(this.canvasSize, deltaTime);
+		this.paddleOpponent.update(this.canvasSize, deltaTime);
 		this.ball.update(
 			this.paddlePlayer,
 			this.paddleOpponent,
 			this.canvasSize,
 			this.handleScoreUpdate,
-			timeBetweenTwoFrames,
+			deltaTime,
 		);
 	}
 

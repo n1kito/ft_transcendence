@@ -158,6 +158,7 @@ export class GameService {
 			// TODO: if a client leaves and they were in a game, we need to
 			// stop the game broadcast, end the match etc...
 			// Delete the client from the room
+			this.rooms[currentRoomId].gameInstance.endGame(); // TODO: this was to debug
 			delete this.rooms[currentRoomId].players[socket.id];
 			console.log(`[🏠] Removing [%s] from room %s`, socket.id, currentRoomId);
 
@@ -259,7 +260,7 @@ export class GameService {
 	░█░█░█▀█░█░█░█▀▀
 	░▀▀▀░▀░▀░▀░▀░▀▀▀
 	*/
-	
+
 	handlePlayerMovement(
 		clientSocket: Socket,
 		direction: 'up' | 'down' | 'immobile',
@@ -273,7 +274,7 @@ export class GameService {
 		this.rooms[playerRoomId].gameInstance.setPlayerDirection(
 			clientSocket.id,
 			direction,
-			inputSequenceId
+			inputSequenceId,
 		);
 	}
 

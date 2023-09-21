@@ -5,6 +5,7 @@ import { IGameState } from '../../../shared-lib/types/game';
 import { Socket, io } from 'socket.io-client';
 import useAuth from './userAuth';
 import type { IPlayerInformation } from '../../../shared-lib/types/game';
+import { IPlayerMovementPayload } from 'shared-lib/types/game';
 
 export const useGameSocket = () => {
 	// Import necessary contexts
@@ -196,16 +197,9 @@ export const useGameSocket = () => {
 		});
 	};
 
-	const broadcastPlayerPosition = (
-		direction: string,
-		inputSequenceNumber: number,
-	) => {
+	const broadcastPlayerPosition = (payload: IPlayerMovementPayload) => {
 		// socketLog(`sending paddle movement: ${direction}`);
-		socketRef.current?.emit('player-moved', {
-			playerNumber: userData?.id,
-			direction: direction,
-			inputSequenceNumber: inputSequenceNumber,
-		});
+		socketRef.current?.emit('player-moved', payload);
 	};
 
 	const notifyPlayerLeft = () => {
