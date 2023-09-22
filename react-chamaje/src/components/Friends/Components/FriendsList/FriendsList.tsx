@@ -37,6 +37,7 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 	const [searchUserError, setSearchUserError] = useState('');
 	const [isFriendAdded, setIsFriendAdded] = useState(false);
 
+	// input validation before sending request
 	const handleLoginChange = (username: string) => {
 		setSearchedLogin(username);
 		// allowed characters for username
@@ -59,33 +60,27 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 		addFriend(searchedLogin, accessToken)
 			.then(async (data) => {
 				setSettingsPanelIsOpen(false);
-				setIsFriendAdded(true);
+				// check if friend to be added is not already in the friends list
+				if (!friends.some((friend) => friend.login === data.login)) {
+					// create friend object for <IFriendStruct>
+					const newFriend = {
+						id: data.id,
+						login: data.login,
+						image: data.image,
+						onlineStatus: false,
+					};
+					// add the new friend to the existing friends list
+					const updatedFriends = [...friends, newFriend];
+					// update the state with the updated friends list
+					setFriends(updatedFriends);
+					// ping to update online status
+					userData?.chatSocket?.sendServerConnection();
+				}
 			})
 			.catch((error) => {
 				setSearchUserError(error.message);
 			});
 	};
-
-	useEffect(() => {
-		// if a friend is successfully added then update friendslist
-		if (isFriendAdded) {
-			fetchFriends(accessToken)
-				.then(async (data) => {
-					// Update friends state
-					setFriends(data);
-					// Ping friends to get updated online status
-					userData?.chatSocket?.sendServerConnection();
-					// End isFriendAdded state
-					setIsFriendAdded(false);
-				})
-				.catch((error) => {
-					console.error('could not fetch friends: ', error);
-				});
-		}
-		return () => {
-			setSearchUserError('');
-		};
-	}, [isFriendAdded]);
 
 	// if user click outside the settings window
 	// (meaning going back to the main window)

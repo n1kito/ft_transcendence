@@ -32,7 +32,7 @@ const NavBar: React.FC<navBarProps> = ({ isLoggedIn = true }) => {
 				<FullscreenTrigger />
 				<img
 					className="userAvatar"
-					src={isAuthentificated ? userData.image : AnnaWintour}
+					src={isAuthentificated && userData ? userData.image : AnnaWintour}
 				/>
 				<Lock />
 				<Clock />

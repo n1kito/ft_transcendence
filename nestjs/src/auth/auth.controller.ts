@@ -75,8 +75,7 @@ export class AuthController {
 				payload,
 			);
 			// TODO: error 401 due to asynchron issue ?
-			// Attach the generated access and refresh tokens as cookies in the response
-			// this.tokenService.attachAccessTokenCookie(res, accessToken);
+
 			this.tokenService.attachRefreshTokenCookie(res, refreshToken);
 
 			// Define the URL to redirect the user after successful authentication

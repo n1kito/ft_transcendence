@@ -29,6 +29,7 @@ import InputField from './Components/InputField/InputField';
 import { useNavigate } from 'react-router-dom';
 import { deleteFriend } from 'src/utils/FriendsQueries';
 import { deleteMyProfile, fetchUserData } from 'src/utils/UserQueries';
+import { turnOffTwoFactorAuthentication } from 'src/utils/TwoFactorAuthQueries';
 
 // TODO: find a way to make the shaddow wrapper widht's 100% so if fills the sidebar
 export interface ProfileProps {
@@ -139,23 +140,13 @@ const Profile: React.FC<ProfileProps> = ({
 
 	// disable two-factor authentication
 	const disableTwoFactorAuthentication = async () => {
-		try {
-			const response = await fetch('api/login/2fa/turn-off', {
-				method: 'POST',
-				credentials: 'include',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-			});
-			if (response.ok) {
+		turnOffTwoFactorAuthentication(accessToken)
+			.then(() => {
 				setIsTwoFAEnabled(false);
-			} else if (response.status === 500) {
-				const messageError = await response.json();
-				console.error(messageError);
-			}
-		} catch (error) {
-			throw new Error('internal error');
-		}
+			})
+			.catch((error) => {
+				console.error(error);
+			});
 	};
 
 	// if 2Fa is correctly enable, means 2FA window must unmount and
@@ -171,8 +162,8 @@ const Profile: React.FC<ProfileProps> = ({
 		// if still in authentication process
 		if (isInProcessRef.current) {
 			// turn-off 2FA to prevent setting the user as verified
-			disableTwoFactorAuthentication().catch((error) => {
-				console.error('Error disabling 2FA: ', error);
+			turnOffTwoFactorAuthentication(accessToken).catch((error) => {
+				console.error(error);
 			});
 		}
 	};
@@ -236,6 +227,7 @@ const Profile: React.FC<ProfileProps> = ({
 	/* Change Avatar                                                                      */
 	/**************************************************************************************/
 	const [selectedFile, setSelectedFile] = useState<File | null>(null);
+	const [fileError, setFileError] = useState('');
 
 	const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files ? event.target.files[0] : null;

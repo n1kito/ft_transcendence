@@ -6,6 +6,12 @@ import InputField from '../InputField/InputField';
 import Button from 'src/components/Shared/Button/Button';
 import useAuth from 'src/hooks/userAuth';
 import ShadowWrapper from 'src/components/Shared/ShadowWrapper/ShadowWrapper';
+import {
+	logInTwoFactorAuthentication,
+	turnOffTwoFactorAuthentication,
+	turnOnTwoFactorAuthentication,
+} from 'src/utils/TwoFactorAuthQueries';
+import { access } from 'fs';
 
 export interface TwoFactorAuthenticationProps {
 	setTwoFactorAuthWindowisOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -25,35 +31,19 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 	// with the validation code given by google authenticator after scanning
 	// the QR code.
 	const handleActivateButtonClick = async () => {
-		try {
-			const response = await fetch('/api/login/2fa/authenticate', {
-				method: 'POST',
-				credentials: 'include',
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': `Bearer ${accessToken}`,
-				},
-				body: JSON.stringify({ twoFactorAuthenticationCode: validationCode }),
-			});
-			if (response.ok) {
-				const responseData = await response.json();
+		logInTwoFactorAuthentication(validationCode, accessToken)
+			.then((data) => {
 				// set 2fa to 'enabled'
 				setIsTwoFAEnabled(true);
 				// reset validation code error, just in case
 				setValidationCodeError('');
 				// set the authentication process as finished
 				isProcessFinishedRef.current = true;
-			} else {
-				// if validation code error is invalid, set
-				// `ValidationCodeError` state to display
-				// error message
-				const responseData = await response.json();
-				console.log('response: ', responseData);
-				setValidationCodeError(responseData.message);
-			}
-		} catch (error) {
-			console.error(error);
-		}
+			})
+			.catch((error) => {
+				// set error to display it
+				setValidationCodeError(error);
+			});
 	};
 
 	// Handle input state: disable the 'activate' button in case
@@ -61,10 +51,8 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 	const handleInput = (newValidationCode: string) => {
 		// Save keyboard event is ValidationCodeState
 		setValidationCode(newValidationCode);
-
 		// test if input is only digit
 		const isDigitOnly = /^[0-9]+$/.test(newValidationCode);
-
 		// if input is not valid set InputError to true
 		if (!newValidationCode || newValidationCode.length < 6 || !isDigitOnly)
 			setInputError(true);
@@ -72,61 +60,32 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 		else setInputError(false);
 	};
 
-	// fetch request to turn on 2FA mode : generate google auth secret and
-	// enable 2fa status (boolean). Infos are kept in database until user
-	// decides to turn it off.
-	// RETURN : generated QR Code with google auth secret and user's payload
-	const turnOn2fa = async () => {
-		try {
-			const response = await fetch('api/login/2fa/turn-on', {
-				method: 'POST',
-				credentials: 'include',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-			});
-			if (response.ok) {
-				// retrieve QR code url from response
-				const qrCodeUrl = await response.text();
-				// and update qrCode state
-				setQrCode(qrCodeUrl);
-			}
-		} catch (error) {
-			console.error('2fa: ', error);
-		}
-	};
-
-	// fetch request to turn off 2FA mode : remove google auth secret and
-	// fisable 2FA status
-	const turnOff2fa = async () => {
-		try {
-			const response = await fetch('api/login/2fa/turn-off', {
-				method: 'POST',
-				credentials: 'include',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-			});
-			if (response.ok) {
-				// if success, clean states managing 2FA mode
-				setQrCode('');
-				setIsTwoFAEnabled(false);
-			}
-		} catch (error) {
-			console.error('2fa: ', error);
-		}
-	};
-
 	useEffect(() => {
-		// On mount, turn on 2FA
-		turnOn2fa();
+		// On mount, turn on Two-Factor Authentication
+		// generate a qr code
+		turnOnTwoFactorAuthentication(accessToken)
+			.then((qrCodeUrl) => {
+				// get QR code url from response
+				// and update QrCode state
+				setQrCode(qrCodeUrl);
+			})
+			.catch((error) => {
+				console.error(error);
+			});
 
 		return () => {
 			// On unmount, if ever the process is not completed before
 			// verifyin user's 2FA autentication (meaning validation code
 			// is verified by google auth), turn off 2FA and close window
 			if (!isProcessFinishedRef.current) {
-				turnOff2fa();
+				turnOffTwoFactorAuthentication(accessToken)
+					.then((data) => {
+						setQrCode('');
+						setIsTwoFAEnabled(false);
+					})
+					.catch((error) => {
+						console.error(error);
+					});
 				setTwoFactorAuthWindowisOpen(false);
 			}
 		};

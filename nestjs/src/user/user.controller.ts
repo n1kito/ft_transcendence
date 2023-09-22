@@ -216,7 +216,6 @@ export class UserController {
 				matchHistory: matchHistory,
 				rivalLogin,
 				rivalImage,
-				// friends: this.getUserFriends,
 			};
 		}
 		// else, we only return what is needed for the profile component
@@ -266,9 +265,13 @@ export class UserController {
 			}
 			// add friend
 			await this.userService.addFriend(userId, friend.id);
-			return response
-				.status(200)
-				.json({ message: 'Friend added successfully' });
+			// return newly added friend object
+			return response.status(200).json({
+				id: friend.id,
+				login: friend.login,
+				image: friend.image,
+				onlineStatus: false,
+			});
 		} catch (error) {
 			return response.status(400).json({
 				message: error,

@@ -162,9 +162,9 @@ export class AuthService {
 		// fetch request to `imagesUrl` to save it at `localImagePath`
 		const request = https.get(imageUrl, (response) => {
 			if (response.statusCode !== 200) {
-				throw Error(
-					`failed to fetch image status code: ${response.statusCode}`,
-				);
+				// throw Error(
+				// 	`failed to fetch image status code: ${response.statusCode}`,
+				// );
 				return;
 			}
 
