@@ -327,7 +327,7 @@ export class UserService {
 
 	async addFriend(userId: number, friendUserIdToAdd: number) {
 		try {
-			// Retrieve user's data including its friends list
+			// Retrieve user's data including friends list
 			let user = await this.prisma.user.findUnique({
 				where: {
 					id: userId,
@@ -370,15 +370,15 @@ export class UserService {
 	}
 
 	async uploadAvatar(file: Express.Multer.File, userId: number) {
+		// get user in db
 		let user = await this.prisma.findUserById(userId);
 		if (!user) {
 			throw 'User not found';
 		}
-
 		// retrieve avatar name in database
-		const avatarName = user.image;
+		const oldAvatarName = user.image;
 		// append it to get filepath
-		const filePath = `./images/${avatarName}`;
+		const filePathToDelete = `./images/${oldAvatarName}`;
 
 		try {
 			// update image path in database
@@ -392,9 +392,9 @@ export class UserService {
 				},
 			});
 			// if success delete old avatar
-			fs.access(filePath, constants.F_OK, (err) => {
+			fs.access(filePathToDelete, constants.F_OK, (err) => {
 				if (err) console.log(`${file} ${err ? 'does not exist' : 'exists'}`);
-				fs.unlink(filePath, (error) => {
+				fs.unlink(filePathToDelete, (error) => {
 					if (error) throw error;
 				});
 			});
@@ -403,14 +403,14 @@ export class UserService {
 		}
 	}
 
-	async validateLoginDto(login: string) {
+	async validateLoginDto(login: string): Promise<boolean> {
 		// init searchUserDto
 		const searchUserDto = new SearchUserDto();
 		searchUserDto.login = login;
 
 		// Validate the searchUserDto
 		const errors = await validate(searchUserDto);
-
+		// if found error return true
 		return errors.length > 0 ? true : false;
 	}
 }

@@ -35,18 +35,18 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [searchedLogin, setSearchedLogin] = useState('');
 	const [searchUserError, setSearchUserError] = useState('');
-	const [searchUserSuccess, setSearchUserSuccess] = useState('');
 	const [isFriendAdded, setIsFriendAdded] = useState(false);
 
 	const handleLoginChange = (username: string) => {
 		setSearchedLogin(username);
-		// setSearchUserError('');
-		setSearchUserSuccess('');
+		// allowed characters for username
 		const usernameRegex = /^[A-Za-z0-9-_\\.]*$/;
-
+		// if input is empty set error to prevent sending useless requests
 		if (!username) setSearchUserError(' ');
+		// check if username is valid
 		else if (!usernameRegex.test(username))
 			return setSearchUserError('only letters and numbers');
+		// wait until minimun length before sending request
 		else if (username.length < 4) setSearchUserError(' ');
 		else {
 			setSearchUserError('');
@@ -80,13 +80,19 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 				})
 				.catch((error) => {
 					console.error('could not fetch friends: ', error);
-					// setSearchUserError(error.message);
 				});
 		}
 		return () => {
 			setSearchUserError('');
 		};
 	}, [isFriendAdded]);
+
+	// if user click outside the settings window
+	// (meaning going back to the main window)
+	// removes error message
+	useEffect(() => {
+		if (searchUserError) setSearchUserError('');
+	}, [settingsPanelIsOpen]);
 
 	return (
 		<Window
@@ -122,11 +128,10 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 			{settingsPanelIsOpen && (
 				<SettingsWindow settingsWindowVisible={setSettingsPanelIsOpen}>
 					<Title highlightColor="yellow">Username</Title>
-					<div className="settings-form">
+					<div className="search-login-form">
 						<InputField
 							onChange={handleLoginChange}
 							error={searchUserError}
-							success={searchUserSuccess}
 							maxlength={8}
 						></InputField>
 

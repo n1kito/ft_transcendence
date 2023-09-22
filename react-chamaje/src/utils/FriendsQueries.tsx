@@ -11,11 +11,10 @@ export async function fetchFriends(accessToken: string) {
 			const data = await response.json();
 			throw new Error(data.message);
 		}
-		if (response.ok) {
-			const data = await response.json();
-			return data.friends;
-			return response.json();
-		}
+
+		const data = await response.json();
+		return data.friends;
+		return response.json();
 	} catch (error) {
 		throw error;
 	}

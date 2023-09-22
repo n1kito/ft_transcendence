@@ -181,10 +181,12 @@ export class UserController {
 		// Rank logic
 		const userRank = usersWithHigherKillCountThanOurUser + 1;
 		// Target logic
-		const targetUser = await this.prisma.user.findUnique({
-			where: { id: user.targetId },
-		});
-		// Rival logic
+		const targetUser =
+			!user.isDefaultProfile && user.targetId !== null
+				? await this.prisma.user.findUnique({
+						where: { id: user.targetId },
+				  })
+				: undefined;
 		const { rivalLogin, rivalImage } = await this.userService.findUserRival(
 			user.id,
 		);
@@ -207,8 +209,8 @@ export class UserController {
 				killCount: user.killCount,
 				winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
 				rank: userRank,
-				targetLogin: targetUser.login,
-				targetImage: targetUser.image,
+				targetLogin: targetUser?.login,
+				targetImage: targetUser?.image,
 				bestieLogin: bestieUser.bestieLogin,
 				bestieImage: bestieUser.bestieImage,
 				matchHistory: matchHistory,
@@ -227,8 +229,8 @@ export class UserController {
 				killCount: user.killCount,
 				winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
 				rank: userRank,
-				targetLogin: targetUser.login,
-				targetImage: targetUser.image,
+				targetLogin: targetUser?.login,
+				targetImage: targetUser?.image,
 				targetDiscoveredByUser: user.targetDiscoveredByUser,
 				bestieLogin: bestieUser.bestieLogin,
 				bestieImage: bestieUser.bestieImage,
@@ -238,8 +240,7 @@ export class UserController {
 			};
 	}
 
-	// TODO: add DTO
-
+	// add `login` in friends[]
 	@Put(':login/add')
 	async addFriend(
 		@Param('login') login: string,
@@ -247,37 +248,35 @@ export class UserController {
 		@Res() response: Response,
 	) {
 		try {
+			// verify `login` with SearchUserDto
 			const errorDto = await this.userService.validateLoginDto(login);
 			if (errorDto)
 				return response.status(400).json({ message: 'Validation failed' });
-
+			// authenticate requesting user
 			const userId = this.userService.authenticateUser(request);
-
 			// retrieve friend's user id
 			const friend = await this.prisma.user.findUnique({
 				where: { login: login },
 			});
 			if (!friend)
 				return response.status(404).json({ message: 'User not found' });
-
+			// cannot add self
 			if (userId === friend.id) {
 				return response.status(401).json({ message: 'Cannot add yourself' });
 			}
-
+			// add friend
 			await this.userService.addFriend(userId, friend.id);
 			return response
 				.status(200)
 				.json({ message: 'Friend added successfully' });
 		} catch (error) {
-			console.error('---------------------------------', error);
 			return response.status(400).json({
 				message: error,
 			});
 		}
 	}
 
-	// TODO: add DTO
-	// cannot delete self !
+	// delete `login` in friends[]
 	@Delete(':login/delete')
 	async deleteFriend(
 		@Param('login') login: string,
@@ -285,29 +284,29 @@ export class UserController {
 		@Res() response: Response,
 	) {
 		try {
+			// verify `login` with SearchUserDto
 			const errorDto = await this.userService.validateLoginDto(login);
 			if (errorDto)
 				return response.status(400).json({ message: 'Validation failed' });
-
+			// authenticate requesting user
 			const userId = this.userService.authenticateUser(request);
-
 			// retrieve friend's user id
 			const friend = await this.prisma.user.findUnique({
 				where: { login: login },
 			});
-
+			// friend not found in db
 			if (!friend) response.status(404).json({ message: 'Friend not found' });
-
+			// cannot delete self
 			if (userId === friend.id) {
 				return response
 					.status(401)
 					.json({ message: 'Cannot deleter yourself' });
 			}
-
+			// delete friend
 			await this.userService.deleteFriend(userId, friend.id);
 			response.status(200).json({ message: 'Friend deleted successfully' });
 		} catch (error) {
-			return response.status(500).json({
+			return response.status(400).json({
 				error: error,
 			});
 		}
@@ -333,7 +332,7 @@ export class UserController {
 					// extract mimetype line from file's data and split
 					const parts = file.mimetype.split('/');
 					// if not only one '/' is found throw error
-					if (parts.length !== 2) throw new Error('Invalid mimetype format');
+					if (parts.length !== 2) throw 'Invalid mimetype format';
 					// get part after '/'
 					const extensionName = parts[1];
 					// this should be the extension name
@@ -363,10 +362,7 @@ export class UserController {
 				return response.status(401).json({ message: 'User is unauthorized' });
 
 			await this.userService.uploadAvatar(file, userId);
-			// console.log('🍧 image path:', imagePath);
-			// if (imagePath) {
 			return response.status(200).json({ image: file.filename });
-			// }
 		} catch (error) {
 			response.status(400).json({ message: error });
 		}

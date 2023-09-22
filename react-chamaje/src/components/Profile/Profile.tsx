@@ -202,6 +202,7 @@ const Profile: React.FC<ProfileProps> = ({
 				},
 			});
 			if (response.ok) {
+				// if success go back to login page
 				logOut();
 			} else if (response.status === 500) {
 				const messageError = await response.json();
