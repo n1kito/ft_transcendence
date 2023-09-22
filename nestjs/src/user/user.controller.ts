@@ -31,7 +31,7 @@ import { validate } from 'class-validator';
 import { twoFactorAuthenticationCodeDto } from 'src/auth/dto/two-factor-auth-code.dto';
 import { SearchUserDto } from './dto/search-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { MulterError, diskStorage } from 'multer';
 import path from 'path';
 
 export interface CustomRequest extends Request {
@@ -318,6 +318,16 @@ export class UserController {
 	@Put('upload')
 	@UseInterceptors(
 		FileInterceptor('file', {
+			// define a custom filter to block evil files
+			fileFilter: (request: CustomRequest, file, cb) => {
+				// if file extension meet the critera, allow the file to pursue his destiny
+				if (file.originalname.match(/^.*\.(jpg|png|jpeg)$/)) cb(null, true);
+				else if (file.size > 1024 * 1024 * 4) cb(null, true);
+				else {
+					// reject the evil file
+					cb(new MulterError('LIMIT_UNEXPECTED_FILE', 'file'), false);
+				}
+			},
 			storage: diskStorage({
 				destination: './images',
 				filename: (request: CustomRequest, file, cb) => {
@@ -350,6 +360,7 @@ export class UserController {
 		@Req() request: CustomRequest,
 		@Res() response: Response,
 		@UploadedFile(
+			// extra layer of security
 			new ParseFilePipe({
 				validators: [
 					new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
@@ -360,11 +371,13 @@ export class UserController {
 		file: Express.Multer.File,
 	) {
 		try {
+			// get userId
 			const userId = this.userService.authenticateUser(request);
 			if (!userId)
 				return response.status(401).json({ message: 'User is unauthorized' });
-
+			// upload new avatar
 			await this.userService.uploadAvatar(file, userId);
+			// send response ok with the avatar's filename
 			return response.status(200).json({ image: file.filename });
 		} catch (error) {
 			response.status(400).json({ message: error });

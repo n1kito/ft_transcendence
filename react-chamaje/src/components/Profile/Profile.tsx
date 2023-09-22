@@ -40,7 +40,6 @@ export interface ProfileProps {
 	onCloseClick: () => void;
 	nbOnline: number;
 	setNbOnline: React.Dispatch<React.SetStateAction<number>>;
-	nbFriendsOnline: number;
 	setShowFriendProfile?: React.Dispatch<React.SetStateAction<boolean>>;
 	setDeletedFriend?: React.Dispatch<React.SetStateAction<string>>;
 }
@@ -53,7 +52,6 @@ const Profile: React.FC<ProfileProps> = ({
 	onCloseClick,
 	nbOnline,
 	setNbOnline,
-	nbFriendsOnline,
 	setShowFriendProfile,
 	setDeletedFriend,
 }) => {
@@ -205,8 +203,8 @@ const Profile: React.FC<ProfileProps> = ({
 		if (login && setDeletedFriend)
 			deleteFriend(login, accessToken)
 				.then(async (data) => {
-					nbFriendsOnline--;
-					setNbOnline(nbFriendsOnline);
+					nbOnline--;
+					setNbOnline(nbOnline);
 					setSettingsPanelIsOpen(false);
 					setDeletedFriend(login);
 					onCloseClick();
@@ -230,8 +228,21 @@ const Profile: React.FC<ProfileProps> = ({
 	const [fileError, setFileError] = useState('');
 
 	const handleFileInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setSelectedFile(null);
 		const file = event.target.files ? event.target.files[0] : null;
-		setSelectedFile(file);
+		if (file) {
+			// Check the file type
+			if (!/(\.jpeg|\.jpg|\.png)$/i.test(file.name)) {
+				setFileError('File must be a .jpeg, .jpg, or .png image.');
+			} else if (file.size > 1024 * 1024 * 4) {
+				setFileError('File size must be less than 4 MB.');
+			} else {
+				// Reset any previous file error
+				setFileError('');
+				// Set the selected file
+				setSelectedFile(file);
+			}
+		}
 	};
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -271,9 +282,17 @@ const Profile: React.FC<ProfileProps> = ({
 				console.error(messageError);
 			}
 		} catch (error) {
+			alert();
 			console.error(error);
 		}
 	};
+
+	useEffect(() => {
+		return () => {
+			// cleanup on unmount
+			if (fileError) setFileError('');
+		};
+	});
 
 	return (
 		<Window
@@ -372,6 +391,9 @@ const Profile: React.FC<ProfileProps> = ({
 								type="file"
 								onChange={handleFileInput}
 							/>
+							{fileError && (
+								<div className="change-avatar-error">{fileError}</div>
+							)}
 							<Button
 								onClick={uploadNewAvatar}
 								disabled={selectedFile ? false : true}

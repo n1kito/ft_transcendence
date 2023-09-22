@@ -277,7 +277,6 @@ const Desktop = () => {
 						windowDragConstraintRef={windowDragConstraintRef}
 						nbOnline={nbOnline}
 						setNbOnline={SetNbOnline}
-						nbFriendsOnline={nbFriendsOnline}
 					/>
 				)}
 				{openFriendsWindow && (
@@ -301,7 +300,6 @@ const Desktop = () => {
 						isMyFriend={true}
 						nbOnline={nbOnline}
 						setNbOnline={SetNbOnline}
-						nbFriendsOnline={nbFriendsOnline}
 						setShowFriendProfile={setShowFriendProfile}
 						setDeletedFriend={setDeletedFriend}
 					></Profile>
