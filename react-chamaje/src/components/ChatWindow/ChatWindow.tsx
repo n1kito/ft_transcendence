@@ -21,16 +21,21 @@ import DOMPurify from 'dompurify';
 import {
 	blockUserQuery,
 	fetchChannels,
-	fetchPrivateMessages,
 	getAdminRights,
 	getChatInfo,
 	leaveChat,
 	makePrivate,
 	sendMessageQuery,
 	setNewPassword,
+	unblockUserQuery,
 } from 'src/utils/queries';
 // import { IChatStruct } from '../PrivateMessages/PrivateMessages';
-import { ChatContext, IChatStruct, IMessage } from 'src/contexts/ChatContext';
+import {
+	ChatContext,
+	IChatStruct,
+	IMessage,
+	IUserBlocked,
+} from 'src/contexts/ChatContext';
 
 export interface IChatWindowProps {
 	onCloseClick: () => void;
@@ -87,13 +92,23 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	const [pwdContent, setPwdContent] = useState('');
 
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
+	const [settingPwdError, setSettingPwdError] = useState('');
+	const [settingPwdSuccess, setSettingPwdSuccess] = useState('');
+
 	const [channelIsPrivate, setChannelIsPrivate] = useState(false);
 	const [isOwner, setIsOwner] = useState(false);
 	const [isAdmin, setIsAdmin] = useState(false);
+	const [isBlocked, setIsBlocked] = useState(false);
+	const [secondUserId, setSecondUserId] = useState(0);
 
 	const { userData } = useContext(UserContext);
-	const { chatData, updateChatList, getNewChatsList, updateBlockedUsers } =
-		useContext(ChatContext);
+	const {
+		chatData,
+		updateChatList,
+		getNewChatsList,
+		updateBlockedUsers,
+		getNewBlockedUsers,
+	} = useContext(ChatContext);
 	const chatContentRef = useRef<HTMLDivElement>(null);
 
 	const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -124,6 +139,8 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	/* ************************** links functions ************************** */
 	const openSettingsPanel = () => {
 		setSettingsPanelIsOpen(!settingsPanelIsOpen);
+		setSettingPwdSuccess('');
+		setSettingPwdError('');
 	};
 	/* ********************************************************************* */
 	/* ********************** channel links functions ********************** */
@@ -136,7 +153,8 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 				const updatedChatsList = chatData.chatsList.filter(
 					(channel) => channel.chatId !== chatId,
 				);
-				getNewChatsList(updatedChatsList, true);
+				console.log('updatedChatsList', updatedChatsList);
+				getNewChatsList(updatedChatsList);
 				setChatWindowIsOpen(false);
 			})
 			.catch((e) => {
@@ -157,7 +175,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 				const updatedChatsList = chatData.chatsList.filter(
 					(privateMessage) => privateMessage.chatId !== chatId,
 				);
-				getNewChatsList(updatedChatsList, false);
+				getNewChatsList(updatedChatsList);
 				setChatWindowIsOpen(false);
 			})
 			.catch((e) => {
@@ -172,13 +190,30 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 				for (const pKey in current.participants) {
 					const pCurrent = current.participants[pKey];
 					if (pCurrent !== userData?.id) {
-						blockUserQuery(accessToken, pCurrent)
-							.then(() => {
-								updateBlockedUsers([pCurrent]);
-							})
-							.catch((e) => {
-								console.error('Could not block user: ', e.message);
-							});
+						if (!isBlocked) {
+							blockUserQuery(accessToken, pCurrent)
+								.then(() => {
+									updateBlockedUsers([
+										{ userBlockedId: pCurrent, blockedAt: new Date() },
+									]);
+									setIsBlocked(true);
+								})
+								.catch((e) => {
+									console.error('Could not block user: ', e.message);
+								});
+						} else {
+							unblockUserQuery(accessToken, pCurrent)
+								.then(() => {
+									const updatedBlockedUsers = chatData.blockedUsers.filter(
+										(user) => user.userBlockedId !== secondUserId,
+									);
+									getNewBlockedUsers(updatedBlockedUsers);
+									setIsBlocked(true);
+								})
+								.catch((e) => {
+									console.error('Could not block user: ', e.message);
+								});
+						}
 					}
 				}
 			}
@@ -187,13 +222,36 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	/* ********************************************************************* */
 
 	// empty the textarea when changing active chat
+	// get the chat info
+	// get the userId of the correspond if not a channel
 	useEffect(() => {
 		setTextareaContent('');
 		setTextareaIsEmpty(true);
 		getChatInfo(accessToken, chatId).then((chatInfo: IChatInfo) => {
 			setChannelIsPrivate(chatInfo.isPrivate);
 		});
+		if (!isChannel && userData) {
+			const chat = chatData.chatsList.find(
+				(target) => target.chatId === chatId,
+			);
+			if (chat)
+				setSecondUserId(
+					chat.participants.at(0) === userData.id
+						? chat.participants.at(1) || 0
+						: chat.participants.at(0) || 0,
+				);
+		}
 	}, [chatId]);
+
+	// check if that user is blocked
+	useEffect(() => {
+		for (const current of chatData.blockedUsers)
+			if (current.userBlockedId === secondUserId) {
+				setIsBlocked(true);
+				return;
+			}
+		setIsBlocked(false);
+	}, [secondUserId, chatData.blockedUsers]);
 	/* ********************************************************************* */
 	/* ******************************** CHAT ******************************* */
 	/* ********************************************************************* */
@@ -204,7 +262,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	// TODO: find a way to leave room when changing chat (because it is
 	// not an unmounting)
 	useEffect(() => {
-		console.log('chatId in ChatWindow', chatId);
 		if (chatId) chatData.socket?.joinRoom(chatId);
 		// if (chatId) userData?.chatSocket?.joinRoom(chatId);
 		// return () => {
@@ -228,7 +285,14 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	}, [chatId]);
 
 	const sendMessage = async () => {
-		sendMessageQuery(accessToken, textareaContent, chatId)
+		if (!isChannel) {
+			const user = chatData.blockedUsers.find(
+				(target) => target.userBlockedId === secondUserId,
+			);
+			if (user) return;
+		}
+
+		sendMessageQuery(accessToken, textareaContent, chatId, secondUserId)
 			.then(() => {
 				// socket sending message
 				chatData.socket?.sendMessage(
@@ -261,17 +325,17 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	/* ******************************* DEBUG ******************************* */
 	/* ********************************************************************* */
 
-	useEffect(() => {
-		console.log('isOwner', isOwner);
-	}, [isOwner]);
+	// useEffect(() => {
+	// 	console.log('isOwner', isOwner);
+	// }, [isOwner]);
 
-	useEffect(() => {
-		console.log('isAdmin', isAdmin);
-	}, [isAdmin]);
+	// useEffect(() => {
+	// 	console.log('isAdmin', isAdmin);
+	// }, [isAdmin]);
 
-	useEffect(() => {
-		console.log('pwdContent', pwdContent);
-	}, [pwdContent]);
+	// useEffect(() => {
+	// 	console.log('pwdContent', pwdContent);
+	// }, [pwdContent]);
 
 	/* ********************************************************************* */
 	/* ******************************* RETURN ****************************** */
@@ -296,7 +360,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 					: [
 							{ name: 'Profile', onClick: () => null },
 							{ name: 'Play', onClick: () => null },
-							{ name: 'Block', onClick: blockUser },
+							{ name: isBlocked ? 'Unblock' : 'Block', onClick: blockUser },
 							{ name: 'Leave chat', onClick: leavePM },
 							{ name: 'Settings', onClick: openSettingsPanel },
 					  ]
@@ -317,8 +381,9 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 						});
 						const isLast = index === messages.length - 1;
 						for (const currentBlocked of chatData.blockedUsers) {
-							if (currentBlocked === currentMessage.sentById) {
-								return;
+							if (currentBlocked.userBlockedId === currentMessage.sentById) {
+								const currentDate = new Date(currentBlocked.blockedAt);
+								if (date > currentDate) return;
 							}
 						}
 						return (
@@ -389,15 +454,22 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 					</Button>
 					<Title highlightColor="yellow">Channel password</Title>
 					<div className="settings-form">
-						<InputField onChange={handlePwdInput}></InputField>
+						<InputField
+							onChange={handlePwdInput}
+							success={settingPwdSuccess}
+							error={settingPwdError}
+						></InputField>
 						<Button
 							onClick={async () => {
+								console.log('pwdContent', pwdContent);
 								setNewPassword(accessToken, chatId, pwdContent)
 									.then(() => {
 										setPwdContent('');
+										setSettingPwdSuccess('Password changed successfully');
 									})
 									.catch((e) => {
 										console.error('Could not set the password');
+										setSettingPwdError(e.message);
 									});
 							}}
 						>

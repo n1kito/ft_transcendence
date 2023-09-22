@@ -4,10 +4,11 @@ import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { ChatController } from './chat.controller';
 import { TokenModule } from 'src/token/token.module';
 import { AuthMiddleWare } from 'src/middleware/auth.middleware';
+import { UserService } from 'src/user/user.service';
 
 @Module({
 	controllers: [ChatController],
-	providers: [ChatService, PrismaService],
+	providers: [ChatService, PrismaService, UserService],
 	imports: [TokenModule],
 })
 export class ChatModule implements NestModule {

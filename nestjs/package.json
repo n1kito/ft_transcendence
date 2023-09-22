@@ -32,11 +32,11 @@
     "class-validator": "^0.14.0",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.3.1",
-	"jsonwebtoken": "^9.0.1",
-	"reflect-metadata": "^0.1.13",
-	"rxjs": "^7.8.1",
-    "socket.io": "^4.7.2",
-    "shared-types": "file:../shared-types"
+    "jsonwebtoken": "^9.0.1",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.8.1",
+    "shared-types": "file:../shared-types",
+    "socket.io": "^4.7.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.5",
@@ -49,6 +49,7 @@
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^5.59.11",
     "@typescript-eslint/parser": "^5.59.11",
+    "bcrypt": "^5.1.1",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",

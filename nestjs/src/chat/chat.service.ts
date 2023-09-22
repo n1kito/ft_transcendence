@@ -15,6 +15,7 @@ import { plainToClass } from 'class-transformer';
 import { CustomException } from 'src/user/user.service';
 import { CreateChatDTO } from './dto/createChat.dto';
 import { Response } from 'express';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class ChatService {
@@ -198,6 +199,17 @@ export class ChatService {
 		}
 	}
 
+	async getRoom(chatId: number) {
+		const res = await this.prisma.chat.findFirst({
+			where: {
+				id: chatId,
+			},
+			include: {
+				participants: true,
+			},
+		});
+		return res;
+	}
 	async getChannelRoom(chatId: number) {
 		const res = await this.prisma.chat.findFirst({
 			where: {
@@ -246,15 +258,34 @@ export class ChatService {
 	}
 
 	async setPassword(chatId: number, newPassword: string) {
+		const hash = await bcrypt.hash(newPassword, 10);
 		await this.prisma.chat.update({
 			where: { id: chatId },
 			data: {
-				password: newPassword.length ? newPassword : null,
-				isProtected: newPassword.length ? true : false,
+				password: newPassword || null,
+				isProtected: newPassword ? true : false,
 			},
 		});
 	}
 
+	// returns true if there was no password or if it is the right password
+	// TODO: password hash
+	async checkPassword(chatId: number, password: string) {
+		const response = await this.prisma.chat.findUnique({
+			where: { id: chatId },
+			select: {
+				password: true,
+				isProtected: true,
+			},
+		});
+		if (
+			!response.isProtected ||
+			(response.isProtected && response.password === password)
+		) {
+			return true;
+		}
+		return false;
+	}
 	/* ********************************************************************* */
 	/* ************************* PRIVATE MESSAGES ************************** */
 	/* ********************************************************************* */

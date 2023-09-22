@@ -11,12 +11,12 @@ import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/Settings
 import Title from '../Profile/Components/Title/Title';
 import InputField from '../Profile/Components/InputField/InputField';
 import Button from '../Shared/Button/Button';
-import { error } from 'console';
 import {
 	createChatPrivateMessage,
+	fetchChats,
 	fetchMessages,
-	fetchPrivateMessages,
 	findUserByLogin,
+	getBlockedUsers,
 } from 'src/utils/queries';
 import { ChatContext, IChatStruct, IMessage } from 'src/contexts/ChatContext';
 
@@ -27,14 +27,6 @@ interface IPrivateMessagesProps {
 	// chatWindowControl: (state: boolean) => void;
 }
 
-// export interface IChatStruct {
-// 	chatId: number;
-// 	participants: number[];
-// 	name: string; // for the PM its the login
-// 	avatar?: string;
-// 	onlineIndicator?: boolean; // if it is a friend of us, show the online status
-// }
-
 const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	onCloseClick,
 	windowDragConstraintRef,
@@ -42,7 +34,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	// chatWindowControl,
 }) => {
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
-	const [chatWindowUserId, setChatWindowUserId] = useState(0);
 	const [chatWindowId, setChatWindowId] = useState(0);
 	const [chatWindowName, setChatWindowName] = useState('');
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
@@ -52,8 +43,13 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	const [searchUserSuccess, setSearchUserSuccess] = useState('');
 	const { userData, setUserData } = useContext(UserContext);
 	const { accessToken } = useAuth();
-	const { chatData, updateChatData, updateChatList, getNewChatsList } =
-		useContext(ChatContext);
+	const {
+		chatData,
+		updateChatData,
+		updateChatList,
+		getNewChatsList,
+		getNewBlockedUsers,
+	} = useContext(ChatContext);
 
 	/* ********************************************************************* */
 	/* ***************************** WEBSOCKET ***************************** */
@@ -68,7 +64,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 		const onReceiveMessage = (message: IMessage) => {
 			// if the user was blocked, dont display it
 			for (const current of chatData.blockedUsers) {
-				if (message.sentById === current) return;
+				if (message.sentById === current.userBlockedId) return;
 			}
 			// if it is the active chat, load message
 			if (message.chatId === chatWindowId) {
@@ -99,24 +95,24 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	/* ******************************* DEBUG ******************************* */
 	/* ********************************************************************* */
 
-	useEffect(() => {
-		console.log(' PrivateMessage - messages', messages);
-	}, [messages]);
+	// useEffect(() => {
+	// 	console.log(' PrivateMessage - messages', messages);
+	// }, [messages]);
 	// useEffect(() => {
 	// 	console.log(' PrivateMessage - privateMessages', privateMessages);
 	// }, [privateMessages]);
 
-	useEffect(() => {
-		console.log(
-			'%cchatData.chatsList',
-			'background-color: red',
-			chatData.chatsList,
-		);
-	}, [chatData.chatsList]);
+	// useEffect(() => {
+	// 	console.log(
+	// 		'%cchatData.chatsList',
+	// 		'background-color: red',
+	// 		chatData.chatsList,
+	// 	);
+	// }, [chatData.chatsList]);
 
-	useEffect(() => {
-		console.log(' PrivateMessage - chatWindowId', chatWindowId);
-	}, [chatWindowId]);
+	// useEffect(() => {
+	// 	console.log(' PrivateMessage - chatWindowId', chatWindowId);
+	// }, [chatWindowId]);
 
 	// useEffect(() => {
 	// 	console.log(' PrivateMessage - searchUserSuccess', searchUserSuccess);
@@ -127,10 +123,18 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 
 	// on mounting this component, fetch the privateMessages
 	useEffect(() => {
-		fetchPrivateMessages(accessToken)
+		fetchChats(accessToken)
 			.then((data) => {
-				getNewChatsList(data, false);
+				getNewChatsList(data);
 				// updateChatList(data);
+				getBlockedUsers(accessToken)
+					.then((users) => {
+						console.warn('I fetched my blocked users', users);
+						getNewBlockedUsers(users);
+					})
+					.catch(() => {
+						console.error('Could not retreive blocked users');
+					});
 			})
 			.catch((e) => {
 				console.error('Error fetching private conversations: ', e);
@@ -155,10 +159,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 				setChatWindowName(currentChat.name);
 				fetchMessages(currentChat.chatId, accessToken)
 					.then((data) => {
-						// let messagesToDisplay : IMessage[]
-						// for (const current of data) {
-						// 	if (current.sentById === )
-						// }
 						setMessages(data);
 					})
 					.catch((e) => {
@@ -176,7 +176,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 				.then(async (data) => {
 					setChatWindowId(data);
 					setMessages([]);
-					fetchPrivateMessages(accessToken)
+					fetchChats(accessToken)
 						.then((data) => {
 							updateChatList(data);
 						})
@@ -217,14 +217,16 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 									isChannel: false,
 								},
 							]);
+							// TODO: Check if we still need to do the part before.
+							// if without it we still get photos, remove it
+							fetchChats(accessToken)
+								.then((data) => {
+									getNewChatsList(data);
+								})
+								.catch((e) => {
+									console.error('Error fetching private conversations: ', e);
+								});
 
-							// fetchPrivateMessages(accessToken)
-							// 	.then((data) => {
-							// 		updateChatList(data);
-							// 	})
-							// 	.catch((e) => {
-							// 		console.error('Error fetching private conversations: ', e);
-							// 	});
 							setSettingsPanelIsOpen(false);
 						})
 						.catch((e) => {
@@ -267,7 +269,10 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					]}
 				>
 					<PrivateMessagesList>
-						{chatData.chatsList.length > 0 ? (
+						{chatData.chatsList.length > 0 &&
+						chatData.chatsList.find(
+							(current) => current.isChannel === false,
+						) ? (
 							chatData.chatsList.map((room, index) => {
 								if (!room.isChannel) {
 									// find the other participant id
@@ -280,11 +285,11 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 									const friend = friends.find((friend) => {
 										return friend.id === participantId;
 									});
-
+									console.log('displaying a PM');
 									// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
 									return (
 										<FriendBadge
-											key={index}
+											key={'PM' + room.chatId}
 											badgeTitle={room.name}
 											badgeImageUrl={`http://localhost:3000${room.avatar}`}
 											onlineIndicator={friend ? friend.onlineStatus : false}
@@ -298,6 +303,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 							})
 						) : (
 							<FriendBadge
+								key={'PMEmptyFriendBadge'}
 								isEmptyBadge={true}
 								isChannelBadge={false}
 								onClick={() => {
@@ -329,6 +335,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 			</div>
 			{chatWindowIsOpen && (
 				<ChatWindow
+					key={'ChatWindowInPM'}
 					onCloseClick={() => setChatWindowIsOpen(false)}
 					windowDragConstraintRef={windowDragConstraintRef}
 					name={chatWindowName}

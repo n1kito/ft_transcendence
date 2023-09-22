@@ -1,5 +1,6 @@
 import {
 	IsBoolean,
+	IsDefined,
 	IsNotEmpty,
 	IsNumber,
 	IsOptional,
@@ -10,9 +11,11 @@ import {
 export class SetPrivateDTO {
 	@IsNumber()
 	@IsNotEmpty()
+	@IsDefined()
 	chatId: number;
 
 	@IsBoolean()
 	@IsNotEmpty()
+	@IsDefined()
 	toPrivate: boolean;
 }

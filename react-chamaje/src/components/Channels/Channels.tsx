@@ -12,6 +12,7 @@ import {
 	createChannel,
 	fetchChannels,
 	fetchMessages,
+	getBlockedUsers,
 	joinChannel,
 } from 'src/utils/queries';
 import { UserContext } from 'src/contexts/UserContext';
@@ -29,7 +30,8 @@ const Channels: React.FC<IChannelsProps> = ({
 }) => {
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [settingsMode, setSettingsMode] = useState('');
-	const [settingsError, setSettingsError] = useState('');
+	const [settingsNameError, setSettingsNameError] = useState('');
+	const [settingsPwdError, setSettingsPwdError] = useState('');
 	// const [settingsSuccess, setSettingsSuccess] = useState('');
 
 	const [channelsList, setChannelsList] = useState<IChatStruct[]>([]);
@@ -40,12 +42,18 @@ const Channels: React.FC<IChannelsProps> = ({
 
 	const [messages, setMessages] = useState<IMessage[]>([]);
 
-	const [channelInput, setChannelInput] = useState('');
+	const [channelNameInput, setChannelNameInput] = useState('');
+	const [pwdInput, setPwdInput] = useState('');
 
 	const { userData } = useContext(UserContext);
 	const { accessToken } = useAuth();
-	const { chatData, updateChatData, updateChatList, getNewChatsList } =
-		useContext(ChatContext);
+	const {
+		chatData,
+		updateChatData,
+		updateChatList,
+		getNewChatsList,
+		getNewBlockedUsers,
+	} = useContext(ChatContext);
 
 	/* ********************************************************************* */
 	/* ***************************** WEBSOCKET ***************************** */
@@ -60,7 +68,7 @@ const Channels: React.FC<IChannelsProps> = ({
 		const onReceiveMessage = (message: IMessage) => {
 			// if the user was blocked, dont display it
 			for (const current of chatData.blockedUsers) {
-				if (message.sentById === current) return;
+				if (message.sentById === current.userBlockedId) return;
 			}
 			// if it is the active chat, load message
 			if (message.chatId === chatWindowId) {
@@ -113,44 +121,48 @@ const Channels: React.FC<IChannelsProps> = ({
 	};
 
 	const createNewChannel = () => {
-		if (channelInput) {
-			createChannel(accessToken, channelInput)
+		if (channelNameInput) {
+			createChannel(accessToken, channelNameInput, pwdInput)
 				.then((room) => {
 					updateChatList([
 						{
 							chatId: room.chatId,
 							participants: [userData?.id ? userData.id : 0],
-							name: channelInput,
+							name: channelNameInput,
 							isChannel: true,
 						},
 					]);
 					setSettingsPanelIsOpen(false);
 				})
-				.then(() => setChannelInput(''))
+				.then(() => {
+					setChannelNameInput('');
+					setPwdInput('');
+				})
 				.catch((e) => {
 					console.error('Error creating channel: ', e.message);
-					setSettingsError(e.message);
+					setSettingsNameError(e.message);
 				});
 		}
 	};
 
 	const handleJoinChannel = () => {
-		if (channelInput) {
-			joinChannel(accessToken, channelInput)
+		if (channelNameInput) {
+			joinChannel(accessToken, channelNameInput, pwdInput)
 				.then((data) => {
-					setChannelInput('');
+					setChannelNameInput('');
 					setSettingsPanelIsOpen(false);
 					updateChatList([
 						{
 							chatId: data.chatId,
 							participants: data.participants,
-							name: channelInput,
+							name: channelNameInput,
 							isChannel: true,
 						},
 					]);
 					console.log('Channel joined successfully');
 				})
 				.catch((e) => {
+					setSettingsNameError(e.message)
 					console.error('Could not join channel: ', e.message);
 				});
 		}
@@ -158,35 +170,45 @@ const Channels: React.FC<IChannelsProps> = ({
 
 	// every time I put a char in this, it fetches everything...
 	// no it does not but it rerenders my list
-	const handleChannelInput = (channel: string) => {
-		setChannelInput(channel);
+	const handleChannelNameInput = (channel: string) => {
+		setChannelNameInput(channel);
+	};
+
+	// every time I put a char in this, it fetches everything...
+	// no it does not but it rerenders my list
+	const handlePwdInput = (pwd: string) => {
+		setPwdInput(pwd);
 	};
 	/* ********************************************************************* */
 	/* ******************************* DEBUG ******************************* */
 	/* ********************************************************************* */
 
-	useEffect(() => {
-		console.log(' Channel - messages', messages);
-	}, [messages]);
+	// useEffect(() => {
+	// 	console.log(' Channel - messages', messages);
+	// }, [messages]);
 
-	useEffect(() => {
-		console.log('chatWindowIsOpen', chatWindowIsOpen);
-	}, [chatWindowIsOpen]);
+	// useEffect(() => {
+	// 	console.log('chatWindowIsOpen', chatWindowIsOpen);
+	// }, [chatWindowIsOpen]);
 
-	useEffect(() => {
-		console.log('chatWindowId', chatWindowId);
-	}, [chatWindowId]);
+	// useEffect(() => {
+	// 	console.log('chatWindowId', chatWindowId);
+	// }, [chatWindowId]);
 
-	useEffect(() => {
-		console.log('channelsList', channelsList);
-	}, [channelsList]);
+	// useEffect(() => {
+	// 	console.log('channelsList', channelsList);
+	// }, [channelsList]);
 
-	useEffect(() => {
-		console.log('chatData.chatsList', chatData.chatsList);
-	}, [chatData.chatsList]);
-	useEffect(() => {
-		console.log('chatWindowName', chatWindowName);
-	}, [chatWindowName]);
+	// useEffect(() => {
+	// 	console.log('channelNameInput', channelNameInput);
+	// }, [channelNameInput]);
+
+	// useEffect(() => {
+	// 	console.log('chatData.chatsList', chatData.chatsList);
+	// }, [chatData.chatsList]);
+	// useEffect(() => {
+	// 	console.log('chatWindowName', chatWindowName);
+	// }, [chatWindowName]);
 
 	/* ********************************************************************* */
 	/* ******************************* RETURN ******************************* */
@@ -195,10 +217,17 @@ const Channels: React.FC<IChannelsProps> = ({
 	useEffect(() => {
 		fetchChannels(accessToken)
 			.then((data) => {
-				getNewChatsList(data, true);
+				getNewChatsList(data);
 			})
 			.catch((e) => {
 				console.error('Error fetching channels: ', e);
+			});
+		getBlockedUsers(accessToken)
+			.then((data) => {
+				getNewBlockedUsers(data);
+			})
+			.catch(() => {
+				console.error('Could not retreive blocked users');
 			});
 	}, []);
 
@@ -228,13 +257,14 @@ const Channels: React.FC<IChannelsProps> = ({
 				]}
 			>
 				<div className="channels-list-wrapper">
-					{chatData.chatsList.length > 0 ? (
+					{chatData.chatsList.length > 0 &&
+					chatData.chatsList.find((current) => current.isChannel === true) ? (
 						chatData.chatsList.map((room, index) => {
 							if (room.isChannel) {
 								// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
 								return (
 									<FriendBadge
-										key={index}
+										key={'Channel' + room.chatId}
 										badgeTitle={room.name ? room.name : 'Anonymous channel'}
 										isChannelBadge={true}
 										isClickable={true}
@@ -247,6 +277,7 @@ const Channels: React.FC<IChannelsProps> = ({
 						})
 					) : (
 						<FriendBadge
+							key={'ChannelEmptyFriendBadge'}
 							isEmptyBadge={true}
 							isChannelBadge={true}
 							onClick={() => {
@@ -263,8 +294,14 @@ const Channels: React.FC<IChannelsProps> = ({
 						<Title highlightColor="yellow">Channel name</Title>
 						<div className="settings-form">
 							<InputField
-								onChange={handleChannelInput}
-								error={settingsError}
+								onChange={handleChannelNameInput}
+								error={settingsNameError}
+							></InputField>
+							<Title highlightColor="yellow">Password</Title>
+
+							<InputField
+								onChange={handlePwdInput}
+								error={settingsPwdError}
 							></InputField>
 							<Button
 								onClick={() => {
@@ -281,6 +318,7 @@ const Channels: React.FC<IChannelsProps> = ({
 			</Window>
 			{chatWindowIsOpen && (
 				<ChatWindow
+					key={'ChatWindowInChannel'}
 					onCloseClick={() => setChatWindowIsOpen(false)}
 					windowDragConstraintRef={windowDragConstraintRef}
 					// userId={chatWindowUserId}

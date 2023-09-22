@@ -7,7 +7,6 @@ import React, {
 } from 'react';
 import WebSocketService from 'src/services/WebSocketService';
 
-
 export interface IChatStruct {
 	chatId: number;
 	participants: number[];
@@ -26,9 +25,14 @@ export interface IMessage {
 	avatar?: string;
 }
 
+export interface IUserBlocked {
+	userBlockedId: number;
+	blockedAt: Date;
+}
+
 export interface IChatDataProps {
 	chatsList: IChatStruct[];
-	blockedUsers: number[];
+	blockedUsers: IUserBlocked[];
 	socket: WebSocketService | null;
 }
 
@@ -43,8 +47,9 @@ interface ChatContextType {
 	chatData: IChatDataProps;
 	updateChatData: (updates: Partial<IChatDataProps>) => void;
 	updateChatList: (update: IChatStruct[]) => void;
-	getNewChatsList: (update: IChatStruct[], updatingChannels: boolean) => void;
-	updateBlockedUsers: (update: number[]) => void;
+	getNewChatsList: (update: IChatStruct[]) => void;
+	updateBlockedUsers: (update: IUserBlocked[]) => void;
+	getNewBlockedUsers: (update: IUserBlocked[]) => void;
 	eraseChatData: () => void;
 	resetChatData: () => void;
 }
@@ -61,6 +66,9 @@ export const ChatContext = createContext<ChatContextType>({
 		throw new Error('getNewChatsList function must be overriden');
 	},
 	updateBlockedUsers: () => {
+		throw new Error('updateBlockedUsers function must be overriden');
+	},
+	getNewBlockedUsers: () => {
 		throw new Error('updateBlockedUsers function must be overriden');
 	},
 	eraseChatData: () => {
@@ -108,42 +116,55 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 		// for (let current in updates)
 		//     updatedChatlist.push(current)
 		const updatedChatList = chatData.chatsList.concat(updates);
-		setChatData({
+		setChatData((prevChatData) => ({
 			chatsList: updatedChatList,
-			blockedUsers: chatData.blockedUsers,
-			socket: chatData.socket,
+			blockedUsers: prevChatData.blockedUsers,
+			socket: prevChatData.socket,
 			// ... put the rest of it
-		});
+		}));
 	};
 
 	// set the chat list to a new list keeping the chats that are
 	const getNewChatsList = (
 		updates: IChatStruct[],
-		updatingChannels: boolean,
 	) => {
-		const keptChats = chatData.chatsList.filter((current) => {
-			return current.isChannel !== updatingChannels;
-		});
-		setChatData({
-			chatsList: keptChats.concat(updates),
-			blockedUsers: chatData.blockedUsers,
-			socket: chatData.socket,
-		});
+		// const keptChats = chatData.chatsList.filter((current) => {
+		// 	return current.isChannel !== updatingChannels;
+		// });
+		setChatData((prevChatData) => ({
+			chatsList: updates,
+			// chatsList: keptChats.concat(updates),
+			blockedUsers: prevChatData.blockedUsers,
+			socket: prevChatData.socket,
+		}));
 	};
 
-	const updateBlockedUsers = (updates: number[]) => {
+	const getNewBlockedUsers = (updates: IUserBlocked[]) => {
+		console.log('%cChatData: ', 'background-color:blue', chatData.chatsList);
+
+		setChatData((prevChatData) => ({
+			...prevChatData,
+			blockedUsers: updates,
+		}));
+		// setChatData({
+		// 	chatsList: chatData.chatsList,
+		// 	blockedUsers: updates,
+		// 	socket: chatData.socket,
+		// });
+	};
+	const updateBlockedUsers = (updates: IUserBlocked[]) => {
 		// const updatedChatlist = chatData.chatsList.map((current) => {
 		// 	return current;
 		// });
 		// for (let current in updates)
 		//     updatedChatlist.push(current)
 		const updatedBlockedUsers = chatData.blockedUsers.concat(updates);
-		setChatData({
-			chatsList: chatData.chatsList,
+		setChatData((prevChatData) => ({
+			chatsList: prevChatData.chatsList,
 			blockedUsers: updatedBlockedUsers,
-			socket: chatData.socket,
+			socket: prevChatData.socket,
 			// ... put the rest of it
-		});
+		}));
 	};
 
 	// Helper function to reset the chat state to its initial state in one function call
@@ -180,6 +201,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 				updateChatList,
 				updateBlockedUsers,
 				getNewChatsList,
+				getNewBlockedUsers,
 			}}
 		>
 			{children}

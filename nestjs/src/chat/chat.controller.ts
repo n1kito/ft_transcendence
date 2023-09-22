@@ -24,11 +24,13 @@ import { ValidationError } from 'class-validator';
 import { JoinChannelDTO } from './dto/joinChannel.dto';
 import { errorMonitor } from 'events';
 import { BlockUserDTO } from '../user/dto/blockUser.dto';
+import { UserService } from 'src/user/user.service';
 
 @Controller('chat')
 export class ChatController {
 	constructor(
 		private readonly chatService: ChatService,
+		private readonly userService: UserService,
 		private readonly tokenService: TokenService,
 		private readonly prisma: PrismaService,
 	) {}
@@ -41,7 +43,7 @@ export class ChatController {
 	) {
 		try {
 			const chatIdNb = +chatId;
-			this.tokenService.ExtractUserId(request.headers['authorization'])
+			this.tokenService.ExtractUserId(request.headers['authorization']);
 			const response = await this.prisma.chat.findUnique({
 				where: {
 					id: chatIdNb,
@@ -66,14 +68,22 @@ export class ChatController {
 	) {
 		try {
 			console.error('🛑🛑🛑', chatId);
-			const nbChatId = +chatId
-			const userId = this.tokenService.ExtractUserId(request.headers['authorization']);
-			const isUserInChat = await this.chatService.isUserInChat(userId, nbChatId);
+			const nbChatId = +chatId;
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			const isUserInChat = await this.chatService.isUserInChat(
+				userId,
+				nbChatId,
+			);
 			if (!isUserInChat) {
 				res.status(403).json({ message: 'You are not in this chat' });
 				return;
 			}
-			const messages = await this.chatService.getChatMessages(request, nbChatId);
+			const messages = await this.chatService.getChatMessages(
+				request,
+				nbChatId,
+			);
 			res.status(200).json(messages);
 		} catch (e) {
 			console.error('error fetching messages: ', e);
@@ -119,21 +129,29 @@ export class ChatController {
 					});
 				// if its a private message and the user does not already have a conv
 			} else if (createChat.userId) {
-				this.chatService.findPrivateMessageByID(createChat.userId, userId)
-				.then((res) => {
-					if (!res) {
-						this.chatService.createChat(userId, createChat).then(async (chatId) => {
-							await this.chatService.createChatSession(userId, chatId);
-							await this.chatService.createChatSession(createChat.userId, chatId);
-							response.status(200).json({ chatId: chatId });
-						});
-					} else {
-						throw new Error('You already have a conversation with that person')
-					}
-				})
-				.catch((e) => {
-					response.status(401).json({ message: e.message });
-				})
+				this.chatService
+					.findPrivateMessageByID(createChat.userId, userId)
+					.then((res) => {
+						if (!res) {
+							this.chatService
+								.createChat(userId, createChat)
+								.then(async (chatId) => {
+									await this.chatService.createChatSession(userId, chatId);
+									await this.chatService.createChatSession(
+										createChat.userId,
+										chatId,
+									);
+									response.status(200).json({ chatId: chatId });
+								});
+						} else {
+							throw new Error(
+								'You already have a conversation with that person',
+							);
+						}
+					})
+					.catch((e) => {
+						response.status(401).json({ message: e.message });
+					});
 			} else {
 				response.status(401).json({ message: 'Could not create chat' });
 			}
@@ -145,7 +163,7 @@ export class ChatController {
 
 	@Put('/sendMessage')
 	async sendMessage(
-		@Body(new ValidationPipe()) sendMessage: SendMessageDTO,
+		@Body(new ValidationPipe()) validatedData: SendMessageDTO,
 		@Req() request: CustomRequest,
 		@Res() res: Response,
 	) {
@@ -153,19 +171,50 @@ export class ChatController {
 			const userId = this.tokenService.ExtractUserId(
 				request.headers['authorization'],
 			);
-			const isUserInChat = await this.chatService.isUserInChat(userId, sendMessage.chatId);
+			const isUserInChat = await this.chatService.isUserInChat(
+				userId,
+				validatedData.chatId,
+			);
 			if (!isUserInChat) {
 				res.status(403).json({ message: 'You are not in this chat' });
 				return;
 			}
-			await this.chatService.sendMessage(userId, sendMessage);
-			res.status(201).json({ message: 'Message sent successfully' });
+			if (validatedData.userId) {
+				this.userService
+					.isUserBlockedBy(userId, validatedData.userId)
+					.then(async (response) => {
+						if (response) res.status(403).json({ message: 'You are blocked' });
+						else {
+							this.userService
+								.isUserBlocked(userId, validatedData.userId)
+								.then(async (response) => {
+									if (response)
+										res.status(403).json({ message: 'You blocked that user' });
+									else {
+										await this.chatService.sendMessage(userId, validatedData);
+										res
+											.status(201)
+											.json({ message: 'Message sent successfully' });
+									}
+								})
+								.catch((e) => {
+									throw new Error('Could not check if blocked: ' + e.message);
+								});
+						}
+					})
+					.catch((e) => {
+						throw new Error('Could not check if blocked: ' + e.message);
+					});
+			} else {
+				await this.chatService.sendMessage(userId, validatedData);
+				res.status(201).json({ message: 'Message sent successfully' });
+			}
+			// this.userService.isUserBlockedBy(userId, sendMessage.e)
 		} catch (e) {
 			console.error('error sending a message', e);
 			res.status(400).json(e.message);
 		}
 	}
-
 
 	@Delete('/leaveChat')
 	async leaveChat(
@@ -178,7 +227,10 @@ export class ChatController {
 			const userId = this.tokenService.ExtractUserId(
 				request.headers['authorization'],
 			);
-			const isUserInChat = await this.chatService.isUserInChat(userId, leaveChannel.chatId);
+			const isUserInChat = await this.chatService.isUserInChat(
+				userId,
+				leaveChannel.chatId,
+			);
 			if (!isUserInChat) {
 				response.status(403).json({ message: 'You are not in this chat' });
 				return;
@@ -192,7 +244,6 @@ export class ChatController {
 				.json({ message: 'Something went wrong leaving the channel' });
 		}
 	}
-
 
 	/* ********************************************************************* */
 	/* ***************************** CHANNELS ****************************** */
@@ -221,24 +272,40 @@ export class ChatController {
 							.json({ message: 'You are already in this chat' });
 						return;
 					}
-					if (data.isPrivate)  {
+					if (data.isPrivate) {
 						response
 							.status(403)
 							.json({ message: 'Could not join the channel' });
 						return;
 					}
 					this.chatService
-						.createChatSession(userId, data.id)
-						.then(() => {
-							response
-								.status(200)
-								.json({ chatId: data.id, participants: data.participants });
+						.checkPassword(data.id, validatedData.password)
+						.then((canAccess) => {
+							if (!canAccess) {
+								response
+									.status(403)
+									.json({ message: 'The password is incorrect' });
+
+								return;
+							}
+							this.chatService
+								.createChatSession(userId, data.id)
+								.then(() => {
+									response
+										.status(200)
+										.json({ chatId: data.id, participants: data.participants });
+								})
+								.catch((e) => {
+									console.error('error joining a channel: ', e);
+									response.status(400).json({
+										message: 'Could not join the channel',
+									});
+								});
 						})
 						.catch((e) => {
-							console.error('error joining a channel: ', e);
 							response
-								.status(400)
-								.json({ message: 'Could not join the channel' });
+								.status(403)
+								.json({ message: 'This channel is protected' });
 						});
 				})
 				.catch(() => {
@@ -329,7 +396,7 @@ export class ChatController {
 				.then((data) => {
 					if (data.isAdmin || data.isOwner) {
 						this.chatService
-							.setPassword(validatedData.chatId, validatedData.newPassword)
+							.setPassword(validatedData.chatId, validatedData.password)
 							.then(() => {
 								response.status(200).json({
 									message: 'changed password successfully',
@@ -343,6 +410,7 @@ export class ChatController {
 				});
 		} catch (e) {
 			response.status(401).json({ message: e.message });
+			console.error('👋👋👋👋👋👋👋👋👋👋👋👋this is an error: ', e.message);
 		}
 	}
 }

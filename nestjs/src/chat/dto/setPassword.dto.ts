@@ -1,19 +1,30 @@
 import {
 	IsAlphanumeric,
+	IsDefined,
 	IsNotEmpty,
 	IsNumber,
+	IsOptional,
 	IsString,
-    NotContains,
+	MaxLength,
+	MinLength,
+	NotContains,
 } from 'class-validator';
 
 export class SetPasswordDTO {
-    @NotContains("\\")
-    @NotContains("/")
-    @NotContains(";")
+	@IsOptional()
+	@IsNotEmpty()
 	@IsString()
-	newPassword: string;
+	@IsDefined()
+	@NotContains('/')
+	@NotContains('\\')
+	@NotContains(';')
+	@NotContains(' ')
+	@MinLength(7) 
+	@MaxLength(20)
+	password?: string;
 
 	@IsNumber()
 	@IsNotEmpty()
+	@IsDefined()
 	chatId: number;
 }

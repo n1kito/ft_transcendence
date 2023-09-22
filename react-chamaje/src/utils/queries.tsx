@@ -2,6 +2,28 @@
 /* ******************************* CHAT ******************************** */
 /* ********************************************************************* */
 
+export async function fetchChats(accessToken: string) {
+	try {
+		const response = await fetch('/api/user/me/chats', {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+		});
+		if (!response.ok) {
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
+		return response.json();
+	} catch (e) {
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error(e.message);
+		} else
+			throw new Error('Something went wrong fetching private message rooms');
+	}
+}
+
 export async function leaveChat(accessToken: string, chatId: number) {
 	try {
 		const response = await fetch('api/chat/leaveChat', {
@@ -72,13 +94,60 @@ export async function blockUserQuery(accessToken: string, userId: number) {
 		} else throw new Error('Something went wrong');
 	}
 }
+
+export async function unblockUserQuery(accessToken: string, userId: number) {
+	try {
+		const response = await fetch('api/user/unblockUser', {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+			body: JSON.stringify({
+				userId: userId,
+			}),
+		});
+		if (!response.ok) {
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
+		return response.json();
+	} catch (e) {
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error(e.message);
+		} else throw new Error('Something went wrong');
+	}
+}
+
+export async function getBlockedUsers(accessToken: string) {
+	try {
+		const response = await fetch('api/user/me/blockedUsers', {
+			method: 'GET',
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+		});
+		if (!response.ok) {
+			console.error('watsup');
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
+		return response.json();
+	} catch (e) {
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error(e.message);
+		} else throw new Error('Something went wrong');
+	}
+}
 /* ********************************************************************* */
 /* ***************************** CHANNELS ****************************** */
 /* ********************************************************************* */
 
 export async function fetchChannels(accessToken: string) {
 	try {
-		const response = await fetch('/api/user/me/channels', {
+		const response = await fetch('/api/user/me/chats', {
 			method: 'GET',
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
@@ -98,7 +167,11 @@ export async function fetchChannels(accessToken: string) {
 }
 
 // creates a channel that is private by default
-export async function createChannel(accessToken: string, channelName: string) {
+export async function createChannel(
+	accessToken: string,
+	channelName: string,
+	password?: string,
+) {
 	try {
 		const response = await fetch('api/chat/createChat/', {
 			method: 'PUT',
@@ -110,10 +183,11 @@ export async function createChannel(accessToken: string, channelName: string) {
 			body: JSON.stringify({
 				isChannel: true,
 				isPrivate: true,
-				isProtected: false,
+				isProtected: password ? true : false,
 				name: channelName,
 				isOwner: true,
 				isAdmin: true,
+				password: password || null,
 			}),
 		});
 		if (!response.ok) {
@@ -128,7 +202,11 @@ export async function createChannel(accessToken: string, channelName: string) {
 	}
 }
 
-export async function joinChannel(accessToken: string, channelName: string) {
+export async function joinChannel(
+	accessToken: string,
+	channelName: string,
+	password?: string,
+) {
 	try {
 		const response = await fetch('api/chat/joinChannel', {
 			method: 'PUT',
@@ -139,10 +217,12 @@ export async function joinChannel(accessToken: string, channelName: string) {
 			credentials: 'include',
 			body: JSON.stringify({
 				name: channelName,
+				password: password || null,
 			}),
 		});
 		if (!response.ok) {
 			const responseError = await response.json();
+			console.error(responseError.message);
 			throw new Error(responseError.message);
 		}
 		return response.json();
@@ -222,11 +302,12 @@ export async function setNewPassword(
 			credentials: 'include',
 			body: JSON.stringify({
 				chatId: chatId,
-				newPassword: newPassword,
+				password: newPassword.length > 0 ? newPassword : null,
 			}),
 		});
 		if (!response.ok) {
 			const responseError = await response.json();
+			console.log(responseError, responseError);
 			throw new Error(responseError.message);
 		}
 		return response.json();
@@ -234,35 +315,13 @@ export async function setNewPassword(
 		if (e instanceof Error && typeof e.message === 'string') {
 			console.error('Error setting password: ' + e.message);
 			throw new Error('' + e.message);
-		} else throw new Error('Something went wrongsetting password');
+		} else throw new Error('Something went wrong setting password');
 	}
 }
 
 /* ********************************************************************* */
 /* ************************* PRIVATE MESSAGES ************************** */
 /* ********************************************************************* */
-
-export async function fetchPrivateMessages(accessToken: string) {
-	try {
-		const response = await fetch('/api/user/me/privateMessages', {
-			method: 'GET',
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-			},
-			credentials: 'include',
-		});
-		if (!response.ok) {
-			const responseError = await response.json();
-			throw new Error(responseError.message);
-		}
-		return response.json();
-	} catch (e) {
-		if (e instanceof Error && typeof e.message === 'string') {
-			throw new Error(e.message);
-		} else
-			throw new Error('Something went wrong fetching private message rooms');
-	}
-}
 
 export async function createChatPrivateMessage(
 	correspondantId: number,
@@ -328,6 +387,7 @@ export async function sendMessageQuery(
 	accessToken: string,
 	message: string,
 	chatId: number,
+	secondUserId?: number,
 ) {
 	try {
 		const response = await fetch('/api/chat/sendMessage', {
@@ -337,7 +397,11 @@ export async function sendMessageQuery(
 				'Authorization': `Bearer ${accessToken}`,
 			},
 			credentials: 'include',
-			body: JSON.stringify({ message: message, chatId: chatId }),
+			body: JSON.stringify({
+				message: message,
+				chatId: chatId,
+				userId: secondUserId,
+			}),
 		});
 		if (!response.ok) {
 			const responseError = await response.json();

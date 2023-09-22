@@ -250,6 +250,7 @@ const Desktop = () => {
 				)}
 				{privateMessageWindowIsOpen && (
 					<PrivateMessages
+						key={'pmKeyInDesktop'}
 						onCloseClick={() => setPrivateMessageWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
 						friends={friends}
@@ -258,6 +259,7 @@ const Desktop = () => {
 				)}
 				{channelsWindowIsOpen && (
 					<Channels
+						key={'channelKeyInDesktop'}
 						onCloseClick={() => setChannelsWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
 					/>

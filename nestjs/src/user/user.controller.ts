@@ -3,6 +3,7 @@ import {
 	Body,
 	ConflictException,
 	Controller,
+	Delete,
 	Get,
 	HttpException,
 	HttpStatus,
@@ -303,7 +304,7 @@ export class UserController {
 
 	// Chat logic
 	// Private messages
-	@Get('me/privateMessages')
+	@Get('me/chats')
 	async getPrivateMessages(
 		@Req() request: CustomRequest,
 		@Param('userId') userId: number,
@@ -317,9 +318,7 @@ export class UserController {
 
 			// this contains an array of the chat rooms joined that are not channels
 			const chatPromises = chatSessions.map(async (currentChat) => {
-				const room = await this.chatService.getPrivateMessageRoom(
-					currentChat.chatId,
-				);
+				const room = await this.chatService.getRoom(currentChat.chatId);
 				return room; // Return the result of each asynchronous operation
 			});
 			// the filter(Boolean) throws away every null/undefined object
@@ -350,9 +349,9 @@ export class UserController {
 						participants: currentRoom.participants.map((currentParticipant) => {
 							return currentParticipant.userId;
 						}),
-						name: name,
-						avatar: avatar,
-						isChannel: false,
+						name: currentRoom.name || name,
+						avatar: currentRoom.isChannel ? null : avatar,
+						isChannel: currentRoom.isChannel,
 					};
 				}),
 			);
@@ -379,7 +378,7 @@ export class UserController {
 
 			// this contains an array of the chat rooms joined that are channels
 			const chatPromises = chatSessions.map(async (currentChat) => {
-				const room = await this.chatService.getChannelRoom(currentChat.chatId);
+				const room = await this.chatService.getRoom(currentChat.chatId);
 				return room; // Return the result of each asynchronous operation
 			});
 			// the filter(Boolean) throws away every null/undefined object
@@ -396,7 +395,7 @@ export class UserController {
 							return currentParticipant.userId;
 						}),
 						name: currentRoom.name,
-						isChannel: true,
+						isChannel: currentRoom.isChannel,
 					};
 				}),
 			);
@@ -460,6 +459,61 @@ export class UserController {
 		} catch (e) {
 			console.error('error blocking a user', e.message);
 			res.status(400).json(e.message);
+		}
+	}
+
+	@Delete('/unblockUser')
+	async leaveChat(
+		// @Body() leaveChannel: LeaveChannelDTO,
+		@Body(new ValidationPipe()) validatedData: BlockUserDTO,
+		@Req() request: CustomRequest,
+		@Res() res: Response,
+	) {
+		try {
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			this.prisma
+				.findUserById(validatedData.userId)
+				.then(() => {
+					this.userService
+						.unblockUser(userId, validatedData.userId)
+						.then(() => {
+							res.status(200).json({ message: 'User unblocked successfully' });
+						})
+						.catch((e) => {
+							throw new Error('could not unblock user: ' + e.message);
+						});
+				})
+				.catch(() => {
+					res.status(404).json({ message: 'Could not find user to unblock' });
+					throw new Error('Could find user to unblock');
+				});
+		} catch (e) {
+			console.error('👋👋👋error unblocking user', e);
+			response
+				.status(400)
+				.json({ message: 'Something went wrong unblocking the user' });
+		}
+	}
+	// get list of blocked users
+	@Get('/me/blockedUsers')
+	async getBlockedUsers(@Req() request: CustomRequest, @Res() res: Response) {
+		try {
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			this.userService
+				.getBlockedUsers(userId)
+				.then((response) => {
+					res.status(200).json(response.blockedUsers);
+				})
+				.catch((e) => {
+					res.status(400).json(e.message);
+				});
+		} catch (e) {
+			console.error(e.message);
+			res.status(400).json({ message: 'Could not retreive blocked users' });
 		}
 	}
 }

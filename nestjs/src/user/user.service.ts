@@ -282,31 +282,67 @@ export class UserService {
 	}
 
 	async blockUser(userId: number, userToBlock: number) {
-		const response = await this.prisma.user.update({
+		const response = await this.prisma.userBlocked.create({
+		  data: {
+			blockedAt: new Date(),
+			userBlockingId: userId, // The user performing the block
+			userBlockedId: userToBlock,
+		  },
+		});
+		return response;
+	}	
+
+	async unblockUser(userId: number, userToBlock: number) {
+		const response = await this.prisma.userBlocked.deleteMany({
+			where: {
+				userBlockingId: userId,
+				userBlockedId: userToBlock,
+			}
+		});
+		return response;
+	}	
+
+	async getBlockedUsers(userId: number) {
+		const response = await this.prisma.user.findUnique({
 			where: { id: userId },
-			data: {
-				blockedUsers: {
-					push: userToBlock,
-				},
+			select: {
+				blockedUsers: true,
 			},
 		});
 		return response;
 	}
 
-	// return true if the user is blocked by blocking user
-	async isUserBlockedBy(userId:number, userBlocking: number) {
+	// return true if the user is blocked by the second user
+	async isUserBlockedBy(userId: number, secondUser: number) {
 		const response = await this.prisma.user.findFirst({
 			where: {
-				id: userBlocking,
+				id: userId,
 			},
 			select: {
-				blockedUsers: true,
-			}
+				blockedBy: true,
+			},
 		});
-		if (!response.blockedUsers) return false;
-		for (const current of response.blockedUsers) {
-			if (current === userId) return true;
+		if (!response.blockedBy) return false;
+		for (const current of response.blockedBy) {
+			if (current.userBlockingId === secondUser) return true;
 		}
 		return false;
 	}
+
+		// return true if the user blocked the second user
+		async isUserBlocked(userId: number, secondUser: number) {
+			const response = await this.prisma.user.findFirst({
+				where: {
+					id: userId,
+				},
+				select: {
+					blockedUsers: true,
+				},
+			});
+			if (!response.blockedUsers) return false;
+			for (const current of response.blockedUsers) {
+				if (current.userBlockedId === secondUser) return true;
+			}
+			return false;
+		}
 }
