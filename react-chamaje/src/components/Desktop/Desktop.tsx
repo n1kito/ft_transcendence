@@ -24,7 +24,7 @@ import ChatIcon from './Icons/PC.svg';
 import FriendsIcon from './Icons/NOTEBOOK.svg';
 import GameIcon from './Icons/CD.svg';
 import Channels from '../Channels/Channels';
-import { fetchFriends } from 'src/utils/FriendsQueries';
+import { deleteFriend, fetchFriends } from 'src/utils/FriendsQueries';
 
 // Friend structure to keep track of them and their online/ingame status
 export interface IFriendStruct {
@@ -47,7 +47,7 @@ const Desktop = () => {
 	const [showFriendProfile, setShowFriendProfile] = useState(false);
 
 	const [friendLogin, setFriendLogin] = useState('');
-
+	const [deletedFriend, setDeletedFriend] = useState('');
 	const [nbOnline, SetNbOnline] = useState(0);
 
 	const navigate = useNavigate();
@@ -216,20 +216,27 @@ const Desktop = () => {
 	/* **************************** FRIENDS ******************************** */
 	/* ********************************************************************* */
 
+	// on badge click, display friend's profile
 	const handleBadgeClick = (friendLogin: string) => {
 		setFriendLogin(friendLogin);
 		setShowFriendProfile(true);
 	};
 
+	// when friend is deleted, filters out the deleted one from friends array state
 	useEffect(() => {
-		const fetchData = async () => {
-			const updatedFriends = await fetchFriends(accessToken);
-			setFriends(updatedFriends);
-			userData?.chatSocket?.sendServerConnection();
+		const updateFriends = async () => {
+			// copy friends
+			const updatedFriends = [...friends];
+			// filter out the deleted friend
+			const filteredFriends = updatedFriends.filter(
+				(friend) => friend.login !== deletedFriend,
+			);
+			// update state with filtered friends
+			setFriends(filteredFriends);
+			// reset deletedFriend state
+			setDeletedFriend('');
 		};
-		if (isAuthentificated && showFriendProfile === false) fetchData();
-		// fetchData();
-		return () => {};
+		if (!showFriendProfile && deletedFriend) updateFriends();
 	}, [showFriendProfile]);
 
 	return (
@@ -301,6 +308,7 @@ const Desktop = () => {
 						setNbOnline={SetNbOnline}
 						nbFriendsOnline={nbFriendsOnline}
 						setShowFriendProfile={setShowFriendProfile}
+						setDeletedFriend={setDeletedFriend}
 					></Profile>
 				)}
 				{chatWindowIsOpen && (

@@ -28,7 +28,7 @@ import TwoFactorAuthentication from './Components/TwoFactorAuthentication/TwoFac
 import InputField from './Components/InputField/InputField';
 import { useNavigate } from 'react-router-dom';
 import { deleteFriend } from 'src/utils/FriendsQueries';
-import { fetchUserData } from 'src/utils/UserQueries';
+import { deleteMyProfile, fetchUserData } from 'src/utils/UserQueries';
 
 // TODO: find a way to make the shaddow wrapper widht's 100% so if fills the sidebar
 export interface ProfileProps {
@@ -41,6 +41,7 @@ export interface ProfileProps {
 	setNbOnline: React.Dispatch<React.SetStateAction<number>>;
 	nbFriendsOnline: number;
 	setShowFriendProfile?: React.Dispatch<React.SetStateAction<boolean>>;
+	setDeletedFriend?: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const Profile: React.FC<ProfileProps> = ({
@@ -53,6 +54,7 @@ const Profile: React.FC<ProfileProps> = ({
 	setNbOnline,
 	nbFriendsOnline,
 	setShowFriendProfile,
+	setDeletedFriend,
 }) => {
 	const { accessToken, isTwoFAEnabled, setIsTwoFAEnabled, logOut } = useAuth();
 	const { userData, updateUserData } = useContext(UserContext);
@@ -193,24 +195,13 @@ const Profile: React.FC<ProfileProps> = ({
 	/**************************************************************************************/
 
 	const deleteProfile = async () => {
-		try {
-			const response = await fetch('api/user/me/delete', {
-				method: 'DELETE',
-				credentials: 'include',
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-			});
-			if (response.ok) {
-				// if success go back to login page
+		deleteMyProfile(accessToken)
+			.then(async (data) => {
 				logOut();
-			} else if (response.status === 500) {
-				const messageError = await response.json();
-				console.error(messageError);
-			}
-		} catch (error) {
-			throw new Error('internal error');
-		}
+			})
+			.catch((error) => {
+				console.error(error);
+			});
 	};
 
 	/**************************************************************************************/
@@ -218,13 +209,15 @@ const Profile: React.FC<ProfileProps> = ({
 	/**************************************************************************************/
 	const [isFriendDeleted, setIsFriendDeleted] = useState(false);
 
+	// sends request to delete friend
 	const handleDeleteFriend = async () => {
-		if (login)
+		if (login && setDeletedFriend)
 			deleteFriend(login, accessToken)
 				.then(async (data) => {
 					nbFriendsOnline--;
 					setNbOnline(nbFriendsOnline);
 					setSettingsPanelIsOpen(false);
+					setDeletedFriend(login);
 					onCloseClick();
 				})
 				.catch((error) => {
@@ -234,6 +227,7 @@ const Profile: React.FC<ProfileProps> = ({
 
 	useEffect(() => {
 		return () => {
+			// cleanup on unmount
 			if (login && setLogin) setLogin('');
 		};
 	});
