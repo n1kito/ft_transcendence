@@ -83,6 +83,18 @@ export class GameLogic {
 		// Same for the ball
 		// this.ball.serverUpdate(serverState.ball);
 
+		// Update the player scores
+		// if (
+		// 	this.playerScore != serverState.player1.score ||
+		// 	this.opponentScore != serverState.player2.score
+		// )
+		let scoreUdpdate =
+			this.playerScore != serverState.player1.score ||
+			this.opponentScore != serverState.player2.score;
+		// console.log('SCORE: ', JSON.stringify(serverState, null, 4));
+		this.playerScore = serverState.player1.score;
+		this.opponentScore = serverState.player2.score;
+
 		// Find the index of the last event that the server processed
 		const lastTreatedInputIndex = this.untreatedInputs.findIndex((input) => {
 			// Return a condition
@@ -98,8 +110,14 @@ export class GameLogic {
 		// its corrent current state based on its past position and the number
 		// of moves it's done
 		this.paddlePlayer.targetY = serverState.player1.y;
-		this.ball.targetX = serverState.ball.x;
-		this.ball.targetY = serverState.ball.y;
+		if (scoreUdpdate) {
+			this.ball.x = this.ball.targetX = serverState.ball.x;
+			this.ball.y = this.ball.targetY = serverState.ball.y;
+			scoreUdpdate = false;
+		} else {
+			this.ball.targetX = serverState.ball.x;
+			this.ball.targetY = serverState.ball.y;
+		}
 
 		this.untreatedInputs.forEach((input) => {
 			this.log('Reapplying step on paddle Y...');

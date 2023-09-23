@@ -16,13 +16,6 @@ export class GameRenderer {
 
 	private playerPositionBroadcastInterval: NodeJS.Timer | undefined;
 
-	private previousFrameTimeStamp = 0;
-	private timeBetweenTwoFrames = 0;
-
-	// Assume 60 logic updates per second, i.e., around 16.667ms per update
-	private fixedTimeStep = 1 / 60;
-	private accumulatedTime = 0;
-
 	constructor(
 		socket: React.MutableRefObject<Socket | null>,
 		canvasRef: React.MutableRefObject<HTMLCanvasElement | null>,

@@ -5,9 +5,9 @@ import {
 import { GameEntity } from './Shared';
 
 export default class Paddle extends GameEntity {
-	speed: number = 800;
+	// speed: number = 800;
+	speed: number = 12;
 	targetY = 0;
-
 	private direction: number;
 
 	constructor(x: number, y: number, width: number, height: number) {

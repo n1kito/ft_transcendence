@@ -172,7 +172,7 @@ export class GameLogic {
 				height: this.ball.height,
 			},
 		};
-		console.log(JSON.stringify(player1StateUpdate, null, 4));
+		// console.log(JSON.stringify(player1StateUpdate, null, 4));
 		// Send the stated to each player
 		this.server
 			.to(player1SocketId)
