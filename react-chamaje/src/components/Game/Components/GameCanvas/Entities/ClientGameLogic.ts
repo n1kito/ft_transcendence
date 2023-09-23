@@ -68,6 +68,7 @@ export class GameLogic {
 	gameStateServerUpdate(serverState: IGameState | undefined) {
 		if (!serverState) return;
 
+		// console.log(serverState);
 		// console.log(
 		// 	`[Client] Timestamp: ${Date.now()}, BallX: ${this.ball.x}, BallY: ${
 		// 		this.ball.y
@@ -78,7 +79,7 @@ export class GameLogic {
 		// const oldBallY = this.ball.y;
 		// Update our player's position according to our received state
 		// which is most likely in the past, compared to where we are at right now
-		this.paddlePlayer.serverUpdate(serverState.player1);
+		// this.paddlePlayer.serverUpdate(serverState.player1);
 		// Same for the ball
 		// this.ball.serverUpdate(serverState.ball);
 
@@ -96,17 +97,29 @@ export class GameLogic {
 		// acknowledged from the server, so our player can be positioned in
 		// its corrent current state based on its past position and the number
 		// of moves it's done
+		this.paddlePlayer.targetY = serverState.player1.y;
+		this.ball.targetX = serverState.ball.x;
+		this.ball.targetY = serverState.ball.y;
+
 		this.untreatedInputs.forEach((input) => {
+			this.log('Reapplying step on paddle Y...');
 			const numberDirection =
 				input.direction === 'up' ? -1 : input.direction === 'down' ? 1 : 0;
 			// For each remaining action we did after our server update,
 			// we update the position relative to the frame rate of our canvas
-			this.paddlePlayer.y +=
+			this.paddlePlayer.targetY +=
 				(1 / 60) * this.paddlePlayer.speed * numberDirection;
+			this.ball.targetX += (1 / 60) * input.ballSpeed * input.ballXVelocity;
+			this.ball.targetY += (1 / 60) * input.ballSpeed * input.ballYVelocity;
 			// this.ball.x += (1 / 60) * input.ballSpeed * input.ballXVelocity;
 			// this.ball.y += (1 / 60) * input.ballSpeed * input.ballYVelocity;
 		});
 
+		// if (this.ball.targetY != this.paddlePlayer.y)
+		// 	this.log(
+		// 		`❌ predicted Y: ${this.ball.targetY} | our Y: ${this.paddlePlayer.y}`,
+		// 	);
+		// else this.log('✅ Predicted Y positioning matched');
 		// if (this.ball.x != oldBallX)
 		// 	console.log(
 		// 		'new coordinates: ' + this.ball.x + ' predicted: ' + oldBallX,
@@ -115,19 +128,23 @@ export class GameLogic {
 		// 	console.log(
 		// 		'new coordinates: ' + this.ball.y + ' predicted: ' + oldBallY,
 		// 	);
-
 		// Update the opponent's position
 		this.paddleOpponent.serverUpdate(serverState.player2);
-
+		// this.paddlePlayer.x = serverState.player1.x;
 		// Update the ball
 		// TODO: the ball should actually be tracked like my paddle
 		// and have server reconciliation the same as my paddle
 		// TODO: non pas forcement en fait je peux aussi juste interpoler
 		// puisque le serveur a sa propre logique il saura toujours si un joueur
 		// essaye de tricher pour gagner des points
-		this.ball.serverUpdate(serverState.ball);
+		// this.ball.serverUpdate(serverState.ball);
 
 		// Update the player scores
+		// if (
+		// 	this.playerScore != serverState.player1.score ||
+		// 	this.opponentScore != serverState.player2.score
+		// )
+		// console.log('SCORE: ', JSON.stringify(serverState, null, 4));
 		this.playerScore = serverState.player1.score;
 		this.opponentScore = serverState.player2.score;
 	}
@@ -138,8 +155,8 @@ export class GameLogic {
 		// 		this.ball.x
 		// 	}, BallY: ${this.ball.y}`,
 		// );
-		this.paddlePlayer.update(this.canvasSize, deltaTime);
-		this.paddleOpponent.update(this.canvasSize, deltaTime);
+		// this.paddlePlayer.update(this.canvasSize, deltaTime);
+		// this.paddleOpponent.update(this.canvasSize, deltaTime);
 		this.ball.update(
 			this.paddlePlayer,
 			this.paddleOpponent,

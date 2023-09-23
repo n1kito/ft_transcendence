@@ -28,7 +28,7 @@ export class GameLogic {
 	public paddleHeight = this.canvasSize.height * 0.2;
 	public ballSize = 10;
 
-	private gameStateInterval = 16.667; // 60 FPS
+	private gameStateInterval = 16.6666666667; // 60 FPS
 
 	constructor(
 		player1SocketId: string,
@@ -97,14 +97,14 @@ export class GameLogic {
 		direction: 'up' | 'down' | 'immobile',
 		inputSequenceId: number,
 	) {
-		console.log({ inputSequenceId });
+		// console.log({ inputSequenceId });
 		// For convenience, find if we're updating the position of player 1 or 2
 		const playerIndex =
 			Object.keys(this.players).indexOf(playerSocketId) === 0 ? 1 : 2;
 
-		this.log(
-			`Updating direction to Player${playerIndex} [${playerSocketId}] to ${direction}`,
-		);
+		// this.log(
+		// 	`Updating direction to Player${playerIndex} [${playerSocketId}] to ${direction}`,
+		// );
 		this.players[playerSocketId].setDirection(direction);
 		this.players[playerSocketId].latestInputSequenceId = inputSequenceId;
 	}
@@ -153,7 +153,7 @@ export class GameLogic {
 				height: this.players[player2SocketId].height,
 				score: this.player2Score,
 			},
-			// This is their opponent, to player1 for us
+			// This is their opponent, so player1 for us
 			player2: {
 				x: this.canvasSize.width - this.paddleWidth,
 				y: this.players[player1SocketId].y,
@@ -162,17 +162,17 @@ export class GameLogic {
 				score: this.player1Score,
 			},
 			// The x coordinates of the ball need to be flipped
-			// TODO: add xVelocity as well
 			ball: {
 				x: this.canvasSize.width - this.ball.x,
 				y: this.ball.y,
-				xVelocity: this.ball.xVelocity,
+				xVelocity: -this.ball.xVelocity,
 				yVelocity: this.ball.yVelocity,
 				speed: this.ball.speed,
 				width: this.ball.width,
 				height: this.ball.height,
 			},
 		};
+		console.log(JSON.stringify(player1StateUpdate, null, 4));
 		// Send the stated to each player
 		this.server
 			.to(player1SocketId)
@@ -217,11 +217,11 @@ export class GameLogic {
 		this.log(`Started broadcasting at ${gameBroadcastInterval}ms interval`);
 		if (this.gameHasStarted && !this.gameBroadcastInterval) {
 			this.gameBroadcastInterval = setInterval(() => {
-				console.log(
-					`[Server] Timestamp: ${Date.now()}, BallX: ${this.ball.x}, BallY: ${
-						this.ball.y
-					}`,
-				);
+				// console.log(
+				// 	`[Server] Timestamp: ${Date.now()}, BallX: ${this.ball.x}, BallY: ${
+				// 		this.ball.y
+				// 	}`,
+				// );
 				this.broadcastGameState();
 			}, gameBroadcastInterval);
 		}
@@ -232,13 +232,13 @@ export class GameLogic {
 		// const gameStateInterval = 10;
 
 		this.log(`Started game simulation at ${this.gameStateInterval}ms interval`);
-		let serverUpdateTime = Date.now();
+		// let serverUpdateTime = Date.now();
 		if (this.gameHasStarted && !this.gameStateUpdateInterval) {
-			let currentTime = Date.now();
+			// let currentTime = Date.now();
 			this.gameStateUpdateInterval = setInterval(() => {
-				let currentTime = Date.now();
-				console.log(`Server update time: ${currentTime - serverUpdateTime}ms`);
-				serverUpdateTime = currentTime;
+				// let currentTime = Date.now();
+				// console.log(`Server update time: ${currentTime - serverUpdateTime}ms`);
+				// serverUpdateTime = currentTime;
 				this.updateGameState(this.gameStateInterval / 1000);
 			}, this.gameStateInterval);
 		}

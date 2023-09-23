@@ -6,6 +6,8 @@ import { GameEntity } from './Shared';
 
 export default class Paddle extends GameEntity {
 	speed: number = 800;
+	targetY = 0;
+
 	private direction: number;
 
 	constructor(x: number, y: number, width: number, height: number) {
@@ -43,8 +45,10 @@ export default class Paddle extends GameEntity {
 	}
 
 	serverUpdate(playerState: IPlayerState) {
-		this.x = playerState.x;
-		this.y = playerState.y;
+		// this.x = playerState.x;
+		this.targetX = playerState.x;
+		this.targetY = playerState.y;
+		// this.y = playerState.y;
 		this.width = playerState.width;
 		this.height = playerState.height;
 	}

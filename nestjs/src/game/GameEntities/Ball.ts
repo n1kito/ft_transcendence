@@ -36,9 +36,7 @@ export default class Ball extends GameEntity {
 		const canvasWidth = canvasSize.width;
 		const canvasCenter = canvasWidth / 2 - this.width / 2;
 
-		// update the position of the ball
-		this.x += timeBetweenTwoFrames * this.xVelocity * this.speed;
-		this.y += timeBetweenTwoFrames * this.yVelocity * this.speed;
+		// console.log({ timeBetweenTwoFrames });
 
 		// checking for any collisions
 		// we always check for the ball's direction, so it never gets stuck
@@ -65,7 +63,7 @@ export default class Ball extends GameEntity {
 		// check for left collision
 		// on collision, the ball goes to the middle of the court, goes back to base speed and the player loses a point
 		else if (this.xVelocity < 0 && this.x <= 0) {
-			console.log('lost a point');
+			console.log(`lost a point: x = ${this.x}`);
 			this.speed = this.BASE_SPEED;
 			this.x = canvasCenter;
 			playerScored(false);
@@ -81,10 +79,15 @@ export default class Ball extends GameEntity {
 		// // check for right collision
 		// // on collision, ball goes to the center of the cour, goes back to base speed and player scores a point
 		else if (this.xVelocity > 0 && this.x + this.width >= canvasWidth) {
-			console.log('scored a point');
+			// console.log('scored a point');
+			console.log(`scored a point: x = ${this.x}`);
 			this.speed = this.BASE_SPEED;
 			this.x = canvasCenter;
 			playerScored(true);
+		} else {
+			// update the position of the ball
+			this.x += timeBetweenTwoFrames * this.xVelocity * this.speed;
+			this.y += timeBetweenTwoFrames * this.yVelocity * this.speed;
 		}
 	}
 

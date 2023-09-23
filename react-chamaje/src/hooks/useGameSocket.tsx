@@ -108,6 +108,7 @@ export const useGameSocket = () => {
 		gameData.socket.on('game-state-update', (serverGameState: IGameState) => {
 			// socketLog('received game state update');
 			updateGameData({ gameState: serverGameState });
+			// console.log(serverGameState);
 		});
 	}, [gameData.socket]);
 

@@ -71,7 +71,7 @@ export class GameRenderer {
 
 	// 	// Update game state in fixed time steps
 	// 	while (accumulatedTime >= fixedTimeStep) {
-	// 		this.gameLogic.updateElementsState(fixedTimeStep);
+	// this.gameLogic.updateElementsState(fixedTimeStep);
 	// 		accumulatedTime -= fixedTimeStep;
 	// 	}
 
@@ -80,38 +80,18 @@ export class GameRenderer {
 
 	// 	this.animationFrameId = requestAnimationFrame(this.gameLoop);
 	// };
-	lastFrame = performance.now();
 	// calls all the functions needed to update the game state
-	gameLoop = (currentFrameTimeStamp: number): void => {
-		const delta = (currentFrameTimeStamp - this.previousFrameTimeStamp) / 1000;
-		// calculate how much time has passed
-		// this.timeBetweenTwoFrames =
-		// (currentFrameTimeStamp - this.previousFrameTimeStamp) / 1000;
-		this.previousFrameTimeStamp = currentFrameTimeStamp;
-
-		// Accumulate time passed
-		this.accumulatedTime += delta;
-
-		// Update game state in fixed time steps
-		while (this.accumulatedTime >= this.fixedTimeStep) {
-			this.gameLogic.updateElementsState(this.fixedTimeStep);
-			this.accumulatedTime -= this.fixedTimeStep;
-		}
-
-		let pouet = currentFrameTimeStamp - this.lastFrame;
-		console.log(`Client update time: ${pouet}ms`);
-		this.lastFrame = currentFrameTimeStamp;
-
-		// // Log the current FPS
-		// const fps = Math.round(1 / this.timeBetweenTwoFrames);
-		// this.log(`${fps} FPS`);
-
-		// Limit the time between two frames to a maximum of 0.1, in case
-		// it goes too high (after switching tabs or on load for example)
-		// this.timeBetweenTwoFrames = Math.min(this.timeBetweenTwoFrames, 0.1);
-
-		// Update the game state locally (Client side prediction)
-		// this.gameLogic.updateElementsState(this.timeBetweenTwoFrames);
+	secondsPassed = 0;
+	oldTimeStamp = 0;
+	gameLoop = (timeStamp: number): void => {
+		// Calculate how much time has passed
+		this.secondsPassed = (timeStamp - this.oldTimeStamp) / 1000;
+		// Move forward in time with a maximum amount
+		this.secondsPassed = Math.min(this.secondsPassed, 0.1);
+		this.oldTimeStamp = timeStamp;
+		// Pass the time to the update
+		this.gameLogic.updateElementsState(this.secondsPassed);
+		// TODO: handle interpolation
 		this.draw();
 		this.animationFrameId = requestAnimationFrame(this.gameLoop);
 	};
@@ -197,16 +177,16 @@ export class GameRenderer {
 		if (!this.playerPositionBroadcastInterval) {
 			// TODO: the question here is: do I need to broadcast the initial state of the server
 			// or does it make o difference? I don't think so
-			const startingState: IPlayerMovementPayload = {
-				inputSequenceId: this.gameLogic.inputSequenceId,
-				direction: this.gameLogic.paddlePlayer.getDirection(),
-				ballXVelocity: this.gameLogic.ball.xVelocity,
-				ballYVelocity: this.gameLogic.ball.yVelocity,
-				ballSpeed: this.gameLogic.ball.speed,
-			};
-			this.gameLogic.broadcastPlayerPosition(startingState);
+			// const startingState: IPlayerMovementPayload = {
+			// 	inputSequenceId: this.gameLogic.inputSequenceId,
+			// 	direction: this.gameLogic.paddlePlayer.getDirection(),
+			// 	ballXVelocity: this.gameLogic.ball.xVelocity,
+			// 	ballYVelocity: this.gameLogic.ball.yVelocity,
+			// 	ballSpeed: this.gameLogic.ball.speed,
+			// };
+			// this.gameLogic.broadcastPlayerPosition(startingState);
 			this.playerPositionBroadcastInterval = setInterval(() => {
-				this.gameLogic.log('sharing player direction with server');
+				// this.gameLogic.log('sharing player direction with server');
 				this.gameLogic.inputSequenceId++;
 				const currentState: IPlayerMovementPayload = {
 					inputSequenceId: this.gameLogic.inputSequenceId,
@@ -216,7 +196,7 @@ export class GameRenderer {
 					ballSpeed: this.gameLogic.ball.speed,
 				};
 				this.gameLogic.untreatedInputs.push(currentState);
-				console.log(this.gameLogic.untreatedInputs.length);
+				// console.log(this.gameLogic.untreatedInputs.length);
 				// console.log(this.gameLogic.untreatedInputs);
 				this.gameLogic.broadcastPlayerPosition(currentState);
 			}, 15);

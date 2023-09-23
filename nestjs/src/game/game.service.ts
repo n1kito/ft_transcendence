@@ -266,7 +266,7 @@ export class GameService {
 		direction: 'up' | 'down' | 'immobile',
 		inputSequenceId: number,
 	) {
-		console.log('[🕹️ ] Player moved', direction);
+		// console.log('[🕹️ ] Player moved', direction);
 		const playerRoomId = this.getRoomIdFromSocketId(clientSocket.id);
 		if (!playerRoomId) return; // TODO: do something else here ?
 		// TODO: Basically we need to feed this to the current came logic in the room
