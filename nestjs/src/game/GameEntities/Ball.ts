@@ -2,8 +2,6 @@ import { GameEntity } from './Shared';
 import Paddle from './Paddle';
 
 export default class Ball extends GameEntity {
-	// private BASE_SPEED: number = 300;
-	// private MAX_SPEED: number = 450;
 	private BASE_SPEED = 6;
 	private MAX_SPEED = this.BASE_SPEED * 1.5;
 	speed: number = this.BASE_SPEED;
@@ -13,15 +11,6 @@ export default class Ball extends GameEntity {
 	constructor(x: number, y: number, width: number, height: number) {
 		super(x, y, width, height);
 
-		// give the ball a random initial direction
-		// let coinToss = Math.floor(Math.random() * 2) + 1;
-		// TODO: this should be decided by the server, otherwise each player will start
-		// the game with the ball going in a different direction
-		// this.xVelocity = coinToss === 1 ? 1 : -1;
-		// The ball will always go to the player on the right
-		// TODO: if we want this to be different we need to sync it from the server
-		// to the client, otherwise each client and server logic can have different
-		// starting directions
 		this.xVelocity = 1;
 		// the ball will always start by going down
 		this.yVelocity = 1;
@@ -32,13 +21,10 @@ export default class Ball extends GameEntity {
 		opponentPaddle: Paddle,
 		canvasSize: { width: number; height: number },
 		playerScored: (won: boolean) => void,
-		timeBetweenTwoFrames: number,
 	) {
 		const canvasHeight = canvasSize.height;
 		const canvasWidth = canvasSize.width;
 		const canvasCenter = canvasWidth / 2 - this.width / 2;
-
-		// console.log({ timeBetweenTwoFrames });
 
 		// checking for any collisions
 		// we always check for the ball's direction, so it never gets stuck
@@ -88,8 +74,8 @@ export default class Ball extends GameEntity {
 			playerScored(true);
 		} else {
 			// update the position of the ball
-			this.x += /*timeBetweenTwoFrames **/ this.xVelocity * this.speed;
-			this.y += /*timeBetweenTwoFrames * */ this.yVelocity * this.speed;
+			this.x += this.xVelocity * this.speed;
+			this.y += this.yVelocity * this.speed;
 		}
 	}
 

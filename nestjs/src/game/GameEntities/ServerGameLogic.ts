@@ -1,4 +1,3 @@
-import { findIndex } from 'rxjs';
 import Ball from './Ball';
 import Paddle from './Paddle';
 import { Server } from 'socket.io';
@@ -78,7 +77,6 @@ export class GameLogic {
 			this.players[player2SocketId],
 			this.canvasSize,
 			this.handleScoreUpdate,
-			timeBetweenTwoFrames,
 		);
 	}
 
@@ -97,20 +95,11 @@ export class GameLogic {
 		direction: 'up' | 'down' | 'immobile',
 		inputSequenceId: number,
 	) {
-		// console.log({ inputSequenceId });
-		// For convenience, find if we're updating the position of player 1 or 2
-		const playerIndex =
-			Object.keys(this.players).indexOf(playerSocketId) === 0 ? 1 : 2;
-
-		// this.log(
-		// 	`Updating direction to Player${playerIndex} [${playerSocketId}] to ${direction}`,
-		// );
 		this.players[playerSocketId].setDirection(direction);
 		this.players[playerSocketId].latestInputSequenceId = inputSequenceId;
 	}
 
 	broadcastGameState() {
-		// this.log('Broadcasting game state...');
 		const [player1SocketId, player2SocketId] = Object.keys(this.players);
 		// Creating the state udpdate for player1 (left side of the screen)
 		const player1StateUpdate: IGameState = {
@@ -172,7 +161,6 @@ export class GameLogic {
 				height: this.ball.height,
 			},
 		};
-		// console.log(JSON.stringify(player1StateUpdate, null, 4));
 		// Send the stated to each player
 		this.server
 			.to(player1SocketId)
@@ -217,11 +205,6 @@ export class GameLogic {
 		this.log(`Started broadcasting at ${gameBroadcastInterval}ms interval`);
 		if (this.gameHasStarted && !this.gameBroadcastInterval) {
 			this.gameBroadcastInterval = setInterval(() => {
-				// console.log(
-				// 	`[Server] Timestamp: ${Date.now()}, BallX: ${this.ball.x}, BallY: ${
-				// 		this.ball.y
-				// 	}`,
-				// );
 				this.broadcastGameState();
 			}, gameBroadcastInterval);
 		}
@@ -232,6 +215,7 @@ export class GameLogic {
 		// const gameStateInterval = 10;
 
 		this.log(`Started game simulation at ${this.gameStateInterval}ms interval`);
+		// TODO: do we want to reinstate a way to make the server run a consistent speed ?
 		// let serverUpdateTime = Date.now();
 		if (this.gameHasStarted && !this.gameStateUpdateInterval) {
 			// let currentTime = Date.now();
@@ -257,6 +241,4 @@ export class GameLogic {
 			this.gameStateUpdateInterval = undefined;
 		}
 	}
-
-	// TODO: create startBroadcasting && stopBroadcasting function ?
 }

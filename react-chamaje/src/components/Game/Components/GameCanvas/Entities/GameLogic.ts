@@ -5,10 +5,20 @@ import {
 	IPlayerMovementPayload,
 } from '../../../../../../shared-lib/types/game';
 
+// import { ICurrentGameState } from '@sharedTypes/game';
 export class GameLogic {
+	private TICK_RATE = 1000 / 60; // we want 60 updates per second (in milliseconds, so we can use the value with Date.now()
+	private lastTick = Date.now();
 	public inputSequenceId = 0; // this is used to track the number of each client input
+
+	// used to store all of the inputs that have not been confirmed by the server yet
+	// public unconfirmedInputs: Array<{
+	// 	sequenceNumber: number;
+	// 	direction: string;
+	// }> = [];
 	untreatedInputs: IPlayerMovementPayload[] = [];
 
+	// private frontEndPLayers = {};
 	public paddlePlayer: Paddle;
 	public paddleOpponent: Paddle;
 	public ball: Ball;
@@ -79,31 +89,27 @@ export class GameLogic {
 		// acknowledged from the server, so our player can be positioned in
 		// its corrent current state based on its past position and the number
 		// of moves it's done
-		// this.paddlePlayer.targetY = serverState.player1.y;
+		this.paddlePlayer.targetY = serverState.player1.y;
 		// If we see a score, we apply the server position directly so the ball
 		// goes to the middle of the canvas with no interpolation
-		// if (scoreChanged) {
-		// 	this.ball.x = this.ball.targetX = serverState.ball.x;
-		// 	this.ball.y = this.ball.targetY = serverState.ball.y;
-		// 	scoreChanged = false;
-		// } else {
-		// 	this.ball.targetX = serverState.ball.x;
-		// 	this.ball.targetY = serverState.ball.y;
-		// }
+		if (scoreChanged) {
+			this.ball.x = this.ball.targetX = serverState.ball.x;
+			this.ball.y = this.ball.targetY = serverState.ball.y;
+			scoreChanged = false;
+		} else {
+			this.ball.targetX = serverState.ball.x;
+			this.ball.targetY = serverState.ball.y;
+		}
 
 		// For each remaining action we did after our server update,
 		// we update the position of our paddle and the ball
 		this.untreatedInputs.forEach((input) => {
-			const numberDirection =
-				input.direction === 'up' ? -1 : input.direction === 'down' ? 1 : 0;
-			this.paddlePlayer.targetY += this.paddlePlayer.speed * numberDirection;
-			if (scoreChanged) {
-				this.ball.targetX += input.ballSpeed * input.ballXVelocity;
-				this.ball.targetY += input.ballSpeed * input.ballYVelocity;
-			}
+			// const numberDirection =
+			input.direction === 'up' ? -1 : input.direction === 'down' ? 1 : 0;
+			// this.paddlePlayer.targetY += this.paddlePlayer.speed * numberDirection;
+			// this.ball.targetX += input.ballSpeed * input.ballXVelocity;
+			// this.ball.targetY += input.ballSpeed * input.ballYVelocity;
 		});
-
-		this.ball.serverUpdate(serverState.ball);
 
 		// Apply the server state to the opponent's paddle with interpolation
 		this.paddleOpponent.serverUpdate(serverState.player2);

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import './Game.css';
 import Window from '../Window/Window';
 import GameOverlay from './Components/GameOverlay/GameOverlay';
@@ -37,13 +37,10 @@ const Game: React.FC<IGameProps> = ({
 	windowDragConstraintRef,
 	opponentId = undefined,
 }) => {
-	// Canvas ref
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
-	// gameInstance
-	// const gameInstance = useRef<GameObject | null>(null);
 	const gameInstance = useRef<GameRenderer | null>(null);
-
-	// // Canvas states
+	// TODO: might not be necessary since I don't change the actual canvas size
+	// upon resize, it should actually be just set to 100%
 	const [canvasSize, setCanvasSize] = useState<ICanvasProps>({
 		width: 700,
 		height: 500,
@@ -52,12 +49,10 @@ const Game: React.FC<IGameProps> = ({
 	// Import the game context, so it can be used everywhere
 	const { gameData, updateGameData, resetGameData, eraseGameData } =
 		useContext(GameContext);
+
 	// use our socket hook
 	const {
-		socketRef,
 		broadcastPlayerPosition,
-		joinRoom,
-		requestOpponentInfo,
 		setPlayer1AsReady: notifyPlayerIsReady,
 	} = useGameSocket();
 	// Create a ref to out context's socket
@@ -69,7 +64,6 @@ const Game: React.FC<IGameProps> = ({
 			const ctx = canvasRef.current.getContext('2d');
 			if (ctx)
 				gameInstance.current = new GameRenderer(
-					socketRef,
 					canvasRef,
 					ctx,
 					broadcastPlayerPosition,
@@ -88,20 +82,6 @@ const Game: React.FC<IGameProps> = ({
 		else gameInstance.current?.stopGame();
 	}, [gameData.gameIsPlaying]);
 
-	// // If we're connected to the socket and don't have a room, ask for one
-	// useEffect(() => {
-	// 	if (gameData.connectedToServer && !gameData.roomId) {
-	// 		joinRoom();
-	// 	}
-	// }, [gameData.connectedToServer, gameData.roomId]);
-
-	// if we're in a room and it's full, ask for our opponent's information
-	// useEffect(() => {
-	// 	if (gameData.roomIsFull) {
-	// 		requestOpponentInfo();
-	// 	}
-	// }, [gameData.roomIsFull]);
-
 	// notify the server when player is ready
 	useEffect(() => {
 		if (gameData.player1Ready) notifyPlayerIsReady();
@@ -109,19 +89,8 @@ const Game: React.FC<IGameProps> = ({
 
 	useEffect(() => {
 		// Everytime the server sends a state update, we need to apply it
-		// console.log('Game state changed, we need update it !');
-		// TODO: this seems a bit annoying, since the logic is what really interacts
-		// with react events, maybe the renderer should be instantiated in the logic
-		// and not the other way arround ?
 		gameInstance.current?.gameLogic.gameStateServerUpdate(gameData.gameState);
 	}, [gameData.gameState]);
-
-	// useEffect(() => {
-	// 	if (gameData.player1Ready && gameData.player2Ready)
-	// 		updateGameData({ gameIsPlaying: true });
-	// }, [gameData.player1Ready, gameData.player2Ready]);
-
-	//
 
 	return (
 		<Window
@@ -137,9 +106,6 @@ const Game: React.FC<IGameProps> = ({
 			<div className="game-wrapper">
 				{!gameData.gameIsPlaying && <GameOverlay />}
 				<GameCanvas
-					// paddle1Props={paddle1Position}
-					// paddle2Props={paddle2Position}
-					// ballProps={ballPosition}
 					canvasProps={canvasSize}
 					ref={canvasRef}
 				/>

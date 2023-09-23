@@ -1,28 +1,18 @@
-import { Socket } from 'socket.io-client';
-import { GameLogic } from './ClientGameLogic';
+import { GameLogic } from './GameLogic';
 import { IPlayerMovementPayload } from '../../../../../../../shared-lib/types/game';
 
 export class GameRenderer {
 	gameLogic: GameLogic;
-
-	private socket: Socket | null;
-
-	// private canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
 	private gameContext: CanvasRenderingContext2D;
-
 	private gradient: CanvasGradient;
-
 	private animationFrameId: number | undefined;
-
 	private playerPositionBroadcastInterval: NodeJS.Timer | undefined;
 
 	constructor(
-		socket: React.MutableRefObject<Socket | null>,
 		canvasRef: React.MutableRefObject<HTMLCanvasElement | null>,
 		gameContext: CanvasRenderingContext2D,
 		broadcastPlayerPosition: (payload: IPlayerMovementPayload) => void,
 	) {
-		this.socket = socket.current;
 		// Storing the game logic instance
 		this.gameLogic = new GameLogic(
 			{ width: canvasRef.current!.width, height: canvasRef.current!.height },
@@ -46,8 +36,8 @@ export class GameRenderer {
 	*/
 
 	startGame = (): void => {
-		this.startBroadcastingToServer();
 		this.animationFrameId = requestAnimationFrame(this.gameLoop);
+		this.startBroadcastingToServer();
 	};
 
 	stopGame = (): void => {
@@ -55,36 +45,10 @@ export class GameRenderer {
 		this.cancelGameLoop();
 	};
 
-	// gameLoop = (currentFrameTimeStamp) => {
-	// 	let delta = (currentFrameTimeStamp - this.previousFrameTimeStamp) / 1000;
-	// 	this.previousFrameTimeStamp = currentFrameTimeStamp;
-
-	// 	// Accumulate time passed
-	// 	accumulatedTime += delta;
-
-	// 	// Update game state in fixed time steps
-	// 	while (accumulatedTime >= fixedTimeStep) {
-	// this.gameLogic.updateElementsState(fixedTimeStep);
-	// 		accumulatedTime -= fixedTimeStep;
-	// 	}
-
-	// 	// Now draw your game
-	// 	this.draw();
-
-	// 	this.animationFrameId = requestAnimationFrame(this.gameLoop);
-	// };
-	// calls all the functions needed to update the game state
-	secondsPassed = 0;
-	oldTimeStamp = 0;
+	// The game loop's only job is to continuously render the canvas
+	// and predict the ball's movements (which will be regularly corrected by the server)
 	gameLoop = (timeStamp: number): void => {
-		// Calculate how much time has passed
-		this.secondsPassed = (timeStamp - this.oldTimeStamp) / 1000;
-		// Move forward in time with a maximum amount
-		this.secondsPassed = Math.min(this.secondsPassed, 0.1);
-		this.oldTimeStamp = timeStamp;
-		// Pass the time to the update
-		this.gameLogic.updateElementsState(this.secondsPassed);
-		// TODO: handle interpolation
+		this.gameLogic.updateBallPosition();
 		this.draw();
 		this.animationFrameId = requestAnimationFrame(this.gameLoop);
 	};
@@ -117,69 +81,27 @@ export class GameRenderer {
 		if (event.key === 'ArrowUp') {
 			console.log('[🕹️] up');
 			direction = 'up';
-			// this.broadcastPlayerPosition('up');
-			// change the direction of the paddle
-			// this.paddlePlayer.setDirection(PaddleDirection.up);
 		}
 		if (event.key === 'ArrowDown') {
 			console.log('[🕹️] down');
 			direction = 'down';
-			// this.broadcastPlayerPosition('down');
-			// change the direction of the paddle
-			// this.paddlePlayer.setDirection(PaddleDirection.down);
 		}
-		// If a direction was registered
+		// If a direction was registered, update the paddle's position
+		// so it's instantanuous on the screen
 		if (direction) {
-			// Update the paddle's position
 			this.gameLogic.paddlePlayer.setDirection(direction);
-
-			// give an id to that state and send it to the server
-			// this.gameLogic.inputSequenceId++; //increase the sequence number of the input
-			// this.gameLogic.broadcastPlayerPosition(
-			// 	direction,
-			// 	this.gameLogic.inputSequenceId,
-			// );
-			// // add the action to the array of actions that have not yet been confirmed by the server
-			// this.gameLogic.unconfirmedInputs.push({
-			// 	sequenceNumber: this.gameLogic.inputSequenceNumber,
-			// 	direction: direction,
-			// });
 		}
 	};
 
 	handleKeyRelease = (event: KeyboardEvent): void => {
 		if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-			// // this.broadcastPlayerPosition('immobile');
 			this.gameLogic.paddlePlayer.setDirection('immobile');
-			// this.gameLogic.inputSequenceId++;
-			// this.gameLogic.broadcastPlayerPosition(
-			// 	'immobile',
-			// 	this.gameLogic.inputSequenceId,
-			// );
-			// this.gameLogic.unconfirmedInputs.push({
-			// 	sequenceNumber: this.gameLogic.inputSequenceNumber,
-			// 	direction: 'immobile',
-			// });
-
-			// Send the new direction to the backend
-			// this.socket?.emit('player-moved', { direction: 'immobile' });
 		}
 	};
 
 	startBroadcastingToServer() {
 		if (!this.playerPositionBroadcastInterval) {
-			// TODO: the question here is: do I need to broadcast the initial state of the server
-			// or does it make o difference? I don't think so
-			// const startingState: IPlayerMovementPayload = {
-			// 	inputSequenceId: this.gameLogic.inputSequenceId,
-			// 	direction: this.gameLogic.paddlePlayer.getDirection(),
-			// 	ballXVelocity: this.gameLogic.ball.xVelocity,
-			// 	ballYVelocity: this.gameLogic.ball.yVelocity,
-			// 	ballSpeed: this.gameLogic.ball.speed,
-			// };
-			// this.gameLogic.broadcastPlayerPosition(startingState);
 			this.playerPositionBroadcastInterval = setInterval(() => {
-				// this.gameLogic.log('sharing player direction with server');
 				this.gameLogic.inputSequenceId++;
 				const currentState: IPlayerMovementPayload = {
 					inputSequenceId: this.gameLogic.inputSequenceId,
@@ -189,14 +111,11 @@ export class GameRenderer {
 					ballSpeed: this.gameLogic.ball.speed,
 				};
 				this.gameLogic.untreatedInputs.push(currentState);
-				// console.log(this.gameLogic.untreatedInputs.length);
-				// console.log(this.gameLogic.untreatedInputs);
 				this.gameLogic.broadcastPlayerPosition(currentState);
 			}, 15);
 		}
 	}
 
-	// TODO: make sure this is being used somewhere
 	stopBroadcastingToServer() {
 		if (this.playerPositionBroadcastInterval) {
 			clearInterval(this.playerPositionBroadcastInterval);
@@ -270,8 +189,8 @@ export class GameRenderer {
 			this.gameLogic.canvasSize.width,
 		);
 		// Add colors to the gradient
-		gradient.addColorStop(0.1086, 'rgba(194, 255, 182, 0.69)');
-		gradient.addColorStop(0.5092, 'rgba(254, 164, 182, 1.00)');
+		gradient.addColorStop(0.1086, 'rgb(194, 255, 182)');
+		gradient.addColorStop(0.5092, 'rgb(254, 164, 182)');
 		gradient.addColorStop(0.5093, '#FFA3B6');
 		gradient.addColorStop(0.7544, '#DDA9FF');
 		gradient.addColorStop(1.0, '#A2D1FF');

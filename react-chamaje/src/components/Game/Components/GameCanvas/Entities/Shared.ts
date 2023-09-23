@@ -24,8 +24,10 @@ export class GameEntity {
 	draw(context: CanvasRenderingContext2D): void {
 		// setup the visual style
 		context.fillStyle = 'white';
-		context.shadowColor = 'pink';
-		context.shadowBlur = 20;
+		context.strokeStyle = 'white';
+		context.lineWidth = 1;
+		context.shadowColor = 'white';
+		context.shadowBlur = 40;
 		context.shadowOffsetX = 0;
 		context.shadowOffsetY = 0;
 
@@ -35,11 +37,34 @@ export class GameEntity {
 		this.interpolate();
 
 		// draw the entity
-		context.fillRect(this.x, this.y, this.width, this.height);
+		context.fillRect(this.x, this.y, this.width - 1, this.height - 1);
+		context.strokeRect(this.x, this.y, this.width - 1, this.height - 1);
 	}
 
+	// interpolate() {
+	// 	if (this.targetX) this.x += (this.targetX - this.x) * 0.5;
+	// 	if (this.targetY) this.y += (this.targetY - this.y) * 0.5;
+	// }
+
 	interpolate() {
-		if (this.targetX) this.x += (this.targetX - this.x) * 0.5;
-		if (this.targetY) this.y += (this.targetY - this.y) * 0.5;
+		if (this.targetX) {
+			const diffX = Math.abs(this.targetX - this.x); // Calculate the absolute difference
+			if (diffX <= 50) {
+				// Check if the difference is not greater than 200
+				this.x += (this.targetX - this.x) * 0.5;
+			} else {
+				this.x = this.targetX;
+			}
+		}
+
+		if (this.targetY) {
+			const diffY = Math.abs(this.targetY - this.y); // Calculate the absolute difference
+			if (diffY <= 50) {
+				// Check if the difference is not greater than 200
+				this.y += (this.targetY - this.y) * 0.5;
+			} else {
+				this.y = this.targetY;
+			}
+		}
 	}
 }

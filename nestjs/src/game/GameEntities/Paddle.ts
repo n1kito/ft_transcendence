@@ -17,7 +17,7 @@ export default class Paddle extends GameEntity {
 		canvasSize: { width: number; height: number },
 		timeBetweenTwoFrames: number,
 	) {
-		const screenPaddleGap: number = 0.075 * canvasSize.height;
+		const screenPaddleGap: number = 0.05 * canvasSize.height;
 		// Calculate the new y coordinate of the paddle
 		this.y += /*timeBetweenTwoFrames **/ this.speed * this.direction;
 		// Make sure the y coordinates are never < 0 or > canvasHeight - paddleHeight
