@@ -51,10 +51,8 @@ const Game: React.FC<IGameProps> = ({
 		useContext(GameContext);
 
 	// use our socket hook
-	const {
-		broadcastPlayerPosition,
-		setPlayer1AsReady: notifyPlayerIsReady,
-	} = useGameSocket();
+	const { broadcastPlayerPosition, setPlayer1AsReady: notifyPlayerIsReady } =
+		useGameSocket();
 	// Create a ref to out context's socket
 
 	useEffect(() => {
@@ -105,10 +103,7 @@ const Game: React.FC<IGameProps> = ({
 			{/* TODO: add the player information above the canvas game */}
 			<div className="game-wrapper">
 				{!gameData.gameIsPlaying && <GameOverlay />}
-				<GameCanvas
-					canvasProps={canvasSize}
-					ref={canvasRef}
-				/>
+				<GameCanvas canvasProps={canvasSize} ref={canvasRef} />
 			</div>
 		</Window>
 	);

@@ -47,8 +47,19 @@ export class GameRenderer {
 
 	// The game loop's only job is to continuously render the canvas
 	// and predict the ball's movements (which will be regularly corrected by the server)
-	gameLoop = (timeStamp: number): void => {
-		this.gameLogic.updateBallPosition();
+	lastTime = 0;
+	gameLoop = (timestamp: number): void => {
+		this.gameLogic.deltaTime = (timestamp - this.lastTime) / 1000; // Time since last frame in seconds
+		this.lastTime = timestamp;
+		this.gameLogic.deltaTime = Math.min(this.gameLogic.deltaTime, 0.1);
+		// console.log('delta time = ', this.gameLogic.deltaTime);
+
+		// console.log(this.gameLogic.ball.x, this.gameLogic.ball.y);
+		// this.gameLogic.updateBallPosition();
+		this.gameLogic.paddlePlayer.update(
+			{ width: 700, height: 500 },
+			this.gameLogic.deltaTime,
+		);
 		this.draw();
 		this.animationFrameId = requestAnimationFrame(this.gameLoop);
 	};

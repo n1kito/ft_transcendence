@@ -139,6 +139,7 @@ export class GameService {
 		if (currentRoomId && this.rooms[currentRoomId]) {
 			// TODO: if a client leaves and they were in a game, we need to
 			// stop the game broadcast, end the match etc...
+			this.rooms[currentRoomId].gameInstance.endGame();
 			// handleGameStop(); // TODO:
 			// Delete the client from the room
 			delete this.rooms[currentRoomId].players[socket.id];
@@ -406,7 +407,5 @@ export class GameService {
 	*/
 
 	// TODO: how do I track what gameSession is linked to a particular game ? Maybe through the gameInstance ?
-	createDBGameEntry() {
-
-	}
+	createDBGameEntry() {}
 }

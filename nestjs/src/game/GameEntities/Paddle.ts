@@ -2,7 +2,7 @@ import { GameEntity } from './Shared';
 
 export default class Paddle extends GameEntity {
 	// private speed: number = 800;
-	private speed: number = 10;
+	private speed: number = 800;
 	private direction: number;
 
 	// The latest frontent sequence state that the player has treated
@@ -19,7 +19,7 @@ export default class Paddle extends GameEntity {
 	) {
 		const screenPaddleGap: number = 0.05 * canvasSize.height;
 		// Calculate the new y coordinate of the paddle
-		this.y += /*timeBetweenTwoFrames **/ this.speed * this.direction;
+		this.y += timeBetweenTwoFrames * this.speed * this.direction;
 		// Make sure the y coordinates are never < 0 or > canvasHeight - paddleHeight
 		// However, to respect the original 1972 game, the paddles leave a gap at the top and the bottom of the playground,
 		// to avoid infinite matches

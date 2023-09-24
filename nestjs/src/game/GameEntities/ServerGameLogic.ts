@@ -1,7 +1,7 @@
 import Ball from './Ball';
 import Paddle from './Paddle';
 import { Server } from 'socket.io';
-import { IGameState } from 'shared-lib/types/game';
+import { IBallState, IGameState, IPlayerState } from 'shared-lib/types/game';
 
 export class GameLogic {
 	// public paddlePlayer: Paddle;
@@ -77,6 +77,7 @@ export class GameLogic {
 			this.players[player2SocketId],
 			this.canvasSize,
 			this.handleScoreUpdate,
+			timeBetweenTwoFrames,
 		);
 	}
 
@@ -101,33 +102,38 @@ export class GameLogic {
 
 	broadcastGameState() {
 		const [player1SocketId, player2SocketId] = Object.keys(this.players);
-		// Creating the state udpdate for player1 (left side of the screen)
+
+		// TODO: actually we only need to share the ball's x and y coordinates since there is no client prediction on the ball
+		// same thing for each player's opponent basically
+		const currentBallState: IBallState = {
+			x: this.ball.x,
+			y: this.ball.y,
+			xVelocity: this.ball.xVelocity,
+			yVelocity: this.ball.yVelocity,
+			speed: this.ball.speed,
+			width: this.ball.width,
+			height: this.ball.height,
+		};
+		const currentPlayer1State: IPlayerState = {
+			x: 0,
+			y: this.players[player1SocketId].y,
+			width: this.players[player1SocketId].width,
+			height: this.players[player1SocketId].height,
+			score: this.player1Score,
+		};
+		const currentPlayer2State: IPlayerState = {
+			x: this.canvasSize.width - this.paddleWidth,
+			y: this.players[player2SocketId].y,
+			width: this.players[player2SocketId].width,
+			height: this.players[player2SocketId].height,
+			score: this.player2Score,
+		};
 		const player1StateUpdate: IGameState = {
 			// Each player gets their latest input sequence id
 			inputSequenceId: this.players[player1SocketId].latestInputSequenceId,
-			player1: {
-				x: 0,
-				y: this.players[player1SocketId].y,
-				width: this.players[player1SocketId].width,
-				height: this.players[player1SocketId].height,
-				score: this.player1Score,
-			},
-			player2: {
-				x: this.canvasSize.width - this.paddleWidth,
-				y: this.players[player2SocketId].y,
-				width: this.players[player2SocketId].width,
-				height: this.players[player2SocketId].height,
-				score: this.player2Score,
-			},
-			ball: {
-				x: this.ball.x,
-				y: this.ball.y,
-				xVelocity: this.ball.xVelocity,
-				yVelocity: this.ball.yVelocity,
-				speed: this.ball.speed,
-				width: this.ball.width,
-				height: this.ball.height,
-			},
+			player1: currentPlayer1State,
+			player2: currentPlayer2State,
+			ball: currentBallState,
 		};
 		// Creating the state update for player2 (right side of the screen for us, so things need to be flipped for them,
 		// since both players appear on the left side of their screen)
@@ -136,29 +142,19 @@ export class GameLogic {
 			inputSequenceId: this.players[player2SocketId].latestInputSequenceId,
 			// This is their left-hand side player, so player2 for us
 			player1: {
+				...currentPlayer2State,
 				x: 0,
-				y: this.players[player2SocketId].y,
-				width: this.players[player2SocketId].width,
-				height: this.players[player2SocketId].height,
-				score: this.player2Score,
 			},
 			// This is their opponent, so player1 for us
 			player2: {
+				...currentPlayer1State,
 				x: this.canvasSize.width - this.paddleWidth,
-				y: this.players[player1SocketId].y,
-				width: this.players[player1SocketId].width,
-				height: this.players[player1SocketId].height,
-				score: this.player1Score,
 			},
-			// The x coordinates of the ball need to be flipped
+			// The x coordinates and xVelocity values of the ball need to be flipped
 			ball: {
-				x: this.canvasSize.width - this.ball.x,
-				y: this.ball.y,
-				xVelocity: -this.ball.xVelocity,
-				yVelocity: this.ball.yVelocity,
-				speed: this.ball.speed,
-				width: this.ball.width,
-				height: this.ball.height,
+				...currentBallState,
+				x: this.canvasSize.width - currentBallState.x - this.ballSize,
+				xVelocity: -currentBallState.xVelocity,
 			},
 		};
 		// Send the stated to each player
@@ -172,8 +168,8 @@ export class GameLogic {
 
 	startGame() {
 		this.gameHasStarted = true;
-		this.startGameSimulation();
 		this.startBroadcasting();
+		this.startGameSimulation();
 	}
 
 	endGame() {
@@ -202,7 +198,7 @@ export class GameLogic {
 	private startBroadcasting() {
 		const gameBroadcastInterval = 15;
 
-		this.log(`Started broadcasting at ${gameBroadcastInterval}ms interval`);
+		// this.log(`Started broadcasting at ${gameBroadcastInterval}ms interval`);
 		if (this.gameHasStarted && !this.gameBroadcastInterval) {
 			this.gameBroadcastInterval = setInterval(() => {
 				this.broadcastGameState();
@@ -219,11 +215,14 @@ export class GameLogic {
 		// let serverUpdateTime = Date.now();
 		if (this.gameHasStarted && !this.gameStateUpdateInterval) {
 			// let currentTime = Date.now();
+			let lastTime = Date.now();
 			this.gameStateUpdateInterval = setInterval(() => {
-				// let currentTime = Date.now();
-				// console.log(`Server update time: ${currentTime - serverUpdateTime}ms`);
-				// serverUpdateTime = currentTime;
-				this.updateGameState(this.gameStateInterval / 1000);
+				const currentTime = Date.now();
+				let deltaTime = (currentTime - lastTime) / 1000; // Time since last frame in seconds
+				lastTime = currentTime;
+				deltaTime = Math.min(deltaTime, 0.1);
+				// console.log('delta time = ', deltaTime);
+				this.updateGameState(deltaTime);
 			}, this.gameStateInterval);
 		}
 	}

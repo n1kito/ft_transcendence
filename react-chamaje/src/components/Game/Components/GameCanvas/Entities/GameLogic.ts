@@ -7,15 +7,8 @@ import {
 
 // import { ICurrentGameState } from '@sharedTypes/game';
 export class GameLogic {
-	private TICK_RATE = 1000 / 60; // we want 60 updates per second (in milliseconds, so we can use the value with Date.now()
-	private lastTick = Date.now();
 	public inputSequenceId = 0; // this is used to track the number of each client input
 
-	// used to store all of the inputs that have not been confirmed by the server yet
-	// public unconfirmedInputs: Array<{
-	// 	sequenceNumber: number;
-	// 	direction: string;
-	// }> = [];
 	untreatedInputs: IPlayerMovementPayload[] = [];
 
 	// private frontEndPLayers = {};
@@ -27,6 +20,8 @@ export class GameLogic {
 	public opponentScore = 0;
 
 	public canvasSize: { width: number; height: number };
+
+	public deltaTime = 0;
 
 	public broadcastPlayerPosition: (payload: IPlayerMovementPayload) => void;
 
@@ -72,16 +67,13 @@ export class GameLogic {
 		let scoreChanged =
 			this.playerScore != serverState.player1.score ||
 			this.opponentScore != serverState.player2.score;
-		this.playerScore = serverState.player1.score;
-		this.opponentScore = serverState.player2.score;
 
 		// Find the index of the last event that the server processed
 		const lastTreatedInputIndex = this.untreatedInputs.findIndex((input) => {
-			// Return a condition
 			return serverState.inputSequenceId === input.inputSequenceId;
 		});
+		// Remove the non-needed inputs from our untreated input history
 		if (lastTreatedInputIndex > -1) {
-			// Remove the non-needed inputs from our untreated input history
 			this.untreatedInputs.splice(0, lastTreatedInputIndex + 1);
 		}
 
@@ -90,27 +82,35 @@ export class GameLogic {
 		// its corrent current state based on its past position and the number
 		// of moves it's done
 		this.paddlePlayer.targetY = serverState.player1.y;
-		// If we see a score, we apply the server position directly so the ball
-		// goes to the middle of the canvas with no interpolation
+		console.log('server state Y:', serverState.player1.y);
+		// For each remaining action we did after our server update,
+		// we update the position of our paddle and the ball
+		this.untreatedInputs.forEach((input) => {
+			const numberDirection =
+				input.direction === 'up' ? -1 : input.direction === 'down' ? 1 : 0;
+			const screenPaddleGap: number = 0.05 * this.canvasSize.height;
+			const newTargetY =
+				this.paddlePlayer.targetY +
+				this.paddlePlayer.speed * numberDirection * this.deltaTime;
+			this.paddlePlayer.targetY = Math.max(
+				screenPaddleGap,
+				Math.min(
+					newTargetY,
+					this.canvasSize.height - this.paddlePlayer.height - screenPaddleGap,
+				),
+			);
+		});
+
+		// Only interpolate with targetX/Y if the score has not changed
+		// otherwise the ball slides accross the entire screen
 		if (scoreChanged) {
 			this.ball.x = this.ball.targetX = serverState.ball.x;
 			this.ball.y = this.ball.targetY = serverState.ball.y;
-			scoreChanged = false;
+			console.log(`Score changed: x = ${this.ball.x} y = ${this.ball.y}`);
 		} else {
 			this.ball.targetX = serverState.ball.x;
 			this.ball.targetY = serverState.ball.y;
 		}
-
-		// For each remaining action we did after our server update,
-		// we update the position of our paddle and the ball
-		this.untreatedInputs.forEach((input) => {
-			// const numberDirection =
-			input.direction === 'up' ? -1 : input.direction === 'down' ? 1 : 0;
-			// this.paddlePlayer.targetY += this.paddlePlayer.speed * numberDirection;
-			// this.ball.targetX += input.ballSpeed * input.ballXVelocity;
-			// this.ball.targetY += input.ballSpeed * input.ballYVelocity;
-		});
-
 		// Apply the server state to the opponent's paddle with interpolation
 		this.paddleOpponent.serverUpdate(serverState.player2);
 
@@ -119,19 +119,20 @@ export class GameLogic {
 		this.opponentScore = serverState.player2.score;
 	}
 
-	updateBallPosition(): void {
-		this.ball.update(
-			this.paddlePlayer,
-			this.paddleOpponent,
-			this.canvasSize,
-			this.handleScoreUpdate,
-		);
-	}
+	// updateBallPosition(): void {
+	// 	this.ball.update(
+	// 		this.paddlePlayer,
+	// 		this.paddleOpponent,
+	// 		this.canvasSize,
+	// 		this.handleScoreUpdate,
+	// 		this.deltaTime,
+	// 	);
+	// }
 
-	handleScoreUpdate = (won: boolean) => {
-		if (won) this.playerScore++;
-		else this.opponentScore++;
-	};
+	// handleScoreUpdate = (won: boolean) => {
+	// 	if (won) this.playerScore++;
+	// 	else this.opponentScore++;
+	// };
 
 	log(message: string): void {
 		console.log(
