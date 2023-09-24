@@ -9,24 +9,8 @@ import { Socket } from 'socket.io-client';
 import { IPlayerInformation } from '../../../shared-lib/types/game';
 import { IGameState } from '../../../shared-lib/types/game';
 
-interface IPlayerState {
-	x: number;
-	y: number;
-	width: number;
-	height: number;
-	score: number;
-}
-interface IBallState {
-	x: number;
-	y: number;
-	width: number;
-	height: number;
-}
-interface IGeneralAssetsState {}
-
 export interface IGameDataProps {
 	socket: Socket | undefined;
-	// gameCanStart: boolean;
 	gameIsPlaying: boolean;
 	player1Ready: boolean;
 	player2Ready: boolean;
@@ -40,12 +24,13 @@ export interface IGameDataProps {
 	connectedToServer: boolean;
 	connectionErrorStatus: string | null;
 	//TODO: add other properties
+	// User actions
+	userWantsNewOpponent: boolean;
 }
 
 // Initial state of the gameData
 const defaultGameState: IGameDataProps = {
 	socket: undefined,
-	// gameCanStart: false,
 	gameIsPlaying: false,
 	player1Ready: false,
 	player2Ready: false,
@@ -58,6 +43,8 @@ const defaultGameState: IGameDataProps = {
 	// Connection information
 	connectedToServer: false,
 	connectionErrorStatus: null,
+	// User actions
+	userWantsNewOpponent: false,
 };
 
 interface GameContextType {
@@ -103,11 +90,11 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
 			...prevGameData,
 			...updates,
 		}));
-		// if ('socket' in updates) {
-		// 	logContext(`socket ${updates.socket != undefined ? 'added' : 'removed'}`);
-		// } else {
-		// 	logContext(JSON.stringify(updates, null, 4));
-		// }
+		if ('socket' in updates) {
+			logContext(`socket ${updates.socket != undefined ? 'added' : 'removed'}`);
+		} else {
+			logContext(JSON.stringify(updates, null, 4));
+		}
 	};
 
 	// Helper function to reset the game state to its initial state in one function call

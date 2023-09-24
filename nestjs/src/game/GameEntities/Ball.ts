@@ -51,7 +51,7 @@ export default class Ball extends GameEntity {
 			this.rectangleIntersection(this, playerPaddle)
 		) {
 			// console.log('hit my own paddle');
-			console.log(`own paddle collision: x = ${this.x}`);
+			// console.log(`own paddle collision: x = ${this.x}`);
 			this.handlePaddleCollision(playerPaddle);
 		}
 		// check for left collision
@@ -60,7 +60,7 @@ export default class Ball extends GameEntity {
 			// console.log(`lost a point: x = ${this.x}`);
 			this.speed = this.BASE_SPEED;
 			this.x = canvasCenter;
-			console.log(`score ! x to ${canvasCenter}`);
+			// console.log(`score ! x to ${canvasCenter}`);
 			playerScored(false);
 		}
 		// check for right paddle collision
@@ -68,7 +68,7 @@ export default class Ball extends GameEntity {
 			this.xVelocity > 0 &&
 			this.rectangleIntersection(this, opponentPaddle)
 		) {
-			console.log(`opponent paddle collision: x = ${this.x}`);
+			// console.log(`opponent paddle collision: x = ${this.x}`);
 			this.handlePaddleCollision(opponentPaddle);
 		}
 		// // check for right collision
@@ -77,7 +77,7 @@ export default class Ball extends GameEntity {
 			// console.log(`scored a point: x = ${this.x}`);
 			this.speed = this.BASE_SPEED;
 			this.x = canvasCenter;
-			console.log(`score ! x to ${canvasCenter}`);
+			// console.log(`score ! x to ${canvasCenter}`);
 			playerScored(true);
 		} else {
 			// // update the position of the ball

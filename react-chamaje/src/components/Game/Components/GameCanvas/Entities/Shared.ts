@@ -22,23 +22,28 @@ export class GameEntity {
 	}
 
 	draw(context: CanvasRenderingContext2D): void {
-		// setup the visual style
-		context.fillStyle = 'white';
-		// context.strokeStyle = 'white';
-		// context.lineWidth = 1;
-		context.shadowColor = 'white';
-		context.shadowBlur = 40;
-		context.shadowOffsetX = 0;
-		context.shadowOffsetY = 0;
-
 		// TODO: this interpolates even when the ball is going to the center
 		// whih looks awful, but not sure how to track whether the ball
 		// needs to go back after score changes
 		this.interpolate();
 
+		// setup the visual style
+		context.fillStyle = 'white';
+		// context.strokeStyle = 'white';
+		// context.lineWidth = 1;
+		context.shadowOffsetX = 0;
+		context.shadowOffsetY = 0;
 		// draw the entity
+		context.shadowColor = 'pink';
+		context.shadowBlur = 40;
 		context.fillRect(this.x, this.y, this.width, this.height);
-		// context.strokeRect(this.x, this.y, this.width, this.height);
+		context.shadowColor = 'pink';
+		context.shadowBlur = 30;
+		context.fillRect(this.x, this.y, this.width, this.height);
+		context.shadowColor = 'pink';
+		context.shadowBlur = 20;
+		context.fillRect(this.x, this.y, this.width, this.height);
+		context.strokeRect(this.x, this.y, this.width, this.height);
 	}
 
 	// interpolate() {
@@ -47,20 +52,7 @@ export class GameEntity {
 	// }
 
 	interpolate() {
-		if (this.targetX >= 0) {
-			// const diffX = Math.abs(this.targetX - this.x); // Calculate the absolute difference
-			// if (diffX <= 50) {
-			// Check if the difference is not greater than 200
-			this.x += (this.targetX - this.x) * 0.5;
-			// }
-		}
-
-		if (this.targetY >= 0) {
-			// const diffY = Math.abs(this.targetY - this.y); // Calculate the absolute difference
-			// if (diffY <= 50) {
-			// Check if the difference is not greater than 200
-			this.y += (this.targetY - this.y) * 0.5;
-			// }
-		}
+		if (this.targetX >= 0) this.x += (this.targetX - this.x) * 0.5;
+		if (this.targetY >= 0) this.y += (this.targetY - this.y) * 0.5;
 	}
 }

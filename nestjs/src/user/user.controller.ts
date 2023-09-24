@@ -26,10 +26,10 @@ export interface CustomRequest extends Request {
 export type UserWithRelations = Prisma.UserGetPayload<{
 	include: {
 		gamesPlayedAsPlayer1: {
-			include: { user1: true; user2: true };
+			include: { player1: true; player2: true };
 		};
 		gamesPlayedAsPlayer2: {
-			include: { user1: true; user2: true };
+			include: { player1: true; player2: true };
 		};
 		gamesWon: true;
 		target: true;

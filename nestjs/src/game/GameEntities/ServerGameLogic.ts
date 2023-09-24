@@ -2,11 +2,15 @@ import Ball from './Ball';
 import Paddle from './Paddle';
 import { Server } from 'socket.io';
 import { IBallState, IGameState, IPlayerState } from 'shared-lib/types/game';
+import { EventEmitter } from 'stream';
 
 export class GameLogic {
 	// public paddlePlayer: Paddle;
 	// public paddleOpponent: Paddle;
 	private server: Server;
+
+	// Initiate an event emitter so this instance can communicate with the gameService
+	eventEmitter: EventEmitter = new EventEmitter();
 	// private roomId: string;
 
 	// Broadcasting functions
@@ -16,9 +20,11 @@ export class GameLogic {
 	private gameBroadcastInterval: NodeJS.Timeout | undefined = undefined;
 	private gameStateUpdateInterval: NodeJS.Timeout | undefined = undefined;
 
-	private players: { [socketId: string]: Paddle } = {};
+	players: { [socketId: string]: Paddle } = {};
 	public ball: Ball;
 
+	public player1UserId: number;
+	public player2UserId: number;
 	public player1Score: number = 0;
 	public player2Score: number = 0;
 
@@ -31,7 +37,9 @@ export class GameLogic {
 
 	constructor(
 		player1SocketId: string,
+		player1UserId: number,
 		player2SocketId: string,
+		player2UserId: number,
 		server: Server,
 	) {
 		// Initiate the server and room Id, so we can broadcast from here directly
@@ -44,6 +52,7 @@ export class GameLogic {
 			this.paddleWidth,
 			this.paddleHeight,
 		);
+		this.player1UserId = player1UserId;
 		// Add player2 with their corresponding paddle mapped to their socketId
 		this.players[player2SocketId] = new Paddle(
 			this.canvasSize.width - this.paddleWidth,
@@ -51,6 +60,7 @@ export class GameLogic {
 			this.paddleWidth,
 			this.paddleHeight,
 		);
+		this.player2UserId = player2UserId;
 		// Create ball
 		this.ball = new Ball(
 			this.canvasSize.width / 2 - this.ballSize / 2,
@@ -176,6 +186,7 @@ export class GameLogic {
 		this.gameHasStarted = false;
 		this.stopBroadcasting();
 		this.stopGameSimulation();
+		this.eventEmitter.emit('game-ended');
 	}
 
 	setPlayerAsReady(playerSocketId: string) {
@@ -223,6 +234,11 @@ export class GameLogic {
 				deltaTime = Math.min(deltaTime, 0.1);
 				// console.log('delta time = ', deltaTime);
 				this.updateGameState(deltaTime);
+				// Check to see if anyone won
+				if (this.player1Score === 11 || this.player2Score === 11) {
+					this.endGame();
+					this.eventEmitter.emit('somebody-won');
+				}
 			}, this.gameStateInterval);
 		}
 	}

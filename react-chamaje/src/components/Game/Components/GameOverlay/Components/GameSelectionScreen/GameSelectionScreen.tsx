@@ -100,7 +100,7 @@ const GameSelectionScreen: React.FC<IGameSelectionScreenProps> = () => {
 					</Tooltip>
 					<Button
 						onClick={() => {
-							resetGameData();
+							updateGameData({ userWantsNewOpponent: true });
 						}} // TODO: this will not work, our user needs to be removed from their current room}
 						disabled={gameData.player1Ready || !gameData.opponentInfo}
 						baseColor={[300, 91, 84]}

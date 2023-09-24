@@ -31,8 +31,8 @@ export class CustomException extends HttpException {
 
 // Define a custom type that is a game session with users included
 type GameSessionWithUsers = gameSession & {
-	user1: User;
-	user2: User;
+	player1: User;
+	player2: User;
 };
 
 @Injectable()
@@ -215,10 +215,10 @@ export class UserService {
 			},
 			include: {
 				gamesPlayedAsPlayer1: {
-					include: { user1: true, user2: true },
+					include: { player1: true, player2: true },
 				},
 				gamesPlayedAsPlayer2: {
-					include: { user1: true, user2: true },
+					include: { player1: true, player2: true },
 				},
 				gamesWon: true,
 				target: true,
@@ -239,10 +239,10 @@ export class UserService {
 			},
 			include: {
 				gamesPlayedAsPlayer1: {
-					include: { user1: true, user2: true },
+					include: { player1: true, player2: true },
 				},
 				gamesPlayedAsPlayer2: {
-					include: { user1: true, user2: true },
+					include: { player1: true, player2: true },
 				},
 				gamesWon: true,
 				target: true,
@@ -289,7 +289,7 @@ export class UserService {
 					},
 				},
 			],
-		});;
+		});
 		// Find Rank
 		const userRank =
 			leaderboard.findIndex((entry) => entry.winnerId === userId) + 1;
@@ -310,12 +310,12 @@ export class UserService {
 			(a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
 		);
 		const filteredGameSessions = combinedGameSessions.map((session) => ({
-			player1Login: session.user1.login,
-			player1Score: session.user1Score,
-			player1Image: session.user1.image,
-			player2Login: session.user2.login,
-			player2Score: session.user2Score,
-			player2Image: session.user2.image,
+			player1Login: session.player1.login,
+			player1Score: session.player1Score,
+			player1Image: session.player1.image,
+			player2Login: session.player2.login,
+			player2Score: session.player2Score,
+			player2Image: session.player2.image,
 		}));
 		return filteredGameSessions;
 	}

@@ -82,7 +82,6 @@ export class GameLogic {
 		// its corrent current state based on its past position and the number
 		// of moves it's done
 		this.paddlePlayer.targetY = serverState.player1.y;
-		console.log('server state Y:', serverState.player1.y);
 		// For each remaining action we did after our server update,
 		// we update the position of our paddle and the ball
 		this.untreatedInputs.forEach((input) => {
@@ -102,11 +101,11 @@ export class GameLogic {
 		});
 
 		// Only interpolate with targetX/Y if the score has not changed
+		// or the distance between both is not too high,
 		// otherwise the ball slides accross the entire screen
-		if (scoreChanged) {
+		if (scoreChanged || Math.abs(this.ball.x - serverState.ball.x) > 20) {
 			this.ball.x = this.ball.targetX = serverState.ball.x;
 			this.ball.y = this.ball.targetY = serverState.ball.y;
-			console.log(`Score changed: x = ${this.ball.x} y = ${this.ball.y}`);
 		} else {
 			this.ball.targetX = serverState.ball.x;
 			this.ball.targetY = serverState.ball.y;
@@ -119,20 +118,20 @@ export class GameLogic {
 		this.opponentScore = serverState.player2.score;
 	}
 
-	// updateBallPosition(): void {
-	// 	this.ball.update(
-	// 		this.paddlePlayer,
-	// 		this.paddleOpponent,
-	// 		this.canvasSize,
-	// 		this.handleScoreUpdate,
-	// 		this.deltaTime,
-	// 	);
-	// }
+	updateBallPosition(): void {
+		this.ball.update(
+			this.paddlePlayer,
+			this.paddleOpponent,
+			this.canvasSize,
+			this.handleScoreUpdate,
+			this.deltaTime,
+		);
+	}
 
-	// handleScoreUpdate = (won: boolean) => {
-	// 	if (won) this.playerScore++;
-	// 	else this.opponentScore++;
-	// };
+	handleScoreUpdate = (won: boolean) => {
+		if (won) this.playerScore++;
+		else this.opponentScore++;
+	};
 
 	log(message: string): void {
 		console.log(

@@ -77,17 +77,13 @@ model gameSession {
     id           Int        @id @default(autoincrement())
     createdAt    DateTime   @default(now())
     updatedAt    DateTime   @updatedAt
-    user1Id      Int
-    user2Id      Int
-    winnerId     Int?
-    user1Score   Int        @default(0)
-    user2Score   Int        @default(0)
-    status       GameStatus @default(Waiting)
-    roomId       String
-    user1IsReady Boolean    @default(false)
-    user2IsReady Boolean    @default(false)
+    player1Id    Int
+    player2Id    Int
+    player1Score   Int
+    player2Score   Int
+    winnerId     Int
 
-    user1  User  @relation("player1", fields: [user1Id], references: [id])
-    user2  User  @relation("player2", fields: [user2Id], references: [id])
-    winner User? @relation("winner", fields: [winnerId], references: [id])
+    player1  User  @relation("player1", fields: [player1Id], references: [id])
+    player2  User  @relation("player2", fields: [player2Id], references: [id])
+    winner User  @relation("winner", fields: [winnerId], references: [id])
 }

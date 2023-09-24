@@ -51,8 +51,11 @@ const Game: React.FC<IGameProps> = ({
 		useContext(GameContext);
 
 	// use our socket hook
-	const { broadcastPlayerPosition, setPlayer1AsReady: notifyPlayerIsReady } =
-		useGameSocket();
+	const {
+		broadcastPlayerPosition,
+		setPlayer1AsReady: notifyPlayerIsReady,
+		askForAnotherOpponent,
+	} = useGameSocket();
 	// Create a ref to out context's socket
 
 	useEffect(() => {
@@ -84,6 +87,14 @@ const Game: React.FC<IGameProps> = ({
 	useEffect(() => {
 		if (gameData.player1Ready) notifyPlayerIsReady();
 	}, [gameData.player1Ready]);
+
+	// monitor if user wants new opponent
+	useEffect(() => {
+		if (gameData.userWantsNewOpponent) {
+			askForAnotherOpponent();
+			updateGameData({ userWantsNewOpponent: false });
+		}
+	}, [gameData.userWantsNewOpponent]);
 
 	useEffect(() => {
 		// Everytime the server sends a state update, we need to apply it

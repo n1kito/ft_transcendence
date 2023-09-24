@@ -55,7 +55,7 @@ export class GameRenderer {
 		// console.log('delta time = ', this.gameLogic.deltaTime);
 
 		// console.log(this.gameLogic.ball.x, this.gameLogic.ball.y);
-		// this.gameLogic.updateBallPosition();
+		this.gameLogic.updateBallPosition();
 		this.gameLogic.paddlePlayer.update(
 			{ width: 700, height: 500 },
 			this.gameLogic.deltaTime,
@@ -90,11 +90,11 @@ export class GameRenderer {
 	handleKeyPress = (event: KeyboardEvent): void => {
 		let direction = null;
 		if (event.key === 'ArrowUp') {
-			console.log('[🕹️] up');
+			// console.log('[🕹️] up');
 			direction = 'up';
 		}
 		if (event.key === 'ArrowDown') {
-			console.log('[🕹️] down');
+			// console.log('[🕹️] down');
 			direction = 'down';
 		}
 		// If a direction was registered, update the paddle's position
@@ -147,11 +147,11 @@ export class GameRenderer {
 		this.drawNet();
 		// Draw our scores
 		this.drawScores();
+		// Draw our ball
+		this.gameLogic.ball.draw(this.gameContext);
 		// Draw our paddles
 		this.gameLogic.paddlePlayer.draw(this.gameContext);
 		this.gameLogic.paddleOpponent.draw(this.gameContext);
-		// Draw our ball
-		this.gameLogic.ball.draw(this.gameContext);
 	}
 
 	// clears our canvas

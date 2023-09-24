@@ -100,6 +100,16 @@ export const useGameSocket = () => {
 			updateGameData({ player2Ready: true });
 		});
 
+		gameData.socket.on('opponent-left', () => {
+			updateGameData({
+				player1Ready: false,
+				player2Ready: false,
+				opponentInfo: undefined,
+				gameIsPlaying: false,
+				gameState: undefined,
+			});
+		});
+
 		// gameData.socket.on('game-has-started', () => {
 		// 	socketLog('The game has staaaaaarted');
 		// 	updateGameData({ gameIsPlaying: true });
@@ -111,6 +121,22 @@ export const useGameSocket = () => {
 			if (!gameData.gameIsPlaying) updateGameData({ gameIsPlaying: true });
 			updateGameData({ gameState: serverGameState });
 		});
+
+		gameData.socket.on(
+			'game-ended',
+			(gameEndStatus: { gameHasWinner: boolean; userWon: boolean }) => {
+				console.log('GAME-ENDED NOTICE', gameEndStatus);
+				// Update necessary values from the game context
+				updateGameData({
+					gameIsPlaying: false,
+					player1Ready: false,
+					player2Ready: false,
+					userWonGame: gameEndStatus.userWon,
+					userLostGame: gameEndStatus.gameHasWinner && !gameEndStatus.userWon,
+					gameState: undefined,
+				});
+			},
+		);
 	}, [gameData.socket]);
 
 	const notifyPlayerIsReady = () => {
@@ -124,11 +150,15 @@ export const useGameSocket = () => {
 		socketRef.current?.emit('player-moved', payload);
 	};
 
-	const notifyPlayerLeft = () => {
-		socketRef.current?.emit('player-left', {
-			playerId: userData?.id,
-		});
+	const askForAnotherOpponent = () => {
+		socketRef.current?.emit('user-wants-new-opponent');
 	};
+
+	// const notifyPlayerLeft = () => {
+	// 	socketRef.current?.emit('player-left', {
+	// 		playerId: userData?.id,
+	// 	});
+	// };
 
 	const startGame = () => {
 		socketRef.current?.emit('game started');
@@ -139,5 +169,6 @@ export const useGameSocket = () => {
 		broadcastPlayerPosition,
 		setPlayer1AsReady: notifyPlayerIsReady,
 		startGame,
+		askForAnotherOpponent,
 	};
 };

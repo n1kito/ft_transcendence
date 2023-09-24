@@ -57,11 +57,19 @@ export class GameGateway
 	*/
 
 	handleConnection(clientSocket: Socket) {
-		this.gameService.handleNewClientConnection(clientSocket);
+		try {
+			this.gameService.handleNewClientConnection(clientSocket).then(() => {});
+		} catch (error) {
+			console.error('handleConnection():', error.message);
+		}
 	}
 
 	async handleDisconnect(clientSocket: any) {
-		this.gameService.handleClientDisconnect(clientSocket);
+		try {
+			this.gameService.handleClientDisconnect(clientSocket);
+		} catch (error) {
+			console.error('handleDisconnect:', error.message);
+		}
 	}
 
 	/*
@@ -78,17 +86,33 @@ export class GameGateway
 
 	@SubscribeMessage('player-is-ready')
 	handlePlayerIsReady(clientSocket: Socket) {
-		this.gameService.broadcastPlayerIsReady(clientSocket);
-		this.gameService.setPlayerAsReady(clientSocket);
+		try {
+			this.gameService.broadcastPlayerIsReady(clientSocket);
+			this.gameService.setPlayerAsReady(clientSocket);
+		} catch (error) {
+			console.error('handlePlayerIsReady():', error.message);
+		}
 	}
 
 	@SubscribeMessage('player-moved')
 	handlePlayerMovement(clientSocket: Socket, payload: IPlayerMovementPayload) {
-		this.gameService.handlePlayerMovement(
-			clientSocket,
-			payload.direction,
-			payload.inputSequenceId,
-		);
+		try {
+			this.gameService.handlePlayerMovement(
+				clientSocket,
+				payload.direction,
+				payload.inputSequenceId,
+			);
+		} catch (error) {
+			console.error('handlePlayerMovement():', error.message);
+		}
 	}
 
+	@SubscribeMessage('user-wants-new-opponent')
+	handleUserWantsNewOpponent(clientSocket: Socket) {
+		try {
+			this.gameService.handleUserWantsNewOpponent(clientSocket);
+		} catch (error) {
+			console.error('handleUserWantsNewOpponent():', error.message);
+		}
+	}
 }

@@ -5,7 +5,8 @@ import { Server, Socket } from 'socket.io';
 import * as jwt from 'jsonwebtoken';
 import { GameLogic } from './GameEntities/ServerGameLogic';
 import { IPlayerInformation } from 'shared-lib/types/game';
-import { resolvePtr } from 'dns';
+import { Mutex } from 'async-mutex';
+
 // import { IPlayerInformation } from '@types/game-types';
 
 function decodeToken(client: Socket): any {
@@ -17,25 +18,23 @@ function decodeToken(client: Socket): any {
 
 // These are all the information that our users need to receive from the server
 // to update their front correctly
-interface PlayerGameState {
-	y: number;
-	opponentY: number;
-	ballX: number;
-	ballY: number;
-	ballDX: number;
-	ballDY: number;
-	score: number;
-	opponentScore: number;
-	gameOver: boolean;
-}
+// interface PlayerGameState {
+// 	y: number;
+// 	opponentY: number;
+// 	ballX: number;
+// 	ballY: number;
+// 	ballDX: number;
+// 	ballDY: number;
+// 	score: number;
+// 	opponentScore: number;
+// 	gameOver: boolean;
+// }
 
 // This is everything that a room contains: a game instance, and players.
 // So now, everytimg a
 interface Room {
 	gameInstance?: GameLogic;
-	players: {
-		[socketId: string]: PlayerGameState;
-	};
+	playersSocketIds: string[];
 }
 
 // This is a map of all of our current rooms
@@ -48,6 +47,15 @@ interface Client {
 	roomId?: string;
 }
 
+interface IGameInterfaceBackupProps {
+	player1SocketId: string;
+	player1UserId: number;
+	player1Score: number;
+	player2SocketId: string;
+	player2UserId: number;
+	player2Score: number;
+}
+
 @Injectable()
 export class GameService {
 	private server: Server;
@@ -56,6 +64,8 @@ export class GameService {
 	private rooms: Rooms = {};
 
 	private isProcessingRooms: Boolean = false;
+
+	private roomAssignmentMutex: Mutex = new Mutex();
 
 	constructor(private readonly prisma: PrismaService) {}
 
@@ -69,7 +79,7 @@ export class GameService {
 	░▀▀▀░▀▀▀░▀░▀░▀░▀░▀▀▀░▀▀▀░░▀░░▀▀▀░▀▀▀░▀░▀░
 	*/
 
-	handleNewClientConnection(newlyConnectedSocket: Socket) {
+	async handleNewClientConnection(newlyConnectedSocket: Socket) {
 		try {
 			// Handle client identification
 			const decodedPayload = decodeToken(newlyConnectedSocket);
@@ -100,7 +110,7 @@ export class GameService {
 			});
 
 			// Assign a room to our client
-			const assignedRoomId = this.assignRoom(
+			const assignedRoomId = await this.assignRoom(
 				newlyConnectedSocketId,
 				newlyConnectedUserId,
 			);
@@ -111,15 +121,7 @@ export class GameService {
 				console.log(
 					'[🏠] Room is FULL. Sending players their opponent information',
 				);
-				this.sharePlayersInfo(
-					newlyConnectedSocketId,
-					newlyConnectedUserId,
-					assignedRoomId,
-				);
-				this.createGameLogic(assignedRoomId);
-				// this.server.in(assignedRoomId).emit('room-is-full');
-				// TODO: Regarding the gameSession, I think for now it should only be
-				// created when the match had started
+				this.handleRoomIsFull(newlyConnectedSocketId, assignedRoomId);
 			}
 		} catch (error) {
 			console.error('Connection error: ', error.message);
@@ -137,18 +139,20 @@ export class GameService {
 		// Remove the client from their current room
 		const currentRoomId = this.connectedClients.get(socket.id)?.roomId;
 		if (currentRoomId && this.rooms[currentRoomId]) {
-			// TODO: if a client leaves and they were in a game, we need to
-			// stop the game broadcast, end the match etc...
 			this.rooms[currentRoomId].gameInstance.endGame();
-			// handleGameStop(); // TODO:
 			// Delete the client from the room
-			delete this.rooms[currentRoomId].players[socket.id];
 			console.log(`[🏠] Removing [%s] from room %s`, socket.id, currentRoomId);
+			this.removeUserFromRoom(currentRoomId, socket.id);
 
 			// If the room has no players left, delete the room itself
-			if (Object.keys(this.rooms[currentRoomId].players).length === 0) {
+			if (this.rooms[currentRoomId].playersSocketIds.length === 0) {
 				console.log(`[🏠] Room ${currentRoomId} was empty, removing it !`);
 				delete this.rooms[currentRoomId];
+			}
+			// Else, let the other player know that their partner has left
+			else {
+				const opponnentSocketId = this.rooms[currentRoomId].playersSocketIds[0];
+				this.server.to(opponnentSocketId).emit('opponent-left');
 			}
 		}
 
@@ -180,15 +184,29 @@ export class GameService {
 	}
 
 	createGameLogic(roomId: string) {
-		const [player1SocketId, player2SocketId] = Object.keys(
-			this.rooms[roomId].players,
-		);
+		// Find each user's socketId
+		const [player1SocketId, player2SocketId] =
+			this.rooms[roomId].playersSocketIds;
 		console.log(
 			`[🏠] Instantiating a game logic for players [${player1SocketId}] & [${player2SocketId}] in room #${roomId} `,
 		);
+
+		// Find the userId for each player
+		let player1UserId: number, player2UserId: number;
+		if (this.connectedClients.has(player1SocketId))
+			player1UserId = this.connectedClients.get(player1SocketId).userId;
+		if (this.connectedClients.has(player2SocketId))
+			player2UserId = this.connectedClients.get(player2SocketId).userId;
+
+		// Remove any preexisting gamelogic instance stored there
+		if (this.rooms[roomId].gameInstance) delete this.rooms[roomId].gameInstance;
+
+		// And create a new one
 		this.rooms[roomId].gameInstance = new GameLogic(
 			player1SocketId,
+			player1UserId,
 			player2SocketId,
+			player2UserId,
 			this.server,
 		);
 	}
@@ -203,32 +221,22 @@ export class GameService {
 	// TODO: when the invites will be implemented, this should become assignSoloRoom
 	// and we'll need findOpponentRoom() that looks for a room with me and my required
 	// opponent and if not found creates it and puts us both inside.
-	assignRoom(
+	async assignRoom(
 		newlyConnectedSocketId: string,
 		newlyConnectedUserId: number,
-	): string {
-		// TODO: this should be a mutex not an infinite loop, because otherwise
-		// it will make the entire server lag everytime someone is assigned a room
-		// // If the server is already processing rooms, wait so we don't create
-		// // race conditions
-		while (this.isProcessingRooms) {
-			console.log(
-				'[🏠] Waiting for the room assignment process to be unlocked !',
-			);
-		}
+	): Promise<string> {
+		const releaseMutex = await this.roomAssignmentMutex.acquire();
 
-		// If not, lock it
-		this.isProcessingRooms = true;
+		try {
+			// Find an available room or create a new one
+			let targetRoomId: string | undefined;
 
-		// Find an available room or create a new one
-		let targetRoomId: string | undefined;
-
-		// Find a room that only has one player who is not our player
-		for (const roomId in this.rooms) {
-			if (Object.keys(this.rooms[roomId].players).length == 1) {
-				// TODO: this was commented out for testing purposes
-				// PUT IS BACK !!!!
-				/*
+			// Find a room that only has one player who is not our player
+			for (const roomId in this.rooms) {
+				if (this.rooms[roomId].playersSocketIds.length == 1) {
+					// TODO: this was commented out for testing purposes
+					// PUT IS BACK !!!!
+					/*
 				// Get the socketId of the player in the room
 				const playerSocketId = Object.keys(this.rooms[roomId].players)[0];
 				// Check if the userId associated to that socket is different from
@@ -236,47 +244,36 @@ export class GameService {
 				// If so, assign them to that room and stop looking
 				if (this.connectedClients.get(playerSocketId).userId !== userId) {
 				*/
-				targetRoomId = roomId;
-				break;
-				// }
+					targetRoomId = roomId;
+					break;
+					// }
+				}
 			}
+
+			// If there is no available room, create a new one
+			if (!targetRoomId) {
+				targetRoomId = this.generateRoomId(newlyConnectedUserId);
+				this.rooms[targetRoomId] = {
+					playersSocketIds: [],
+				};
+			}
+
+			// Add the player to the room, and initialise their game state
+			// TODO: this game state is not used anwywhere actually because it's not accessible by the game logic.
+			this.rooms[targetRoomId].playersSocketIds.push(newlyConnectedSocketId);
+
+			// Update the roomId to our client's entry in the connectedClients map
+			if (this.connectedClients.has(newlyConnectedSocketId))
+				this.connectedClients.get(newlyConnectedSocketId).roomId = targetRoomId;
+
+			console.log(
+				`[🏠] user #${newlyConnectedUserId} via socket [${newlyConnectedSocketId}] was assigned to room #${targetRoomId}`,
+			);
+			return targetRoomId;
+		} finally {
+			// Unlock the mutex
+			releaseMutex();
 		}
-
-		// If there is no available room, create a new one
-		if (!targetRoomId) {
-			targetRoomId = this.generateRoomId(newlyConnectedUserId);
-			this.rooms[targetRoomId] = {
-				// gameLogic: new GameLogic(), // TODO: this should only be instantiated once there are two players in the room
-				players: {},
-			};
-		}
-
-		// Add the player to the room, and initialise their game state
-		// TODO: this game state is not used anwywhere actually because it's not accessible by the game logic.
-		this.rooms[targetRoomId].players[newlyConnectedSocketId] = {
-			y: 0,
-			opponentY: 0,
-			ballX: 0,
-			ballY: 0,
-			ballDX: 0,
-			ballDY: 0,
-			score: 0,
-			opponentScore: 0,
-			gameOver: false,
-		};
-
-		// Update the roomId to our client's entry in the connectedClients map
-		if (this.connectedClients.has(newlyConnectedSocketId))
-			this.connectedClients.get(newlyConnectedSocketId).roomId = targetRoomId;
-
-		console.log(
-			`[🏠] user #${newlyConnectedUserId} via socket [${newlyConnectedSocketId}] was assigned to room #${targetRoomId}`,
-		);
-
-		// Unlock room processing lock, otherwise nothing else can happen
-		this.isProcessingRooms = false;
-
-		return targetRoomId;
 	}
 
 	generateRoomId(newlyConnectedUserId: number): string {
@@ -289,7 +286,7 @@ export class GameService {
 	}
 
 	isRoomFull(roomId: string): boolean {
-		return Object.keys(this.rooms[roomId].players).length === 2;
+		return this.rooms[roomId].playersSocketIds.length === 2;
 	}
 
 	sharePlayersInfo(
@@ -298,11 +295,20 @@ export class GameService {
 		assignedRoomId: string,
 	) {
 		// Find the socketId of the user's opponent
-		const opponentSocketId = Object.keys(
-			this.rooms[assignedRoomId].players,
-		).find((currentSocketId) => currentSocketId !== newlyConnectedSocketId);
+		const opponentSocketId = this.getOpponentSocketId(
+			newlyConnectedSocketId,
+			assignedRoomId,
+		);
 		// Get the userId associated with that socket
-		const opponentUserId = this.connectedClients.get(opponentSocketId).userId;
+		let opponentUserId;
+		if (this.connectedClients.has(opponentSocketId)) {
+			opponentUserId = this.connectedClients.get(opponentSocketId).userId;
+			console.log('Opponent user id is', opponentUserId);
+		} else {
+			console.log(
+				`The opponent socket ID ${opponentSocketId} does not exist in connected clients.`,
+			);
+		}
 
 		// Retrieve each player's information and send it to their opponent via
 		// their socket
@@ -352,12 +358,20 @@ export class GameService {
 		// Find the room they're currently in
 		const playerRoomId = this.connectedClients.get(socket.id).roomId;
 		// Find their current opponent
-		const opponentSocketId = Object.keys(this.rooms[playerRoomId].players).find(
-			(currentSocketId) => currentSocketId != socket.id,
-		);
+		const opponentSocketId = this.getOpponentSocketId(socket.id, playerRoomId);
 		// If they are still here, let them know that their opponent is ready
 		if (opponentSocketId)
 			this.server.to(opponentSocketId).emit('opponent-is-ready');
+	}
+
+	broadcastPlayerLeft(socket: Socket) {
+		// Find the room they're currently in
+		const playerRoomId = this.connectedClients.get(socket.id).roomId;
+		// Find their current opponent
+		const opponentSocketId = this.getOpponentSocketId(socket.id, playerRoomId);
+		// If they are still here, let them know that their opponent is ready
+		if (opponentSocketId)
+			this.server.to(opponentSocketId).emit('opponent-left');
 	}
 
 	setPlayerAsReady(socket: Socket) {
@@ -370,23 +384,135 @@ export class GameService {
 
 		// If both players are ready, let both of them know and start the game
 		if (this.rooms[playerRoomId].gameInstance.bothPlayersAreReady()) {
-			// const [player1SocketId, player2SocketId] = Object.keys(
-			// 	this.rooms[playerRoomId].players,
-			// );
-			// TODO: removed this because starting the game starts emitting update
-			// to the clients and I'd rather use that to let the client know to start the game
-			// this.server.to(player1SocketId).emit('game-has-started');
-			// this.server.to(player2SocketId).emit('game-has-started');
+			// Start the game and start sending game status to each user
 			gameInstance.startGame();
-			this.createDBGameEntry();
-			// TODO: the game will start here so we need to create a DB entry for the game with each player
-			// and if one disconnects, they are marked as a looser ?
+			// TODO: these should be able to be moved somewhere more logical
+			gameInstance.eventEmitter.on('game-ended', () => {
+				// TODO: if the user disconnects right as the game ends we might have an issue here
+				// where the game instance gets destroyed before we can store it
+
+				// Creating a copy in case one of the users disconnects
+				const gameInstanceCopy = {
+					player1SocketId: Object.keys(gameInstance.players)[0],
+					player1UserId: gameInstance.player1UserId,
+					player1Score: gameInstance.player1Score,
+					player2SocketId: Object.keys(gameInstance.players)[1],
+					player2UserId: gameInstance.player2UserId,
+					player2Score: gameInstance.player2Score,
+				};
+				console.log({ gameInstanceCopy });
+				// Let each player know the game is over and whether someone won
+				let gameHasWinner =
+					gameInstance.player1Score === 11 || gameInstance.player2Score === 11;
+				this.server.to(gameInstanceCopy.player1SocketId).emit('game-ended', {
+					gameHasWinner: gameHasWinner,
+					userWon: gameInstance.player1Score === 11,
+				});
+				this.server.to(gameInstanceCopy.player2SocketId).emit('game-ended', {
+					gameHasWinner: gameHasWinner,
+					userWon: gameInstance.player2Score === 11,
+				});
+				// If the game had a winner, store it in a gameSession in the database
+				if (gameHasWinner) {
+					this.createDBGameEntry(playerRoomId, gameInstanceCopy);
+				}
+				// Create a new game instance in the room, in case users want to play again
+				this.createGameLogic(playerRoomId);
+			});
 		}
 	}
 
-	// Locate a room the user might be in
-	getRoomIdFromSocketId(socketId: string): string | undefined {
-		return this.connectedClients.get(socketId).roomId;
+	// User triggered the "shuffle button"
+	// The server will try to find a room with another opponent waiting
+	async handleUserWantsNewOpponent(clientSocket: Socket) {
+		const releaseMutex = await this.roomAssignmentMutex.acquire();
+		console.log(`[🏠] Socket [${clientSocket.id}] wants a new room please !`);
+		try {
+			// Get the id of the room the user is in
+			let currentRoomId = this.getRoomIdFromSocketId(clientSocket.id);
+			if (currentRoomId) {
+				// Try to find another available room for the user
+				const newRoomId = this.findAnotherRoom(clientSocket, currentRoomId);
+				// If there is one
+				if (newRoomId) {
+					// Remove the user from their current room
+					this.removeUserFromRoom(currentRoomId, clientSocket.id);
+
+					// Notify their current opponent
+					this.broadcastPlayerLeft(clientSocket);
+
+					// Add the player to their new room
+					this.rooms[newRoomId].playersSocketIds.push(clientSocket.id);
+
+					// Update the roomId to our client's entry in the connectedClients map
+					if (this.connectedClients.has(clientSocket.id))
+						this.connectedClients.get(clientSocket.id).roomId = newRoomId;
+
+					// Let the oser user in that room know that someone showed up
+					this.handleRoomIsFull(clientSocket.id, newRoomId);
+				} else
+					console.log(
+						`[🏠] Could not find another room with a different opponent. Socket [${clientSocket.id}] is still in room ${currentRoomId}`,
+					);
+			}
+		} finally {
+			releaseMutex();
+		}
+	}
+
+	// When room is full, each user receives their opponent's information
+	// and a new gameLogic is created
+	handleRoomIsFull(newlyConnectedSocketId: string, assignedRoomId: string) {
+		let newlyConnectedUserId = undefined;
+		if (this.connectedClients.has(newlyConnectedSocketId))
+			newlyConnectedUserId = this.connectedClients.get(
+				newlyConnectedSocketId,
+			).userId;
+		this.createGameLogic(assignedRoomId);
+		this.sharePlayersInfo(
+			newlyConnectedSocketId,
+			newlyConnectedUserId,
+			assignedRoomId,
+		);
+	}
+
+	removeUserFromRoom(roomId: string, socketId: string) {
+		// Remove the user from their current room
+		const index = this.rooms[roomId].playersSocketIds.indexOf(socketId);
+		if (index > -1) this.rooms[roomId].playersSocketIds.splice(index, 1);
+		// Remove the roomId from the user's entry in the client map
+		if (this.connectedClients.has(socketId))
+			this.connectedClients.get(socketId).roomId = undefined;
+		// Delete the game instance from the rooms
+		// It will be recreated whenever a new user joins the room
+		if (this.rooms[roomId].gameInstance) delete this.rooms[roomId].gameInstance;
+	}
+
+	// Looks for available room our user is not already in
+	findAnotherRoom(
+		clientSocket: Socket,
+		currentRoomId: string,
+	): string | undefined {
+		let userId;
+		if (this.connectedClients.has(clientSocket.id))
+			userId = this.connectedClients.get(clientSocket.id).userId;
+		let newRoomId: string | undefined = undefined;
+
+		// Find a room that only has one player who is not our player
+		for (const roomId in this.rooms) {
+			if (this.rooms[currentRoomId].playersSocketIds.length == 1) {
+				// Get the socketId of the player in the room
+				const playerSocketId = this.rooms[currentRoomId].playersSocketIds[0];
+				// Check if the userId associated to that socket is different from
+				// the userId of the user we're trying to put in a room
+				// If so, assign them to that room and stop looking
+				if (this.connectedClients.get(playerSocketId).userId !== userId) {
+					newRoomId = roomId;
+					break;
+				}
+			}
+		}
+		return newRoomId;
 	}
 
 	// TODO: opponent left the room, should handle several cases:
@@ -400,12 +526,56 @@ export class GameService {
 	░▀▀▀░░▀░░▀▀▀░▀▀▀░▀▀▀
 	*/
 
+	// Locate a room the user might be in
+	getRoomIdFromSocketId(socketId: string): string | undefined {
+		return this.connectedClients.get(socketId).roomId;
+	}
+
+	// Get the socketId of a user's opponent in a room
+	getOpponentSocketId(
+		userSocketId: string,
+		roomId: string,
+	): string | undefined {
+		return this.rooms[roomId].playersSocketIds.find(
+			(currentSocketId) => currentSocketId != userSocketId,
+		);
+	}
+
+	// Find the playerID associated with a socketId
+	getUserIdFromSocket(socketId: string): number | undefined {
+		return this.connectedClients.get(socketId).userId;
+	}
+
 	/*
 	░█▀▄░█▀█░▀█▀░█▀█░█▀▄░█▀█░█▀▀░█▀▀
 	░█░█░█▀█░░█░░█▀█░█▀▄░█▀█░▀▀█░█▀▀
 	░▀▀░░▀░▀░░▀░░▀░▀░▀▀░░▀░▀░▀▀▀░▀▀▀
 	*/
 
-	// TODO: how do I track what gameSession is linked to a particular game ? Maybe through the gameInstance ?
-	createDBGameEntry() {}
+	// Create a Database gameSession entry for a finished game that has a winner
+	createDBGameEntry(
+		roomId: string,
+		gameInstanceProperties: IGameInterfaceBackupProps,
+	) {
+		const { player1Score, player2Score, player1UserId, player2UserId } =
+			gameInstanceProperties;
+		this.prisma.gameSession
+			.create({
+				data: {
+					player1Id: player1UserId,
+					player1Score: player1Score,
+					player2Id: player2UserId,
+					player2Score: player2Score,
+					winnerId: player1Score > player2Score ? player1UserId : player2UserId,
+				},
+			})
+			.then(() => {
+				console.log(
+					`Successfully created database entry for game in room ${roomId}`,
+				);
+			})
+			.catch((error) => {
+				console.error('Error creating DB game entry:', error.message);
+			});
+	}
 }
