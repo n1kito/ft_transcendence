@@ -51,7 +51,7 @@ class WebSocketService {
 
 	sendServerConnection() {
 		try {
-			console.log('🟢 ping server !');
+			// console.log('🟢 ping server !');
 			this.socket.emit('ServerConnection', this.userId);
 		} catch (e) {
 			console.error(e, ': WebSocketService sendServerConnection');

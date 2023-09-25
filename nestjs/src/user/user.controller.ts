@@ -135,6 +135,7 @@ export class UserController {
 	async getUserInfo(
 		@Param('login') login: string,
 		@Req() request: CustomRequest,
+		@Res() response: Response,
 	) {
 		// When mounting desktop, user/:login (old user/me) is fetched to set userContext.
 		// So when fetching for the first time login is unknown.
@@ -153,7 +154,7 @@ export class UserController {
 		});
 		if (!user) {
 			// Handle case when user is not found
-			return { message: 'User not found' };
+			return response.status(404).json('User not found');
 		}
 		// identify the login associated with the ID the request is coming from
 		const userRequesting = await this.prisma.user.findUnique({
@@ -203,7 +204,7 @@ export class UserController {
 		if (userRequestingLogin && userRequestingLogin === login) {
 			// return user data except its 2fa secret
 			const { twoFactorAuthenticationSecret, ...updatedUser } = user;
-			return {
+			const userData = {
 				...updatedUser,
 				gamesCount: gamesCount,
 				killCount: user.killCount,
@@ -217,10 +218,11 @@ export class UserController {
 				rivalLogin,
 				rivalImage,
 			};
+			return response.status(200).json(userData);
 		}
 		// else, we only return what is needed for the profile component
-		else
-			return {
+		else {
+			const profileData = {
 				login: user.login,
 				image: user.image,
 				// add profile information
@@ -237,6 +239,8 @@ export class UserController {
 				rivalLogin,
 				rivalImage,
 			};
+			return response.status(200).json(profileData);
+		}
 	}
 
 	// add `login` in friends[]

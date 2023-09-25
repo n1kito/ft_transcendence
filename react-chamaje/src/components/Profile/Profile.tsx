@@ -42,6 +42,7 @@ export interface ProfileProps {
 	setNbOnline: React.Dispatch<React.SetStateAction<number>>;
 	setShowFriendProfile?: React.Dispatch<React.SetStateAction<boolean>>;
 	setDeletedFriend?: React.Dispatch<React.SetStateAction<string>>;
+	setAddedFriend?: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const Profile: React.FC<ProfileProps> = ({
@@ -54,6 +55,7 @@ const Profile: React.FC<ProfileProps> = ({
 	setNbOnline,
 	setShowFriendProfile,
 	setDeletedFriend,
+	setAddedFriend,
 }) => {
 	const { accessToken, isTwoFAEnabled, setIsTwoFAEnabled, logOut } = useAuth();
 	const { userData, updateUserData } = useContext(UserContext);
@@ -75,6 +77,8 @@ const Profile: React.FC<ProfileProps> = ({
 		useState(false);
 	const navigate = useNavigate();
 	const [changedAvatar, setChangedAvatar] = useState(false);
+
+	const [searchedData, setSearchedData] = useState(false);
 
 	// TODO: fetch profile data should be a separate service so we don't rewrite the function in multiple components
 
@@ -212,6 +216,14 @@ const Profile: React.FC<ProfileProps> = ({
 				.catch((error) => {
 					console.error(error);
 				});
+	};
+
+	const handleAddFriend = async () => {
+		if (setAddedFriend && login) {
+			setSettingsPanelIsOpen(false);
+			setAddedFriend(login);
+			onCloseClick();
+		}
 	};
 
 	useEffect(() => {
@@ -427,6 +439,27 @@ const Profile: React.FC<ProfileProps> = ({
 								baseColor={[111, 60, 84]}
 								onClick={() => {
 									deleteProfile();
+								}}
+							>
+								yes
+							</Button>
+							<Button
+								baseColor={[40, 100, 80]}
+								onClick={() => {
+									setSettingsPanelIsOpen(false);
+								}}
+							>
+								no
+							</Button>
+						</div>
+					)}
+
+					{settingsMode === 'Add Friend' && (
+						<div className="delete-settings-wrapper">
+							<Button
+								baseColor={[111, 60, 84]}
+								onClick={() => {
+									handleAddFriend();
 								}}
 							>
 								yes

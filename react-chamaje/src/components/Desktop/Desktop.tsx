@@ -19,7 +19,12 @@ import ChatIcon from './Icons/PC.svg';
 import FriendsIcon from './Icons/NOTEBOOK.svg';
 import GameIcon from './Icons/CD.svg';
 import Channels from '../Channels/Channels';
-import { deleteFriend, fetchFriends } from 'src/utils/FriendsQueries';
+import {
+	addFriend,
+	deleteFriend,
+	fetchFriends,
+} from 'src/utils/FriendsQueries';
+import { error } from 'console';
 
 // Friend structure to keep track of them and their online/ingame status
 export interface IFriendStruct {
@@ -43,8 +48,11 @@ const Desktop = () => {
 
 	const [friendLogin, setFriendLogin] = useState('');
 	const [deletedFriend, setDeletedFriend] = useState('');
+	const [addedFriend, setAddedFriend] = useState('');
+	const [profileError, setProfileError] = useState('');
 	const [nbOnline, SetNbOnline] = useState(0);
 
+	const [isMyFriend, setIsMyFriend] = useState(false);
 	const navigate = useNavigate();
 	const {
 		isAuthentificated,
@@ -214,6 +222,7 @@ const Desktop = () => {
 	// on badge click, display friend's profile
 	const handleBadgeClick = (friendLogin: string) => {
 		setFriendLogin(friendLogin);
+		setIsMyFriend(true);
 		setShowFriendProfile(true);
 	};
 
@@ -232,7 +241,42 @@ const Desktop = () => {
 			setDeletedFriend('');
 		};
 		if (!showFriendProfile && deletedFriend) updateFriends();
-	}, [showFriendProfile]);
+	}, [deletedFriend]);
+
+	// when friend is added, friends array state is updated
+	useEffect(() => {
+		const updateFriends = async () => {
+			addFriend(addedFriend, accessToken)
+				.then(async (data) => {
+					// copy friends
+					const updatedFriends = [...friends];
+					// check if friend to be added is not already in the friends list
+					if (!friends.some((friend) => friend.login === data.login)) {
+						// create friend object for <IFriendStruct>
+						const newFriend = {
+							id: data.id,
+							login: data.login,
+							image: data.image,
+							onlineStatus: false,
+						};
+						// add the new friend to the existing friends list
+						const updatedFriends = [...friends, newFriend];
+						// update the state with the updated friends list
+						setFriends(updatedFriends);
+						// ping to update online status
+						userData?.chatSocket?.sendServerConnection();
+						// reset AddedFriend state
+						setAddedFriend('');
+					}
+				})
+				.catch((error) => {
+					setAddedFriend('');
+				});
+		};
+		if (!showFriendProfile && addedFriend) {
+			updateFriends();
+		}
+	}, [addedFriend]);
 
 	return (
 		<div className="desktopWrapper" ref={windowDragConstraintRef}>
@@ -288,6 +332,9 @@ const Desktop = () => {
 						nbFriendsOnline={nbOnline}
 						onBadgeClick={handleBadgeClick}
 						setFriends={setFriends}
+						setShowFriendProfile={setShowFriendProfile}
+						setProfileLogin={setFriendLogin}
+						setIsMyFriend={setIsMyFriend}
 					/>
 				)}
 				{openFriendsWindow && showFriendProfile && (
@@ -297,11 +344,12 @@ const Desktop = () => {
 							setProfileWindowIsOpen(false), setShowFriendProfile(false);
 						}}
 						windowDragConstraintRef={windowDragConstraintRef}
-						isMyFriend={true}
+						isMyFriend={isMyFriend}
 						nbOnline={nbOnline}
 						setNbOnline={SetNbOnline}
 						setShowFriendProfile={setShowFriendProfile}
 						setDeletedFriend={setDeletedFriend}
+						setAddedFriend={setAddedFriend}
 					></Profile>
 				)}
 				{chatWindowIsOpen && (

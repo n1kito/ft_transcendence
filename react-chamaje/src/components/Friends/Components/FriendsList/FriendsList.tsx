@@ -12,6 +12,7 @@ import Title from 'src/components/Profile/Components/Title/Title';
 import InputField from 'src/components/Profile/Components/InputField/InputField';
 import Button from 'src/components/Shared/Button/Button';
 import { addFriend, fetchFriends } from 'src/utils/FriendsQueries';
+import { fetchProfileData } from 'src/utils/UserQueries';
 
 interface IFriendsListProps {
 	onCloseClick: () => void;
@@ -20,6 +21,9 @@ interface IFriendsListProps {
 	friends: IFriendStruct[];
 	setFriends: React.Dispatch<React.SetStateAction<IFriendStruct[]>>;
 	nbFriendsOnline: number;
+	setShowFriendProfile: React.Dispatch<React.SetStateAction<boolean>>;
+	setProfileLogin: React.Dispatch<React.SetStateAction<string>>;
+	setIsMyFriend: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const FriendsList: React.FC<IFriendsListProps> = ({
@@ -29,13 +33,17 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 	windowDragConstraintRef,
 	onBadgeClick,
 	setFriends,
+	setShowFriendProfile,
+	setProfileLogin,
+	setIsMyFriend,
 }) => {
 	const { userData, updateUserData } = useContext(UserContext);
 	const { accessToken } = useAuth();
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [searchedLogin, setSearchedLogin] = useState('');
-	const [searchUserError, setSearchUserError] = useState('');
+	const [loginInputError, setLoginInputError] = useState('');
 	const [isFriendAdded, setIsFriendAdded] = useState(false);
+	const [settingsMode, setSettingsMode] = useState('');
 
 	// input validation before sending request
 	const handleLoginChange = (username: string) => {
@@ -43,14 +51,14 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 		// allowed characters for username
 		const usernameRegex = /^[A-Za-z0-9-_\\.]*$/;
 		// if input is empty set error to prevent sending useless requests
-		if (!username) setSearchUserError(' ');
+		if (!username) setLoginInputError(' ');
 		// check if username is valid
 		else if (!usernameRegex.test(username))
-			return setSearchUserError('only letters and numbers');
+			return setLoginInputError('only letters and numbers');
 		// wait until minimun length before sending request
-		else if (username.length < 4) setSearchUserError(' ');
+		else if (username.length < 4) setLoginInputError(' ');
 		else {
-			setSearchUserError('');
+			setLoginInputError('');
 		}
 	};
 
@@ -78,15 +86,34 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 				}
 			})
 			.catch((error) => {
-				setSearchUserError(error.message);
+				setLoginInputError(error);
 			});
+	};
+
+	// on `search User` button click, send request display `searchedLogin` profile
+	const handleSearchUser = async () => {
+		if (searchedLogin)
+			fetchProfileData(searchedLogin, accessToken)
+				.then(() => {
+					setProfileLogin(searchedLogin);
+					setIsMyFriend(
+						friends.some((friend) => friend.login === searchedLogin),
+					);
+					setShowFriendProfile(true);
+					setSettingsPanelIsOpen(false);
+				})
+				.catch((error) => {
+					setLoginInputError(error.message);
+					setShowFriendProfile(false);
+				});
 	};
 
 	// if user click outside the settings window
 	// (meaning going back to the main window)
 	// removes error message
 	useEffect(() => {
-		if (searchUserError) setSearchUserError('');
+		if (loginInputError) setLoginInputError('');
+		// if (setProfileError) setProfileError('');
 	}, [settingsPanelIsOpen]);
 
 	return (
@@ -97,8 +124,16 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 			windowDragConstraintRef={windowDragConstraintRef}
 			links={[
 				{
-					name: 'Add friend',
+					name: 'Add Friend',
 					onClick: () => {
+						setSettingsMode('Add Friend');
+						setSettingsPanelIsOpen(true);
+					},
+				},
+				{
+					name: 'Search User',
+					onClick: () => {
+						setSettingsMode('Search User');
 						setSettingsPanelIsOpen(true);
 					},
 				},
@@ -122,23 +157,44 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 			</div>
 			{settingsPanelIsOpen && (
 				<SettingsWindow settingsWindowVisible={setSettingsPanelIsOpen}>
-					<Title highlightColor="yellow">Username</Title>
-					<div className="search-login-form">
-						<InputField
-							onChange={handleLoginChange}
-							error={searchUserError}
-							maxlength={8}
-						></InputField>
+					<Title highlightColor="yellow">{settingsMode}</Title>
+					{settingsMode === 'Add Friend' && (
+						<div className="search-login-form">
+							<InputField
+								onChange={handleLoginChange}
+								error={loginInputError}
+								maxlength={8}
+							></InputField>
 
-						<Button
-							onClick={() => {
-								handleAddFriend();
-							}}
-							disabled={!!searchUserError}
-						>
-							Add friend
-						</Button>
-					</div>
+							<Button
+								onClick={() => {
+									handleAddFriend();
+								}}
+								disabled={!!loginInputError}
+							>
+								Add
+							</Button>
+						</div>
+					)}
+
+					{settingsMode === 'Search User' && (
+						<div className="search-login-form">
+							<InputField
+								onChange={handleLoginChange}
+								error={loginInputError}
+								maxlength={8}
+							></InputField>
+
+							<Button
+								onClick={() => {
+									handleSearchUser();
+								}}
+								disabled={!!loginInputError}
+							>
+								Search
+							</Button>
+						</div>
+					)}
 				</SettingsWindow>
 			)}
 			<div className="bottomInfo">
