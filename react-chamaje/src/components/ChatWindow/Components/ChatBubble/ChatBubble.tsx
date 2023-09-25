@@ -3,27 +3,36 @@ import './ChatBubble.css';
 import Tooltip from '../../../Shared/Tooltip/Tooltip';
 import Button from '../../../Shared/Button/Button';
 import Profile from 'src/components/Profile/Profile';
+import { kick, makeAdmin } from 'src/utils/queries';
+import useAuth from 'src/hooks/userAuth';
+import { access } from 'fs';
 
 interface IChatBubbleProps {
 	userId: number;
+	chatId: number;
 	wasSent?: boolean;
 	sender?: string;
 	senderAvatar?: string;
 	time?: string;
 	children: ReactNode;
+	isAdmin: boolean;
 	// messageRef?: RefObject<HTMLDivElement>;
 }
 
 const ChatBubble: React.FC<IChatBubbleProps> = ({
+	chatId,
+	userId,
 	wasSent = false,
 	sender = 'Sender',
 	time = '',
 	senderAvatar = '',
 	children,
+	isAdmin = false,
 	// messageRef,
 }) => {
 	const [tooltipVisible, setTooltipVisible] = useState(false);
 	const [profileIsOpen, setProfileIsOpen] = useState(false);
+	const { accessToken } = useAuth();
 
 	const openFriendProfile = () => {
 		setProfileIsOpen(true);
@@ -43,7 +52,7 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 					<div
 						className="chat-bubble-avatar"
 						onMouseEnter={() => {
-							setTooltipVisible(true);
+							if (isAdmin) setTooltipVisible(true);
 						}}
 						onMouseLeave={() => {
 							setTimeout(() => {
@@ -70,7 +79,14 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 								</Button>
 								<Button
 									onClick={() => {
-										window.alert('user was kicked');
+										// chatData.socket => send kick message
+										kick(accessToken, chatId, userId)
+											.then((data) => {
+												console.log(data);
+											})
+											.catch((e) => {
+												console.error('Could not kick user: ', e.message);
+											});
 									}}
 								>
 									kick
@@ -78,16 +94,26 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 								<Button
 									baseColor={[309, 81, 92]}
 									onClick={() => {
-										window.alert('user is blocked');
+										window.alert('user was banned');
 									}}
 								>
-									block
+									ban
 								</Button>
 								<Button
 									baseColor={[111, 60, 84]}
-									disabled={true}
 									onClick={() => {
-										window.alert('user is now an admin');
+										// socket => make admin
+										// make admin query
+										makeAdmin(accessToken, chatId, userId)
+											.then((data) => {
+												console.log(data);
+											})
+											.catch((e) => {
+												console.error(
+													'Could not make the user administrator: ',
+													e.message,
+												);
+											});
 									}}
 								>
 									admin

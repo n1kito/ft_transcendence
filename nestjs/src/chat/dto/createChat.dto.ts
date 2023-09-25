@@ -26,16 +26,16 @@ export class CreateChatDTO {
 	@IsDefined()
 	isProtected: boolean;
 
+	// 60 is size of the returned hash
 	@IsOptional()
 	@IsNotEmpty()
 	@IsString()
 	@IsDefined()
-	@NotContains('/')
 	@NotContains('\\')
 	@NotContains(';')
 	@NotContains(' ')
 	@MinLength(7)
-	@MaxLength(20)
+	@MaxLength(60)
 	password?: string;
 
 	@IsOptional()
@@ -53,5 +53,4 @@ export class CreateChatDTO {
 	@NotContains(';')
 	@IsDefined()
 	name?: string;
-
 }

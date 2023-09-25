@@ -162,7 +162,7 @@ const Channels: React.FC<IChannelsProps> = ({
 					console.log('Channel joined successfully');
 				})
 				.catch((e) => {
-					setSettingsNameError(e.message)
+					setSettingsNameError(e.message);
 					console.error('Could not join channel: ', e.message);
 				});
 		}

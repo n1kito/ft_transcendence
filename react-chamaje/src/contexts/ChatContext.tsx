@@ -125,9 +125,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 	};
 
 	// set the chat list to a new list keeping the chats that are
-	const getNewChatsList = (
-		updates: IChatStruct[],
-	) => {
+	const getNewChatsList = (updates: IChatStruct[]) => {
 		// const keptChats = chatData.chatsList.filter((current) => {
 		// 	return current.isChannel !== updatingChannels;
 		// });

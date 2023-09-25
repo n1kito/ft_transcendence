@@ -52,6 +52,8 @@ model User {
     // blockedUsers Int[]
     blockedUsers UserBlocked[] @relation("BlockedUsers")
     blockedBy    UserBlocked[]
+    Chat         Chat?         @relation(fields: [chatId], references: [id])
+    chatId       Int?
 }
 
 model Game {
@@ -80,6 +82,7 @@ model Chat {
     isProtected  Boolean
     password     String?
     name         String?
+    bannedUsers  User[]
 }
 
 model chatSession {
@@ -93,7 +96,7 @@ model chatSession {
 
     isOwner Boolean?
     isAdmin Boolean?
-    // lastOpen ? So we know when new msg
+    isMuted DateTime?
 }
 
 model Message {

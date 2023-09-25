@@ -25,12 +25,11 @@ export class JoinChannelDTO {
 	@IsNotEmpty()
 	@IsString()
 	@IsDefined()
-	@NotContains('/')
 	@NotContains('\\')
 	@NotContains(';')
 	@NotContains(' ')
 	@MinLength(7)
-	@MaxLength(20)
+	@MaxLength(60)
 	password?: string;
 
 }

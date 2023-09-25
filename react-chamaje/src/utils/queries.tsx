@@ -1,3 +1,5 @@
+import bcrypt from 'bcryptjs-react';
+
 /* ********************************************************************* */
 /* ******************************* CHAT ******************************** */
 /* ********************************************************************* */
@@ -252,15 +254,44 @@ export async function makePrivate(
 			}),
 		});
 		if (!response.ok) {
-			console.warn('making private');
 			const responseError = await response.json();
 			throw new Error(responseError.message);
 		}
+		return response.json();
 	} catch (e) {
 		if (e instanceof Error && typeof e.message === 'string') {
-			console.error('Error making private: ' + e.message);
 			throw new Error(e.message);
 		} else throw new Error('Something went wrong making private');
+	}
+}
+
+export async function makeAdmin(
+	accessToken: string,
+	chatId: number,
+	targetId: number,
+) {
+	try {
+		const response = await fetch('api/chat/makeAdmin', {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+			body: JSON.stringify({
+				chatId: chatId,
+				targetId: targetId,
+			}),
+		});
+		if (!response.ok) {
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
+		return response.json();
+	} catch (e) {
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error(e.message);
+		} else throw new Error('Something went wrong making admin');
 	}
 }
 
@@ -316,6 +347,36 @@ export async function setNewPassword(
 			console.error('Error setting password: ' + e.message);
 			throw new Error('' + e.message);
 		} else throw new Error('Something went wrong setting password');
+	}
+}
+
+export async function kick(
+	accessToken: string,
+	chatId: number,
+	targetId: number,
+) {
+	try {
+		const response = await fetch('api/chat/kick', {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+			body: JSON.stringify({
+				chatId: chatId,
+				targetId: targetId,
+			}),
+		});
+		if (!response.ok) {
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
+		return response.json();
+	} catch (e) {
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error('' + e.message);
+		} else throw new Error('Something went wrong kicking the user');
 	}
 }
 
@@ -407,7 +468,7 @@ export async function sendMessageQuery(
 			const responseError = await response.json();
 			throw new Error(responseError.message);
 		}
-		// return response.json();
+		return response.json();
 	} catch (e) {
 		if (e instanceof Error && typeof e.message === 'string') {
 			throw new Error(e.message);

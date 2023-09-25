@@ -16,6 +16,7 @@ import { CustomException } from 'src/user/user.service';
 import { CreateChatDTO } from './dto/createChat.dto';
 import { Response } from 'express';
 import * as bcrypt from 'bcrypt';
+import { bufferCount } from 'rxjs';
 
 @Injectable()
 export class ChatService {
@@ -83,6 +84,20 @@ export class ChatService {
 
 	// create Chat
 	async createChat(userId: number, content: CreateChatDTO) {
+		if (content.password) {
+			const salt = await bcrypt.genSalt();
+			const hash = await bcrypt.hash(content.password, salt);
+			const chat = await this.prisma.chat.create({
+				data: {
+					isChannel: content.isChannel,
+					isPrivate: content.isPrivate,
+					isProtected: content.isProtected,
+					password: content.password ? hash : null,
+					name: content.name,
+				},
+			});
+			return chat.id;
+		}
 		const chat = await this.prisma.chat.create({
 			data: {
 				isChannel: content.isChannel,
@@ -245,6 +260,18 @@ export class ChatService {
 		return res;
 	}
 
+	async makeAdmin(chatId: number, userId: number) {
+		const res = await this.prisma.chatSession.updateMany({
+			where: {
+				chatId: chatId,
+				userId: userId,
+			},
+			data: {
+				isAdmin: true,
+			},
+		});
+		return res;
+	}
 	// create a chat session for the creator of a channel
 	async createOwnerChannelSession(userId: number, chatId: number) {
 		await this.prisma.chatSession.create({
@@ -258,11 +285,12 @@ export class ChatService {
 	}
 
 	async setPassword(chatId: number, newPassword: string) {
-		const hash = await bcrypt.hash(newPassword, 10);
+		const salt = await bcrypt.genSalt();
+		const hash = await bcrypt.hash(newPassword, salt);
 		await this.prisma.chat.update({
 			where: { id: chatId },
 			data: {
-				password: newPassword || null,
+				password: hash || null,
 				isProtected: newPassword ? true : false,
 			},
 		});
@@ -278,10 +306,8 @@ export class ChatService {
 				isProtected: true,
 			},
 		});
-		if (
-			!response.isProtected ||
-			(response.isProtected && response.password === password)
-		) {
+		const isMatch = await bcrypt.compare(password, response.password);
+		if (!response.isProtected || (response.isProtected && isMatch)) {
 			return true;
 		}
 		return false;

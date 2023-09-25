@@ -25,6 +25,7 @@ import { JoinChannelDTO } from './dto/joinChannel.dto';
 import { errorMonitor } from 'events';
 import { BlockUserDTO } from '../user/dto/blockUser.dto';
 import { UserService } from 'src/user/user.service';
+import { KickDTO } from './dto/kick.dto';
 
 @Controller('chat')
 export class ChatController {
@@ -249,6 +250,73 @@ export class ChatController {
 	/* ***************************** CHANNELS ****************************** */
 	/* ********************************************************************* */
 
+	@Delete('/kick')
+	async kick(
+		// @Body() leaveChannel: LeaveChannelDTO,
+		@Body(new ValidationPipe()) validatedData: KickDTO,
+		@Req() request: CustomRequest,
+		@Res() response: Response,
+	) {
+		try {
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			const isUserInChat = await this.chatService.isUserInChat(
+				userId,
+				validatedData.chatId,
+			);
+			if (!isUserInChat) {
+				response.status(403).json({ message: 'You are not in this chat' });
+				return;
+			}
+			this.chatService
+				.getAdminInfo(validatedData.chatId, userId)
+				.then((data) => {
+					if (!data.isAdmin && !data.isOwner) {
+						response
+							.status(403)
+							.json({ message: "You don't have sufficient rights" });
+						return;
+					}
+					this.chatService
+						.getAdminInfo(validatedData.chatId, validatedData.targetId)
+						.then((targetData) => {
+							if (targetData.isOwner) {
+								response
+									.status(403)
+									.json({ message: "You can't kick the owner of the channel" });
+								return;
+							}
+							// is admin?
+							this.chatService
+								.leaveChat(validatedData.targetId, validatedData.chatId)
+								.then(() => {
+									response
+										.status(200)
+										.json({ message: 'User kicked successfully' });
+								});
+						})
+						.catch((e) => {
+							response
+								.status(403)
+								.json({ message: 'Could not retreive your admin infos' });
+							return;
+						});
+				})
+				.catch((e) => {
+					response
+						.status(403)
+						.json({ message: 'Could not retreive your admin infos' });
+					return;
+				});
+		} catch (e) {
+			console.error('👋👋👋error kicking user', e);
+			response
+				.status(400)
+				.json({ message: 'Something went wrong kicking the user' });
+		}
+	}
+
 	@Put('/joinChannel')
 	async joinChannel(
 		@Body(new ValidationPipe()) validatedData: JoinChannelDTO,
@@ -352,6 +420,74 @@ export class ChatController {
 		} catch (e) {
 			console.error('👋👋👋👋👋👋👋👋👋👋👋👋set private error: ', e);
 			res.status(401).json({ message: e.message });
+		}
+	}
+
+	@Put('/makeAdmin')
+	async makeAdmin(
+		@Body(new ValidationPipe()) validatedData: KickDTO,
+		@Req() request: CustomRequest,
+		@Res() response: Response,
+	) {
+		try {
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			const isUserInChat = await this.chatService.isUserInChat(
+				userId,
+				validatedData.chatId,
+			);
+			if (!isUserInChat) {
+				response.status(403).json({ message: 'You are not in this chat' });
+				return;
+			}
+			// is the user requesting admin?
+			this.chatService
+				.getAdminInfo(validatedData.chatId, userId)
+				.then((data) => {
+					if (!data.isAdmin && !data.isOwner) {
+						response
+							.status(403)
+							.json({ message: "You don't have sufficient rights" });
+						return;
+					}
+					// is the target admin ?
+					this.chatService
+						.getAdminInfo(validatedData.chatId, validatedData.targetId)
+						.then((targetData) => {
+							if (targetData.isOwner || targetData.isAdmin) {
+								response
+									.status(400)
+									.json({ message: 'The user is already an administrator' });
+								return;
+							}
+
+							this.chatService
+								.makeAdmin(validatedData.chatId, validatedData.targetId)
+								.then(() => {
+									response
+										.status(200)
+										.json({ message: 'The user is now an administrator' });
+								});
+						})
+						.catch((e) => {
+							response
+								.status(403)
+								.json({ message: 'Could not retreive your admin infos' });
+							return;
+						});
+				})
+				.catch((e) => {
+					response
+						.status(403)
+						.json({ message: 'Could not retreive your admin infos' });
+					return;
+				});
+		} catch (e) {
+			console.error('👋👋👋error making admin', e);
+			response.status(400).json({
+				message: 'Something went wrong making the user administrator',
+			});
 		}
 	}
 

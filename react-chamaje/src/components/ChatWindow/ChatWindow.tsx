@@ -353,7 +353,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 								? { name: 'Invite', onClick: inviteToChannel }
 								: { name: '' },
 							{ name: 'Leave', onClick: leaveChannel },
-							isOwner || isAdmin
+							isOwner
 								? { name: 'Settings', onClick: openSettingsPanel }
 								: { name: '' },
 					  ]
@@ -362,7 +362,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							{ name: 'Play', onClick: () => null },
 							{ name: isBlocked ? 'Unblock' : 'Block', onClick: blockUser },
 							{ name: 'Leave chat', onClick: leavePM },
-							{ name: 'Settings', onClick: openSettingsPanel },
 					  ]
 			}
 			useBeigeBackground={true}
@@ -389,6 +388,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 						return (
 							<ChatBubble
 								userId={currentMessage.sentById}
+								chatId={chatId}
 								key={index}
 								wasSent={
 									userData && currentMessage.sentById === userData.id
@@ -398,6 +398,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 								sender={currentMessage.login}
 								time={date.toLocaleString('en-US', dateFormatOptions)}
 								senderAvatar={currentMessage.avatar}
+								isAdmin={isAdmin || isOwner}
 							>
 								{
 									<div
