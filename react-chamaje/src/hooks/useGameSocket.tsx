@@ -56,19 +56,22 @@ export const useGameSocket = () => {
 			updateGameData({ connectedToServer: true });
 		});
 		gameData.socket.on('connect_error', (error: Error) => {
-			updateGameData({ connectionErrorStatus: 'Connection error' });
+			updateGameData({
+				connectionErrorStatus: 'Connection error, please refresh the page !',
+			});
 			// setConnectionStatus('Connection error');
 		});
 		gameData.socket.on('connect_timeout', () => {
 			updateGameData({ connectionErrorStatus: 'Connection timeout' });
 			// setConnectionStatus('Connection timeout');
 		});
-		gameData.socket.on('connection_limit_reached', () => {
-			updateGameData({
-				connectionErrorStatus:
-					'Too many connections, please close some tabs and refresh !',
-			});
-		});
+		// TODO: reimplement this
+		// gameData.socket.on('connection_limit_reached', () => {
+		// 	updateGameData({
+		// 		connectionErrorStatus:
+		// 			'Too many connections, please close some tabs and refresh !',
+		// 	});
+		// });
 		gameData.socket.on('error', (error) => {
 			console.error('General Error:', error);
 		});
@@ -104,6 +107,7 @@ export const useGameSocket = () => {
 			updateGameData({
 				player1Ready: false,
 				player2Ready: false,
+				opponentPowerupsDisabled: false,
 				opponentInfo: undefined,
 				gameIsPlaying: false,
 				gameState: undefined,
@@ -115,6 +119,13 @@ export const useGameSocket = () => {
 		// 	updateGameData({ gameIsPlaying: true });
 		// });
 
+		gameData.socket.on(
+			'opponent-toggled-powerups',
+			(opponentDisabledPowerups: boolean) => {
+				updateGameData({ opponentPowerupsDisabled: opponentDisabledPowerups });
+			},
+		);
+
 		gameData.socket.on('game-state-update', (serverGameState: IGameState) => {
 			// socketLog('received game state update');
 			// Mark the game as started
@@ -125,12 +136,13 @@ export const useGameSocket = () => {
 		gameData.socket.on(
 			'game-ended',
 			(gameEndStatus: { gameHasWinner: boolean; userWon: boolean }) => {
-				console.log('GAME-ENDED NOTICE', gameEndStatus);
 				// Update necessary values from the game context
 				updateGameData({
 					gameIsPlaying: false,
 					player1Ready: false,
 					player2Ready: false,
+					userPowerupsDisabled: false,
+					opponentPowerupsDisabled: false,
 					userWonGame: gameEndStatus.userWon,
 					userLostGame: gameEndStatus.gameHasWinner && !gameEndStatus.userWon,
 					gameState: undefined,
@@ -154,6 +166,13 @@ export const useGameSocket = () => {
 		socketRef.current?.emit('user-wants-new-opponent');
 	};
 
+	const sharePowerupSettingUpdate = () => {
+		socketRef.current?.emit(
+			'powerup-setting-update',
+			gameData.userPowerupsDisabled,
+		);
+	};
+
 	// const notifyPlayerLeft = () => {
 	// 	socketRef.current?.emit('player-left', {
 	// 		playerId: userData?.id,
@@ -166,6 +185,7 @@ export const useGameSocket = () => {
 
 	return {
 		socketRef,
+		sharePowerupSettingUpdate,
 		broadcastPlayerPosition,
 		setPlayer1AsReady: notifyPlayerIsReady,
 		startGame,

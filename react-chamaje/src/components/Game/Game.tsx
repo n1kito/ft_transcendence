@@ -52,6 +52,7 @@ const Game: React.FC<IGameProps> = ({
 
 	// use our socket hook
 	const {
+		sharePowerupSettingUpdate,
 		broadcastPlayerPosition,
 		setPlayer1AsReady: notifyPlayerIsReady,
 		askForAnotherOpponent,
@@ -74,7 +75,7 @@ const Game: React.FC<IGameProps> = ({
 		return () => {
 			gameInstance.current?.stopGame();
 			gameInstance.current?.removeEventListeners();
-			eraseGameData(); // TODO: this does not seem to log shit
+			resetGameData(); // TODO: this does not seem to log shit
 		};
 	}, []);
 
@@ -95,6 +96,10 @@ const Game: React.FC<IGameProps> = ({
 			updateGameData({ userWantsNewOpponent: false });
 		}
 	}, [gameData.userWantsNewOpponent]);
+
+	useEffect(() => {
+		sharePowerupSettingUpdate();
+	}, [gameData.userPowerupsDisabled]);
 
 	useEffect(() => {
 		// Everytime the server sends a state update, we need to apply it

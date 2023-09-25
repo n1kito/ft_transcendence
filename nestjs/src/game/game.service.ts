@@ -16,22 +16,7 @@ function decodeToken(client: Socket): any {
 	) as jwt.JwtPayload;
 }
 
-// These are all the information that our users need to receive from the server
-// to update their front correctly
-// interface PlayerGameState {
-// 	y: number;
-// 	opponentY: number;
-// 	ballX: number;
-// 	ballY: number;
-// 	ballDX: number;
-// 	ballDY: number;
-// 	score: number;
-// 	opponentScore: number;
-// 	gameOver: boolean;
-// }
-
 // This is everything that a room contains: a game instance, and players.
-// So now, everytimg a
 interface Room {
 	gameInstance?: GameLogic;
 	playersSocketIds: string[];
@@ -175,7 +160,6 @@ export class GameService {
 	handlePlayerMovement(
 		clientSocket: Socket,
 		direction: 'up' | 'down' | 'immobile',
-		inputSequenceId: number,
 	) {
 		// console.log('[🕹️ ] Player moved', direction);
 		const playerRoomId = this.getRoomIdFromSocketId(clientSocket.id);
@@ -186,14 +170,13 @@ export class GameService {
 		// 	direction,
 		// 	inputSequenceId,
 		// );
-		this.rooms[playerRoomId].gameInstance.updatePlayerPosition(
+		this.rooms[playerRoomId].gameInstance?.updatePlayerPosition(
 			clientSocket.id,
 			direction,
-			inputSequenceId,
 		);
 
 		// Broadcast the new game state to our players
-		this.rooms[playerRoomId].gameInstance.broadcastGameState();
+		this.rooms[playerRoomId].gameInstance?.broadcastGameState();
 	}
 
 	createGameLogic(roomId: string) {
@@ -222,6 +205,35 @@ export class GameService {
 			player2UserId,
 			this.server,
 		);
+	}
+
+	handlePowerupSettingUpdate(
+		clientSocket: Socket,
+		userDisabledPowerups: boolean,
+	) {
+		const roomId = this.getRoomIdFromSocketId(clientSocket.id);
+		if (roomId) {
+			const opponentSocketId = this.getOpponentSocketId(
+				clientSocket.id,
+				roomId,
+			);
+			if (opponentSocketId) {
+				clientSocket
+					.to(opponentSocketId)
+					.emit('opponent-toggled-powerups', userDisabledPowerups);
+				if (this.rooms[roomId].gameInstance) {
+					this.rooms[roomId].gameInstance.powerupsEnabled =
+						!userDisabledPowerups;
+					console.log(
+						`[${userDisabledPowerups ? '🪫 ' : '🔋'}] User [${
+							clientSocket.id
+						}] ${
+							userDisabledPowerups ? 'disabled' : 'enabled'
+						} powerups for room ${roomId}`,
+					);
+				}
+			}
+		}
 	}
 
 	/*

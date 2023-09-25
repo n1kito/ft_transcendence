@@ -14,6 +14,8 @@ export interface IGameDataProps {
 	gameIsPlaying: boolean;
 	player1Ready: boolean;
 	player2Ready: boolean;
+	userPowerupsDisabled: boolean;
+	opponentPowerupsDisabled: boolean;
 	roomId: string | undefined;
 	userWonGame: boolean;
 	userLostGame: boolean;
@@ -34,6 +36,8 @@ const defaultGameState: IGameDataProps = {
 	gameIsPlaying: false,
 	player1Ready: false,
 	player2Ready: false,
+	userPowerupsDisabled: false,
+	opponentPowerupsDisabled: false,
 	roomId: undefined,
 	userWonGame: false,
 	userLostGame: false,

@@ -17,15 +17,6 @@ interface IRoomInformationProps {
 	state: string;
 }
 
-// interface IGameInformationProps {
-// 	gameRoomId: number;
-// 	opponentLogin: string;
-// 	opponentImage: string;
-// }
-
-// TODO:
-// - When a player disconnects in the middle of a game, do we make him leave the room ?
-
 @WebSocketGateway({
 	path: '/ws/',
 })
@@ -97,11 +88,7 @@ export class GameGateway
 	@SubscribeMessage('player-moved')
 	handlePlayerMovement(clientSocket: Socket, payload: IPlayerMovementPayload) {
 		try {
-			this.gameService.handlePlayerMovement(
-				clientSocket,
-				payload.direction,
-				payload.inputSequenceId,
-			);
+			this.gameService.handlePlayerMovement(clientSocket, payload.direction);
 		} catch (error) {
 			console.error('handlePlayerMovement():', error.message);
 		}
@@ -113,6 +100,18 @@ export class GameGateway
 			this.gameService.handleUserWantsNewOpponent(clientSocket);
 		} catch (error) {
 			console.error('handleUserWantsNewOpponent():', error.message);
+		}
+	}
+
+	@SubscribeMessage('powerup-setting-update')
+	handlePowerupSettingUpdate(
+		clientSocket: Socket,
+		userDisabledPowerups: boolean,
+	) {
+		try {
+			this.gameService.handlePowerupSettingUpdate(clientSocket, userDisabledPowerups);
+		} catch (error) {
+			console.error('handlePowerupSettingUpdate():', error.message);
 		}
 	}
 }

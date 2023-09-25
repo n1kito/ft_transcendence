@@ -51,7 +51,7 @@ export interface IBallState {
 interface IGeneralAssetsState {}
 
 export interface IGameState {
-	inputSequenceId: number;
+	// inputSequenceId: number;
 	player1: IPlayerState;
 	player2: IPlayerState;
 	ball: IBallState;
@@ -59,7 +59,7 @@ export interface IGameState {
 }
 
 export interface IPlayerMovementPayload {
-	inputSequenceId: number;
+	// inputSequenceId: number;
 	direction: 'up' | 'down' | 'immobile';
 	// ballXVelocity: number;
 	// ballYVelocity: number;

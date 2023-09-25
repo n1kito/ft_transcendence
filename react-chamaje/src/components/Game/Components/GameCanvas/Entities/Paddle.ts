@@ -7,31 +7,13 @@ import { GameEntity } from './Shared';
 export default class Paddle extends GameEntity {
 	// speed: number = 800;
 	// speed: number = 800;
-	speed: number = 15;
+	speed: number = 8;
 	// targetY: number | undefined;
 	private direction: number;
 
 	constructor(x: number, y: number, width: number, height: number) {
 		super(x, y, width, height);
 		this.direction = 0;
-	}
-
-	update(
-		canvasSize: { width: number; height: number } /*, deltaTime: number*/,
-	) {
-		const screenPaddleGap: number = 0.05 * canvasSize.height;
-		// Calculate the new y coordinate of the paddle
-		// this.y += this.speed * this.direction;
-		// Make sure the y coordinates are never < 0 or > canvasHeight - paddleHeight
-		// However, to respect the original 1972 game, the paddles leave a gap at the top and the bottom of the playground,
-		// to avoid infinite matches
-		this.y = Math.max(
-			screenPaddleGap,
-			Math.min(
-				this.y + this.speed * this.direction /** deltaTime*/,
-				canvasSize.height - this.height - screenPaddleGap,
-			),
-		);
 	}
 
 	setDirection(direction: string) {
@@ -46,11 +28,10 @@ export default class Paddle extends GameEntity {
 		else return 'immobile';
 	}
 
-	serverUpdate(playerState: IPlayerState) {
-		// this.x = playerState.x;
+	update(playerState: IPlayerState) {
+		// TODO: add speed to server update if we want that powerup
 		this.targetX = playerState.x;
 		this.targetY = playerState.y;
-		// this.y = playerState.y;
 		this.width = playerState.width;
 		this.height = playerState.height;
 	}

@@ -5,13 +5,10 @@ import { IBallState, IGameState, IPlayerState } from 'shared-lib/types/game';
 import { EventEmitter } from 'stream';
 
 export class GameLogic {
-	// public paddlePlayer: Paddle;
-	// public paddleOpponent: Paddle;
 	private server: Server;
 
 	// Initiate an event emitter so this instance can communicate with the gameService
 	eventEmitter: EventEmitter = new EventEmitter();
-	// private roomId: string;
 
 	// Broadcasting functions
 	private player1IsReady: boolean = false;
@@ -23,10 +20,12 @@ export class GameLogic {
 	players: { [socketId: string]: Paddle } = {};
 	public ball: Ball;
 
+	// Game session state
 	public player1UserId: number;
 	public player2UserId: number;
 	public player1Score: number = 0;
 	public player2Score: number = 0;
+	public powerupsEnabled: boolean = true;
 
 	public canvasSize = { width: 700, height: 500 };
 	public paddleWidth = 5;
@@ -77,10 +76,9 @@ export class GameLogic {
 	updatePlayerPosition(
 		playerSocketId: string,
 		direction: 'up' | 'down' | 'immobile',
-		inputSequenceid: number,
 	) {
 		// Change the paddle's direction
-		this.setPlayerDirection(playerSocketId, direction, inputSequenceid);
+		this.setPlayerDirection(playerSocketId, direction);
 		// Update that paddle's position
 		this.players[playerSocketId].update(this.canvasSize);
 	}
@@ -116,23 +114,16 @@ export class GameLogic {
 	setPlayerDirection(
 		playerSocketId: string,
 		direction: 'up' | 'down' | 'immobile',
-		inputSequenceId: number,
 	) {
 		this.players[playerSocketId].setDirection(direction);
-		this.players[playerSocketId].latestInputSequenceId = inputSequenceId;
 	}
 
 	broadcastGameState() {
 		const [player1SocketId, player2SocketId] = Object.keys(this.players);
 
-		// TODO: actually we only need to share the ball's x and y coordinates since there is no client prediction on the ball
-		// same thing for each player's opponent basically
 		const currentBallState: IBallState = {
 			x: this.ball.x,
 			y: this.ball.y,
-			// xVelocity: this.ball.xVelocity,
-			// yVelocity: this.ball.yVelocity,
-			// speed: this.ball.speed,
 			width: this.ball.width,
 			height: this.ball.height,
 		};
@@ -151,8 +142,6 @@ export class GameLogic {
 			score: this.player2Score,
 		};
 		const player1StateUpdate: IGameState = {
-			// Each player gets their latest input sequence id
-			inputSequenceId: this.players[player1SocketId].latestInputSequenceId,
 			player1: currentPlayer1State,
 			player2: currentPlayer2State,
 			ball: currentBallState,
@@ -160,8 +149,6 @@ export class GameLogic {
 		// Creating the state update for player2 (right side of the screen for us, so things need to be flipped for them,
 		// since both players appear on the left side of their screen)
 		const player2StateUpdate: IGameState = {
-			// Each player gets their latest input sequence id
-			inputSequenceId: this.players[player2SocketId].latestInputSequenceId,
 			// This is their left-hand side player, so player2 for us
 			player1: {
 				...currentPlayer2State,
@@ -190,8 +177,6 @@ export class GameLogic {
 
 	startGame() {
 		this.gameHasStarted = true;
-		// this.startBroadcasting(); // TODO: removed this but need to clean it up
-		// Send first state of game to both users
 		this.broadcastGameState();
 		this.startGameSimulation();
 	}
@@ -219,44 +204,17 @@ export class GameLogic {
 		return this.player1IsReady && this.player2IsReady;
 	}
 
-	// TODO: Not broadcasting the game automatically now. It's just that
-	// whenever a player sends a position update now, the new game state is
-	// shared with the,
-	// // Start broadcasting to clients with an interval of 500ms
-	// private startBroadcasting() {
-	// 	const gameBroadcastInterval = 10;
-
-	// 	// this.log(`Started broadcasting at ${gameBroadcastInterval}ms interval`);
-	// 	if (this.gameHasStarted && !this.gameBroadcastInterval) {
-	// 		this.gameBroadcastInterval = setInterval(() => {
-	// 			this.broadcastGameState();
-	// 		}, gameBroadcastInterval);
-	// 	}
-	// }
-
 	// Start the game simulation with an interval of 50ms
 	private startGameSimulation() {
 		const gameStateInterval = 10;
 
 		this.log(`Started game simulation at ${gameStateInterval}ms interval`);
-		// TODO: do we want to reinstate a way to make the server run a consistent speed ?
-		// let serverUpdateTime = Date.now();
 		if (this.gameHasStarted && !this.gameStateUpdateInterval) {
-			// let currentTime = Date.now();
-			// let lastTime = Date.now();
 			this.gameStateUpdateInterval = setInterval(() => {
-				// const currentTime = Date.now();
-				// let deltaTime = (currentTime - lastTime) / 1000; // Time since last frame in seconds
-				// lastTime = currentTime;
-				// deltaTime = Math.min(deltaTime, 0.1);
-				// console.log('delta time = ', deltaTime);
-				// Update the ball position
-				// this.updateGameState(deltaTime);
 				this.updateGameState();
 				// Check to see if anyone won
 				if (this.player1Score === 11 || this.player2Score === 11) {
 					this.endGame();
-					this.eventEmitter.emit('somebody-won');
 				}
 			}, gameStateInterval);
 		}

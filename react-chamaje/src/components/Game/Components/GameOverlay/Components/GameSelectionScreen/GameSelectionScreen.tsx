@@ -15,6 +15,7 @@ const GameSelectionScreen: React.FC<IGameSelectionScreenProps> = () => {
 	const { gameData, updateGameData, resetGameData } = useContext(GameContext);
 	const { userData } = useContext(UserContext);
 	const [playTooltipVisible, setPlayTooltipVisible] = useState(false);
+	const [powerupsTooltipVisible, setPowerupsTooltipVisible] = useState(false);
 	const [shuffleTooltipVisible, setShuffleTooltipVisible] = useState(false);
 
 	return (
@@ -77,6 +78,51 @@ const GameSelectionScreen: React.FC<IGameSelectionScreenProps> = () => {
 						}
 					>
 						play
+					</Button>
+				</div>
+				<div
+					className="game-play-button-wrapper"
+					onMouseEnter={() => {
+						setPowerupsTooltipVisible(true);
+					}}
+					onMouseLeave={() => {
+						setPowerupsTooltipVisible(false);
+					}}
+				>
+					<Tooltip
+						isVisible={
+							powerupsTooltipVisible && gameData.opponentInfo != undefined
+						}
+						position="bottom"
+					>
+						{`${
+							gameData.opponentPowerupsDisabled
+								? 'Your opponent disabled power-ups. Destroy them.'
+								: gameData.userPowerupsDisabled
+								? 'You disabled the power-ups ? Ok fine.'
+								: 'Power-ups are activated ! Yay !'
+						}`}
+					</Tooltip>
+					<Button
+						onClick={() => {
+							updateGameData({
+								userPowerupsDisabled: !gameData.userPowerupsDisabled,
+							});
+						}}
+						disabled={
+							gameData.player1Ready ||
+							gameData.player2Ready ||
+							!gameData.opponentInfo ||
+							gameData.opponentPowerupsDisabled
+						}
+						baseColor={
+							gameData.userPowerupsDisabled ? [360, 75, 80] : [200, 70, 90]
+						}
+					>
+						✨ power-ups
+						{gameData.userPowerupsDisabled || gameData.opponentPowerupsDisabled
+							? ' ✗'
+							: ' ✔'}
 					</Button>
 				</div>
 				<div

@@ -2,11 +2,8 @@ import { GameEntity } from './Shared';
 
 export default class Paddle extends GameEntity {
 	// private speed: number = 800;
-	private speed: number = 15;
+	private speed: number = 8;
 	private direction: number;
-
-	// The latest frontent sequence state that the player has treated
-	latestInputSequenceId: number = 0;
 
 	constructor(x: number, y: number, width: number, height: number) {
 		super(x, y, width, height);

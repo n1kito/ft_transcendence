@@ -1,5 +1,6 @@
 import { GameLogic } from './GameLogic';
 import { IPlayerMovementPayload } from '../../../../../../../shared-lib/types/game';
+import PowerUp from './PowerUp';
 
 export class GameRenderer {
 	gameLogic: GameLogic;
@@ -7,6 +8,7 @@ export class GameRenderer {
 	private gradient: CanvasGradient;
 	private animationFrameId: number | undefined;
 	private playerPositionBroadcastInterval: NodeJS.Timer | undefined;
+	private powerUp: PowerUp | null = null;
 
 	constructor(
 		canvasRef: React.MutableRefObject<HTMLCanvasElement | null>,
@@ -21,6 +23,9 @@ export class GameRenderer {
 
 		// this.canvasRef = canvasRef;
 		this.gameContext = gameContext;
+
+		// Init the powerup
+		this.powerUp = new PowerUp(gameContext, this.gameLogic.canvasSize);
 
 		// Init the gradient style
 		this.gradient = this.initGradient();
@@ -46,20 +51,7 @@ export class GameRenderer {
 	};
 
 	// The game loop's only job is to continuously render the canvas
-	// and predict the ball's movements (which will be regularly corrected by the server)
-	lastTime = 0;
 	gameLoop = (timestamp: number): void => {
-		// this.gameLogic.deltaTime = (timestamp - this.lastTime) / 1000; // Time since last frame in seconds
-		// this.lastTime = timestamp;
-		// this.gameLogic.deltaTime = Math.min(this.gameLogic.deltaTime, 0.1);
-		// console.log('delta time = ', this.gameLogic.deltaTime);
-
-		// console.log(this.gameLogic.ball.x, this.gameLogic.ball.y);
-		// this.gameLogic.updateBallPosition();
-		// this.gameLogic.paddlePlayer.update(
-		// 	{ width: 700, height: 500 },
-		// 	// this.gameLogic.deltaTime,
-		// );
 		this.draw();
 		this.animationFrameId = requestAnimationFrame(this.gameLoop);
 	};
@@ -90,15 +82,12 @@ export class GameRenderer {
 	handleKeyPress = (event: KeyboardEvent): void => {
 		let direction = null;
 		if (event.key === 'ArrowUp') {
-			// console.log('[🕹️] up');
 			direction = 'up';
 		}
 		if (event.key === 'ArrowDown') {
-			// console.log('[🕹️] down');
 			direction = 'down';
 		}
-		// If a direction was registered, update the paddle's position
-		// so it's instantanuous on the screen
+		// If a direction was registered, update the paddle's direction
 		if (direction) {
 			this.gameLogic.paddlePlayer.setDirection(direction);
 		}
@@ -113,15 +102,9 @@ export class GameRenderer {
 	startBroadcastingToServer() {
 		if (!this.playerPositionBroadcastInterval) {
 			this.playerPositionBroadcastInterval = setInterval(() => {
-				this.gameLogic.inputSequenceId++;
 				const currentState: IPlayerMovementPayload = {
-					inputSequenceId: this.gameLogic.inputSequenceId,
 					direction: this.gameLogic.paddlePlayer.getDirection(),
-					// ballXVelocity: this.gameLogic.ball.xVelocity,
-					// ballYVelocity: this.gameLogic.ball.yVelocity,
-					// ballSpeed: this.gameLogic.ball.speed,
 				};
-				this.gameLogic.untreatedInputs.push(currentState);
 				this.gameLogic.broadcastPlayerPosition(currentState);
 			}, 10);
 		}
@@ -147,6 +130,8 @@ export class GameRenderer {
 		this.drawNet();
 		// Draw our scores
 		this.drawScores();
+		// Draw the powerup
+		this.powerUp?.draw();
 		// Draw our ball
 		this.gameLogic.ball.draw(this.gameContext);
 		// Draw our paddles

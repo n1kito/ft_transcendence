@@ -29,11 +29,9 @@ export class GameEntity {
 
 		// setup the visual style
 		context.fillStyle = 'white';
-		// context.strokeStyle = 'white';
-		// context.lineWidth = 1;
 		context.shadowOffsetX = 0;
 		context.shadowOffsetY = 0;
-		// draw the entity
+		// draw the entites
 		context.shadowColor = 'pink';
 		context.shadowBlur = 40;
 		context.fillRect(this.x, this.y, this.width, this.height);
@@ -46,13 +44,8 @@ export class GameEntity {
 		context.strokeRect(this.x, this.y, this.width, this.height);
 	}
 
-	// interpolate() {
-	// 	if (this.targetX) this.x += (this.targetX - this.x) * 0.5;
-	// 	if (this.targetY) this.y += (this.targetY - this.y) * 0.5;
-	// }
-
 	interpolate() {
-		if (this.targetX >= 0) this.x += this.targetX - this.x * 0.5;
-		if (this.targetY >= 0) this.y += this.targetY - this.y * 0.5;
+		if (this.targetX >= 0) this.x += (this.targetX - this.x) * 0.5;
+		if (this.targetY >= 0) this.y += (this.targetY - this.y) * 0.5;
 	}
 }
