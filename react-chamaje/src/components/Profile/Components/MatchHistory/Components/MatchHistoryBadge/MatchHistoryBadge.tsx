@@ -32,7 +32,11 @@ const MatchHistoryBadge: React.FC<IMatchHistoryBadgeProps> = ({
 			>
 				YOU {`${playerWon ? 'WON' : 'LOST'}`}
 			</div>
-			<FriendBadge badgeTitle={adversaryLogin} badgeImageUrl={badgeImageUrl} />
+			<FriendBadge
+				badgeTitle={adversaryLogin}
+				badgeImageUrl={badgeImageUrl}
+				onlineIndicator={false}
+			/>
 			<BlackBadge>
 				Score: {userScore}/{adversaryScore}
 			</BlackBadge>

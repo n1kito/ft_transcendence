@@ -52,7 +52,7 @@ export class GameEntity {
 	// }
 
 	interpolate() {
-		if (this.targetX >= 0) this.x += (this.targetX - this.x) * 0.5;
-		if (this.targetY >= 0) this.y += (this.targetY - this.y) * 0.5;
+		if (this.targetX >= 0) this.x += this.targetX - this.x * 0.5;
+		if (this.targetY >= 0) this.y += this.targetY - this.y * 0.5;
 	}
 }

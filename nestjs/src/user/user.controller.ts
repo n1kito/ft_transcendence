@@ -194,8 +194,9 @@ export class UserController {
 				await this.userService.calculateRank(requestedUser.id);
 			const totalGameCount =
 				this.userService.calculateTotalGameCount(requestedUser);
-			const calculatedWinRate: number | undefined =
-				this.userService.calculateWinRate(requestedUser);
+			const calculatedWinRate: number | undefined = Math.round(
+				this.userService.calculateWinRate(requestedUser),
+			);
 
 			// Match history
 			let matchHistory: IMatchHistory[] | undefined = undefined;
@@ -221,6 +222,9 @@ export class UserController {
 				// Bestie
 				bestieLogin: requestedUser.bestie?.login,
 				matchHistory: matchHistory,
+				// Rival
+				rivalLogin: requestedUser.rival?.login,
+				rivalImage: requestedUser.rival?.image,
 			};
 		} catch (error) {
 			throw new NotFoundException(error);

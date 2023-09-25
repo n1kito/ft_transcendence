@@ -33,7 +33,8 @@ export class GameLogic {
 	public paddleHeight = this.canvasSize.height * 0.2;
 	public ballSize = 10;
 
-	private gameStateInterval = 16.6666666667; // 60 FPS
+	// private gameStateInterval = 16.6666666667; // 60 FPS
+	// private gameStateInterval = 10; // 60 FPS
 
 	constructor(
 		player1SocketId: string,
@@ -73,13 +74,24 @@ export class GameLogic {
 		}
 	}
 
-	updateGameState(timeBetweenTwoFrames: number): void {
-		// Update the position of each player
-		for (const playerSocketId in this.players)
-			this.players[playerSocketId].update(
-				this.canvasSize,
-				timeBetweenTwoFrames,
-			);
+	updatePlayerPosition(
+		playerSocketId: string,
+		direction: 'up' | 'down' | 'immobile',
+		inputSequenceid: number,
+	) {
+		// Change the paddle's direction
+		this.setPlayerDirection(playerSocketId, direction, inputSequenceid);
+		// Update that paddle's position
+		this.players[playerSocketId].update(this.canvasSize);
+	}
+
+	updateGameState(/*timeBetweenTwoFrames: number*/): void {
+		// // Update the position of each player
+		// for (const playerSocketId in this.players)
+		// 	this.players[playerSocketId].update(
+		// 		this.canvasSize,
+		// 		timeBetweenTwoFrames,
+		// 	);
 		// And the position of the ball
 		const [player1SocketId, player2SocketId] = Object.keys(this.players);
 		this.ball.update(
@@ -87,7 +99,7 @@ export class GameLogic {
 			this.players[player2SocketId],
 			this.canvasSize,
 			this.handleScoreUpdate,
-			timeBetweenTwoFrames,
+			// timeBetweenTwoFrames,
 		);
 	}
 
@@ -118,9 +130,9 @@ export class GameLogic {
 		const currentBallState: IBallState = {
 			x: this.ball.x,
 			y: this.ball.y,
-			xVelocity: this.ball.xVelocity,
-			yVelocity: this.ball.yVelocity,
-			speed: this.ball.speed,
+			// xVelocity: this.ball.xVelocity,
+			// yVelocity: this.ball.yVelocity,
+			// speed: this.ball.speed,
 			width: this.ball.width,
 			height: this.ball.height,
 		};
@@ -164,7 +176,7 @@ export class GameLogic {
 			ball: {
 				...currentBallState,
 				x: this.canvasSize.width - currentBallState.x - this.ballSize,
-				xVelocity: -currentBallState.xVelocity,
+				// xVelocity: -currentBallState.xVelocity,
 			},
 		};
 		// Send the stated to each player
@@ -178,7 +190,9 @@ export class GameLogic {
 
 	startGame() {
 		this.gameHasStarted = true;
-		this.startBroadcasting();
+		// this.startBroadcasting(); // TODO: removed this but need to clean it up
+		// Send first state of game to both users
+		this.broadcastGameState();
 		this.startGameSimulation();
 	}
 
@@ -205,41 +219,46 @@ export class GameLogic {
 		return this.player1IsReady && this.player2IsReady;
 	}
 
-	// Start broadcasting to clients with an interval of 500ms
-	private startBroadcasting() {
-		const gameBroadcastInterval = 15;
+	// TODO: Not broadcasting the game automatically now. It's just that
+	// whenever a player sends a position update now, the new game state is
+	// shared with the,
+	// // Start broadcasting to clients with an interval of 500ms
+	// private startBroadcasting() {
+	// 	const gameBroadcastInterval = 10;
 
-		// this.log(`Started broadcasting at ${gameBroadcastInterval}ms interval`);
-		if (this.gameHasStarted && !this.gameBroadcastInterval) {
-			this.gameBroadcastInterval = setInterval(() => {
-				this.broadcastGameState();
-			}, gameBroadcastInterval);
-		}
-	}
+	// 	// this.log(`Started broadcasting at ${gameBroadcastInterval}ms interval`);
+	// 	if (this.gameHasStarted && !this.gameBroadcastInterval) {
+	// 		this.gameBroadcastInterval = setInterval(() => {
+	// 			this.broadcastGameState();
+	// 		}, gameBroadcastInterval);
+	// 	}
+	// }
 
 	// Start the game simulation with an interval of 50ms
 	private startGameSimulation() {
-		// const gameStateInterval = 10;
+		const gameStateInterval = 10;
 
-		this.log(`Started game simulation at ${this.gameStateInterval}ms interval`);
+		this.log(`Started game simulation at ${gameStateInterval}ms interval`);
 		// TODO: do we want to reinstate a way to make the server run a consistent speed ?
 		// let serverUpdateTime = Date.now();
 		if (this.gameHasStarted && !this.gameStateUpdateInterval) {
 			// let currentTime = Date.now();
-			let lastTime = Date.now();
+			// let lastTime = Date.now();
 			this.gameStateUpdateInterval = setInterval(() => {
-				const currentTime = Date.now();
-				let deltaTime = (currentTime - lastTime) / 1000; // Time since last frame in seconds
-				lastTime = currentTime;
-				deltaTime = Math.min(deltaTime, 0.1);
+				// const currentTime = Date.now();
+				// let deltaTime = (currentTime - lastTime) / 1000; // Time since last frame in seconds
+				// lastTime = currentTime;
+				// deltaTime = Math.min(deltaTime, 0.1);
 				// console.log('delta time = ', deltaTime);
-				this.updateGameState(deltaTime);
+				// Update the ball position
+				// this.updateGameState(deltaTime);
+				this.updateGameState();
 				// Check to see if anyone won
 				if (this.player1Score === 11 || this.player2Score === 11) {
 					this.endGame();
 					this.eventEmitter.emit('somebody-won');
 				}
-			}, this.gameStateInterval);
+			}, gameStateInterval);
 		}
 	}
 

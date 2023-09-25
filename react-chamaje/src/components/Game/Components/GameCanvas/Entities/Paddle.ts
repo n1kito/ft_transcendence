@@ -6,7 +6,8 @@ import { GameEntity } from './Shared';
 
 export default class Paddle extends GameEntity {
 	// speed: number = 800;
-	speed: number = 800;
+	// speed: number = 800;
+	speed: number = 15;
 	// targetY: number | undefined;
 	private direction: number;
 
@@ -15,7 +16,9 @@ export default class Paddle extends GameEntity {
 		this.direction = 0;
 	}
 
-	update(canvasSize: { width: number; height: number }, deltaTime: number) {
+	update(
+		canvasSize: { width: number; height: number } /*, deltaTime: number*/,
+	) {
 		const screenPaddleGap: number = 0.05 * canvasSize.height;
 		// Calculate the new y coordinate of the paddle
 		// this.y += this.speed * this.direction;
@@ -25,7 +28,7 @@ export default class Paddle extends GameEntity {
 		this.y = Math.max(
 			screenPaddleGap,
 			Math.min(
-				this.y + this.speed * this.direction * deltaTime,
+				this.y + this.speed * this.direction /** deltaTime*/,
 				canvasSize.height - this.height - screenPaddleGap,
 			),
 		);

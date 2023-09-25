@@ -21,7 +21,7 @@ export class GameLogic {
 
 	public canvasSize: { width: number; height: number };
 
-	public deltaTime = 0;
+	// public deltaTime = 0;
 
 	public broadcastPlayerPosition: (payload: IPlayerMovementPayload) => void;
 
@@ -90,7 +90,7 @@ export class GameLogic {
 			const screenPaddleGap: number = 0.05 * this.canvasSize.height;
 			const newTargetY =
 				this.paddlePlayer.targetY +
-				this.paddlePlayer.speed * numberDirection * this.deltaTime;
+				this.paddlePlayer.speed * numberDirection; /* * this.deltaTime*/
 			this.paddlePlayer.targetY = Math.max(
 				screenPaddleGap,
 				Math.min(
@@ -118,15 +118,15 @@ export class GameLogic {
 		this.opponentScore = serverState.player2.score;
 	}
 
-	updateBallPosition(): void {
-		this.ball.update(
-			this.paddlePlayer,
-			this.paddleOpponent,
-			this.canvasSize,
-			this.handleScoreUpdate,
-			this.deltaTime,
-		);
-	}
+	// updateBallPosition(): void {
+	// 	this.ball.update(
+	// 		this.paddlePlayer,
+	// 		this.paddleOpponent,
+	// 		this.canvasSize,
+	// 		this.handleScoreUpdate,
+	// 		// this.deltaTime,
+	// 	);
+	// }
 
 	handleScoreUpdate = (won: boolean) => {
 		if (won) this.playerScore++;

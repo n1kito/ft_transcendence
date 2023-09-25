@@ -11,13 +11,6 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-enum PlayerGameStatus {
-    Waiting // Waiting for the game to start
-    Ready // Player is ready to start the game (they presse the play button)
-    Playing // Player is currently in a game
-    Finished // Player finished the game
-}
-
 model User {
     id        Int      @id @unique @default(autoincrement())
     ft_id     Int?     @unique
@@ -63,14 +56,6 @@ model User {
     rival   User?  @relation("Rival", fields: [rivalId], references: [id])
     rivalId Int?
     rivalOf User[] @relation("Rival")
-}
-
-// TODO: update this
-enum GameStatus {
-    Waiting // Waiting for the game to start
-    Ready // Players are ready to start the game (they pressed the play button)
-    Playing // Player is currently in a game
-    Finished // Player finished the game
 }
 
 model gameSession {

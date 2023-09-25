@@ -2,7 +2,8 @@ import { GameEntity } from './Shared';
 import Paddle from './Paddle';
 
 export default class Ball extends GameEntity {
-	private BASE_SPEED = 400;
+	// private BASE_SPEED = 8;
+	private BASE_SPEED = 5;
 	private MAX_SPEED = this.BASE_SPEED * 1.75;
 	speed: number = this.BASE_SPEED;
 	xVelocity: number = 0;
@@ -21,7 +22,7 @@ export default class Ball extends GameEntity {
 		opponentPaddle: Paddle,
 		canvasSize: { width: number; height: number },
 		playerScored: (won: boolean) => void,
-		timeBetweenTwoFrames: number,
+		// timeBetweenTwoFrames: number,
 	) {
 		const canvasHeight = canvasSize.height;
 		const canvasWidth = canvasSize.width;
@@ -81,8 +82,8 @@ export default class Ball extends GameEntity {
 			playerScored(true);
 		} else {
 			// // update the position of the ball
-			this.x += this.xVelocity * this.speed * timeBetweenTwoFrames;
-			this.y += this.yVelocity * this.speed * timeBetweenTwoFrames;
+			this.x += this.xVelocity * this.speed /* * timeBetweenTwoFrames*/;
+			this.y += this.yVelocity * this.speed /* * timeBetweenTwoFrames*/;
 		}
 	}
 

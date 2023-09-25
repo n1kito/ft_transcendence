@@ -49,17 +49,17 @@ export class GameRenderer {
 	// and predict the ball's movements (which will be regularly corrected by the server)
 	lastTime = 0;
 	gameLoop = (timestamp: number): void => {
-		this.gameLogic.deltaTime = (timestamp - this.lastTime) / 1000; // Time since last frame in seconds
-		this.lastTime = timestamp;
-		this.gameLogic.deltaTime = Math.min(this.gameLogic.deltaTime, 0.1);
+		// this.gameLogic.deltaTime = (timestamp - this.lastTime) / 1000; // Time since last frame in seconds
+		// this.lastTime = timestamp;
+		// this.gameLogic.deltaTime = Math.min(this.gameLogic.deltaTime, 0.1);
 		// console.log('delta time = ', this.gameLogic.deltaTime);
 
 		// console.log(this.gameLogic.ball.x, this.gameLogic.ball.y);
-		this.gameLogic.updateBallPosition();
-		this.gameLogic.paddlePlayer.update(
-			{ width: 700, height: 500 },
-			this.gameLogic.deltaTime,
-		);
+		// this.gameLogic.updateBallPosition();
+		// this.gameLogic.paddlePlayer.update(
+		// 	{ width: 700, height: 500 },
+		// 	// this.gameLogic.deltaTime,
+		// );
 		this.draw();
 		this.animationFrameId = requestAnimationFrame(this.gameLoop);
 	};
@@ -117,13 +117,13 @@ export class GameRenderer {
 				const currentState: IPlayerMovementPayload = {
 					inputSequenceId: this.gameLogic.inputSequenceId,
 					direction: this.gameLogic.paddlePlayer.getDirection(),
-					ballXVelocity: this.gameLogic.ball.xVelocity,
-					ballYVelocity: this.gameLogic.ball.yVelocity,
-					ballSpeed: this.gameLogic.ball.speed,
+					// ballXVelocity: this.gameLogic.ball.xVelocity,
+					// ballYVelocity: this.gameLogic.ball.yVelocity,
+					// ballSpeed: this.gameLogic.ball.speed,
 				};
 				this.gameLogic.untreatedInputs.push(currentState);
 				this.gameLogic.broadcastPlayerPosition(currentState);
-			}, 15);
+			}, 10);
 		}
 	}
 

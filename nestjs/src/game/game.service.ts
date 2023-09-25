@@ -129,9 +129,9 @@ export class GameService {
 		}
 	}
 
-	handleClientDisconnect(socket: Socket) {
+	async handleClientDisconnect(socket: Socket) {
 		console.log(
-			'[🔴] Client disconnected from socket %s',
+			`[🔴] User %s disconnected from socket %s`,
 			this.connectedClients.get(socket.id).userId,
 			socket.id,
 		);
@@ -139,11 +139,12 @@ export class GameService {
 		// Remove the client from their current room
 		const currentRoomId = this.connectedClients.get(socket.id)?.roomId;
 		if (currentRoomId && this.rooms[currentRoomId]) {
-			this.rooms[currentRoomId].gameInstance.endGame();
+			// Stop the game if there was a game going
+			if (this.rooms[currentRoomId].gameInstance)
+				this.rooms[currentRoomId].gameInstance.endGame();
 			// Delete the client from the room
 			console.log(`[🏠] Removing [%s] from room %s`, socket.id, currentRoomId);
-			this.removeUserFromRoom(currentRoomId, socket.id);
-
+			await this.removeUserFromRoom(currentRoomId, socket.id);
 			// If the room has no players left, delete the room itself
 			if (this.rooms[currentRoomId].playersSocketIds.length === 0) {
 				console.log(`[🏠] Room ${currentRoomId} was empty, removing it !`);
@@ -152,6 +153,11 @@ export class GameService {
 			// Else, let the other player know that their partner has left
 			else {
 				const opponnentSocketId = this.rooms[currentRoomId].playersSocketIds[0];
+				console.log(
+					`Notifying opponent #${this.getUserIdFromSocket(
+						opponnentSocketId,
+					)} that we left the room`,
+				);
 				this.server.to(opponnentSocketId).emit('opponent-left');
 			}
 		}
@@ -174,13 +180,20 @@ export class GameService {
 		// console.log('[🕹️ ] Player moved', direction);
 		const playerRoomId = this.getRoomIdFromSocketId(clientSocket.id);
 		if (!playerRoomId) return; // TODO: do something else here ?
-		// TODO: Basically we need to feed this to the current came logic in the room
-		// and then we'll want to extract a new game state to share with each player
-		this.rooms[playerRoomId].gameInstance.setPlayerDirection(
+		// Update the paddle position
+		// this.rooms[playerRoomId].gameInstance.setPlayerDirection(
+		// 	clientSocket.id,
+		// 	direction,
+		// 	inputSequenceId,
+		// );
+		this.rooms[playerRoomId].gameInstance.updatePlayerPosition(
 			clientSocket.id,
 			direction,
 			inputSequenceId,
 		);
+
+		// Broadcast the new game state to our players
+		this.rooms[playerRoomId].gameInstance.broadcastGameState();
 	}
 
 	createGameLogic(roomId: string) {
@@ -436,7 +449,7 @@ export class GameService {
 				// If there is one
 				if (newRoomId) {
 					// Remove the user from their current room
-					this.removeUserFromRoom(currentRoomId, clientSocket.id);
+					await this.removeUserFromRoom(currentRoomId, clientSocket.id);
 
 					// Notify their current opponent
 					this.broadcastPlayerLeft(clientSocket);
@@ -476,16 +489,23 @@ export class GameService {
 		);
 	}
 
-	removeUserFromRoom(roomId: string, socketId: string) {
-		// Remove the user from their current room
-		const index = this.rooms[roomId].playersSocketIds.indexOf(socketId);
-		if (index > -1) this.rooms[roomId].playersSocketIds.splice(index, 1);
-		// Remove the roomId from the user's entry in the client map
-		if (this.connectedClients.has(socketId))
-			this.connectedClients.get(socketId).roomId = undefined;
-		// Delete the game instance from the rooms
-		// It will be recreated whenever a new user joins the room
-		if (this.rooms[roomId].gameInstance) delete this.rooms[roomId].gameInstance;
+	async removeUserFromRoom(roomId: string, socketId: string) {
+		const releaseMutex = await this.roomAssignmentMutex.acquire();
+
+		try {
+			// Remove the user from their current room
+			const index = this.rooms[roomId].playersSocketIds.indexOf(socketId);
+			if (index > -1) this.rooms[roomId].playersSocketIds.splice(index, 1);
+			// Remove the roomId from the user's entry in the client map
+			if (this.connectedClients.has(socketId))
+				this.connectedClients.get(socketId).roomId = undefined;
+			// Delete the game instance from the rooms
+			// It will be recreated whenever a new user joins the room
+			if (this.rooms[roomId].gameInstance)
+				delete this.rooms[roomId].gameInstance;
+		} finally {
+			releaseMutex();
+		}
 	}
 
 	// Looks for available room our user is not already in
@@ -553,12 +573,18 @@ export class GameService {
 	*/
 
 	// Create a Database gameSession entry for a finished game that has a winner
-	createDBGameEntry(
+	async createDBGameEntry(
 		roomId: string,
 		gameInstanceProperties: IGameInterfaceBackupProps,
 	) {
 		const { player1Score, player2Score, player1UserId, player2UserId } =
 			gameInstanceProperties;
+
+		// Find out who won
+		const winnerId =
+			player1Score > player2Score ? player1UserId : player2UserId;
+		const loserId = player1Score > player2Score ? player2UserId : player1UserId;
+		// Create the game sessions
 		this.prisma.gameSession
 			.create({
 				data: {
@@ -566,7 +592,7 @@ export class GameService {
 					player1Score: player1Score,
 					player2Id: player2UserId,
 					player2Score: player2Score,
-					winnerId: player1Score > player2Score ? player1UserId : player2UserId,
+					winnerId: winnerId,
 				},
 			})
 			.then(() => {
@@ -577,5 +603,220 @@ export class GameService {
 			.catch((error) => {
 				console.error('Error creating DB game entry:', error.message);
 			});
+
+		// Check if the winner beat their current target and handle that
+		if (await this.userBeatTheirCurrentTarget(winnerId, loserId)) {
+			await this.increaseUserKillCount(winnerId);
+			await this.assignNewTargetToUser(winnerId);
+		}
+		// Update the bestie of each user
+		await this.updateBestie(player1UserId);
+		await this.updateBestie(player2UserId);
+		// Update the rival fo each user
+		await this.updateRival(player1UserId);
+		await this.updateRival(player2UserId);
+	}
+
+	async userBeatTheirCurrentTarget(winnerId: number, loserId: number) {
+		// Get the target of our currnet winner, selecting only their id
+		const { target } = await this.prisma.user.findUnique({
+			where: {
+				id: winnerId,
+			},
+			select: {
+				target: {
+					select: {
+						id: true,
+					},
+				},
+			},
+		});
+		// If the user had a target
+		if (target) return target.id === loserId;
+		return false;
+	}
+
+	async increaseUserKillCount(userId: number) {
+		try {
+			await this.prisma.user.update({
+				where: { id: userId },
+				data: {
+					killCount: {
+						increment: 1,
+					},
+				},
+			});
+		} catch (error) {
+			console.error('Could not increase user kill count:', error.message);
+		}
+	}
+
+	async assignNewTargetToUser(userId: number) {
+		// Count total users excluding the specific user
+		const totalUsers = await this.prisma.user.count({
+			where: {
+				id: {
+					not: userId,
+				},
+			},
+		});
+		// 	// Generate a random offset
+		const randomOffset = Math.floor(Math.random() * totalUsers);
+		// 	// Fetch the random user using the offset
+		const randomUser = await this.prisma.user.findFirst({
+			where: {
+				id: {
+					not: userId,
+				},
+			},
+			skip: randomOffset,
+		});
+		if (randomUser) {
+			await this.prisma.user.update({
+				where: { id: userId },
+				data: { targetId: randomUser.id, targetDiscoveredByUser: false },
+			});
+		} else {
+			console.log('Could not find random user');
+		}
+	}
+
+	// Find user's bestie, ie the user they've played the most games against
+	// If there is a tie, bestie will be the user with the latest game
+	async updateBestie(userId: number) {
+		try {
+			// Fetch all games our user was in, either as player1 or player 2
+			const gamesPlayed = await this.prisma.gameSession.findMany({
+				where: {
+					OR: [{ player1Id: userId }, { player2Id: userId }],
+				},
+				select: {
+					player1Id: true,
+					player2Id: true,
+					createdAt: true,
+				},
+				orderBy: {
+					createdAt: 'desc',
+				},
+			});
+			// Loop through those and count the frequency of each opponent
+			const opponentCounts: {
+				[key: number]: { count: number; latestGame: Date };
+			} = {};
+			for (const game of gamesPlayed) {
+				const opponentId =
+					game.player1Id === userId ? game.player2Id : game.player1Id;
+				// if it's the first time we're counting the user
+				if (!opponentCounts[opponentId])
+					opponentCounts[opponentId] = { count: 0, latestGame: new Date(0) };
+				opponentCounts[opponentId].count++;
+				opponentCounts[opponentId].latestGame = new Date(
+					Math.max(
+						opponentCounts[opponentId].latestGame.getTime(),
+						game.createdAt.getTime(),
+					),
+				);
+			}
+			// If there are ties, the bestie is the user with the latest game session
+			let mostFrequentOpponentId = null;
+			let highestCount = 0;
+			let latestGame = new Date(0);
+
+			for (const [
+				opponentId,
+				{ count, latestGame: latestGameWithOpponent },
+			] of Object.entries(opponentCounts)) {
+				if (
+					count > highestCount ||
+					(count === highestCount && latestGameWithOpponent > latestGame)
+				) {
+					mostFrequentOpponentId = parseInt(opponentId, 10);
+					highestCount = count;
+					latestGame = latestGameWithOpponent;
+				}
+			}
+			// Update the bestie in the database, if there is one
+			if (mostFrequentOpponentId)
+				await this.prisma.user.update({
+					where: {
+						id: userId,
+					},
+					data: {
+						bestieId: mostFrequentOpponentId,
+					},
+				});
+		} catch (error) {
+			console.error('updateBestie()', error.message);
+		}
+	}
+
+	// Update user rival, meaning the person they've lost the most games against
+	async updateRival(userId: number) {
+		try {
+			// Fetch all games our user was in, either as player1 or player 2,
+			// and did not win
+			const gamesLost = await this.prisma.gameSession.findMany({
+				where: {
+					OR: [{ player1Id: userId }, { player2Id: userId }],
+					NOT: { winnerId: userId },
+				},
+				select: {
+					player1Id: true,
+					player2Id: true,
+					createdAt: true,
+				},
+				orderBy: {
+					createdAt: 'desc',
+				},
+			});
+
+			// Step 2: Tally each opponent
+			const opponentCounts: {
+				[opponentId: number]: { count: number; latestGame: Date };
+			} = {};
+
+			for (const game of gamesLost) {
+				let opponentId =
+					game.player1Id === userId ? game.player2Id : game.player1Id;
+
+				if (!opponentCounts[opponentId]) {
+					opponentCounts[opponentId] = { count: 0, latestGame: game.createdAt };
+				}
+
+				opponentCounts[opponentId].count++;
+				opponentCounts[opponentId].latestGame = game.createdAt;
+			}
+
+			// Step 3: Find the most frequent opponent
+			let mostFrequentOpponentId: number | null = null;
+			let highestCount = 0;
+			let latestGame: Date | null = null;
+
+			for (const [
+				opponentId,
+				{ count, latestGame: latestGameWithOpponent },
+			] of Object.entries(opponentCounts)) {
+				if (
+					count > highestCount ||
+					(count === highestCount && latestGameWithOpponent > latestGame)
+				) {
+					mostFrequentOpponentId = parseInt(opponentId, 10);
+					highestCount = count;
+					latestGame = latestGameWithOpponent;
+				}
+			}
+
+			if (mostFrequentOpponentId)
+				await this.prisma.user.update({
+					where: {
+						id: userId,
+					},
+					data: {
+						rivalId: mostFrequentOpponentId,
+					},
+				});
+		} catch (error) {
+			console.error('updateRival()', error.message);
+		}
 	}
 }
