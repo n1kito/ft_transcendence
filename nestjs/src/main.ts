@@ -4,6 +4,8 @@ import { config } from 'dotenv';
 import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
 import { join } from 'path';
+// import { ExpressAdapter } from '@nestjs/platform-express';
+import { rateLimit } from 'express-rate-limit';
 
 // Configure dotenv
 config();
@@ -30,6 +32,17 @@ async function bootstrap() {
 			),
 		),
 	);
+
+	// rate limit configuration
+	const apiLimiter = rateLimit({
+		windowMs: 15 * 60 * 1000, // 15 minutes
+		limit: 300, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+		standardHeaders: 'draft-7', // Set `RateLimit` and `RateLimit-Policy` headers
+		legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+		validate: { trustProxy: false },
+	});
+
+	app.use(apiLimiter);
 
 	await app.listen(3000, '0.0.0.0').catch((error) => {
 		console.error('Error starting the application:', error);

@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+	MiddlewareConsumer,
+	Module,
+	NestModule,
+	Options,
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
@@ -11,6 +16,12 @@ import { PrismaService } from './services/prisma-service/prisma.service';
 import { TokenModule } from './token/token.module';
 import { ConnectionStatusModule } from './connection-status/connection-status.module';
 import { AuthMiddleWare } from './middleware/auth.middleware';
+import { APP_GUARD } from '@nestjs/core';
+import {
+	ThrottlerGuard,
+	ThrottlerModule,
+	ThrottlerModuleOptions,
+} from '@nestjs/throttler';
 
 @Module({
 	imports: [

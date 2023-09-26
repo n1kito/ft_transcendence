@@ -121,6 +121,10 @@ const Desktop = () => {
 			.then((response) => response.json())
 			.then((data) => {
 				setFriends(data);
+			})
+			.catch((error) => {
+				console.log('ERROR: ', error);
+				logOut;
 			});
 	}, []);
 
