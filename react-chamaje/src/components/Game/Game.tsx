@@ -53,9 +53,10 @@ const Game: React.FC<IGameProps> = ({
 	// use our socket hook
 	const {
 		sharePowerupSettingUpdate,
-		broadcastPlayerPosition,
+		// broadcastPlayerPosition,
 		setPlayer1AsReady: notifyPlayerIsReady,
 		askForAnotherOpponent,
+		socketRef,
 	} = useGameSocket();
 	// Create a ref to out context's socket
 
@@ -66,9 +67,10 @@ const Game: React.FC<IGameProps> = ({
 			const ctx = canvasRef.current.getContext('2d');
 			if (ctx)
 				gameInstance.current = new GameRenderer(
+					socketRef.current,
 					canvasRef,
 					ctx,
-					broadcastPlayerPosition,
+					// broadcastPlayerPosition,
 				);
 		}
 
@@ -101,10 +103,10 @@ const Game: React.FC<IGameProps> = ({
 		sharePowerupSettingUpdate();
 	}, [gameData.userPowerupsDisabled]);
 
-	useEffect(() => {
-		// Everytime the server sends a state update, we need to apply it
-		gameInstance.current?.gameLogic.gameStateServerUpdate(gameData.gameState);
-	}, [gameData.gameState]);
+	// useEffect(() => {
+	// Everytime the server sends a state update, we need to apply it
+	// gameInstance.current?.gameLogic.gameStateServerUpdate(gameData.gameState);
+	// }, [gameData.gameState]);
 
 	return (
 		<Window

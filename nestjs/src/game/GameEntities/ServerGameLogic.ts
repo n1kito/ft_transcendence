@@ -206,7 +206,7 @@ export class GameLogic {
 
 	// Start the game simulation with an interval of 50ms
 	private startGameSimulation() {
-		const gameStateInterval = 10;
+		const gameStateInterval = 15;
 
 		this.log(`Started game simulation at ${gameStateInterval}ms interval`);
 		if (this.gameHasStarted && !this.gameStateUpdateInterval) {

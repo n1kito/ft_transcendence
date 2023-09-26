@@ -126,11 +126,21 @@ export const useGameSocket = () => {
 			},
 		);
 
-		gameData.socket.on('game-state-update', (serverGameState: IGameState) => {
+		// gameData.socket.on('game-state-update', (serverGameState: IGameState) => {
+		// 	// socketLog('received game state update');
+		// 	// Mark the game as started
+		// 	if (gameData.gameIsPlaying == false)
+		// 		updateGameData({ gameIsPlaying: true });
+		// 	// updateGameData({ gameState: serverGameState });
+		// });
+
+		gameData.socket.on('game-started', (serverGameState: IGameState) => {
 			// socketLog('received game state update');
 			// Mark the game as started
-			if (!gameData.gameIsPlaying) updateGameData({ gameIsPlaying: true });
-			updateGameData({ gameState: serverGameState });
+			console.log('APPARENTLY THE GAME JUST STARTED');
+			if (gameData.gameIsPlaying == false)
+				updateGameData({ gameIsPlaying: true });
+			// updateGameData({ gameState: serverGameState });
 		});
 
 		gameData.socket.on(

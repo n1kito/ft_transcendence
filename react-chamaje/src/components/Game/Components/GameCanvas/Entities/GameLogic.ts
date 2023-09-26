@@ -17,11 +17,11 @@ export class GameLogic {
 
 	public canvasSize: { width: number; height: number };
 
-	public broadcastPlayerPosition: (payload: IPlayerMovementPayload) => void;
+	// public broadcastPlayerPosition: (payload: IPlayerMovementPayload) => void;
 
 	constructor(
 		canvasSize: { width: number; height: number },
-		broadcastPlayerPosition: (payload: IPlayerMovementPayload) => void,
+		// broadcastPlayerPosition: (payload: IPlayerMovementPayload) => void,
 	) {
 		this.canvasSize = canvasSize;
 
@@ -29,7 +29,7 @@ export class GameLogic {
 		const paddleWidth = 5;
 		const paddleHeight = canvasSize.height * 0.2;
 		const ballSize = 10;
-		this.broadcastPlayerPosition = broadcastPlayerPosition;
+		// this.broadcastPlayerPosition = broadcastPlayerPosition;
 
 		// Create player1 paddle
 		this.paddlePlayer = new Paddle(

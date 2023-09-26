@@ -409,6 +409,10 @@ export class GameService {
 
 		// If both players are ready, let both of them know and start the game
 		if (this.rooms[playerRoomId].gameInstance.bothPlayersAreReady()) {
+			// Send a game-ready update to each user
+			this.rooms[playerRoomId].playersSocketIds.forEach((playerSocketId) => {
+				this.server.to(playerSocketId).emit('game-started');
+			});
 			// Start the game and start sending game status to each user
 			gameInstance.startGame();
 			// TODO: these should be able to be moved somewhere more logical
@@ -494,6 +498,9 @@ export class GameService {
 				newlyConnectedSocketId,
 			).userId;
 		this.createGameLogic(assignedRoomId);
+		// Add the players to a room
+		
+		// Share each player their opponent's information
 		this.sharePlayersInfo(
 			newlyConnectedSocketId,
 			newlyConnectedUserId,

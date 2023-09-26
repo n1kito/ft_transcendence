@@ -1,9 +1,12 @@
 import { GameLogic } from './GameLogic';
 import { IPlayerMovementPayload } from '../../../../../../../shared-lib/types/game';
 import PowerUp from './PowerUp';
+import { Socket } from 'socket.io-client';
+import { IGameState } from 'shared-lib/types/game';
 
 export class GameRenderer {
 	gameLogic: GameLogic;
+	socket: Socket | null = null;
 	private gameContext: CanvasRenderingContext2D;
 	private gradient: CanvasGradient;
 	private animationFrameId: number | undefined;
@@ -11,27 +14,36 @@ export class GameRenderer {
 	private powerUp: PowerUp | null = null;
 
 	constructor(
+		socket: Socket | null,
 		canvasRef: React.MutableRefObject<HTMLCanvasElement | null>,
 		gameContext: CanvasRenderingContext2D,
-		broadcastPlayerPosition: (payload: IPlayerMovementPayload) => void,
+		// broadcastPlayerPosition: (payload: IPlayerMovementPayload) => void,
 	) {
 		// Storing the game logic instance
 		this.gameLogic = new GameLogic(
 			{ width: canvasRef.current!.width, height: canvasRef.current!.height },
-			broadcastPlayerPosition,
+			// broadcastPlayerPosition,
 		);
 
 		// this.canvasRef = canvasRef;
 		this.gameContext = gameContext;
 
 		// Init the powerup
-		this.powerUp = new PowerUp(gameContext, this.gameLogic.canvasSize);
+		// this.powerUp = new PowerUp(gameContext, this.gameLogic.canvasSize);
 
 		// Init the gradient style
 		this.gradient = this.initGradient();
 
 		// Setup event listeners on canvas
 		this.setupEventListeners();
+
+		// Store socket
+		this.socket = socket;
+
+		this.socket?.on('game-state-update', (serverGameState: IGameState) => {
+			this.log('Received game state update !');
+			this.gameLogic.gameStateServerUpdate(serverGameState);
+		});
 	}
 
 	/*
@@ -105,8 +117,9 @@ export class GameRenderer {
 				const currentState: IPlayerMovementPayload = {
 					direction: this.gameLogic.paddlePlayer.getDirection(),
 				};
-				this.gameLogic.broadcastPlayerPosition(currentState);
-			}, 10);
+				this.socket?.emit('player-moved', currentState);
+				// this.gameLogic.broadcastPlayerPosition(currentState);
+			}, 15);
 		}
 	}
 
@@ -131,7 +144,7 @@ export class GameRenderer {
 		// Draw our scores
 		this.drawScores();
 		// Draw the powerup
-		this.powerUp?.draw();
+		// this.powerUp?.draw();
 		// Draw our ball
 		this.gameLogic.ball.draw(this.gameContext);
 		// Draw our paddles
