@@ -52,8 +52,9 @@ model User {
     // blockedUsers Int[]
     blockedUsers UserBlocked[] @relation("BlockedUsers")
     blockedBy    UserBlocked[]
-    Chat         Chat?         @relation(fields: [chatId], references: [id])
-    chatId       Int?
+
+    bannedFromChat   Chat? @relation(fields: [bannedFromChatId], references: [id])
+    bannedFromChatId Int?
 }
 
 model Game {
@@ -111,6 +112,10 @@ model Message {
     sentAt DateTime @default(now())
 
     content String
+
+    isNotif           String?
+    target            Int?
+    channelInvitation String?
 }
 
 model UserBlocked {

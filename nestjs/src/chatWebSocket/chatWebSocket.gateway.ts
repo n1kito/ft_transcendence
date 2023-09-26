@@ -25,6 +25,10 @@ interface ICommunication {
 	userId: number;
 	login: string;
 	avatar: string;
+	isNotif?: string;
+	target?: number;
+	channelInvitation?: string;
+	targetLogin?: string;
 }
 
 export interface IMessage {
@@ -34,6 +38,15 @@ export interface IMessage {
 	content: string;
 	login: string;
 	avatar?: string;
+	isNotif?: string;
+	target?: number;
+	channelInvitation?: string;
+	targetLogin?: string;
+}
+
+export interface IUserAction {
+	chatId: number;
+	userId: number;
 }
 
 @WebSocketGateway({ path: '/ws/' })
@@ -124,6 +137,10 @@ export class chatWebSocketGateway
 			content: content.message,
 			login: content.login,
 			avatar: content.avatar,
+			isNotif: content.isNotif || null,
+			target: content.target || null,
+			targetLogin: content.targetLogin || null,
+			channelInvitation: content.channelInvitation || null,
 		};
 		// sends the message to everyone except the sender
 		client.to(content.chatId.toString()).emit('receiveMessage', messageToSend);
@@ -132,6 +149,36 @@ export class chatWebSocketGateway
 				content.message +
 				' to room ' +
 				content.chatId,
+		);
+	}
+
+	@SubscribeMessage('kick')
+	handleKick(
+		@MessageBody() content: IUserAction,
+		@ConnectedSocket() client: Socket,
+	): void {
+		const kickMessage: IUserAction = {
+			chatId: content.chatId,
+			userId: content.userId,
+		};
+		client.to(content.chatId.toString()).emit('kick', kickMessage);
+		console.log(
+			'🥾🥾🥾kicking :' + content.userId + ' from room ' + content.chatId,
+		);
+	}
+
+	@SubscribeMessage('makeAdmin')
+	handleMakeAdmin(
+		@MessageBody() content: IUserAction,
+		@ConnectedSocket() client: Socket,
+	): void {
+		const message: IUserAction = {
+			chatId: content.chatId,
+			userId: content.userId,
+		};
+		client.to(content.chatId.toString()).emit('makeAdmin', message);
+		console.log(
+			'👑👑👑 making admin :' + content.userId + ' of room ' + content.chatId,
 		);
 	}
 }

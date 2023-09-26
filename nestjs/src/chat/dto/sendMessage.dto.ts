@@ -9,7 +9,6 @@ import {
 } from 'class-validator';
 
 export class SendMessageDTO {
-	@IsNotEmpty()
 	@IsString()
 	@MaxLength(500)
 	@IsDefined()
@@ -25,4 +24,22 @@ export class SendMessageDTO {
 	@IsOptional()
 	@IsDefined()
 	userId?: number;
+
+	@IsNotEmpty()
+	@IsString()
+	@MaxLength(6)
+	@IsOptional()
+	isNotif?: string;
+
+	@IsNumber()
+	@IsNotEmpty()
+	@IsOptional()
+	targetId?: number;
+
+
+	@IsNotEmpty()
+	@IsString()
+	@IsOptional()
+	channelInvitation?: string;
+
 }

@@ -76,6 +76,11 @@ class WebSocketService {
 	/* ********************************************************************* */
 	/* ******************************** CHAT ******************************* */
 	/* ********************************************************************* */
+	// joinLobby() {
+	// 	this.socket.emit('joinLobby');
+	// 	console.log('🚪 Entering lobby')
+	// }
+
 	joinRoom(chatId: number) {
 		this.socket.emit('joinRoom', chatId);
 		console.log('🚪 Entering room n.', chatId);
@@ -86,13 +91,26 @@ class WebSocketService {
 		console.log('🚪 Leaving room n.', chatId);
 	}
 
-	sendMessage(message: string, chatId: number, login: string, avatar: string) {
+	sendMessage(
+		message: string,
+		chatId: number,
+		login: string,
+		avatar: string,
+		isNotif?: string,
+		target?: number,
+		targetLogin?: string,
+		channelInvitation?: string,
+	) {
 		this.socket.emit('sendMessage', {
 			chatId: chatId,
 			message: message,
 			userId: this.userId,
 			login: login,
 			avatar: avatar,
+			isNotif: isNotif || null,
+			target: target || null,
+			targetLogin: targetLogin || null,
+			channelInvitation: channelInvitation || null,
 		});
 		console.log('sending message to ' + chatId + ': ' + message);
 	}
@@ -107,6 +125,34 @@ class WebSocketService {
 	offReceiveMessage(callback: callbackInterface) {
 		this.socket.off('receiveMessage', callback);
 		console.log('message listener on');
+	}
+
+	/* ********************************************************************* */
+	/* ******************************* ADMIN ******************************* */
+	/* ********************************************************************* */
+	kick(userId: number, chatId: number) {
+		this.socket.emit('kick', {
+			chatId: chatId,
+			userId: userId,
+		});
+		console.log('kicking user ' + userId + ' from chat ' + chatId);
+	}
+
+	onKick(callback: callbackInterface) {
+		this.socket.on('kick', callback);
+		console.log('kick listener on');
+	}
+
+	onMakeAdmin(callback: callbackInterface) {
+		this.socket.on('makeAdmin', callback);
+		console.log('makeAdmin listener on');
+	}
+
+	makeAdmin(userId: number, chatId: number) {
+		this.socket.emit('makeAdmin', {
+			chatId: chatId,
+			userId: userId,
+		});
 	}
 }
 export default WebSocketService;

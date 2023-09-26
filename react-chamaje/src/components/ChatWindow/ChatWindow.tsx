@@ -11,7 +11,6 @@ import Window from '../Window/Window';
 import Button from '../Shared/Button/Button';
 import ChatBubble from './Components/ChatBubble/ChatBubble';
 import { UserContext } from '../../contexts/UserContext';
-import ChattNotification from './Components/ChattNotification/ChattNotification';
 import ChatGameInvite from './Components/ChatGameInvite/ChatGameInvite';
 import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/SettingsWindow';
 import Title from '../Profile/Components/Title/Title';
@@ -21,6 +20,7 @@ import DOMPurify from 'dompurify';
 import {
 	blockUserQuery,
 	fetchChannels,
+	findUserByLogin,
 	getAdminRights,
 	getChatInfo,
 	leaveChat,
@@ -34,8 +34,10 @@ import {
 	ChatContext,
 	IChatStruct,
 	IMessage,
+	IUserAction,
 	IUserBlocked,
 } from 'src/contexts/ChatContext';
+import ChatNotification from './Components/ChatNotification/ChatNotification';
 
 export interface IChatWindowProps {
 	onCloseClick: () => void;
@@ -47,15 +49,6 @@ export interface IChatWindowProps {
 	setChatWindowIsOpen: Dispatch<SetStateAction<boolean>>;
 	setMessages: Dispatch<SetStateAction<IMessage[]>>;
 }
-
-// export interface IMessage {
-// 	chatId: number;
-// 	sentById: number;
-// 	sentAt: Date;
-// 	content: string;
-// 	login: string;
-// 	avatar?: string;
-// }
 
 interface IChatInfo {
 	isChannel: boolean;
@@ -101,6 +94,11 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	const [isBlocked, setIsBlocked] = useState(false);
 	const [secondUserId, setSecondUserId] = useState(0);
 
+	const [isInviting, setIsInviting] = useState(false);
+	const [searchedLogin, setSearchedLogin] = useState('');
+	const [searchUserError, setSearchUserError] = useState('');
+	const [searchUserSuccess, setSearchUserSuccess] = useState('');
+
 	const { userData } = useContext(UserContext);
 	const {
 		chatData,
@@ -110,6 +108,23 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 		getNewBlockedUsers,
 	} = useContext(ChatContext);
 	const chatContentRef = useRef<HTMLDivElement>(null);
+
+	/* ********************************************************************* */
+	/* ***************************** WEBSOCKET ***************************** */
+	/* ********************************************************************* */
+
+	// listen for makeAdmin messages
+	useEffect(() => {
+		if (!chatData.socket) {
+			return;
+		}
+		const onMakeAdmin = (data: IUserAction) => {
+			if (data.userId === userData?.id && data.chatId === chatId) {
+				setIsAdmin(true);
+			}
+		};
+		chatData.socket?.onMakeAdmin(onMakeAdmin);
+	}, [chatId]);
 
 	const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
 		const newValue = event.target.value;
@@ -145,7 +160,52 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	/* ********************************************************************* */
 	/* ********************** channel links functions ********************** */
 
-	const inviteToChannel = () => {};
+	const inviteToChannel = () => {
+		setIsInviting(true);
+	};
+	const handleLoginChange = (login: string) => {
+		setSearchedLogin(login);
+		setSearchUserError('');
+		setSearchUserSuccess('');
+	};
+
+	// find the user by login and create the chat
+	const inviteUserToChannel = () => {
+		console.log('searchedLogin', searchedLogin);
+		if (searchedLogin) {
+			findUserByLogin(searchedLogin, accessToken)
+				// .then((response) => response.json())
+				.then(async (data) => {
+					if (data.message) {
+						throw new Error('User not found');
+					}
+					console.log('response data', data);
+					// if the user is found, create the PM and update the PM list
+					if (!userData) {
+						return;
+					}
+					sendMessageQuery(
+						accessToken,
+						'',
+						chatId,
+						undefined,
+						'invite',
+						data.id,
+						name,
+					)
+						.then(() => {
+							console.log('Invitation sent');
+						})
+						.catch((e) => {
+							console.error('Could not send invitation: ', e.message);
+						});
+				})
+				.catch((e: string) => {
+					console.error(e);
+					setSearchUserError('Could not find user');
+				});
+		}
+	};
 
 	const leaveChannel = () => {
 		leaveChat(accessToken, chatId)
@@ -154,6 +214,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 					(channel) => channel.chatId !== chatId,
 				);
 				console.log('updatedChatsList', updatedChatsList);
+				chatData.socket?.leaveRoom(chatId);
 				getNewChatsList(updatedChatsList);
 				setChatWindowIsOpen(false);
 			})
@@ -176,6 +237,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 					(privateMessage) => privateMessage.chatId !== chatId,
 				);
 				getNewChatsList(updatedChatsList);
+				chatData.socket?.leaveRoom(chatId);
 				setChatWindowIsOpen(false);
 			})
 			.catch((e) => {
@@ -337,6 +399,9 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	// 	console.log('pwdContent', pwdContent);
 	// }, [pwdContent]);
 
+	useEffect(() => {
+		console.log('messages', messages);
+	}, [messages]);
 	/* ********************************************************************* */
 	/* ******************************* RETURN ****************************** */
 	/* ********************************************************************* */
@@ -385,29 +450,41 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 								if (date > currentDate) return;
 							}
 						}
-						return (
-							<ChatBubble
-								userId={currentMessage.sentById}
-								chatId={chatId}
-								key={index}
-								wasSent={
-									userData && currentMessage.sentById === userData.id
-										? true
-										: false
-								}
-								sender={currentMessage.login}
-								time={date.toLocaleString('en-US', dateFormatOptions)}
-								senderAvatar={currentMessage.avatar}
-								isAdmin={isAdmin || isOwner}
-							>
-								{
-									<div
-										dangerouslySetInnerHTML={sanitizedData()}
-										ref={isLast ? chatContentRef : undefined}
-									/>
-								}
-							</ChatBubble>
-						);
+						if (!currentMessage.isNotif) {
+							return (
+								<ChatBubble
+									key={index}
+									userId={currentMessage.sentById}
+									chatId={chatId}
+									wasSent={
+										userData && currentMessage.sentById === userData.id
+											? true
+											: false
+									}
+									sender={currentMessage.login}
+									time={date.toLocaleString('en-US', dateFormatOptions)}
+									senderAvatar={currentMessage.avatar}
+									isAdmin={isAdmin || isOwner}
+								>
+									{
+										<div
+											dangerouslySetInnerHTML={sanitizedData()}
+											ref={isLast ? chatContentRef : undefined}
+										/>
+									}
+								</ChatBubble>
+							);
+						} else {
+							return (
+								<ChatNotification
+									key={index}
+									type={currentMessage.isNotif}
+									sender={currentMessage.login}
+									recipient={currentMessage.targetLogin}
+									channelName={currentMessage.channelInvitation || undefined}
+								></ChatNotification>
+							);
+						}
 					})}
 					{/* <ChattNotification type="Muted" sender="Nikito" recipient="Jee" />
 					<ChatGameInvite sender="Jee" recipient="Nikito" /> */}
@@ -475,6 +552,25 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							}}
 						>
 							update
+						</Button>
+					</div>
+				</SettingsWindow>
+			)}
+			{isInviting && (
+				<SettingsWindow settingsWindowVisible={setIsInviting}>
+					<Title highlightColor="yellow">User name</Title>
+					<div className="settings-form">
+						<InputField
+							onChange={handleLoginChange}
+							error={searchUserError}
+							success={searchUserSuccess}
+						></InputField>
+						<Button
+							onClick={() => {
+								inviteUserToChannel();
+							}}
+						>
+							invite user
 						</Button>
 					</div>
 				</SettingsWindow>

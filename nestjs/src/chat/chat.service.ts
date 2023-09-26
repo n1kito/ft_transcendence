@@ -56,7 +56,9 @@ export class ChatService {
 			sentById: currentMessage.userId,
 			sentAt: currentMessage.sentAt,
 			content: currentMessage.content,
-			// sentByLogin: currentMessage.
+			isNotif: currentMessage.isNotif,
+			target: currentMessage.target,
+			channelInvitation: currentMessage.channelInvitation,
 		}));
 
 		// get the login for each sender
@@ -66,10 +68,29 @@ export class ChatService {
 				where: {
 					id: currentMessage.sentById,
 				},
+				select: {
+					login: true,
+					image: true,
+				},
 			});
 			return res;
 		});
 		const messagesWithLoginRes = await Promise.all(messagesWithLoginPromises);
+
+		// get the login of each target
+		const targetLoginPromises = messages.map(async (currentMessage) => {
+			if (!currentMessage.target) return;
+			const res = await this.prisma.user.findUnique({
+				where: {
+					id: currentMessage.target,
+				},
+				select: {
+					login: true,
+				},
+			});
+			return res;
+		});
+		const targetLoginRes = await Promise.all(targetLoginPromises);
 
 		// get messages and the array with the user together
 		const messagesWithLogin = messages.map((currentMessage, index) => ({
@@ -78,6 +99,12 @@ export class ChatService {
 			content: currentMessage.content,
 			login: messagesWithLoginRes.at(index).login,
 			avatar: messagesWithLoginRes.at(index).image,
+			isNotif: currentMessage.isNotif,
+			target: currentMessage.target,
+			channelInvitation: currentMessage.channelInvitation,
+			targetLogin: targetLoginRes.at(index)
+				? targetLoginRes.at(index).login
+				: null,
 		}));
 		return messagesWithLogin;
 	}
@@ -272,6 +299,66 @@ export class ChatService {
 		});
 		return res;
 	}
+
+	async mute(chatId: number, userId: number) {
+		const date = new Date();
+		// adding 15minutes to the date
+		date.setMinutes(date.getMinutes() + 15);
+		const res = await this.prisma.chatSession.updateMany({
+			where: {
+				chatId: chatId,
+				userId: userId,
+			},
+			data: {
+				isMuted: date,
+			},
+		});
+		return res;
+	}
+
+	async isUserMuted(chatId: number, userId: number) {
+		const res = await this.prisma.chatSession.findFirst({
+			where: {
+				chatId: chatId,
+				userId: userId,
+			},
+			select: {
+				isMuted: true,
+			},
+		});
+		const nowDate = new Date();
+		if (res.isMuted > nowDate) return true;
+		return false;
+	}
+
+	async ban(chatId: number, userId: number) {
+		const res = await this.prisma.chat.update({
+			where: {
+				id: chatId,
+			},
+			data: {
+				bannedUsers: {
+					connect: {
+						id: userId,
+					},
+				},
+			},
+		});
+		return res;
+	}
+
+	// return true if the user is banned
+	async isUserBanned(chatId: number, userId: number) {
+		const res = await this.prisma.chat.findUnique({
+			where: { id: chatId },
+			select: { bannedUsers: true },
+		});
+		for (const current of res.bannedUsers) {
+			if (current.id === userId) return true;
+		}
+		return false;
+	}
+
 	// create a chat session for the creator of a channel
 	async createOwnerChannelSession(userId: number, chatId: number) {
 		await this.prisma.chatSession.create({
@@ -285,15 +372,25 @@ export class ChatService {
 	}
 
 	async setPassword(chatId: number, newPassword: string) {
-		const salt = await bcrypt.genSalt();
-		const hash = await bcrypt.hash(newPassword, salt);
-		await this.prisma.chat.update({
-			where: { id: chatId },
-			data: {
-				password: hash || null,
-				isProtected: newPassword ? true : false,
-			},
-		});
+		if (newPassword) {
+			const salt = await bcrypt.genSalt();
+			const hash = await bcrypt.hash(newPassword, salt);
+			await this.prisma.chat.update({
+				where: { id: chatId },
+				data: {
+					password: hash || null,
+					isProtected: newPassword ? true : false,
+				},
+			});
+		} else {
+			await this.prisma.chat.update({
+				where: { id: chatId },
+				data: {
+					password: null,
+					isProtected: false,
+				},
+			});
+		}
 	}
 
 	// returns true if there was no password or if it is the right password
@@ -306,11 +403,33 @@ export class ChatService {
 				isProtected: true,
 			},
 		});
-		const isMatch = await bcrypt.compare(password, response.password);
-		if (!response.isProtected || (response.isProtected && isMatch)) {
-			return true;
+		if (!response.isProtected) return true;
+		else {
+			const isMatch = await bcrypt.compare(password, response.password);
+			if (response.isProtected && isMatch) {
+				return true;
+			}
 		}
 		return false;
+	}
+
+	async sendNotification(
+		userId: number,
+		chatId: number,
+		targetId: number,
+		notificationType: string,
+		channelName?: string,
+	) {
+		await this.prisma.message.create({
+			data: {
+				chatId: chatId,
+				userId: userId,
+				content: '',
+				isNotif: notificationType,
+				target: targetId,
+				channelInvitation: channelName || null,
+			},
+		});
 	}
 	/* ********************************************************************* */
 	/* ************************* PRIVATE MESSAGES ************************** */

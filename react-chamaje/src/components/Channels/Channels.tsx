@@ -17,7 +17,12 @@ import {
 } from 'src/utils/queries';
 import { UserContext } from 'src/contexts/UserContext';
 import ChatWindow from '../ChatWindow/ChatWindow';
-import { ChatContext, IChatStruct, IMessage } from 'src/contexts/ChatContext';
+import {
+	ChatContext,
+	IChatStruct,
+	IMessage,
+	IUserAction,
+} from 'src/contexts/ChatContext';
 
 interface IChannelsProps {
 	onCloseClick: () => void;
@@ -94,6 +99,39 @@ const Channels: React.FC<IChannelsProps> = ({
 			// userData.chatSocket?.offReceiveMessage(onReceiveMessage);
 		};
 	}, [chatWindowId, messages, chatData.chatsList]);
+
+	// listen for kick message
+	useEffect(() => {
+		if (!chatData.socket) {
+			return;
+		}
+		const onKick = (data: IUserAction) => {
+			if (data.userId === userData?.id) {
+				const updatedChatsList = chatData.chatsList.filter(
+					(channel) => channel.chatId !== data.chatId,
+				);
+				chatData.socket?.leaveRoom(data.chatId);
+				getNewChatsList(updatedChatsList);
+				if (data.chatId === chatWindowId) setChatWindowIsOpen(false);
+			}
+		};
+		chatData.socket?.onKick(onKick);
+	}, [chatData.chatsList]);
+
+	// on chatlist change, join rooms
+	// it is okay to join multiple times the same rooms, socket io ignores it
+	useEffect(() => {
+		if (!chatData.socket) {
+			return;
+		}
+		for (const current of chatData.chatsList) {
+			chatData.socket.joinRoom(current.chatId);
+		}
+	}, [chatData.chatsList]);
+
+	/* ********************************************************************* */
+	/* ********************************************************************* */
+	/* ********************************************************************* */
 
 	// on click on an avatar, check if a PM conversation exists.
 	// If it does, open the window, set the userId and chatId, and fetch

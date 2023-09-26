@@ -78,7 +78,7 @@ export class ChatController {
 				nbChatId,
 			);
 			if (!isUserInChat) {
-				res.status(403).json({ message: 'You are not in this chat' });
+				res.status(400).json({ message: 'You are not in this chat' });
 				return;
 			}
 			const messages = await this.chatService.getChatMessages(
@@ -177,9 +177,20 @@ export class ChatController {
 				validatedData.chatId,
 			);
 			if (!isUserInChat) {
-				res.status(403).json({ message: 'You are not in this chat' });
+				res.status(400).json({ message: 'You are not in this chat' });
 				return;
 			}
+			const isUserMuted = await this.chatService.isUserMuted(
+				validatedData.chatId,
+				userId,
+			);
+			if (isUserMuted) {
+				res.status(403).json({
+					message: 'You were muted for 15 minutes, think about what you did',
+				});
+				return;
+			}
+			// specific to private messages
 			if (validatedData.userId) {
 				this.userService
 					.isUserBlockedBy(userId, validatedData.userId)
@@ -233,7 +244,7 @@ export class ChatController {
 				leaveChannel.chatId,
 			);
 			if (!isUserInChat) {
-				response.status(403).json({ message: 'You are not in this chat' });
+				response.status(400).json({ message: 'You are not in this chat' });
 				return;
 			}
 			await this.chatService.leaveChat(userId, leaveChannel.chatId);
@@ -249,73 +260,6 @@ export class ChatController {
 	/* ********************************************************************* */
 	/* ***************************** CHANNELS ****************************** */
 	/* ********************************************************************* */
-
-	@Delete('/kick')
-	async kick(
-		// @Body() leaveChannel: LeaveChannelDTO,
-		@Body(new ValidationPipe()) validatedData: KickDTO,
-		@Req() request: CustomRequest,
-		@Res() response: Response,
-	) {
-		try {
-			const userId = this.tokenService.ExtractUserId(
-				request.headers['authorization'],
-			);
-			const isUserInChat = await this.chatService.isUserInChat(
-				userId,
-				validatedData.chatId,
-			);
-			if (!isUserInChat) {
-				response.status(403).json({ message: 'You are not in this chat' });
-				return;
-			}
-			this.chatService
-				.getAdminInfo(validatedData.chatId, userId)
-				.then((data) => {
-					if (!data.isAdmin && !data.isOwner) {
-						response
-							.status(403)
-							.json({ message: "You don't have sufficient rights" });
-						return;
-					}
-					this.chatService
-						.getAdminInfo(validatedData.chatId, validatedData.targetId)
-						.then((targetData) => {
-							if (targetData.isOwner) {
-								response
-									.status(403)
-									.json({ message: "You can't kick the owner of the channel" });
-								return;
-							}
-							// is admin?
-							this.chatService
-								.leaveChat(validatedData.targetId, validatedData.chatId)
-								.then(() => {
-									response
-										.status(200)
-										.json({ message: 'User kicked successfully' });
-								});
-						})
-						.catch((e) => {
-							response
-								.status(403)
-								.json({ message: 'Could not retreive your admin infos' });
-							return;
-						});
-				})
-				.catch((e) => {
-					response
-						.status(403)
-						.json({ message: 'Could not retreive your admin infos' });
-					return;
-				});
-		} catch (e) {
-			console.error('👋👋👋error kicking user', e);
-			response
-				.status(400)
-				.json({ message: 'Something went wrong kicking the user' });
-		}
-	}
 
 	@Put('/joinChannel')
 	async joinChannel(
@@ -346,6 +290,16 @@ export class ChatController {
 							.json({ message: 'Could not join the channel' });
 						return;
 					}
+					const isUserBanned = await this.chatService.isUserBanned(
+						data.id,
+						userId,
+					);
+					if (isUserBanned) {
+						response
+							.status(403)
+							.json({ message: 'You are banned from this channel' });
+						return;
+					}
 					this.chatService
 						.checkPassword(data.id, validatedData.password)
 						.then((canAccess) => {
@@ -371,6 +325,7 @@ export class ChatController {
 								});
 						})
 						.catch((e) => {
+							console.error('👋👋👋👋👋👋👋👋👋👋👋👋	channel :', e.message);
 							response
 								.status(403)
 								.json({ message: 'This channel is protected' });
@@ -399,7 +354,7 @@ export class ChatController {
 				setPrivate.chatId,
 			);
 			if (!isUserInChat) {
-				res.status(403).json({ message: 'You are not in this chat' });
+				res.status(400).json({ message: 'You are not in this chat' });
 				return;
 			}
 			this.chatService.getAdminInfo(setPrivate.chatId, userId).then((data) => {
@@ -423,6 +378,86 @@ export class ChatController {
 		}
 	}
 
+	/* ******************************* ADMIN ******************************* */
+
+	@Delete('/kick')
+	async kick(
+		// @Body() leaveChannel: LeaveChannelDTO,
+		@Body(new ValidationPipe()) validatedData: KickDTO,
+		@Req() request: CustomRequest,
+		@Res() response: Response,
+	) {
+		try {
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			const isUserInChat = await this.chatService.isUserInChat(
+				userId,
+				validatedData.chatId,
+			);
+			if (!isUserInChat) {
+				response.status(400).json({ message: 'You are not in this chat' });
+				return;
+			}
+			if (userId === validatedData.targetId) {
+				response.status(400).json({ message: 'Seriously?' });
+				return;
+			}
+			this.chatService
+				.getAdminInfo(validatedData.chatId, userId)
+				.then((data) => {
+					if (!data.isAdmin && !data.isOwner) {
+						response
+							.status(403)
+							.json({ message: "You don't have sufficient rights" });
+						return;
+					}
+					this.chatService
+						.getAdminInfo(validatedData.chatId, validatedData.targetId)
+						.then((targetData) => {
+							if (targetData.isOwner) {
+								response
+									.status(403)
+									.json({ message: "You can't kick the owner of the channel" });
+								return;
+							}
+							// is admin?
+							this.chatService
+								.leaveChat(validatedData.targetId, validatedData.chatId)
+								.then(() => {
+									response
+										.status(200)
+										.json({ message: 'User kicked successfully' });
+								})
+								.then(() => {
+									this.chatService.sendNotification(
+										userId,
+										validatedData.chatId,
+										validatedData.targetId,
+										'kick',
+									);
+								});
+						})
+						.catch((e) => {
+							response
+								.status(403)
+								.json({ message: 'Could not retreive your admin infos' });
+							return;
+						});
+				})
+				.catch((e) => {
+					response
+						.status(403)
+						.json({ message: 'Could not retreive your admin infos' });
+					return;
+				});
+		} catch (e) {
+			console.error('👋👋👋error kicking user', e);
+			response
+				.status(400)
+				.json({ message: 'Something went wrong kicking the user' });
+		}
+	}
 	@Put('/makeAdmin')
 	async makeAdmin(
 		@Body(new ValidationPipe()) validatedData: KickDTO,
@@ -438,7 +473,7 @@ export class ChatController {
 				validatedData.chatId,
 			);
 			if (!isUserInChat) {
-				response.status(403).json({ message: 'You are not in this chat' });
+				response.status(400).json({ message: 'You are not in this chat' });
 				return;
 			}
 			// is the user requesting admin?
@@ -468,6 +503,14 @@ export class ChatController {
 									response
 										.status(200)
 										.json({ message: 'The user is now an administrator' });
+								})
+								.then(() => {
+									this.chatService.sendNotification(
+										userId,
+										validatedData.chatId,
+										validatedData.targetId,
+										'admin',
+									);
 								});
 						})
 						.catch((e) => {
@@ -487,6 +530,173 @@ export class ChatController {
 			console.error('👋👋👋error making admin', e);
 			response.status(400).json({
 				message: 'Something went wrong making the user administrator',
+			});
+		}
+	}
+
+	@Put('/mute')
+	async mute(
+		@Body(new ValidationPipe()) validatedData: KickDTO,
+		@Req() request: CustomRequest,
+		@Res() response: Response,
+	) {
+		try {
+			const userId = await this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			const isUserInChat = await this.chatService.isUserInChat(
+				userId,
+				validatedData.chatId,
+			);
+			if (!isUserInChat) {
+				response.status(400).json({ message: 'You are not in this chat' });
+				return;
+			}
+			if (userId === validatedData.targetId) {
+				response.status(400).json({ message: 'Seriously?' });
+				return;
+			}
+			// is the user requesting admin?
+			this.chatService
+				.getAdminInfo(validatedData.chatId, userId)
+				.then((data) => {
+					if (!data.isAdmin && !data.isOwner) {
+						response
+							.status(403)
+							.json({ message: "You don't have sufficient rights" });
+						return;
+					}
+					// is the target owner ?
+					this.chatService
+						.getAdminInfo(validatedData.chatId, validatedData.targetId)
+						.then((targetData) => {
+							if (targetData.isOwner) {
+								response
+									.status(400)
+									.json({ message: "You can't mute the owner of the channel" });
+								return;
+							}
+
+							this.chatService
+								.mute(validatedData.chatId, validatedData.targetId)
+								.then(() => {
+									response
+										.status(200)
+										.json({ message: 'The user is now muted' });
+								})
+								.then(() => {
+									this.chatService.sendNotification(
+										userId,
+										validatedData.chatId,
+										validatedData.targetId,
+										'mute',
+									);
+								});
+						})
+						.catch((e) => {
+							response
+								.status(403)
+								.json({ message: 'Could not retreive your admin infos' });
+							return;
+						});
+				})
+				.catch((e) => {
+					response
+						.status(403)
+						.json({ message: 'Could not retreive your admin infos' });
+					return;
+				});
+		} catch (e) {
+			console.error('👋👋👋error muting user', e);
+			response.status(400).json({
+				message: 'Something went wrong muting the user',
+			});
+		}
+	}
+
+	@Put('/ban')
+	async ban(
+		@Body(new ValidationPipe()) validatedData: KickDTO,
+		@Req() request: CustomRequest,
+		@Res() response: Response,
+	) {
+		try {
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			const isUserInChat = await this.chatService.isUserInChat(
+				userId,
+				validatedData.chatId,
+			);
+			if (!isUserInChat) {
+				response.status(400).json({ message: 'You are not in this chat' });
+				return;
+			}
+			if (userId === validatedData.targetId) {
+				response.status(400).json({ message: 'Seriously?' });
+				return;
+			}
+			// is the user requesting admin?
+			this.chatService
+				.getAdminInfo(validatedData.chatId, userId)
+				.then((data) => {
+					if (!data.isAdmin && !data.isOwner) {
+						response
+							.status(403)
+							.json({ message: "You don't have sufficient rights" });
+						return;
+					}
+					// is the target owner ?
+					this.chatService
+						.getAdminInfo(validatedData.chatId, validatedData.targetId)
+						.then((targetData) => {
+							if (targetData.isOwner) {
+								response
+									.status(403)
+									.json({ message: "You can't ban the owner of the channel" });
+								return;
+							}
+
+							this.chatService
+								.ban(validatedData.chatId, validatedData.targetId)
+								.then(() => {
+									this.chatService
+										.leaveChat(validatedData.targetId, validatedData.chatId)
+										.then(() => {
+											response.status(200).json({
+												message: 'The user is now banned from the channel',
+											});
+										})
+										.then(() => {
+											this.chatService.sendNotification(
+												userId,
+												validatedData.chatId,
+												validatedData.targetId,
+												'ban',
+											);
+										})
+										.catch(() => {
+											console.error('The user could not leave the channel');
+										});
+								});
+						})
+						.catch((e) => {
+							response
+								.status(403)
+								.json({ message: 'Could not retreive your admin infos' });
+							return;
+						});
+				})
+				.catch((e) => {
+					response
+						.status(403)
+						.json({ message: 'Could not retreive your admin infos' });
+					return;
+				});
+		} catch (e) {
+			console.error('👋👋👋error banning user', e);
+			response.status(400).json({
+				message: 'Something went wrong banning the user from the channel',
 			});
 		}
 	}

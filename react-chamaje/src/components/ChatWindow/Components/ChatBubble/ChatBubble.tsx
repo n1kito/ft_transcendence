@@ -1,11 +1,14 @@
-import React, { ReactNode, RefObject, useState } from 'react';
+import React, { ReactNode, useContext, RefObject, useState } from 'react';
 import './ChatBubble.css';
 import Tooltip from '../../../Shared/Tooltip/Tooltip';
 import Button from '../../../Shared/Button/Button';
 import Profile from 'src/components/Profile/Profile';
-import { kick, makeAdmin } from 'src/utils/queries';
+import { ban, kick, makeAdmin, mute } from 'src/utils/queries';
 import useAuth from 'src/hooks/userAuth';
 import { access } from 'fs';
+import { ChatContext } from 'src/contexts/ChatContext';
+import { useDragControls } from 'framer-motion';
+import { UserContext } from 'src/contexts/UserContext';
 
 interface IChatBubbleProps {
 	userId: number;
@@ -32,6 +35,8 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 }) => {
 	const [tooltipVisible, setTooltipVisible] = useState(false);
 	const [profileIsOpen, setProfileIsOpen] = useState(false);
+	const { chatData } = useContext(ChatContext);
+	const { userData } = useContext(UserContext);
 	const { accessToken } = useAuth();
 
 	const openFriendProfile = () => {
@@ -70,9 +75,23 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 								<Button
 									baseColor={[201, 72, 89]}
 									onClick={() => {
-										window.alert(
-											'user is muted for 15 minutes. Each click adds 15 minutes up to an hour.',
-										);
+										// socket
+										mute(accessToken, chatId, userId)
+											.then((data) => {
+												console.log(data);
+												chatData.socket?.sendMessage(
+													'',
+													chatId,
+													userData ? userData?.login : '',
+													'',
+													'mute',
+													userId,
+													sender,
+												);
+											})
+											.catch((e) => {
+												console.error('Could not mute user: ', e.message);
+											});
 									}}
 								>
 									mute
@@ -83,6 +102,16 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 										kick(accessToken, chatId, userId)
 											.then((data) => {
 												console.log(data);
+												chatData.socket?.kick(userId, chatId);
+												chatData.socket?.sendMessage(
+													'',
+													chatId,
+													userData ? userData?.login : '',
+													'',
+													'kick',
+													userId,
+													sender,
+												);
 											})
 											.catch((e) => {
 												console.error('Could not kick user: ', e.message);
@@ -94,7 +123,24 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 								<Button
 									baseColor={[309, 81, 92]}
 									onClick={() => {
-										window.alert('user was banned');
+										// socket
+										ban(accessToken, chatId, userId)
+											.then((data) => {
+												console.log(data);
+												chatData.socket?.kick(userId, chatId);
+												chatData.socket?.sendMessage(
+													'',
+													chatId,
+													userData ? userData?.login : '',
+													'',
+													'ban',
+													userId,
+													sender,
+												);
+											})
+											.catch((e) => {
+												console.error('Could not ban user: ', e.message);
+											});
 									}}
 								>
 									ban
@@ -103,10 +149,19 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 									baseColor={[111, 60, 84]}
 									onClick={() => {
 										// socket => make admin
-										// make admin query
 										makeAdmin(accessToken, chatId, userId)
 											.then((data) => {
 												console.log(data);
+												chatData.socket?.makeAdmin(userId, chatId);
+												chatData.socket?.sendMessage(
+													'',
+													chatId,
+													userData ? userData?.login : '',
+													'',
+													'admin',
+													userId,
+													sender,
+												);
 											})
 											.catch((e) => {
 												console.error(

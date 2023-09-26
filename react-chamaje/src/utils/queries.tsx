@@ -295,6 +295,66 @@ export async function makeAdmin(
 	}
 }
 
+export async function ban(
+	accessToken: string,
+	chatId: number,
+	targetId: number,
+) {
+	try {
+		const response = await fetch('api/chat/ban', {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+			body: JSON.stringify({
+				chatId: chatId,
+				targetId: targetId,
+			}),
+		});
+		if (!response.ok) {
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
+		return response.json();
+	} catch (e) {
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error(e.message);
+		} else throw new Error('Something went wrong banning user');
+	}
+}
+
+export async function mute(
+	accessToken: string,
+	chatId: number,
+	targetId: number,
+) {
+	try {
+		const response = await fetch('api/chat/mute', {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+			body: JSON.stringify({
+				chatId: chatId,
+				targetId: targetId,
+			}),
+		});
+		if (!response.ok) {
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
+		return response.json();
+	} catch (e) {
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error(e.message);
+		} else throw new Error('Something went wrong muting user');
+	}
+}
+
 export async function getAdminRights(accessToken: string, chatId: number) {
 	try {
 		const response = await fetch('/api/chat/getOwnAdminInfo/' + chatId, {
@@ -449,6 +509,9 @@ export async function sendMessageQuery(
 	message: string,
 	chatId: number,
 	secondUserId?: number,
+	isNotif?: string,
+	targetId?: number,
+	channelInvitation?: string,
 ) {
 	try {
 		const response = await fetch('/api/chat/sendMessage', {
@@ -462,6 +525,9 @@ export async function sendMessageQuery(
 				message: message,
 				chatId: chatId,
 				userId: secondUserId,
+				isNotif: isNotif,
+				targetId: targetId,
+				channelInvitation: channelInvitation,
 			}),
 		});
 		if (!response.ok) {

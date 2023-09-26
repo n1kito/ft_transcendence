@@ -23,6 +23,15 @@ export interface IMessage {
 	content: string;
 	login: string;
 	avatar?: string;
+	isNotif?: string;
+	target?: number;
+	channelInvitation?: string;
+	targetLogin?: string;
+}
+
+export interface IUserAction {
+	chatId: number;
+	userId: number;
 }
 
 export interface IUserBlocked {
