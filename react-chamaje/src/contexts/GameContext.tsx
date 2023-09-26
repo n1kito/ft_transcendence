@@ -28,12 +28,13 @@ export interface IGameDataProps {
 	//TODO: add other properties
 	// User actions
 	userWantsNewOpponent: boolean;
+	gamePowerUp: string | undefined;
 }
 
 // Initial state of the gameData
 const defaultGameState: IGameDataProps = {
 	socket: undefined,
-	gameIsPlaying: false,
+	gameIsPlaying: true,
 	player1Ready: false,
 	player2Ready: false,
 	userPowerupsDisabled: false,
@@ -49,6 +50,7 @@ const defaultGameState: IGameDataProps = {
 	connectionErrorStatus: null,
 	// User actions
 	userWantsNewOpponent: false,
+	gamePowerUp: 'prx',
 };
 
 interface GameContextType {

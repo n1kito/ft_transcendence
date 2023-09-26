@@ -6,6 +6,7 @@ import { GameContext } from '../../contexts/GameContext';
 import { useGameSocket } from '../../hooks/useGameSocket';
 import GameCanvas from './Components/GameCanvas/GameCanvas';
 import { GameRenderer } from './Components/GameCanvas/Entities/GameRenderer';
+import GamePowerUp from './Components/GamePowerUp/GamePowerUp';
 
 export interface ICanvasProps {
 	width: number;
@@ -121,6 +122,7 @@ const Game: React.FC<IGameProps> = ({
 			{/* TODO: add the player information above the canvas game */}
 			<div className="game-wrapper">
 				{!gameData.gameIsPlaying && <GameOverlay />}
+				{gameData.gamePowerUp && <GamePowerUp />}
 				<GameCanvas canvasProps={canvasSize} ref={canvasRef} />
 			</div>
 		</Window>

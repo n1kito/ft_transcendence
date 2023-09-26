@@ -25,7 +25,7 @@ const Desktop = () => {
 	const [profileWindowIsOpen, setProfileWindowIsOpen] = useState(false);
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
 	const [channelsWindowIsOpen, setChannelsWindowIsOpen] = useState(false);
-	const [gameWindowIsOpen, setGameWindowIsOpen] = useState(false);
+	const [gameWindowIsOpen, setGameWindowIsOpen] = useState(true);
 
 	// const navigate = useNavigate();
 	const { isAuthentificated, logOut, accessToken } = useAuth();
