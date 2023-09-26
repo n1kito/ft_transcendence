@@ -122,13 +122,11 @@ const Desktop = () => {
 					/>
 				)}
 				{gameWindowIsOpen && (
-					<GameProvider>
-						<Game
-							onCloseClick={() => setGameWindowIsOpen(false)}
-							windowDragConstraintRef={windowDragConstraintRef}
-							// opponentId={userData?.id === 7 ? 8 : 7}
-						/>
-					</GameProvider>
+					<Game
+						onCloseClick={() => setGameWindowIsOpen(false)}
+						windowDragConstraintRef={windowDragConstraintRef}
+						// opponentId={userData?.id === 7 ? 8 : 7}
+					/>
 				)}
 			</AnimatePresence>
 		</div>

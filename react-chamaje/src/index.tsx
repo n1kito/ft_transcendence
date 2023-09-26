@@ -12,7 +12,7 @@ root.render(
 	<>
 		<App />
 		{/* svg noise filter applied to the entire body element */}
-		<svg className="filter-svg">
+		{/* <svg className="filter-svg">
 			<filter id="noise-filter">
 				<feTurbulence
 					type="fractalNoise"
@@ -21,7 +21,7 @@ root.render(
 					stitchTiles="stitch"
 				/>
 			</filter>
-		</svg>
+		</svg> */}
 	</>,
 	// </React.StrictMode>,
 );

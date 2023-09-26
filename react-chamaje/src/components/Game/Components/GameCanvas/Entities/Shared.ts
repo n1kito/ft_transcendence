@@ -41,7 +41,6 @@ export class GameEntity {
 		context.shadowColor = 'pink';
 		context.shadowBlur = 20;
 		context.fillRect(this.x, this.y, this.width, this.height);
-		context.strokeRect(this.x, this.y, this.width, this.height);
 	}
 
 	interpolate() {

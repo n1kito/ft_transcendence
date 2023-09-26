@@ -163,7 +163,6 @@ export class GameLogic {
 			ball: {
 				...currentBallState,
 				x: this.canvasSize.width - currentBallState.x - this.ballSize,
-				// xVelocity: -currentBallState.xVelocity,
 			},
 		};
 		// Send the stated to each player
@@ -177,7 +176,8 @@ export class GameLogic {
 
 	startGame() {
 		this.gameHasStarted = true;
-		this.broadcastGameState();
+		// this.broadcastGameState();
+		this.startBroadcasting();
 		this.startGameSimulation();
 	}
 
@@ -206,7 +206,7 @@ export class GameLogic {
 
 	// Start the game simulation with an interval of 50ms
 	private startGameSimulation() {
-		const gameStateInterval = 15;
+		const gameStateInterval = 1000 / 60;
 
 		this.log(`Started game simulation at ${gameStateInterval}ms interval`);
 		if (this.gameHasStarted && !this.gameStateUpdateInterval) {
@@ -217,6 +217,15 @@ export class GameLogic {
 					this.endGame();
 				}
 			}, gameStateInterval);
+		}
+	}
+
+	private startBroadcasting() {
+		const gameBroadcastIntervalSpeed = 10;
+		if (this.gameHasStarted && !this.gameBroadcastInterval) {
+			this.gameBroadcastInterval = setInterval(() => {
+				this.broadcastGameState();
+			}, gameBroadcastIntervalSpeed);
 		}
 	}
 

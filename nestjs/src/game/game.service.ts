@@ -176,7 +176,7 @@ export class GameService {
 		);
 
 		// Broadcast the new game state to our players
-		this.rooms[playerRoomId].gameInstance?.broadcastGameState();
+		// this.rooms[playerRoomId].gameInstance?.broadcastGameState();
 	}
 
 	createGameLogic(roomId: string) {
@@ -499,7 +499,7 @@ export class GameService {
 			).userId;
 		this.createGameLogic(assignedRoomId);
 		// Add the players to a room
-		
+
 		// Share each player their opponent's information
 		this.sharePlayersInfo(
 			newlyConnectedSocketId,

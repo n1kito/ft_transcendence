@@ -11,7 +11,7 @@ body {
 	/* TODO: try to change overflow hidden on body, cause issue with Login background overflow on height */
 }
 
-body::after {
+/* body::after {
 	position: absolute;
 	left: 0;
 	top: 0;
@@ -43,13 +43,13 @@ body::after {
 	}
 }
 
-/* Hide the svg filter from the HTML*/
 svg.filter-svg {
 	position: absolute;
 	width: 0;
 	height: 0;
 	overflow: hidden;
 }
+*/
 
 code {
 	font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',

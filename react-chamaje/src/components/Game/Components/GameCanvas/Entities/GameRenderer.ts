@@ -12,6 +12,8 @@ export class GameRenderer {
 	private animationFrameId: number | undefined;
 	private playerPositionBroadcastInterval: NodeJS.Timer | undefined;
 	private powerUp: PowerUp | null = null;
+	private previousTime = Date.now();
+	private timeDifferences: number[] = [];
 
 	constructor(
 		socket: Socket | null,
@@ -41,7 +43,16 @@ export class GameRenderer {
 		this.socket = socket;
 
 		this.socket?.on('game-state-update', (serverGameState: IGameState) => {
-			this.log('Received game state update !');
+			// const currentTime = Date.now();
+			// const timeDifference = currentTime - this.previousTime;
+
+			// this.timeDifferences.push(timeDifference);
+
+			// const average =
+			// 	this.timeDifferences.reduce((acc, val) => acc + val, 0) /
+			// 	this.timeDifferences.length;
+			// console.log(`Average time difference: ${average}ms`);
+			// this.log('Received game state update !');
 			this.gameLogic.gameStateServerUpdate(serverGameState);
 		});
 	}
@@ -63,9 +74,18 @@ export class GameRenderer {
 	};
 
 	// The game loop's only job is to continuously render the canvas
-	gameLoop = (timestamp: number): void => {
-		this.draw();
-		this.animationFrameId = requestAnimationFrame(this.gameLoop);
+	gameLoop = (): void => {
+		// const currentState: IPlayerMovementPayload = {
+		// 	direction: this.gameLogic.paddlePlayer.getDirection(),
+		// };
+		// this.socket?.emit('player-moved', currentState);
+		setTimeout(() => {
+			this.animationFrameId = requestAnimationFrame(this.gameLoop);
+			this.draw();
+			// Drawing code goes here
+		}, 1000 / 60);
+		// this.draw();
+		// this.animationFrameId = requestAnimationFrame(this.gameLoop);
 	};
 
 	cancelGameLoop(): void {
@@ -102,6 +122,7 @@ export class GameRenderer {
 		// If a direction was registered, update the paddle's direction
 		if (direction) {
 			this.gameLogic.paddlePlayer.setDirection(direction);
+			this.gameLogic.paddlePlayer.predictPosition(direction);
 		}
 	};
 
@@ -119,7 +140,7 @@ export class GameRenderer {
 				};
 				this.socket?.emit('player-moved', currentState);
 				// this.gameLogic.broadcastPlayerPosition(currentState);
-			}, 15);
+			}, 10);
 		}
 	}
 
