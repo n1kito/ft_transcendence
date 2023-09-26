@@ -90,9 +90,6 @@ export class AuthMiddleWare implements NestMiddleware {
 				});
 		} catch (error) {
 			console.log('⛔️⛔️ User shall not pass!!');
-
-			console.error(error);
-			// res.status(401).json({ error: 'User not authorized' });
 			const errorPayload = new HttpException(
 				'Unauthorized',
 				HttpStatus.UNAUTHORIZED,
