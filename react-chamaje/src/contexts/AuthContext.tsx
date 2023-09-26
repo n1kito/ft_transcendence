@@ -85,13 +85,11 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 					setIsAuthentificated(true);
 				}
 			} else {
-				console.log('Refresh response is NOT ok');
+				logOut();
 			}
 		} catch (error) {
-			console.log('Refresh token failed, logging out');
 			// Log the user out if token refresh fails
 			logOut();
-			console.log('Error occurred while refreshing token:', error);
 		}
 	};
 

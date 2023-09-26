@@ -15,7 +15,7 @@ export class TokenController {
 			res.status(200);
 			res.send({ accessToken: newAccessToken });
 		} catch (error) {
-			throw new Error('Could not refresh token: ' + error);
+			res.status(401).json({ error: 'Invalid or expired refresh token' });
 		}
 	}
 }
