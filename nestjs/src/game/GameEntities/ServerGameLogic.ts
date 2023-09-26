@@ -53,7 +53,8 @@ export class GameLogic {
 			this.paddleHeight,
 		);
 		this.player1UserId = player1UserId;
-		// Add player2 with their corresponding paddle mapped to their socketId
+		// Add player2 with their corresponding paddle mapped to their socketId			const opponentSocketId = Object.keys(this.players).filter((currentSocketId) => currentSocketId != playerSocketId);
+
 		this.players[player2SocketId] = new Paddle(
 			this.canvasSize.width - this.paddleWidth,
 			this.canvasSize.height / 2 - this.paddleHeight / 2,
@@ -71,6 +72,8 @@ export class GameLogic {
 		if (Object.keys(this.players).length === 2) {
 			this.log('Game logic instantiated with two players');
 		}
+
+		// Setup the powerup intervals and activation key sequence
 	}
 
 	updatePlayerPosition(
@@ -165,7 +168,7 @@ export class GameLogic {
 				x: this.canvasSize.width - currentBallState.x - this.ballSize,
 			},
 		};
-		// Send the stated to each player
+		// Send the state to each player
 		this.server
 			.to(player1SocketId)
 			.emit('game-state-update', player1StateUpdate);
@@ -179,6 +182,13 @@ export class GameLogic {
 		// this.broadcastGameState();
 		this.startBroadcasting();
 		this.startGameSimulation();
+		// TRY TO SEND A POWERUP TO THE PLAYERS
+		setTimeout(() => {
+			console.log('[💪] Sending powerups to our users !');
+			// Send the stated to each player
+			this.server.to(Object.keys(this.players)[0]).emit('new-power-up', 'eee');
+			this.server.to(Object.keys(this.players)[1]).emit('new-power-up', 'eee');
+		}, 2000);
 	}
 
 	endGame() {
@@ -202,6 +212,22 @@ export class GameLogic {
 
 	bothPlayersAreReady() {
 		return this.player1IsReady && this.player2IsReady;
+	}
+
+	activatePowerUp(playerSocketId: string) {
+		// random powerup choice
+		const powerUpChoice = Math.floor(Math.random() * 2) + 1;
+
+		// Double the size of the player's paddle
+		if (powerUpChoice === 1) this.players[playerSocketId].height *= 2;
+		// Recude the size of the opponent's paddle
+		if (powerUpChoice === 2) {
+			const [opponentSocketId] = Object.keys(this.players).filter(
+				(currentSocketId) => currentSocketId != playerSocketId,
+			);
+			this.players[opponentSocketId].height *= 0.5;
+		}
+		return 'this is the description of the powerup';
 	}
 
 	// Start the game simulation with an interval of 50ms

@@ -126,6 +126,30 @@ export const useGameSocket = () => {
 			},
 		);
 
+		gameData.socket.on('new-power-up', (powerUpKeySequence: string) => {
+			updateGameData({ gamePowerUp: powerUpKeySequence });
+		});
+
+		// User receives this when they lost the powerup
+		gameData.socket.on(
+			'power-up-claimed',
+			(data: { wonPowerUp: boolean; powerUpDescription: string }) => {
+				updateGameData({
+					powerUpClaimed: true,
+					wonPowerUp: data.wonPowerUp,
+					powerUpDescription: data.powerUpDescription,
+				});
+				setTimeout(() => {
+					updateGameData({
+						powerUpClaimed: false,
+						gamePowerUp: undefined,
+						wonPowerUp: false,
+						powerUpDescription: undefined,
+					});
+				}, 2000);
+			},
+		);
+
 		// gameData.socket.on('game-state-update', (serverGameState: IGameState) => {
 		// 	// socketLog('received game state update');
 		// 	// Mark the game as started

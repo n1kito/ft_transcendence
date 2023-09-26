@@ -29,12 +29,15 @@ export interface IGameDataProps {
 	// User actions
 	userWantsNewOpponent: boolean;
 	gamePowerUp: string | undefined;
+	powerUpClaimed: boolean;
+	wonPowerUp: boolean;
+	powerUpDescription: string | undefined;
 }
 
 // Initial state of the gameData
 const defaultGameState: IGameDataProps = {
 	socket: undefined,
-	gameIsPlaying: true,
+	gameIsPlaying: false,
 	player1Ready: false,
 	player2Ready: false,
 	userPowerupsDisabled: false,
@@ -50,7 +53,10 @@ const defaultGameState: IGameDataProps = {
 	connectionErrorStatus: null,
 	// User actions
 	userWantsNewOpponent: false,
-	gamePowerUp: 'prx',
+	gamePowerUp: undefined,
+	wonPowerUp: false,
+	powerUpClaimed: false,
+	powerUpDescription: undefined,
 };
 
 interface GameContextType {

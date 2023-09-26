@@ -109,7 +109,19 @@ export class GameGateway
 		userDisabledPowerups: boolean,
 	) {
 		try {
-			this.gameService.handlePowerupSettingUpdate(clientSocket, userDisabledPowerups);
+			this.gameService.handlePowerupSettingUpdate(
+				clientSocket,
+				userDisabledPowerups,
+			);
+		} catch (error) {
+			console.error('handlePowerupSettingUpdate():', error.message);
+		}
+	}
+
+	@SubscribeMessage('power-up-activated')
+	handlePowerupActivated(clientSocket: Socket) {
+		try {
+			this.gameService.handlePowerupActivated(clientSocket);
 		} catch (error) {
 			console.error('handlePowerupSettingUpdate():', error.message);
 		}

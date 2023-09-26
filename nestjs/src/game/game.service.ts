@@ -236,6 +236,35 @@ export class GameService {
 		}
 	}
 
+	handlePowerupActivated(clientSocket: Socket) {
+		console.log(`[💪] Powerup was activated by [${clientSocket.id}]`);
+
+		// Handle the actual powerup
+		const roomId = this.getRoomIdFromSocketId(clientSocket.id);
+		if (roomId) {
+			const opponentSocketId = this.getOpponentSocketId(
+				clientSocket.id,
+				roomId,
+			);
+			const powerUpDescription = this.rooms[
+				roomId
+			]?.gameInstance.activatePowerUp(clientSocket.id);
+			// Let the user know they won
+			this.server.to(clientSocket.id).emit('power-up-claimed', {
+				wonPowerUp: true,
+				powerUpDescription: powerUpDescription,
+			});
+			if (opponentSocketId) {
+				// Reset the opponent's powerup state
+				this.server.to(opponentSocketId).emit('power-up-claimed', {
+					wonPowerUp: false,
+					powerUpDescription: powerUpDescription,
+				});
+			}
+			// activate the powerup for our user
+		}
+	}
+
 	/*
 	░█▀▄░█▀█░█▀█░█▄█░█▀▀
 	░█▀▄░█░█░█░█░█░█░▀▀█

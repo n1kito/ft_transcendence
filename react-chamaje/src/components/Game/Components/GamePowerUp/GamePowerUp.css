@@ -46,3 +46,10 @@
 .power-up-triggered {
 	transform: scale(2);
 }
+
+.power-up-description {
+	color: white;
+	font-family: 'VT323', monospace;
+	font-size: 0.8rem;
+	background-color: black;
+}

@@ -8,6 +8,10 @@ const GamePowerUp = () => {
 
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const [powerUpTriggered, setPowerUpTriggered] = useState(false);
+	const [lostPowerUp, setLostPowerUp] = useState(false);
+	const [powerUpDescription, setPowerUpDescription] = useState<
+		string | undefined
+	>();
 
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -18,16 +22,9 @@ const GamePowerUp = () => {
 					setCurrentIndex(currentIndex + 1);
 				}
 				if (currentIndex === gameData.gamePowerUp.length - 1) {
-					setPowerUpTriggered(true);
-					setTimeout(() => {
-						updateGameData({ gamePowerUp: undefined });
-					}, 750);
+					gameData.socket?.emit('power-up-activated');
 				}
 			}
-			// else
-			// 	window.alert(
-			// 		`gameData.gamePowerUp[currentIndex] = ${gameData.gamePowerUp[currentIndex]}`,
-			// 	);
 		};
 
 		document.addEventListener('keydown', handleKeyDown);
@@ -39,17 +36,21 @@ const GamePowerUp = () => {
 	return (
 		<div
 			className={`game-power-up-wrapper ${
-				powerUpTriggered ? 'power-up-triggered' : ''
+				gameData.powerUpClaimed ? 'power-up-triggered' : ''
 			}`}
 		>
 			<span className="game-power-up-title">
-				✨{' '}
+				{`${!gameData.wonPowerUp ? '' : '✨'}`}
 				<span className="gradient-text">
-					{powerUpTriggered ? 'SUCCESS' : 'PRESS THE KEYS TO POWER UP'}
-				</span>{' '}
-				✨
+					{gameData.powerUpClaimed && gameData.wonPowerUp
+						? ' SUCCESS !!! '
+						: gameData.powerUpClaimed && !gameData.wonPowerUp
+						? ' TOO LATE :( '
+						: ' PRESS THE KEYS TO POWER UP '}
+				</span>
+				{`${gameData.wonPowerUp ? '' : '✨'}`}
 			</span>
-			{powerUpTriggered === false && (
+			{!gameData.powerUpClaimed && (
 				<div className="power-up-buttons">
 					{gameData.gamePowerUp &&
 						Array.from(gameData.gamePowerUp).map((letter, index) => (
@@ -58,6 +59,11 @@ const GamePowerUp = () => {
 							</PowerUpButton>
 						))}
 				</div>
+			)}
+			{gameData.powerUpClaimed && (
+				<span className="power-up-description">
+					{gameData.powerUpDescription}
+				</span>
 			)}
 		</div>
 	);
