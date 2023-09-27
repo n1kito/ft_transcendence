@@ -47,11 +47,11 @@ export class GameGateway
 	░▀▀▀░▀▀▀░▀░▀░▀░▀░▀▀▀░▀▀▀░░▀░░▀▀▀░▀▀▀░▀░▀░
 	*/
 
-	handleConnection(clientSocket: Socket) {
+	async handleConnection(clientSocket: Socket) {
 		try {
-			this.gameService.handleNewClientConnection(clientSocket).then(() => {});
+			await this.gameService.handleNewClientConnection(clientSocket);
 		} catch (error) {
-			console.error('handleConnection():', error.message);
+			console.error('[⚠️ ] handleConnection():', error.message);
 		}
 	}
 
@@ -59,7 +59,7 @@ export class GameGateway
 		try {
 			this.gameService.handleClientDisconnect(clientSocket);
 		} catch (error) {
-			console.error('handleDisconnect:', error.message);
+			console.error('[⚠️ ] handleDisconnect:', error.message);
 		}
 	}
 
@@ -81,7 +81,7 @@ export class GameGateway
 			this.gameService.broadcastPlayerIsReady(clientSocket);
 			this.gameService.setPlayerAsReady(clientSocket);
 		} catch (error) {
-			console.error('handlePlayerIsReady():', error.message);
+			console.error('[⚠️ ] handlePlayerIsReady():', error.message);
 		}
 	}
 
@@ -90,16 +90,16 @@ export class GameGateway
 		try {
 			this.gameService.handlePlayerMovement(clientSocket, payload.direction);
 		} catch (error) {
-			console.error('handlePlayerMovement():', error.message);
+			console.error('[⚠️ ] handlePlayerMovement():', error.message);
 		}
 	}
 
 	@SubscribeMessage('user-wants-new-opponent')
-	handleUserWantsNewOpponent(clientSocket: Socket) {
+	async handleUserWantsNewOpponent(clientSocket: Socket) {
 		try {
-			this.gameService.handleUserWantsNewOpponent(clientSocket);
+			await this.gameService.handleUserWantsNewOpponent(clientSocket);
 		} catch (error) {
-			console.error('handleUserWantsNewOpponent():', error.message);
+			console.error('[⚠️ ] handleUserWantsNewOpponent():', error.message);
 		}
 	}
 
@@ -114,7 +114,7 @@ export class GameGateway
 				userDisabledPowerups,
 			);
 		} catch (error) {
-			console.error('handlePowerupSettingUpdate():', error.message);
+			console.error('[⚠️ ] handlePowerupSettingUpdate():', error.message);
 		}
 	}
 
@@ -123,7 +123,7 @@ export class GameGateway
 		try {
 			this.gameService.handlePowerupActivated(clientSocket);
 		} catch (error) {
-			console.error('handlePowerupActivated():', error.message);
+			console.error('[⚠️ ] handlePowerupActivated():', error.message);
 		}
 	}
 }

@@ -4,6 +4,7 @@ import { config } from 'dotenv';
 import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
 import { join } from 'path';
+import { AllExceptionsFilter } from './filters/all-exceptions.filter';
 
 // Configure dotenv
 config();
@@ -22,6 +23,10 @@ async function bootstrap() {
 		credentials: true, // Allow credentials (cookies, for us)
 	});
 	app.use(cookieParser());
+
+	// Setup a global filter to catch all unexpected exceptions
+	app.useGlobalFilters(new AllExceptionsFilter());
+
 	app.use(
 		'/images',
 		express.static(

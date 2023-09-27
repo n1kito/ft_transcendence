@@ -145,8 +145,7 @@ export class GameService {
 				this.handleRoomIsFull(newlyConnectedSocketId, assignedRoomId);
 			}
 		} catch (error) {
-			throw new Error(`handleNewClientConnection(): ${error.message}`);
-		} finally {
+			console.error(`handleNewClientConnection(): ${error.message}`);
 			newlyConnectedSocket.disconnect();
 		}
 	}
