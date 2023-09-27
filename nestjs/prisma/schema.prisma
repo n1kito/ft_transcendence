@@ -55,6 +55,8 @@ model User {
 
     bannedFromChat   Chat? @relation(fields: [bannedFromChatId], references: [id])
     bannedFromChatId Int?
+    invitedToChat    Chat? @relation("invited", fields: [invitedToChatId], references: [id])
+    invitedToChatId  Int?
 }
 
 model Game {
@@ -84,6 +86,7 @@ model Chat {
     password     String?
     name         String?
     bannedUsers  User[]
+    invitedUsers User[]        @relation("invited")
 }
 
 model chatSession {
@@ -116,6 +119,7 @@ model Message {
     isNotif           String?
     target            Int?
     channelInvitation String?
+    reply             Boolean?
 }
 
 model UserBlocked {

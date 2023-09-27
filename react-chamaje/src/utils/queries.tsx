@@ -1,4 +1,3 @@
-import bcrypt from 'bcryptjs-react';
 
 /* ********************************************************************* */
 /* ******************************* CHAT ******************************** */
@@ -220,6 +219,37 @@ export async function joinChannel(
 			body: JSON.stringify({
 				name: channelName,
 				password: password || null,
+			}),
+		});
+		if (!response.ok) {
+			const responseError = await response.json();
+			console.error(responseError.message);
+			throw new Error(responseError.message);
+		}
+		return response.json();
+	} catch (e) {
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error(e.message);
+		} else throw new Error('Something went wrong joining channel');
+	}
+}
+
+export async function inviteToChannelQuery(
+	accessToken: string,
+	channelId: number,
+	secondUserId: number,
+) {
+	try {
+		const response = await fetch('api/chat/invite', {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+			body: JSON.stringify({
+				channelId: channelId,
+				secondUserId: secondUserId
 			}),
 		});
 		if (!response.ok) {
@@ -480,6 +510,37 @@ export async function createChatPrivateMessage(
 	}
 }
 
+export async function findPrivateMessage(
+	secondUserId: number,
+	userId: number,
+	accessToken: string,
+) {
+	try {
+		if (secondUserId === userId) {
+			throw new Error('Stop talking with yourself');
+		}
+		const response = await fetch(
+			'api/chat/findPrivateMessage/' + secondUserId,
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+				credentials: 'include',
+			},
+		);
+		if (!response.ok) {
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
+		return response.json();
+	} catch (e) {
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error(e.message);
+		} else throw new Error('Something went wrong finding private message room');
+	}
+}
+
 /* ********************************************************************* */
 /* ***************************** MESSAGES ****************************** */
 /* ********************************************************************* */
@@ -514,6 +575,14 @@ export async function sendMessageQuery(
 	channelInvitation?: string,
 ) {
 	try {
+		console.log({
+			message: message,
+			chatId: chatId,
+			userId: secondUserId,
+			isNotif: isNotif,
+			targetId: targetId,
+			channelInvitation: channelInvitation,
+		});
 		const response = await fetch('/api/chat/sendMessage', {
 			method: 'PUT',
 			headers: {

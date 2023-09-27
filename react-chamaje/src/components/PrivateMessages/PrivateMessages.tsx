@@ -75,21 +75,51 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 				setMessages(updatedMessages);
 			} else {
 				console.log(
+					'message.chatId',
+					message.chatId,
+					'chatData.chatsList',
+					chatData.chatsList,
+				);
+
+				// notifications : copy the chat list and add newMessage to the chat concerned
+				let updatedChatList: IChatStruct[] = [];
+				for (const current of chatData.chatsList) {
+					if (current.chatId === message.chatId) {
+						const newChat: IChatStruct = {
+							...current,
+							newMessage: true,
+						};
+						updatedChatList.push(newChat);
+					} else {
+						updatedChatList.push(current);
+					}
+					getNewChatsList(updatedChatList);
+				}
+				console.log(
 					'%cYou received a message from another chat',
 					'color:lightblue;',
 				);
 			}
 		};
 		chatData.socket?.onReceiveMessage(onReceiveMessage);
-		// userData?.chatSocket?.onReceiveMessage(onReceiveMessage);
 
 		// stop listening to messages
-		// TODO: need to change that because I am not sure it will stop listening to the right room
 		return () => {
 			chatData.socket?.offReceiveMessage(onReceiveMessage);
 			// userData.chatSocket?.offReceiveMessage(onReceiveMessage);
 		};
-	}, [chatWindowId, messages]);
+	}, [chatWindowId, messages, chatData.chatsList]);
+
+	// on chatlist change, join rooms
+	// it is okay to join multiple times the same rooms, socket io ignores it
+	useEffect(() => {
+		if (!chatData.socket) {
+			return;
+		}
+		for (const current of chatData.chatsList) {
+			chatData.socket.joinRoom(current.chatId);
+		}
+	}, [chatData.chatsList]);
 
 	/* ********************************************************************* */
 	/* ******************************* DEBUG ******************************* */
@@ -149,14 +179,28 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	const openPrivateMessageWindow: any = (roomId: number, friendId: number) => {
 		let foundChat = false;
 		const chatId = chatData.chatsList.map((currentChat) => {
-			// if (
-			// 	currentChat.participants.length === 2 &&
-			// 	(currentChat.participants.at(0) === friendId ||
-			// 		currentChat.participants.at(1) === friendId)
-			// ) {
 			if (roomId === currentChat.chatId) {
 				setChatWindowId(currentChat.chatId);
 				setChatWindowName(currentChat.name);
+				// notifications : set new Message to false when opened
+				let updatedChatList: IChatStruct[] = [];
+				for (const current of chatData.chatsList) {
+					if (current.chatId === roomId) {
+						const newChat: IChatStruct = {
+							chatId: current.chatId,
+							participants: current.participants,
+							name: current.name,
+							avatar: current.avatar,
+							isChannel: current.isChannel,
+							onlineIndicator: current.onlineIndicator,
+							newMessage: false,
+						};
+						updatedChatList.push(newChat);
+					} else {
+						updatedChatList.push(current);
+					}
+					getNewChatsList(updatedChatList);
+				}
 				fetchMessages(currentChat.chatId, accessToken)
 					.then((data) => {
 						setMessages(data);
@@ -269,48 +313,51 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					]}
 				>
 					<PrivateMessagesList>
-						{chatData.chatsList.length > 0 &&
-						chatData.chatsList.find(
-							(current) => current.isChannel === false,
-						) ? (
-							chatData.chatsList.map((room, index) => {
-								if (!room.isChannel) {
-									// find the other participant id
-									let participantId: number | undefined;
-									userData && room.participants.at(0) !== userData.id
-										? (participantId = room.participants.at(0))
-										: (participantId = room.participants.at(1));
+						{
+							// if the chat list is not empty, display chat that are not channels
+							chatData.chatsList.length > 0 &&
+							chatData.chatsList.find(
+								(current) => current.isChannel === false,
+							) ? (
+								chatData.chatsList.map((room, index) => {
+									if (!room.isChannel) {
+										// find the other participant id
+										let participantId: number | undefined;
+										userData && room.participants.at(0) !== userData.id
+											? (participantId = room.participants.at(0))
+											: (participantId = room.participants.at(1));
 
-									// if it is a friend, display onlinestatus
-									const friend = friends.find((friend) => {
-										return friend.id === participantId;
-									});
-									console.log('displaying a PM');
-									// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
-									return (
-										<FriendBadge
-											key={'PM' + room.chatId}
-											badgeTitle={room.name}
-											badgeImageUrl={`http://localhost:3000${room.avatar}`}
-											onlineIndicator={friend ? friend.onlineStatus : false}
-											isClickable={true}
-											onClick={() => {
-												openPrivateMessageWindow(room.chatId, participantId);
-											}}
-										/>
-									);
-								}
-							})
-						) : (
-							<FriendBadge
-								key={'PMEmptyFriendBadge'}
-								isEmptyBadge={true}
-								isChannelBadge={false}
-								onClick={() => {
-									setSettingsPanelIsOpen(true);
-								}}
-							/>
-						)}
+										// if it is a friend, display onlinestatus
+										const friend = friends.find((friend) => {
+											return friend.id === participantId;
+										});
+										// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
+										return (
+											<FriendBadge
+												key={'PM' + room.chatId}
+												badgeTitle={room.name}
+												badgeImageUrl={`http://localhost:3000${room.avatar}`}
+												onlineIndicator={friend ? friend.onlineStatus : false}
+												isClickable={true}
+												onClick={() => {
+													openPrivateMessageWindow(room.chatId, participantId);
+												}}
+												shaking={room.newMessage || false}
+											/>
+										);
+									}
+								})
+							) : (
+								<FriendBadge
+									key={'PMEmptyFriendBadge'}
+									isEmptyBadge={true}
+									isChannelBadge={false}
+									onClick={() => {
+										setSettingsPanelIsOpen(true);
+									}}
+								/>
+							)
+						}
 					</PrivateMessagesList>
 					{settingsPanelIsOpen && (
 						<SettingsWindow settingsWindowVisible={setSettingsPanelIsOpen}>

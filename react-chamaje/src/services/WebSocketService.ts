@@ -124,7 +124,7 @@ class WebSocketService {
 	// used when leaving active chat but staying in room
 	offReceiveMessage(callback: callbackInterface) {
 		this.socket.off('receiveMessage', callback);
-		console.log('message listener on');
+		console.log('message listener off');
 	}
 
 	/* ********************************************************************* */
@@ -143,9 +143,9 @@ class WebSocketService {
 		console.log('kick listener on');
 	}
 
-	onMakeAdmin(callback: callbackInterface) {
-		this.socket.on('makeAdmin', callback);
-		console.log('makeAdmin listener on');
+	offKick(callback: callbackInterface) {
+		this.socket.off('kick', callback);
+		console.log('kick listener off');
 	}
 
 	makeAdmin(userId: number, chatId: number) {
@@ -153,6 +153,16 @@ class WebSocketService {
 			chatId: chatId,
 			userId: userId,
 		});
+	}
+
+	onMakeAdmin(callback: callbackInterface) {
+		this.socket.on('makeAdmin', callback);
+		console.log('makeAdmin listener on');
+	}
+
+	offMakeAdmin(callback: callbackInterface) {
+		this.socket.off('makeAdmin', callback);
+		console.log('makeAdmin listener off');
 	}
 }
 export default WebSocketService;

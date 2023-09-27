@@ -19,10 +19,13 @@ import useAuth from 'src/hooks/userAuth';
 import DOMPurify from 'dompurify';
 import {
 	blockUserQuery,
+	createChatPrivateMessage,
 	fetchChannels,
+	findPrivateMessage,
 	findUserByLogin,
 	getAdminRights,
 	getChatInfo,
+	inviteToChannelQuery,
 	leaveChat,
 	makePrivate,
 	sendMessageQuery,
@@ -124,6 +127,9 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 			}
 		};
 		chatData.socket?.onMakeAdmin(onMakeAdmin);
+		return () => {
+			chatData.socket?.offMakeAdmin(onMakeAdmin);
+		};
 	}, [chatId]);
 
 	const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -162,6 +168,8 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 
 	const inviteToChannel = () => {
 		setIsInviting(true);
+		setSearchUserError('');
+		setSearchUserSuccess('');
 	};
 	const handleLoginChange = (login: string) => {
 		setSearchedLogin(login);
@@ -184,20 +192,90 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 					if (!userData) {
 						return;
 					}
-					sendMessageQuery(
-						accessToken,
-						'',
-						chatId,
-						undefined,
-						'invite',
-						data.id,
-						name,
-					)
+					// invite to the Channel and create a chat with the user if it did not already exist
+					inviteToChannelQuery(accessToken, chatId, data.id)
 						.then(() => {
-							console.log('Invitation sent');
+							createChatPrivateMessage(data.id, userData.id, accessToken)
+								.then((creationData) => {
+									sendMessageQuery(
+										accessToken,
+										'',
+										creationData.chatId,
+										undefined,
+										'invite',
+										data.id,
+										name,
+									)
+										.then(() => {
+											console.log('Invitation sent');
+											setSearchUserSuccess('Invitation sent');
+											chatData.socket?.sendMessage(
+												'',
+												creationData.chatId,
+												userData.login,
+												'',
+												'invite',
+												data.id,
+												searchedLogin,
+												name,
+											);
+										})
+										.catch((e) => {
+											setSearchUserError(e.message);
+											console.error('Could not send invitation: ', e.message);
+										});
+								})
+								.catch((e) => {
+									if (
+										e.message ===
+										'You already have a conversation with that person'
+									) {
+										findPrivateMessage(data.id, userData.id, accessToken)
+											.then((finderData) => {
+												sendMessageQuery(
+													accessToken,
+													'',
+													finderData.chatId,
+													undefined,
+													'invite',
+													data.id,
+													name,
+												)
+													.then(() => {
+														chatData.socket?.sendMessage(
+															'',
+															finderData.chatId,
+															userData.login,
+															'',
+															'invite',
+															data.id,
+															searchedLogin,
+															name,
+														);
+														setSearchUserSuccess('Invitation sent');
+														console.log('Invitation sent');
+													})
+													.catch((e) => {
+														console.error(
+															'Could not send invitation: ',
+															e.message,
+														);
+													});
+											})
+											.catch((e) => {
+												console.error(
+													'Could not find private message: ',
+													e.message,
+												);
+											});
+									} else {
+										console.error('Could not create chat: ', e.message);
+									}
+								});
 						})
 						.catch((e) => {
-							console.error('Could not send invitation: ', e.message);
+							setSearchUserError(e.message);
+							console.error('Could not invite user');
 						});
 				})
 				.catch((e: string) => {
@@ -219,7 +297,10 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 				setChatWindowIsOpen(false);
 			})
 			.catch((e) => {
-				console.error('Error leaving channel - chatWindow: ', e);
+				if (e.message === 'You are not in this chat') {
+					setChatWindowIsOpen(false);
+				}
+				console.error('Error leaving channel: ', e.message);
 			});
 	};
 
@@ -321,14 +402,9 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	const { accessToken } = useAuth();
 
 	// On mount, join the room associated with the chat
-	// TODO: find a way to leave room when changing chat (because it is
-	// not an unmounting)
+	// socket io ignores if it was already joined
 	useEffect(() => {
 		if (chatId) chatData.socket?.joinRoom(chatId);
-		// if (chatId) userData?.chatSocket?.joinRoom(chatId);
-		// return () => {
-		// 	userData?.chatSocket?.leaveRoom(chatId);
-		// };
 	}, [chatId]);
 
 	// every time we change room, check if we are the owner (if its a channel)
@@ -358,7 +434,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 			.then(() => {
 				// socket sending message
 				chatData.socket?.sendMessage(
-					// userData?.chatSocket?.sendMessage(
 					textareaContent,
 					chatId,
 					userData?.login || '',
@@ -383,21 +458,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 				console.error('Could not send message to the database: ', e);
 			});
 	};
-	/* ********************************************************************* */
-	/* ******************************* DEBUG ******************************* */
-	/* ********************************************************************* */
-
-	// useEffect(() => {
-	// 	console.log('isOwner', isOwner);
-	// }, [isOwner]);
-
-	// useEffect(() => {
-	// 	console.log('isAdmin', isAdmin);
-	// }, [isAdmin]);
-
-	// useEffect(() => {
-	// 	console.log('pwdContent', pwdContent);
-	// }, [pwdContent]);
 
 	useEffect(() => {
 		console.log('messages', messages);
@@ -486,8 +546,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							);
 						}
 					})}
-					{/* <ChattNotification type="Muted" sender="Nikito" recipient="Jee" />
-					<ChatGameInvite sender="Jee" recipient="Nikito" /> */}
 				</div>
 				<div
 					className={`chat-input ${
@@ -539,7 +597,9 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 						></InputField>
 						<Button
 							onClick={async () => {
-								console.log('pwdContent', pwdContent);
+								setSettingPwdError('');
+								setSettingPwdSuccess('');
+
 								setNewPassword(accessToken, chatId, pwdContent)
 									.then(() => {
 										setPwdContent('');

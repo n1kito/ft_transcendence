@@ -14,6 +14,7 @@ export interface IFriendBadgeProps extends ShadowWrapperProps {
 	isChannelBadge?: boolean;
 	isEmptyBadge?: boolean;
 	dashedBorder?: boolean;
+	shaking?: boolean;
 }
 
 const FriendBadge: React.FC<IFriendBadgeProps> = ({
@@ -26,6 +27,7 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 	onlineIndicator = !isChannelBadge,
 	isEmptyBadge = false,
 	dashedBorder = isEmptyBadge || false,
+	shaking = false,
 	onClick,
 }) => {
 	const userContext = useContext(UserContext);
@@ -36,38 +38,58 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 	}
 
 	const [friendIsPlaying, setFriendIsPlaying] = useState(false);
+	const [isShaking, setIsShaking] = useState(false);
+
+	useEffect(() => {
+		if (shaking) {
+			const shakeInterval = setInterval(() => {
+				setIsShaking(true);
+				const shakeDuration = 1000; // Shake for 1 seconds
+				setTimeout(() => {
+					setIsShaking(false);
+				}, shakeDuration);
+			}, 5000); // Start shaking every 10 seconds
+
+			// Clean up interval on unmount or when hasStartedRoulette changes to true
+			return () => clearInterval(shakeInterval);
+		}
+	}, [shaking]);
 
 	return (
-		<ShadowWrapper
-			shadow={isEmptyBadge ? true : shadow}
-			isClickable={isEmptyBadge ? true : isClickable}
-			onClick={onClick}
-			dashedBorder={dashedBorder}
-		>
-			<div
-				className={`badge-wrapper ${isEmptyBadge ? 'is-empty-badge' : ''} ${
-					isChannelBadge ? 'channel-badge' : ''
-				}`}
-				title={toolTip}
+		// <div className={isShaking ? 'shake' : ''}>
+			<ShadowWrapper
+				shadow={isEmptyBadge ? true : shadow}
+				isClickable={isEmptyBadge ? true : isClickable}
+				onClick={onClick}
+				dashedBorder={dashedBorder}
+				shaking={shaking}
+
 			>
-				{!isEmptyBadge && (
-					<>
-						{!isChannelBadge && (
-							<div className="badge-avatar">
-								<img src={badgeImageUrl} draggable={false} />
-							</div>
-						)}
-						<span className="friend-name">{displayTitle}</span>
-					</>
-				)}
-				{!isEmptyBadge && onlineIndicator && (
-					<OnlineIndicator
-						isOnline={onlineIndicator}
-						isPlaying={friendIsPlaying}
-					/>
-				)}
-			</div>
-		</ShadowWrapper>
+				<div
+					className={`badge-wrapper ${isEmptyBadge ? 'is-empty-badge' : ''} ${
+						isChannelBadge ? 'channel-badge' : ''
+					}`}
+					title={toolTip}
+				>
+					{!isEmptyBadge && (
+						<>
+							{!isChannelBadge && (
+								<div className="badge-avatar">
+									<img src={badgeImageUrl} draggable={false} />
+								</div>
+							)}
+							<span className="friend-name">{displayTitle}</span>
+						</>
+					)}
+					{!isEmptyBadge && onlineIndicator && (
+						<OnlineIndicator
+							isOnline={onlineIndicator}
+							isPlaying={friendIsPlaying}
+						/>
+					)}
+				</div>
+			</ShadowWrapper>
+		// </div>
 	);
 };
 

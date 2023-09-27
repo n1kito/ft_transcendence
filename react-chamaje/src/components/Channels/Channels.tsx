@@ -83,6 +83,20 @@ const Channels: React.FC<IChannelsProps> = ({
 				updatedMessages.push(message);
 				setMessages(updatedMessages);
 			} else {
+				// notifications : copy the chat list and add newMessage to the chat concerned
+				let updatedChatList: IChatStruct[] = [];
+				for (const current of chatData.chatsList) {
+					if (current.chatId === message.chatId) {
+						const newChat: IChatStruct = {
+							...current,
+							newMessage: true,
+						};
+						updatedChatList.push(newChat);
+					} else {
+						updatedChatList.push(current);
+					}
+					getNewChatsList(updatedChatList);
+				}
 				console.log(
 					'%cYou received a message from another chat',
 					'color:lightblue;',
@@ -93,14 +107,13 @@ const Channels: React.FC<IChannelsProps> = ({
 		// userData?.chatSocket?.onReceiveMessage(onReceiveMessage);
 
 		// stop listening to messages
-		// TODO: need to change that because I am not sure it will stop listening to the right room
 		return () => {
 			chatData.socket?.offReceiveMessage(onReceiveMessage);
 			// userData.chatSocket?.offReceiveMessage(onReceiveMessage);
 		};
 	}, [chatWindowId, messages, chatData.chatsList]);
 
-	// listen for kick message
+	// listen for kick/ban message
 	useEffect(() => {
 		if (!chatData.socket) {
 			return;
@@ -116,6 +129,9 @@ const Channels: React.FC<IChannelsProps> = ({
 			}
 		};
 		chatData.socket?.onKick(onKick);
+		return () => {
+			chatData.socket?.offKick(onKick);
+		};
 	}, [chatData.chatsList]);
 
 	// on chatlist change, join rooms
@@ -133,10 +149,8 @@ const Channels: React.FC<IChannelsProps> = ({
 	/* ********************************************************************* */
 	/* ********************************************************************* */
 
-	// on click on an avatar, check if a PM conversation exists.
-	// If it does, open the window, set the userId and chatId, and fetch
+	// on click on an avatar open the window, set the userId and chatId, and fetch
 	// the messages.
-	// Otherwise open clean the messages and open the window
 	const openPrivateMessageWindow: any = (roomId: number) => {
 		console.log('roomId', roomId);
 		const chatId = chatData.chatsList.map((currentChat) => {
@@ -145,13 +159,32 @@ const Channels: React.FC<IChannelsProps> = ({
 				setChatWindowName(
 					currentChat.name ? currentChat.name : 'Anonymous channel',
 				);
+				// notifications : set new Message to false when opened
+				let updatedChatList: IChatStruct[] = [];
+				for (const current of chatData.chatsList) {
+					if (current.chatId === roomId) {
+						const newChat: IChatStruct = {
+							chatId: current.chatId,
+							participants: current.participants,
+							name: current.name,
+							avatar: current.avatar,
+							isChannel: current.isChannel,
+							onlineIndicator: current.onlineIndicator,
+							newMessage: false,
+						};
+						updatedChatList.push(newChat);
+					} else {
+						updatedChatList.push(current);
+					}
+					getNewChatsList(updatedChatList);
+				}
 				fetchMessages(currentChat.chatId, accessToken)
 					.then((data) => {
 						setMessages(data);
 						setChatWindowIsOpen(true);
 					})
 					.catch((e) => {
-						console.error('Error fetching messages: ', e);
+						console.error('Error fetching messages: ', e.message);
 					});
 				return;
 			}
@@ -187,7 +220,6 @@ const Channels: React.FC<IChannelsProps> = ({
 		if (channelNameInput) {
 			joinChannel(accessToken, channelNameInput, pwdInput)
 				.then((data) => {
-					setChannelNameInput('');
 					setSettingsPanelIsOpen(false);
 					updateChatList([
 						{
@@ -198,6 +230,10 @@ const Channels: React.FC<IChannelsProps> = ({
 						},
 					]);
 					console.log('Channel joined successfully');
+				})
+				.then(() => {
+					setChannelNameInput('');
+					setPwdInput('');
 				})
 				.catch((e) => {
 					setSettingsNameError(e.message);
@@ -217,36 +253,6 @@ const Channels: React.FC<IChannelsProps> = ({
 	const handlePwdInput = (pwd: string) => {
 		setPwdInput(pwd);
 	};
-	/* ********************************************************************* */
-	/* ******************************* DEBUG ******************************* */
-	/* ********************************************************************* */
-
-	// useEffect(() => {
-	// 	console.log(' Channel - messages', messages);
-	// }, [messages]);
-
-	// useEffect(() => {
-	// 	console.log('chatWindowIsOpen', chatWindowIsOpen);
-	// }, [chatWindowIsOpen]);
-
-	// useEffect(() => {
-	// 	console.log('chatWindowId', chatWindowId);
-	// }, [chatWindowId]);
-
-	// useEffect(() => {
-	// 	console.log('channelsList', channelsList);
-	// }, [channelsList]);
-
-	// useEffect(() => {
-	// 	console.log('channelNameInput', channelNameInput);
-	// }, [channelNameInput]);
-
-	// useEffect(() => {
-	// 	console.log('chatData.chatsList', chatData.chatsList);
-	// }, [chatData.chatsList]);
-	// useEffect(() => {
-	// 	console.log('chatWindowName', chatWindowName);
-	// }, [chatWindowName]);
 
 	/* ********************************************************************* */
 	/* ******************************* RETURN ******************************* */
@@ -283,6 +289,7 @@ const Channels: React.FC<IChannelsProps> = ({
 						onClick: () => {
 							setSettingsMode('create');
 							setSettingsPanelIsOpen(true);
+							setSettingsNameError('');
 						},
 					},
 					{
@@ -290,6 +297,7 @@ const Channels: React.FC<IChannelsProps> = ({
 						onClick: () => {
 							setSettingsMode('join');
 							setSettingsPanelIsOpen(true);
+							setSettingsNameError('');
 						},
 					},
 				]}
@@ -309,6 +317,7 @@ const Channels: React.FC<IChannelsProps> = ({
 										onClick={() => {
 											openPrivateMessageWindow(room.chatId);
 										}}
+										shaking={room.newMessage || false}
 									/>
 								);
 							}
@@ -335,11 +344,13 @@ const Channels: React.FC<IChannelsProps> = ({
 								onChange={handleChannelNameInput}
 								error={settingsNameError}
 							></InputField>
-							<Title highlightColor="yellow">Password</Title>
-
+						</div>
+						<Title highlightColor="yellow">Password</Title>
+						<div className="settings-form">
 							<InputField
 								onChange={handlePwdInput}
 								error={settingsPwdError}
+								isPassword={true}
 							></InputField>
 							<Button
 								onClick={() => {

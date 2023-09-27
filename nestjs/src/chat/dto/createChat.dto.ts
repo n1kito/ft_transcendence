@@ -48,6 +48,8 @@ export class CreateChatDTO {
 	@IsOptional()
 	@IsNotEmpty()
 	@IsString()
+	@MaxLength(35)
+	@MinLength(5)
 	@NotContains('/')
 	@NotContains('\\')
 	@NotContains(';')

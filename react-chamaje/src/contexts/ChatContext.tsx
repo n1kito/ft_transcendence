@@ -14,6 +14,7 @@ export interface IChatStruct {
 	avatar?: string;
 	isChannel: boolean;
 	onlineIndicator?: boolean; // if it is a friend of us, show the online status
+	newMessage?: boolean;
 }
 
 export interface IMessage {

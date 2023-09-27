@@ -26,6 +26,9 @@ import { errorMonitor } from 'events';
 import { BlockUserDTO } from '../user/dto/blockUser.dto';
 import { UserService } from 'src/user/user.service';
 import { KickDTO } from './dto/kick.dto';
+import { FindPMDTO } from './dto/findPM.dto';
+import { InviteDTO } from './dto/invite.dto';
+import { removeEmitHelper } from 'typescript';
 
 @Controller('chat')
 export class ChatController {
@@ -99,7 +102,6 @@ export class ChatController {
 		@Req() request: CustomRequest,
 		@Res() response: Response,
 	) {
-		// TODO: should I check that this chat does not already exist?
 		try {
 			const userId = this.tokenService.ExtractUserId(
 				request.headers['authorization'],
@@ -109,12 +111,12 @@ export class ChatController {
 				this.chatService
 					.getChatByName(createChat.name)
 					.then(async (res) => {
-						// if res, we found a chat named the same
+						// if res, we found a channel named the same
 						if (res) throw new Error('This chat already exists');
 						this.chatService
 							.createChat(userId, createChat)
 							.then(async (chatId) => {
-								console.log('🛑🛑🛑chatId🛑🛑🛑', chatId);
+								// create the chatSession associated to the channel
 								await this.chatService.createOwnerChannelSession(
 									userId,
 									chatId,
@@ -133,10 +135,12 @@ export class ChatController {
 				this.chatService
 					.findPrivateMessageByID(createChat.userId, userId)
 					.then((res) => {
+						// if there was no chat with the user
 						if (!res) {
 							this.chatService
 								.createChat(userId, createChat)
 								.then(async (chatId) => {
+									// create both chatSessions associated with the privateMessage
 									await this.chatService.createChatSession(userId, chatId);
 									await this.chatService.createChatSession(
 										createChat.userId,
@@ -192,6 +196,7 @@ export class ChatController {
 			}
 			// specific to private messages
 			if (validatedData.userId) {
+				// cant send a message to someone that blocked you or that was blocked by you
 				this.userService
 					.isUserBlockedBy(userId, validatedData.userId)
 					.then(async (response) => {
@@ -221,7 +226,6 @@ export class ChatController {
 				await this.chatService.sendMessage(userId, validatedData);
 				res.status(201).json({ message: 'Message sent successfully' });
 			}
-			// this.userService.isUserBlockedBy(userId, sendMessage.e)
 		} catch (e) {
 			console.error('error sending a message', e);
 			res.status(400).json(e.message);
@@ -230,7 +234,6 @@ export class ChatController {
 
 	@Delete('/leaveChat')
 	async leaveChat(
-		// @Body() leaveChannel: LeaveChannelDTO,
 		@Body(new ValidationPipe()) leaveChannel: LeaveChannelDTO,
 		@Req() request: CustomRequest,
 		@Res() response: Response,
@@ -271,6 +274,7 @@ export class ChatController {
 			const userId = this.tokenService.ExtractUserId(
 				request.headers['authorization'],
 			);
+			// find the chat id with the channel name
 			this.chatService
 				.getChatByName(validatedData.name)
 				.then(async (data) => {
@@ -284,11 +288,18 @@ export class ChatController {
 							.json({ message: 'You are already in this chat' });
 						return;
 					}
+					// if it is private, check that the user was invited
 					if (data.isPrivate) {
-						response
-							.status(403)
-							.json({ message: 'Could not join the channel' });
-						return;
+						const isUserInvited = await this.chatService.isUserInvited(
+							userId,
+							data.id,
+						);
+						if (!isUserInvited) {
+							response
+								.status(403)
+								.json({ message: 'Could not join the channel' });
+							return;
+						}
 					}
 					const isUserBanned = await this.chatService.isUserBanned(
 						data.id,
@@ -310,9 +321,11 @@ export class ChatController {
 
 								return;
 							}
+							// create the chat session and delete the invitation
 							this.chatService
 								.createChatSession(userId, data.id)
-								.then(() => {
+								.then(async () => {
+									await this.chatService.deleteInvite(userId, data.id);
 									response
 										.status(200)
 										.json({ chatId: data.id, participants: data.participants });
@@ -325,7 +338,6 @@ export class ChatController {
 								});
 						})
 						.catch((e) => {
-							console.error('👋👋👋👋👋👋👋👋👋👋👋👋	channel :', e.message);
 							response
 								.status(403)
 								.json({ message: 'This channel is protected' });
@@ -333,6 +345,50 @@ export class ChatController {
 				})
 				.catch(() => {
 					response.status(404).json({ message: 'Could not find channel' });
+				});
+		} catch (e) {
+			response.status(401).json({ message: e.message });
+		}
+	}
+
+	@Put('/invite')
+	async invite(
+		@Body(new ValidationPipe()) validatedData: InviteDTO,
+		@Req() request: CustomRequest,
+		@Res() response: Response,
+	) {
+		try {
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			// check that the user was not already in the room before inviting
+			this.chatService
+				.getRoom(validatedData.channelId)
+				.then((roomData) => {
+					for (const current of roomData.participants) {
+						if (current.userId === validatedData.secondUserId) {
+							response
+								.status(400)
+								.json({ message: 'This user is already in the room' });
+							return;
+						}
+					}
+					this.chatService
+						.invite(validatedData.secondUserId, validatedData.channelId)
+						.then(() => {
+							response
+								.status(200)
+								.json({ message: 'User invited successfully' });
+						})
+						.catch((e) => {
+							console.error('Could not invite user: ', e.message);
+							response.status(400).json({ message: 'Could not invite user' });
+							return;
+						});
+				})
+				.catch((e) => {
+					console.error('Could not find room: ', e.message);
+					response.status(404).json({ message: 'Could not find room' });
 				});
 		} catch (e) {
 			response.status(401).json({ message: e.message });
@@ -357,6 +413,7 @@ export class ChatController {
 				res.status(400).json({ message: 'You are not in this chat' });
 				return;
 			}
+			// if the user is not admin/owner, cant switch to private
 			this.chatService.getAdminInfo(setPrivate.chatId, userId).then((data) => {
 				if (data.isAdmin || data.isOwner) {
 					this.chatService
@@ -370,10 +427,11 @@ export class ChatController {
 					res
 						.status(403)
 						.json({ message: "You don't have sufficient admin rights" });
+					return;
 				}
 			});
 		} catch (e) {
-			console.error('👋👋👋👋👋👋👋👋👋👋👋👋set private error: ', e);
+			console.error('set private error: ', e.message);
 			res.status(401).json({ message: e.message });
 		}
 	}
@@ -452,7 +510,7 @@ export class ChatController {
 					return;
 				});
 		} catch (e) {
-			console.error('👋👋👋error kicking user', e);
+			console.error('error kicking user', e);
 			response
 				.status(400)
 				.json({ message: 'Something went wrong kicking the user' });
@@ -527,7 +585,7 @@ export class ChatController {
 					return;
 				});
 		} catch (e) {
-			console.error('👋👋👋error making admin', e);
+			console.error('error making admin', e);
 			response.status(400).json({
 				message: 'Something went wrong making the user administrator',
 			});
@@ -607,7 +665,7 @@ export class ChatController {
 					return;
 				});
 		} catch (e) {
-			console.error('👋👋👋error muting user', e);
+			console.error('error muting user', e.message);
 			response.status(400).json({
 				message: 'Something went wrong muting the user',
 			});
@@ -694,7 +752,7 @@ export class ChatController {
 					return;
 				});
 		} catch (e) {
-			console.error('👋👋👋error banning user', e);
+			console.error('error banning user', e.message);
 			response.status(400).json({
 				message: 'Something went wrong banning the user from the channel',
 			});
@@ -755,8 +813,40 @@ export class ChatController {
 					}
 				});
 		} catch (e) {
-			response.status(401).json({ message: e.message });
-			console.error('👋👋👋👋👋👋👋👋👋👋👋👋this is an error: ', e.message);
+			response.status(400).json({ message: e.message });
+			console.error('Error setting password: ', e.message);
+		}
+	}
+
+	/* ********************************************************************* */
+	/* ************************* PRIVATE MESSAGES ************************** */
+	/* ********************************************************************* */
+
+	// get messages from chat
+	@Get('/findPrivateMessage/:secondUserId')
+	async findPrivateMessage(
+		@Req() request: CustomRequest,
+		@Param('secondUserId') secondUserId: number,
+		@Res() res: Response,
+	) {
+		try {
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			const secondUserIdNb: number = +secondUserId;
+			this.chatService
+				.findPrivateMessageByID(userId, secondUserIdNb)
+				.then((data) => {
+					res.status(200).json({ chatId: data.id });
+				})
+				.catch((e) => {
+					console.error('Could not find PM');
+					res.status(404).json({ message: 'Could not find private message' });
+					return;
+				});
+		} catch (e) {
+			console.error('error finding private message: ', e.message);
+			res.status(400).json({ message: 'Could not find private message' });
 		}
 	}
 }

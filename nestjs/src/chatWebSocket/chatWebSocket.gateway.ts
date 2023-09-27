@@ -152,6 +152,7 @@ export class chatWebSocketGateway
 		);
 	}
 
+	// kick and ban
 	@SubscribeMessage('kick')
 	handleKick(
 		@MessageBody() content: IUserAction,
@@ -163,7 +164,7 @@ export class chatWebSocketGateway
 		};
 		client.to(content.chatId.toString()).emit('kick', kickMessage);
 		console.log(
-			'🥾🥾🥾kicking :' + content.userId + ' from room ' + content.chatId,
+			'🥾🥾🥾 kicking :' + content.userId + ' from room ' + content.chatId,
 		);
 	}
 

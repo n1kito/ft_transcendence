@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import './InputField.css';
 
 interface InputFieldProps {
@@ -6,6 +6,7 @@ interface InputFieldProps {
 	onChange?: (newValue: string) => void;
 	error?: string | null;
 	success?: string;
+	isPassword?: boolean;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -13,6 +14,7 @@ const InputField: React.FC<InputFieldProps> = ({
 	onChange,
 	error,
 	success,
+	isPassword = false,
 }) => {
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const newValue = e.target.value;
@@ -21,11 +23,14 @@ const InputField: React.FC<InputFieldProps> = ({
 		}
 	};
 
+	useEffect(() => {
+		console.log('isPassword', isPassword);
+	}, []);
 	return (
 		<div className="inputFieldWrapper">
 			<input
 				className={`input ${error ? 'error' : success ? 'success' : ''}`}
-				type="text"
+				type={isPassword ? 'password' : 'text'}
 				value={value}
 				onChange={handleChange}
 			/>

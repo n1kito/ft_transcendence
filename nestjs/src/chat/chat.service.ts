@@ -17,6 +17,7 @@ import { CreateChatDTO } from './dto/createChat.dto';
 import { Response } from 'express';
 import * as bcrypt from 'bcrypt';
 import { bufferCount } from 'rxjs';
+import { connect } from 'http2';
 
 @Injectable()
 export class ChatService {
@@ -62,7 +63,6 @@ export class ChatService {
 		}));
 
 		// get the login for each sender
-		// TODO: Here I think I am fetching everyhting from user, I should only fetch login
 		const messagesWithLoginPromises = messages.map(async (currentMessage) => {
 			const res = await this.prisma.user.findUnique({
 				where: {
@@ -154,6 +154,9 @@ export class ChatService {
 				chatId: content.chatId,
 				userId: userId,
 				content: content.message,
+				isNotif: content.isNotif,
+				target: content.targetId,
+				channelInvitation: content.channelInvitation,
 			},
 		});
 	}
@@ -162,6 +165,7 @@ export class ChatService {
 	// this convo, delete all the messages and then the chat
 	async leaveChat(userId: number, chatId: number) {
 		try {
+			const wasOwner = await this.getAdminInfo(chatId, userId);
 			this.prisma.chatSession
 				.deleteMany({
 					where: { chatId: chatId, userId: userId },
@@ -191,11 +195,7 @@ export class ChatService {
 									.catch((e) => {
 										console.error('Could not delete messages: ', e);
 									});
-							} else {
-								console.log(
-									'👋👋👋👋👋👋response.participants.at(0) : ',
-									response.participants.at(0),
-								);
+							} else if (wasOwner.isOwner) {
 								// if there was people remaining, put the first one to have joined as owner
 								this.prisma.chatSession
 									.update({
@@ -394,7 +394,6 @@ export class ChatService {
 	}
 
 	// returns true if there was no password or if it is the right password
-	// TODO: password hash
 	async checkPassword(chatId: number, password: string) {
 		const response = await this.prisma.chat.findUnique({
 			where: { id: chatId },
@@ -430,6 +429,48 @@ export class ChatService {
 				channelInvitation: channelName || null,
 			},
 		});
+	}
+
+	async invite(targetId: number, chatId: number) {
+		const res = await this.prisma.chat.update({
+			where: { id: chatId },
+			data: {
+				invitedUsers: {
+					connect: {
+						id: targetId,
+					},
+				},
+			},
+		});
+		return res;
+	}
+
+	// true if the user is invited
+	async isUserInvited(targetId: number, chatId: number) {
+		const res = await this.prisma.chat.findFirst({
+			where: { id: chatId },
+			select: { invitedUsers: true },
+		});
+		for (const current of res.invitedUsers) {
+			if (current.id === targetId) return true;
+		}
+		return false;
+	}
+
+	async deleteInvite(targetId: number, chatId: number) {
+		const res = await this.prisma.chat.update({
+			where: {
+				id: chatId,
+			},
+			data: {
+				invitedUsers: {
+					disconnect: {
+						id: targetId,
+					},
+				},
+			},
+		});
+		return res;
 	}
 	/* ********************************************************************* */
 	/* ************************* PRIVATE MESSAGES ************************** */
