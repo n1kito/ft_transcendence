@@ -87,21 +87,13 @@ export class GameLogic {
 		this.players[playerSocketId].update(this.canvasSize);
 	}
 
-	updateGameState(/*timeBetweenTwoFrames: number*/): void {
-		// // Update the position of each player
-		// for (const playerSocketId in this.players)
-		// 	this.players[playerSocketId].update(
-		// 		this.canvasSize,
-		// 		timeBetweenTwoFrames,
-		// 	);
-		// And the position of the ball
+	updateGameState(): void {
 		const [player1SocketId, player2SocketId] = Object.keys(this.players);
 		this.ball.update(
 			this.players[player1SocketId],
 			this.players[player2SocketId],
 			this.canvasSize,
 			this.handleScoreUpdate,
-			// timeBetweenTwoFrames,
 		);
 	}
 

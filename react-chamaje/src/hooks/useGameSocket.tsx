@@ -13,6 +13,7 @@ interface IGameSocketProps {
 
 export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 	// Import necessary contexts
+	const { isAuthentificated } = useAuth();
 	const { userData } = useContext(UserContext);
 	const { gameData, updateGameData, resetGameData } = useContext(GameContext);
 	const { accessToken } = useAuth();
@@ -22,8 +23,8 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 
 	// on hook init
 	useEffect(() => {
+		if (!isAuthentificated) return;
 		if (!socketRef.current) {
-			// TODO: add the requested opponent's login here ?
 			// Initialize the socket connection
 			socketRef.current = io({
 				path: '/ws/',
@@ -42,7 +43,7 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 			// // TODO: when the socket is disconnected, all the listener should be removed with the off method I think
 			socketRef.current?.disconnect();
 		};
-	}, []);
+	}, [isAuthentificated]);
 
 	const socketLog = (logContent: string) => {
 		console.log(
@@ -67,19 +68,16 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 			updateGameData({
 				connectionErrorStatus: 'Connection error, please refresh the page !',
 			});
-			// setConnectionStatus('Connection error');
 		});
 		gameData.socket.on('connect_timeout', () => {
 			updateGameData({ connectionErrorStatus: 'Connection timeout' });
-			// setConnectionStatus('Connection timeout');
 		});
-		// TODO: reimplement this
-		// gameData.socket.on('connection_limit_reached', () => {
-		// 	updateGameData({
-		// 		connectionErrorStatus:
-		// 			'Too many connections, please close some tabs and refresh !',
-		// 	});
-		// });
+		gameData.socket.on('connection_limit_reached', () => {
+			updateGameData({
+				connectionErrorStatus:
+					'Too many connections, please close some tabs and refresh !',
+			});
+		});
 		gameData.socket.on('error', (error) => {
 			console.error('General Error:', error);
 		});
@@ -93,7 +91,18 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 				if (gameData.socket) gameData.socket.connect();
 			} else {
 				if (gameData.socket) gameData.socket.disconnect();
+				socketLog('Disconnected from server ! ❌ ');
+				// updateGameData({
+				// 	connectionErrorStatus: 'You were disconnected, please try again.',
+				// });
 			}
+		});
+
+		gameData.socket.on('connection-closed', (error: Error) => {
+			updateGameData({
+				connectionErrorStatus: 'You were disconnected !',
+			});
+			// setConnectionStatus('Connection error');
 		});
 
 		gameData.socket.on('opponent-info', (information: IPlayerInformation) => {
@@ -177,7 +186,6 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 		gameData.socket.on('game-started', (serverGameState: IGameState) => {
 			// socketLog('received game state update');
 			// Mark the game as started
-			console.log('APPARENTLY THE GAME JUST STARTED');
 			if (gameData.gameIsPlaying == false)
 				updateGameData({ gameIsPlaying: true });
 			// updateGameData({ gameState: serverGameState });

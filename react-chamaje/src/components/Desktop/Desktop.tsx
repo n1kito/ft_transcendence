@@ -25,7 +25,7 @@ const Desktop = () => {
 	const [profileWindowIsOpen, setProfileWindowIsOpen] = useState(false);
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
 	const [channelsWindowIsOpen, setChannelsWindowIsOpen] = useState(false);
-	const [gameWindowIsOpen, setGameWindowIsOpen] = useState(false);
+	const [gameWindowIsOpen, setGameWindowIsOpen] = useState(true);
 
 	// const navigate = useNavigate();
 	const { isAuthentificated, logOut, accessToken } = useAuth();
@@ -49,7 +49,6 @@ const Desktop = () => {
 				});
 				if (response.ok) {
 					const data = await response.json();
-					console.log('Fetched user data:', data);
 					// Set the user data in the context
 					updateUserData(data);
 				} else {
@@ -124,8 +123,8 @@ const Desktop = () => {
 				{gameWindowIsOpen && (
 					<Game
 						opponentLogin={
-							userData.login == 'cgosseli'
-								? 'jeepark'
+							userData.login == 'mjallada'
+								? 'freexav'
 								: userData.login == 'jeepark'
 								? 'cgosseli'
 								: ''
