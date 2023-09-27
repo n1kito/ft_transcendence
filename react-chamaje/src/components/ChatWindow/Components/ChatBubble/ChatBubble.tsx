@@ -19,6 +19,8 @@ interface IChatBubbleProps {
 	time?: string;
 	children: ReactNode;
 	isAdmin: boolean;
+	setShowFriendProfile: React.Dispatch<React.SetStateAction<boolean>>;
+	setProfileLogin: React.Dispatch<React.SetStateAction<string>>;
 	// messageRef?: RefObject<HTMLDivElement>;
 }
 
@@ -31,6 +33,8 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 	senderAvatar = '',
 	children,
 	isAdmin = false,
+	setShowFriendProfile,
+	setProfileLogin,
 	// messageRef,
 }) => {
 	const [tooltipVisible, setTooltipVisible] = useState(false);
@@ -41,7 +45,8 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 
 	const openFriendProfile = () => {
 		setProfileIsOpen(true);
-		window.alert(`This should open ${sender}'s profile`);
+		setShowFriendProfile(true);
+		setProfileLogin(sender);
 	};
 
 	// if (isLast) {

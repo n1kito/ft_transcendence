@@ -27,11 +27,15 @@ import {
 interface IChannelsProps {
 	onCloseClick: () => void;
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
+	setShowFriendProfile: React.Dispatch<React.SetStateAction<boolean>>;
+	setProfileLogin: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const Channels: React.FC<IChannelsProps> = ({
 	onCloseClick,
 	windowDragConstraintRef,
+	setShowFriendProfile,
+	setProfileLogin,
 }) => {
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [settingsMode, setSettingsMode] = useState('');
@@ -377,6 +381,8 @@ const Channels: React.FC<IChannelsProps> = ({
 					setMessages={setMessages}
 					isChannel={true}
 					setChatWindowIsOpen={setChatWindowIsOpen}
+					setShowFriendProfile={setShowFriendProfile}
+					setProfileLogin={setProfileLogin}
 				/>
 			)}
 		</>

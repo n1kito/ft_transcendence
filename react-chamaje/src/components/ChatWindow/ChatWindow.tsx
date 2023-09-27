@@ -51,6 +51,8 @@ export interface IChatWindowProps {
 	isChannel?: boolean;
 	setChatWindowIsOpen: Dispatch<SetStateAction<boolean>>;
 	setMessages: Dispatch<SetStateAction<IMessage[]>>;
+	setShowFriendProfile: React.Dispatch<React.SetStateAction<boolean>>;
+	setProfileLogin: React.Dispatch<React.SetStateAction<string>>;
 }
 
 interface IChatInfo {
@@ -77,6 +79,8 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	setMessages,
 	isChannel = false,
 	setChatWindowIsOpen,
+	setShowFriendProfile,
+	setProfileLogin,
 }) => {
 	/* ********************************************************************* */
 	/* ******************************* FRONT ******************************* */
@@ -483,7 +487,14 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 								: { name: '' },
 					  ]
 					: [
-							{ name: 'Profile', onClick: () => null },
+							{
+								name: 'Profile',
+								onClick: () => {
+									console.log('PROFILE, login: ', name);
+									setShowFriendProfile(true);
+									setProfileLogin(name);
+								},
+							},
 							{ name: 'Play', onClick: () => null },
 							{ name: isBlocked ? 'Unblock' : 'Block', onClick: blockUser },
 							{ name: 'Leave chat', onClick: leavePM },
@@ -525,6 +536,8 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 									time={date.toLocaleString('en-US', dateFormatOptions)}
 									senderAvatar={`/api/images/${currentMessage.avatar}`}
 									isAdmin={isAdmin || isOwner}
+									setShowFriendProfile={setShowFriendProfile}
+									setProfileLogin={setProfileLogin}
 								>
 									{
 										<div

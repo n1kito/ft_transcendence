@@ -347,7 +347,7 @@ const Desktop = () => {
 						setIsMyFriend={setIsMyFriend}
 					/>
 				)}
-				{openFriendsWindow && showFriendProfile && (
+				{showFriendProfile && (
 					<Profile
 						login={friendLogin}
 						onCloseClick={() => {
@@ -370,6 +370,8 @@ const Desktop = () => {
 						windowDragConstraintRef={windowDragConstraintRef}
 						friends={friends}
 						// chatWindowControl={setChatWindowIsOpen}
+						setShowFriendProfile={setShowFriendProfile}
+						setProfileLogin={setFriendLogin}
 					/>
 				)}
 				{channelsWindowIsOpen && (
@@ -377,6 +379,8 @@ const Desktop = () => {
 						key="channelKeyInDesktop"
 						onCloseClick={() => setChannelsWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
+						setShowFriendProfile={setShowFriendProfile}
+						setProfileLogin={setFriendLogin}
 					/>
 				)}
 			</AnimatePresence>

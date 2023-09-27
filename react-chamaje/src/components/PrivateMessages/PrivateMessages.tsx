@@ -24,6 +24,8 @@ interface IPrivateMessagesProps {
 	onCloseClick: () => void;
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
 	friends: IFriendStruct[];
+	setShowFriendProfile: React.Dispatch<React.SetStateAction<boolean>>;
+	setProfileLogin: React.Dispatch<React.SetStateAction<string>>;
 	// chatWindowControl: (state: boolean) => void;
 }
 
@@ -31,6 +33,8 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	onCloseClick,
 	windowDragConstraintRef,
 	friends,
+	setShowFriendProfile,
+	setProfileLogin,
 	// chatWindowControl,
 }) => {
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
@@ -390,6 +394,8 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					messages={messages}
 					setMessages={setMessages}
 					setChatWindowIsOpen={setChatWindowIsOpen}
+					setShowFriendProfile={setShowFriendProfile}
+					setProfileLogin={setProfileLogin}
 				/>
 			)}
 		</>
