@@ -339,17 +339,21 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							pCurrent,
 							'play',
 							pCurrent,
-						).then(() => {
-							chatData.socket?.sendMessage(
-								'',
-								chatId,
-								userData ? userData?.login : '',
-								'',
-								'play',
-								pCurrent,
-								name,
-							);
-						});
+						)
+							.then(() => {
+								chatData.socket?.sendMessage(
+									'',
+									chatId,
+									userData ? userData?.login : '',
+									'',
+									'play',
+									pCurrent,
+									name,
+								);
+							})
+							.catch((e) => {
+								console.error('Could not send invitation: ', e.message);
+							});
 					}
 				}
 			}
@@ -497,7 +501,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 
 	return (
 		<Window
-			windowTitle={isChannel ? name : `Chat with ${name}`}
+			windowTitle={isChannel ? name : `Chat with ${name || 'anonymous'}`}
 			onCloseClick={onCloseClick}
 			windowDragConstraintRef={windowDragConstraintRef}
 			links={
