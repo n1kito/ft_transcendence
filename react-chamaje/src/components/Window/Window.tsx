@@ -63,48 +63,46 @@ const Window: React.FC<WindowProps> = ({
 		dragControls.start(event, {});
 	}
 
+	// Handle window resizing for the game
 	useEffect(() => {
 		if (resizable) {
-			// Handle resizing process
 			const handleResize = (event: MouseEvent) => {
-				if (!windowIsBeingResized) return;
-				if (windowRef.current) {
-					// See how much the mouse has moved
-					const xMoveDistance =
-						event.clientX - previousMouseCoordinates.current.x;
-					const yMoveDistance =
-						event.clientY - previousMouseCoordinates.current.y;
-					// Calculate the new dimensions of the window
-					const newWindowWidth =
-						previousWindowSize.current.width + xMoveDistance;
-					const newWindowHeight =
-						previousWindowSize.current.height + yMoveDistance;
-					// Update the div dimensions
-					// if those new dimensions are not too small or too big
-					if (
-						newWindowHeight <= window.innerHeight * 0.85 &&
-						newWindowHeight >= window.innerHeight * 0.5
-					)
-						windowRef.current.style.height = `${newWindowHeight}px`;
-					if (
-						newWindowWidth <= window.innerWidth * 0.95 &&
-						newWindowWidth >= window.innerWidth * 0.3
-					)
-						windowRef.current.style.width = `${newWindowWidth}px`;
+				if (!windowIsBeingResized || !windowRef.current) return;
+
+				const xMoveDistance =
+					event.clientX - previousMouseCoordinates.current.x;
+				const yMoveDistance =
+					event.clientY - previousMouseCoordinates.current.y;
+
+				const originalWidth = previousWindowSize.current.width;
+				const originalHeight = previousWindowSize.current.height;
+
+				// Calculate aspect ratio
+				const aspectRatio = originalWidth / originalHeight;
+
+				// Calculate new dimensions
+				const newWidth = originalWidth + xMoveDistance;
+				const newHeight = newWidth / aspectRatio; // Keep aspect ratio
+
+				// Validation for height and width
+				if (
+					newHeight <= window.innerHeight * 0.85 &&
+					newHeight >= window.innerHeight * 0.5
+				) {
+					windowRef.current.style.height = `${newHeight}px`;
+					windowRef.current.style.width = `${newWidth}px`;
 				}
 			};
-			// Mouse is released
+
 			const handleMouseUp = () => {
 				if (windowIsBeingResized) {
 					setWindowIsBeingResized(false);
 				}
 			};
 
-			// Add event listener to the window
 			window.addEventListener('mousemove', handleResize);
 			window.addEventListener('mouseup', handleMouseUp);
 
-			// Clean up the event listener when the component unmounts
 			return () => {
 				window.removeEventListener('mousemove', handleResize);
 				window.removeEventListener('mouseup', handleMouseUp);
