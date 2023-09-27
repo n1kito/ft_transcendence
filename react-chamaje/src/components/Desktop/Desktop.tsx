@@ -123,6 +123,13 @@ const Desktop = () => {
 				)}
 				{gameWindowIsOpen && (
 					<Game
+						opponentLogin={
+							userData.login == 'cgosseli'
+								? 'jeepark'
+								: userData.login == 'jeepark'
+								? 'cgosseli'
+								: ''
+						}
 						onCloseClick={() => setGameWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
 						// opponentId={userData?.id === 7 ? 8 : 7}

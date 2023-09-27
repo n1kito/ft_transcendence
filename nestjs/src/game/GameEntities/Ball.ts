@@ -3,7 +3,7 @@ import Paddle from './Paddle';
 
 export default class Ball extends GameEntity {
 	// private BASE_SPEED = 8;
-	private BASE_SPEED = 4;
+	private BASE_SPEED = 6;
 	private MAX_SPEED = this.BASE_SPEED * 1.5;
 	speed: number = this.BASE_SPEED;
 	xVelocity: number = 0;

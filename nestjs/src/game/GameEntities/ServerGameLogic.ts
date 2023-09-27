@@ -26,6 +26,7 @@ export class GameLogic {
 	public player1Score: number = 0;
 	public player2Score: number = 0;
 	public powerupsEnabled: boolean = true;
+	public awaitingPowerUpReply: boolean = false;
 
 	public canvasSize = { width: 700, height: 500 };
 	public paddleWidth = 5;
@@ -182,13 +183,8 @@ export class GameLogic {
 		// this.broadcastGameState();
 		this.startBroadcasting();
 		this.startGameSimulation();
-		// TRY TO SEND A POWERUP TO THE PLAYERS
-		setTimeout(() => {
-			console.log('[💪] Sending powerups to our users !');
-			// Send the stated to each player
-			this.server.to(Object.keys(this.players)[0]).emit('new-power-up', 'eee');
-			this.server.to(Object.keys(this.players)[1]).emit('new-power-up', 'eee');
-		}, 2000);
+		// TODO:
+		if (this.powerupsEnabled) this.initiateRandomPowerUps();
 	}
 
 	endGame() {
@@ -214,20 +210,128 @@ export class GameLogic {
 		return this.player1IsReady && this.player2IsReady;
 	}
 
-	activatePowerUp(playerSocketId: string) {
-		// random powerup choice
-		const powerUpChoice = Math.floor(Math.random() * 2) + 1;
+	/*
+	░█▀█░█▀█░█░█░█▀▀░█▀▄░░░█░█░█▀█░█▀▀
+	░█▀▀░█░█░█▄█░█▀▀░█▀▄░░░█░█░█▀▀░▀▀█
+	░▀░░░▀▀▀░▀░▀░▀▀▀░▀░▀░░░▀▀▀░▀░░░▀▀▀
+	*/
 
-		// Double the size of the player's paddle
-		if (powerUpChoice === 1) this.players[playerSocketId].height *= 2;
-		// Recude the size of the opponent's paddle
-		if (powerUpChoice === 2) {
-			const [opponentSocketId] = Object.keys(this.players).filter(
-				(currentSocketId) => currentSocketId != playerSocketId,
-			);
-			this.players[opponentSocketId].height *= 0.5;
+	// This will randomly trigger power ups, if one is not already waiting to be
+	// activated
+	initiateRandomPowerUps() {
+		const MIN_INTERVAL = 15;
+		const MAX_INTERVAL = 30;
+
+		// Get a random interval between 15 and 60 seconds
+		const randomInterval =
+			Math.floor(Math.random() * (MAX_INTERVAL - MIN_INTERVAL + 1)) +
+			MIN_INTERVAL;
+
+		// Initially wait for 'randomInterval * 1000' milliseconds
+		setTimeout(() => {
+			this.sendPowerUpTrigger();
+
+			// Then continue executing at an interval of 'randomInterval * 1000' milliseconds
+			setInterval(() => {
+				this.sendPowerUpTrigger();
+			}, randomInterval * 1000);
+		}, randomInterval * 1000);
+	}
+
+	// Generates a trigger string and sends it to both players
+	sendPowerUpTrigger() {
+		// If there's a powerup ongoing,
+		if (this.awaitingPowerUpReply) return;
+		const randomPowerUpActivationString =
+			this.generatePowerUpActivationString();
+		// Log that we are waiting for users to reply
+		this.awaitingPowerUpReply = true;
+		// Send the powerup triggers
+		this.server
+			.to(Object.keys(this.players)[0])
+			.emit('new-power-up', randomPowerUpActivationString);
+		this.server
+			.to(Object.keys(this.players)[1])
+			.emit('new-power-up', randomPowerUpActivationString);
+		// And wait 10 seconds before cancelling the trigger
+		setTimeout(() => {
+			if (this.awaitingPowerUpReply) {
+				this.server
+					.to(Object.keys(this.players)[0])
+					.emit('power-up-missed', randomPowerUpActivationString);
+				this.server
+					.to(Object.keys(this.players)[1])
+					.emit('power-up-missed', randomPowerUpActivationString);
+				this.awaitingPowerUpReply = false;
+			}
+		}, 10000);
+	}
+
+	// Powerup was activated by a player
+	activatePowerUp(playerSocketId: string) {
+		// We're not waiting for a reply anymore
+		this.awaitingPowerUpReply = false;
+
+		// Find opponent's socketId
+		const [opponentSocketId] = Object.keys(this.players).filter(
+			(currentSocketId) => currentSocketId != playerSocketId,
+		);
+
+		// Randomize powerup choice and duration
+		const POWER_UP_TYPES = 3;
+		const MIN_DURATION = 15;
+		const MAX_DURATION = 30;
+
+		// randomize powerup choice
+		const powerUpChoice = Math.floor(Math.random() * POWER_UP_TYPES) + 1;
+		const powerUpDuration =
+			Math.floor(Math.random() * (MAX_DURATION - MIN_DURATION + 1)) +
+			MIN_DURATION;
+
+		switch (powerUpChoice) {
+			case 1:
+				this.applyPowerUp(playerSocketId, 'height', 2, powerUpDuration);
+				return 'large paddle';
+			case 2:
+				this.applyPowerUp(opponentSocketId, 'height', 0.5, powerUpDuration);
+				return 'small paddle';
+			case 3:
+				this.applyPowerUp(opponentSocketId, 'speed', 0.2, powerUpDuration);
+				return 'slow paddle';
 		}
-		return 'this is the description of the powerup';
+	}
+
+	applyPowerUp(
+		socketId: string,
+		attribute: string,
+		factor: number,
+		duration: number,
+	) {
+		this.players[socketId][attribute] *= factor;
+		setTimeout(() => {
+			this.players[socketId][
+				`reset${attribute.charAt(0).toUpperCase() + attribute.slice(1)}`
+			]();
+		}, duration * 1000);
+	}
+
+	getRandomChar(): string {
+		// Generate a random ASCII code between 97 ('a') and 122 ('z')
+		const randomAsciiCode = Math.floor(Math.random() * 26) + 97;
+		// Create a string from that code and return it
+		return String.fromCharCode(randomAsciiCode);
+	}
+
+	generatePowerUpActivationString(): string {
+		// Generate a random length between 2 and 4
+		const length = Math.floor(Math.random() * 2) + 2;
+
+		// Initialize an empty string
+		let finalString = '';
+
+		// Loop to append random characters to the string
+		for (let i = 0; i < length; ++i) finalString += this.getRandomChar();
+		return finalString;
 	}
 
 	// Start the game simulation with an interval of 50ms

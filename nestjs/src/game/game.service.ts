@@ -20,6 +20,7 @@ function decodeToken(client: Socket): any {
 interface Room {
 	gameInstance?: GameLogic;
 	playersSocketIds: string[];
+	requestedOpponent?: number;
 }
 
 // This is a map of all of our current rooms
@@ -75,6 +76,16 @@ export class GameService {
 			);
 			newlyConnectedSocket.emit('identification_ok');
 
+			const connectionQuery = newlyConnectedSocket.handshake.query;
+			const requestedOpponentLogin: string | undefined =
+				connectionQuery.opponentLogin
+					? String(connectionQuery.opponentLogin)
+					: undefined;
+			let requestedOpponentId: number | undefined;
+			if (requestedOpponentLogin)
+				requestedOpponentId = await this.getUserIdFromLogin(
+					requestedOpponentLogin,
+				);
 			// TODO: Do we want to do this ? Let's keep it for later
 			// TODO: If we allow our user to join different rooms, we just
 			// need to make sure they're not being added to a room they are
@@ -94,11 +105,33 @@ export class GameService {
 				userId: newlyConnectedUserId,
 			});
 
-			// Assign a room to our client
-			const assignedRoomId = await this.assignRoom(
-				newlyConnectedSocketId,
-				newlyConnectedUserId,
-			);
+			let assignedRoomId;
+			if (requestedOpponentLogin && requestedOpponentId)
+				console.log(
+					`user #${newlyConnectedUserId} [${newlyConnectedSocketId}] wants to play with user #${requestedOpponentId} aka ${requestedOpponentLogin}`,
+				);
+			// Handle the case where our user wants to play with someone
+			if (requestedOpponentId) {
+				assignedRoomId = await this.assignOpponentRoom(
+					newlyConnectedSocketId,
+					newlyConnectedUserId,
+					requestedOpponentId,
+				);
+			} else {
+				// Assign a room to our client
+				assignedRoomId = await this.assignRoom(
+					newlyConnectedSocketId,
+					newlyConnectedUserId,
+				);
+			}
+
+			// If the user has a requested opponent, send them their information
+			if (!this.isRoomFull(assignedRoomId) && requestedOpponentId)
+				this.shareOpponentInfo(
+					newlyConnectedSocketId,
+					newlyConnectedUserId,
+					requestedOpponentId,
+				);
 
 			// If our client's room is now full, send each user their opponent's
 			// information and instantiate a game instance
@@ -130,21 +163,6 @@ export class GameService {
 			// Delete the client from the room
 			console.log(`[🏠] Removing [%s] from room %s`, socket.id, currentRoomId);
 			await this.removeUserFromRoom(currentRoomId, socket.id);
-			// If the room has no players left, delete the room itself
-			if (this.rooms[currentRoomId].playersSocketIds.length === 0) {
-				console.log(`[🏠] Room ${currentRoomId} was empty, removing it !`);
-				delete this.rooms[currentRoomId];
-			}
-			// Else, let the other player know that their partner has left
-			else {
-				const opponnentSocketId = this.rooms[currentRoomId].playersSocketIds[0];
-				console.log(
-					`Notifying opponent #${this.getUserIdFromSocket(
-						opponnentSocketId,
-					)} that we left the room`,
-				);
-				this.server.to(opponnentSocketId).emit('opponent-left');
-			}
 		}
 
 		// Remove the client from the connectedClients map
@@ -233,12 +251,13 @@ export class GameService {
 					);
 				}
 			}
+		} else {
+			throw new Error(`Could not find room id for user ${clientSocket.id}`);
 		}
 	}
 
 	handlePowerupActivated(clientSocket: Socket) {
 		console.log(`[💪] Powerup was activated by [${clientSocket.id}]`);
-
 		// Handle the actual powerup
 		const roomId = this.getRoomIdFromSocketId(clientSocket.id);
 		if (roomId) {
@@ -286,21 +305,24 @@ export class GameService {
 			let targetRoomId: string | undefined;
 
 			// Find a room that only has one player who is not our player
+			// and is not reserved for someone else
 			for (const roomId in this.rooms) {
-				if (this.rooms[roomId].playersSocketIds.length == 1) {
-					// TODO: this was commented out for testing purposes
-					// PUT IS BACK !!!!
-					/*
-				// Get the socketId of the player in the room
-				const playerSocketId = Object.keys(this.rooms[roomId].players)[0];
-				// Check if the userId associated to that socket is different from
-				// the userId of the user we're trying to put in a room
-				// If so, assign them to that room and stop looking
-				if (this.connectedClients.get(playerSocketId).userId !== userId) {
-				*/
-					targetRoomId = roomId;
-					break;
-					// }
+				if (
+					this.rooms[roomId].playersSocketIds.length === 1 &&
+					this.rooms[roomId].requestedOpponent === undefined
+				) {
+					// Get the socketId of the player in the room
+					const playerSocketId = this.rooms[roomId].playersSocketIds[0];
+					// Check if the userId associated to that socket is different from
+					// the userId of the user we're trying to put in a room
+					// If so, assign them to that room and stop looking
+					if (
+						this.connectedClients.get(playerSocketId).userId !==
+						newlyConnectedUserId
+					) {
+						targetRoomId = roomId;
+						break;
+					}
 				}
 			}
 
@@ -313,7 +335,6 @@ export class GameService {
 			}
 
 			// Add the player to the room, and initialise their game state
-			// TODO: this game state is not used anwywhere actually because it's not accessible by the game logic.
 			this.rooms[targetRoomId].playersSocketIds.push(newlyConnectedSocketId);
 
 			// Update the roomId to our client's entry in the connectedClients map
@@ -323,9 +344,71 @@ export class GameService {
 			console.log(
 				`[🏠] user #${newlyConnectedUserId} via socket [${newlyConnectedSocketId}] was assigned to room #${targetRoomId}`,
 			);
+
 			return targetRoomId;
 		} finally {
 			// Unlock the mutex
+			releaseMutex();
+		}
+	}
+
+	async assignOpponentRoom(
+		newlyConnectedSocketId: string,
+		newlyConnectedUserId: number,
+		requestedOpponentId: number,
+	): Promise<string> {
+		const releaseMutex = await this.roomAssignmentMutex.acquire();
+
+		try {
+			// Find an available room or create a new one
+			let targetRoomId: string | undefined;
+
+			// Look for a room that has the required opponent in it and that
+			// is expecting the newly connected user
+			for (const roomId in this.rooms) {
+				if (
+					this.rooms[roomId].playersSocketIds.length == 1 &&
+					this.rooms[roomId].requestedOpponent === newlyConnectedUserId
+				) {
+					// Get the socketId of the player in the room
+					const playerSocketId = this.rooms[roomId].playersSocketIds[0];
+					// Check if the userId associated to that socket is the one
+					// the new user wants to play againt
+					if (
+						this.connectedClients.get(playerSocketId).userId ===
+						requestedOpponentId
+					) {
+						targetRoomId = roomId;
+						break;
+					}
+				}
+			}
+			// If it does not exist, create it
+			if (!targetRoomId) {
+				targetRoomId = this.generateRoomId(newlyConnectedUserId);
+				this.rooms[targetRoomId] = {
+					playersSocketIds: [],
+					requestedOpponent: requestedOpponentId,
+				};
+			}
+
+			// Add our player to the room
+			this.rooms[targetRoomId].playersSocketIds.push(newlyConnectedSocketId);
+
+			// Update the roomId to our client's entry in the connectedClients map
+			if (this.connectedClients.has(newlyConnectedSocketId))
+				this.connectedClients.get(newlyConnectedSocketId).roomId = targetRoomId;
+
+			// Update the roomId to our client's entry in the connectedClients map
+			if (this.connectedClients.has(newlyConnectedSocketId))
+				this.connectedClients.get(newlyConnectedSocketId).roomId = targetRoomId;
+
+			console.log(
+				`[🏠] user #${newlyConnectedUserId} via socket [${newlyConnectedSocketId}] was assigned to room #${targetRoomId} with opponent ${requestedOpponentId}`,
+			);
+
+			return targetRoomId;
+		} finally {
 			releaseMutex();
 		}
 	}
@@ -343,68 +426,102 @@ export class GameService {
 		return this.rooms[roomId].playersSocketIds.length === 2;
 	}
 
+	// Sends both users their opponent's information
 	sharePlayersInfo(
 		newlyConnectedSocketId: string,
 		newlyConnectedUserid: number,
 		assignedRoomId: string,
 	) {
-		// Find the socketId of the user's opponent
-		const opponentSocketId = this.getOpponentSocketId(
-			newlyConnectedSocketId,
-			assignedRoomId,
-		);
-		// Get the userId associated with that socket
-		let opponentUserId;
-		if (this.connectedClients.has(opponentSocketId)) {
-			opponentUserId = this.connectedClients.get(opponentSocketId).userId;
-			console.log('Opponent user id is', opponentUserId);
-		} else {
-			console.log(
-				`The opponent socket ID ${opponentSocketId} does not exist in connected clients.`,
+		try {
+			// Find the socketId of the user's opponent
+			const opponentSocketId = this.getOpponentSocketId(
+				newlyConnectedSocketId,
+				assignedRoomId,
 			);
+			// Get the userId associated with that socket
+			let opponentUserId;
+			if (this.connectedClients.has(opponentSocketId)) {
+				opponentUserId = this.connectedClients.get(opponentSocketId).userId;
+				console.log('Opponent user id is', opponentUserId);
+			} else {
+				console.log(
+					`The opponent socket ID ${opponentSocketId} does not exist in connected clients.`,
+				);
+			}
+
+			// Retrieve each player's information and send it to their opponent via
+			// their socket
+
+			// Retrieving and sharing newly connected user's information with opponent
+			this.prisma.user
+				.findUnique({
+					where: {
+						id: newlyConnectedUserid,
+					},
+					select: {
+						login: true,
+						image: true,
+					},
+				})
+				.then((userInformation: IPlayerInformation) => {
+					console.log(
+						`This is the information of socket [${newlyConnectedSocketId}] user #${newlyConnectedUserid}: `,
+						userInformation,
+					);
+					this.server
+						.to(opponentSocketId)
+						.emit('opponent-info', userInformation);
+				});
+			// Retrieving and sharing opponent's information with newly connected user
+			this.prisma.user
+				.findUnique({
+					where: {
+						id: opponentUserId,
+					},
+					select: {
+						login: true,
+						image: true,
+					},
+				})
+				.then((opponentInformation: IPlayerInformation) => {
+					console.log(
+						`This is the information of socket [${newlyConnectedSocketId}]'s opponent, user #${opponentUserId}: `,
+						opponentInformation,
+					);
+					this.server
+						.to(newlyConnectedSocketId)
+						.emit('opponent-info', opponentInformation);
+				});
+		} catch (error) {
+			throw new Error(`sharePlayersInfo(): ${error.message}`);
 		}
+	}
 
-		// Retrieve each player's information and send it to their opponent via
-		// their socket
-
-		// Retrieving and sharing newly connected user's information with opponent
-		this.prisma.user
-			.findUnique({
-				where: {
-					id: newlyConnectedUserid,
-				},
-				select: {
-					login: true,
-					image: true,
-				},
-			})
-			.then((userInformation: IPlayerInformation) => {
-				console.log(
-					`This is the information of socket [${newlyConnectedSocketId}] user #${newlyConnectedUserid}: `,
-					userInformation,
-				);
-				this.server.to(opponentSocketId).emit('opponent-info', userInformation);
-			});
-		// Retrieving and sharing opponent's information with newly connected user
-		this.prisma.user
-			.findUnique({
-				where: {
-					id: opponentUserId,
-				},
-				select: {
-					login: true,
-					image: true,
-				},
-			})
-			.then((opponentInformation: IPlayerInformation) => {
-				console.log(
-					`This is the information of socket [${newlyConnectedSocketId}]'s opponent, user #${opponentUserId}: `,
-					opponentInformation,
-				);
-				this.server
-					.to(newlyConnectedSocketId)
-					.emit('opponent-info', opponentInformation);
-			});
+	// Sends a user their opponent's information
+	async shareOpponentInfo(
+		newlyConnectedSocketId: string,
+		newlyConnectedUserid: number,
+		opponentUserId: number,
+	) {
+		try {
+			this.prisma.user
+				.findUnique({
+					where: {
+						id: opponentUserId,
+					},
+					select: {
+						login: true,
+						image: true,
+					},
+				})
+				.then((opponentInformation: IPlayerInformation) => {
+					this.server
+						.to(newlyConnectedSocketId)
+						.emit('opponent-info', opponentInformation);
+				});
+		} catch (error) {
+			throw new Error(`shareOpponentInfo(): ${error.message}`);
+		}
 	}
 
 	// Let the user's roommate know they are ready
@@ -485,6 +602,7 @@ export class GameService {
 	async handleUserWantsNewOpponent(clientSocket: Socket) {
 		const releaseMutex = await this.roomAssignmentMutex.acquire();
 		console.log(`[🏠] Socket [${clientSocket.id}] wants a new room please !`);
+		console.log('[🏠] Current room states:', this.rooms);
 		try {
 			// Get the id of the room the user is in
 			let currentRoomId = this.getRoomIdFromSocketId(clientSocket.id);
@@ -493,14 +611,15 @@ export class GameService {
 				const newRoomId = this.findAnotherRoom(clientSocket, currentRoomId);
 				// If there is one
 				if (newRoomId) {
+					// Notify their current opponent that user is gone
+					this.broadcastPlayerLeft(clientSocket);
+
 					// Remove the user from their current room
 					await this.removeUserFromRoom(currentRoomId, clientSocket.id);
 
-					// Notify their current opponent
-					this.broadcastPlayerLeft(clientSocket);
-
 					// Add the player to their new room
 					this.rooms[newRoomId].playersSocketIds.push(clientSocket.id);
+					console.log('Added user to new room, rooms now are:', this.rooms);
 
 					// Update the roomId to our client's entry in the connectedClients map
 					if (this.connectedClients.has(clientSocket.id))
@@ -513,6 +632,8 @@ export class GameService {
 						`[🏠] Could not find another room with a different opponent. Socket [${clientSocket.id}] is still in room ${currentRoomId}`,
 					);
 			}
+		} catch (error) {
+			console.error(`handleUserWantsNewOpponent(): ${error.message}`);
 		} finally {
 			releaseMutex();
 		}
@@ -527,7 +648,6 @@ export class GameService {
 				newlyConnectedSocketId,
 			).userId;
 		this.createGameLogic(assignedRoomId);
-		// Add the players to a room
 
 		// Share each player their opponent's information
 		this.sharePlayersInfo(
@@ -538,12 +658,20 @@ export class GameService {
 	}
 
 	async removeUserFromRoom(roomId: string, socketId: string) {
+		console.log(`Removing socker ${socketId} from room ${roomId}`);
+		// TODO: apparently I'm stuck here, probably because of the mutex
+		// look into it some more !
 		const releaseMutex = await this.roomAssignmentMutex.acquire();
 
+		console.log('got here');
 		try {
 			// Remove the user from their current room
 			const index = this.rooms[roomId].playersSocketIds.indexOf(socketId);
 			if (index > -1) this.rooms[roomId].playersSocketIds.splice(index, 1);
+			// NOTE: removed this, the user can just press shuffle is needed
+			// // If the room was reserved, make it not reserved anymore, so
+			// // the user can keep playing with other players
+			// this.rooms[roomId].requestedOpponent = undefined;
 			// Remove the roomId from the user's entry in the client map
 			if (this.connectedClients.has(socketId))
 				this.connectedClients.get(socketId).roomId = undefined;
@@ -551,11 +679,29 @@ export class GameService {
 			// It will be recreated whenever a new user joins the room
 			if (this.rooms[roomId].gameInstance)
 				delete this.rooms[roomId].gameInstance;
+			// If the room has no players left, delete the room itself
+			if (this.rooms[roomId].playersSocketIds.length === 0) {
+				console.log(`[🏠] Room ${roomId} was empty, removing it !`);
+				delete this.rooms[roomId];
+			}
+			// Else, let the other player know that their partner has left
+			else {
+				const opponnentSocketId = this.rooms[roomId].playersSocketIds[0];
+				console.log(
+					`Notifying opponent #${this.getUserIdFromSocket(
+						opponnentSocketId,
+					)} that we left the room`,
+				);
+				this.server.to(opponnentSocketId).emit('opponent-left');
+			}
+		} catch (error) {
+			console.error(`removeUserFromRoom(): ${error.message}`);
 		} finally {
 			releaseMutex();
 		}
 	}
 
+	// TODO: Fix this, it's not working
 	// Looks for available room our user is not already in
 	findAnotherRoom(
 		clientSocket: Socket,
@@ -568,14 +714,18 @@ export class GameService {
 
 		// Find a room that only has one player who is not our player
 		for (const roomId in this.rooms) {
-			if (this.rooms[currentRoomId].playersSocketIds.length == 1) {
+			if (
+				this.rooms[roomId].playersSocketIds.length === 1 &&
+				this.rooms[roomId].requestedOpponent === undefined
+			) {
 				// Get the socketId of the player in the room
-				const playerSocketId = this.rooms[currentRoomId].playersSocketIds[0];
+				const playerSocketId = this.rooms[roomId].playersSocketIds[0];
 				// Check if the userId associated to that socket is different from
 				// the userId of the user we're trying to put in a room
 				// If so, assign them to that room and stop looking
 				if (this.connectedClients.get(playerSocketId).userId !== userId) {
 					newRoomId = roomId;
+					console.log('Found another room !', newRoomId);
 					break;
 				}
 			}
@@ -612,6 +762,20 @@ export class GameService {
 	// Find the playerID associated with a socketId
 	getUserIdFromSocket(socketId: string): number | undefined {
 		return this.connectedClients.get(socketId).userId;
+	}
+
+	async getUserIdFromLogin(
+		requestedLogin: string,
+	): Promise<number | undefined> {
+		const requestedUser = await this.prisma.user.findUnique({
+			where: {
+				login: requestedLogin,
+			},
+			select: {
+				id: true,
+			},
+		});
+		return requestedUser?.id;
 	}
 
 	/*

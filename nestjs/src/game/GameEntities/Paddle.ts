@@ -2,11 +2,14 @@ import { GameEntity } from './Shared';
 
 export default class Paddle extends GameEntity {
 	// private speed: number = 800;
-	private speed: number = 15;
+	private BASE_SPEED = 15;
+	private BASE_HEIGHT;
+	speed: number = this.BASE_SPEED;
 	private direction: number;
 
 	constructor(x: number, y: number, width: number, height: number) {
 		super(x, y, width, height);
+		this.BASE_HEIGHT = this.height;
 		this.direction = 0;
 	}
 
@@ -31,5 +34,13 @@ export default class Paddle extends GameEntity {
 		if (direction === 'up') this.direction = -1;
 		else if (direction === 'down') this.direction = 1;
 		else this.direction = 0;
+	}
+
+	resetSpeed() {
+		this.speed = this.BASE_SPEED;
+	}
+
+	resetHeight() {
+		this.height = this.BASE_HEIGHT;
 	}
 }

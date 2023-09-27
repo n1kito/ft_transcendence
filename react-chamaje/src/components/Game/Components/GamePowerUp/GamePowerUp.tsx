@@ -7,11 +7,6 @@ const GamePowerUp = () => {
 	const { gameData, updateGameData } = useContext(GameContext);
 
 	const [currentIndex, setCurrentIndex] = useState(0);
-	const [powerUpTriggered, setPowerUpTriggered] = useState(false);
-	const [lostPowerUp, setLostPowerUp] = useState(false);
-	const [powerUpDescription, setPowerUpDescription] = useState<
-		string | undefined
-	>();
 
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -40,7 +35,7 @@ const GamePowerUp = () => {
 			}`}
 		>
 			<span className="game-power-up-title">
-				{`${!gameData.wonPowerUp ? '' : '✨'}`}
+				{`${gameData.wonPowerUp ? '✨' : ''}`}
 				<span className="gradient-text">
 					{gameData.powerUpClaimed && gameData.wonPowerUp
 						? ' SUCCESS !!! '
@@ -48,7 +43,7 @@ const GamePowerUp = () => {
 						? ' TOO LATE :( '
 						: ' PRESS THE KEYS TO POWER UP '}
 				</span>
-				{`${gameData.wonPowerUp ? '' : '✨'}`}
+				{`${gameData.wonPowerUp ? '✨' : ''}`}
 			</span>
 			{!gameData.powerUpClaimed && (
 				<div className="power-up-buttons">
@@ -62,7 +57,7 @@ const GamePowerUp = () => {
 			)}
 			{gameData.powerUpClaimed && (
 				<span className="power-up-description">
-					{gameData.powerUpDescription}
+					{gameData.powerUpDescription} mode activated
 				</span>
 			)}
 		</div>

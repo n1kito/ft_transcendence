@@ -7,7 +7,11 @@ import useAuth from './userAuth';
 import type { IPlayerInformation } from '../../../shared-lib/types/game';
 import { IPlayerMovementPayload } from 'shared-lib/types/game';
 
-export const useGameSocket = () => {
+interface IGameSocketProps {
+	opponentLogin?: string | undefined;
+}
+
+export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 	// Import necessary contexts
 	const { userData } = useContext(UserContext);
 	const { gameData, updateGameData, resetGameData } = useContext(GameContext);
@@ -19,11 +23,15 @@ export const useGameSocket = () => {
 	// on hook init
 	useEffect(() => {
 		if (!socketRef.current) {
+			// TODO: add the requested opponent's login here ?
 			// Initialize the socket connection
 			socketRef.current = io({
 				path: '/ws/',
 				reconnection: false,
 				auth: { accessToken: accessToken },
+				query: { opponentLogin: opponentLogin },
+				transports: ['websocket'], // Limit to websocket only
+				timeout: 2000, // Connection timeout in ms
 			});
 			// Store it in our context
 			updateGameData({ socket: socketRef.current });
@@ -130,7 +138,7 @@ export const useGameSocket = () => {
 			updateGameData({ gamePowerUp: powerUpKeySequence });
 		});
 
-		// User receives this when they lost the powerup
+		// User receives this when the powerup was claimed by someone
 		gameData.socket.on(
 			'power-up-claimed',
 			(data: { wonPowerUp: boolean; powerUpDescription: string }) => {
@@ -146,9 +154,17 @@ export const useGameSocket = () => {
 						wonPowerUp: false,
 						powerUpDescription: undefined,
 					});
-				}, 2000);
+				}, 3000);
 			},
 		);
+
+		gameData.socket.on('power-up-missed', () => {
+			updateGameData({
+				gamePowerUp: undefined,
+				powerUpDescription: undefined,
+				powerUpClaimed: false,
+			});
+		});
 
 		// gameData.socket.on('game-state-update', (serverGameState: IGameState) => {
 		// 	// socketLog('received game state update');

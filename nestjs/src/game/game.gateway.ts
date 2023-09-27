@@ -123,7 +123,7 @@ export class GameGateway
 		try {
 			this.gameService.handlePowerupActivated(clientSocket);
 		} catch (error) {
-			console.error('handlePowerupSettingUpdate():', error.message);
+			console.error('handlePowerupActivated():', error.message);
 		}
 	}
 }

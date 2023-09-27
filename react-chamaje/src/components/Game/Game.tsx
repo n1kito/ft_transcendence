@@ -30,13 +30,13 @@ interface IGameProps {
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
 	onCloseClick: () => void;
 	// gameRoomInfo?: IGameRoomProps;
-	opponentId?: number | undefined;
+	opponentLogin?: string | undefined;
 }
 
 const Game: React.FC<IGameProps> = ({
 	onCloseClick,
 	windowDragConstraintRef,
-	opponentId = undefined,
+	opponentLogin = undefined,
 }) => {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const gameInstance = useRef<GameRenderer | null>(null);
@@ -58,8 +58,7 @@ const Game: React.FC<IGameProps> = ({
 		setPlayer1AsReady: notifyPlayerIsReady,
 		askForAnotherOpponent,
 		socketRef,
-	} = useGameSocket();
-	// Create a ref to out context's socket
+	} = useGameSocket({ opponentLogin });
 
 	useEffect(() => {
 		// If the HTML canvas element has loaded,
@@ -100,14 +99,11 @@ const Game: React.FC<IGameProps> = ({
 		}
 	}, [gameData.userWantsNewOpponent]);
 
+	// We're only sending powerupSettingUpdates if we have an opponent
+	// Otherwise the button is disabled anyway
 	useEffect(() => {
-		sharePowerupSettingUpdate();
+		if (gameData.opponentInfo) sharePowerupSettingUpdate();
 	}, [gameData.userPowerupsDisabled]);
-
-	// useEffect(() => {
-	// Everytime the server sends a state update, we need to apply it
-	// gameInstance.current?.gameLogic.gameStateServerUpdate(gameData.gameState);
-	// }, [gameData.gameState]);
 
 	return (
 		<Window
@@ -122,7 +118,7 @@ const Game: React.FC<IGameProps> = ({
 			{/* TODO: add the player information above the canvas game */}
 			<div className="game-wrapper">
 				{!gameData.gameIsPlaying && <GameOverlay />}
-				{gameData.gamePowerUp && <GamePowerUp />}
+				{gameData.gameIsPlaying && gameData.gamePowerUp && <GamePowerUp />}
 				<GameCanvas canvasProps={canvasSize} ref={canvasRef} />
 			</div>
 		</Window>
