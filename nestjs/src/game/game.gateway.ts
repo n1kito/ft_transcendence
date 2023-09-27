@@ -11,6 +11,7 @@ import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { GameService } from './game.service';
 // import { GameRoomStatus, PlayerGameStatus, gameRoom } from '@prisma/client';
 import { IPlayerMovementPayload } from 'shared-lib/types/game';
+import { TokenService } from 'src/token/token.service';
 
 interface IRoomInformationProps {
 	id: number;
@@ -27,8 +28,11 @@ export class GameGateway
 
 	constructor(
 		private readonly prisma: PrismaService,
+		private readonly tokenService: TokenService,
 		private readonly gameService: GameService,
-	) {}
+	) {
+		// webSocketRateLimiter('10s', 100);
+	}
 
 	/*
 	░█░░░▀█▀░█▀▀░█▀▀░█▀▀░█░█░█▀▀░█░░░█▀▀░
@@ -48,10 +52,18 @@ export class GameGateway
 	*/
 
 	handleConnection(clientSocket: Socket) {
+		// verify if user is authenticated
+		const token = clientSocket.handshake.auth.accessToken;
+		if (!token) {
+			console.error('token not found');
+			clientSocket.disconnect();
+		}
 		try {
+			this.tokenService.verifyToken(token);
 			this.gameService.handleNewClientConnection(clientSocket).then(() => {});
 		} catch (error) {
 			console.error('handleConnection():', error.message);
+			clientSocket.disconnect();
 		}
 	}
 
