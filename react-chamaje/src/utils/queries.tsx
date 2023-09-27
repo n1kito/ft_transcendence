@@ -540,6 +540,37 @@ export async function findPrivateMessage(
 	}
 }
 
+export async function setInviteReply(
+	messageId: number,
+	reply: boolean,
+	accessToken: string,
+) {
+	try {
+		const response = await fetch('api/chat/setInviteReply', {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${accessToken}`,
+			},
+			credentials: 'include',
+			body: JSON.stringify({
+				messageId: messageId,
+				reply: reply,
+			}),
+		});
+		if (!response.ok) {
+			const responseError = await response.json();
+			throw new Error(responseError.message);
+		}
+		return response.json();
+	} catch (e) {
+		if (e instanceof Error && typeof e.message === 'string') {
+			throw new Error(e.message);
+		} else
+			throw new Error('Something went wrong creating private message room');
+	}
+}
+
 /* ********************************************************************* */
 /* ***************************** MESSAGES ****************************** */
 /* ********************************************************************* */

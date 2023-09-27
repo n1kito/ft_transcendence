@@ -339,7 +339,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 										return (
 											<FriendBadge
 												key={'PM' + room.chatId}
-												badgeTitle={room.name}
+												badgeTitle={room.name || 'anonymous'}
 												badgeImageUrl={`/api/images/${room.avatar}`}
 												onlineIndicator={friend ? friend.onlineStatus : false}
 												isClickable={true}

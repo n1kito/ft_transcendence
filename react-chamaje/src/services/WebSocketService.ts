@@ -134,6 +134,16 @@ class WebSocketService {
 		console.log('message listener off');
 	}
 
+	// replyToInvit(chatId: number, messageId: number, reply: boolean) {
+	// 	this.socket.emit('replyToInvit', {
+	// 		chatId: chatId,
+	// 		messageId: messageId,
+	// 		reply: reply,
+	// 	});
+	// 	console.log('reply');
+
+	// }
+
 	/* ********************************************************************* */
 	/* ******************************* ADMIN ******************************* */
 	/* ********************************************************************* */

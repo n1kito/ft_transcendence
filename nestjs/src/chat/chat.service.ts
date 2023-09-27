@@ -54,12 +54,14 @@ export class ChatService {
 			},
 		});
 		const messages = response.messages.map((currentMessage) => ({
+			id: currentMessage.id,
 			sentById: currentMessage.userId,
 			sentAt: currentMessage.sentAt,
 			content: currentMessage.content,
 			isNotif: currentMessage.isNotif,
 			target: currentMessage.target,
 			channelInvitation: currentMessage.channelInvitation,
+			reply: currentMessage.reply,
 		}));
 
 		// get the login for each sender
@@ -94,6 +96,7 @@ export class ChatService {
 
 		// get messages and the array with the user together
 		const messagesWithLogin = messages.map((currentMessage, index) => ({
+			id: currentMessage.id,
 			sentById: currentMessage.sentById,
 			sentAt: currentMessage.sentAt,
 			content: currentMessage.content,
@@ -105,6 +108,7 @@ export class ChatService {
 			targetLogin: targetLoginRes.at(index)
 				? targetLoginRes.at(index).login
 				: null,
+			reply: currentMessage.reply,
 		}));
 		return messagesWithLogin;
 	}
@@ -514,5 +518,26 @@ export class ChatService {
 			},
 		});
 		return chatExists;
+	}
+
+	// true if the user received the message
+	async checkRecipient(userId: number, messageId: number) {
+		const res = await this.prisma.message.findUnique({
+			where: { id: messageId },
+			select: { chatId: true, userId: true },
+		});
+		const isUserInChat = await this.isUserInChat(userId, res.chatId);
+		if (!isUserInChat) return false;
+		else if (userId !== res.userId) return true;
+		return false;
+	}
+
+	async replyToInvite(messageId: number, reply: boolean) {
+		const res = await this.prisma.message.update({
+			where: { id: messageId },
+			data: {
+				reply: reply,
+			},
+		});
 	}
 }

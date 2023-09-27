@@ -330,12 +330,45 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 			});
 	};
 
-	const blockUser = () => {
-		for (const key in chatData.chatsList) {
-			const current = chatData.chatsList[key];
+	const inviteToPlay = () => {
+		// get userID to invite
+		for (const current of chatData.chatsList) {
 			if (current.chatId === chatId) {
-				for (const pKey in current.participants) {
-					const pCurrent = current.participants[pKey];
+				for (const pCurrent of current.participants) {
+					if (pCurrent !== userData?.id) {
+						sendMessageQuery(
+							accessToken,
+							'',
+							chatId,
+							pCurrent,
+							'play',
+							pCurrent,
+						)
+							.then(() => {
+								chatData.socket?.sendMessage(
+									'',
+									chatId,
+									userData ? userData?.login : '',
+									'',
+									'play',
+									pCurrent,
+									name,
+								);
+							})
+							.catch((e) => {
+								console.error('Could not send invitation: ', e.message);
+							});
+					}
+				}
+			}
+		}
+	};
+
+	const blockUser = () => {
+		// get the userID to block
+		for (const current of chatData.chatsList) {
+			if (current.chatId === chatId) {
+				for (const pCurrent of current.participants) {
 					if (pCurrent !== userData?.id) {
 						if (!isBlocked) {
 							blockUserQuery(accessToken, pCurrent)
@@ -472,7 +505,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 
 	return (
 		<Window
-			windowTitle={isChannel ? name : `Chat with ${name}`}
+			windowTitle={isChannel ? name : `Chat with ${name || 'anonymous'}`}
 			onCloseClick={onCloseClick}
 			windowDragConstraintRef={windowDragConstraintRef}
 			links={
@@ -490,12 +523,11 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							{
 								name: 'Profile',
 								onClick: () => {
-									console.log('PROFILE, login: ', name);
 									setShowFriendProfile(true);
 									setProfileLogin(name);
 								},
 							},
-							{ name: 'Play', onClick: () => null },
+							{ name: 'Play', onClick: inviteToPlay },
 							{ name: isBlocked ? 'Unblock' : 'Block', onClick: blockUser },
 							{ name: 'Leave chat', onClick: leavePM },
 					  ]
@@ -546,6 +578,17 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 										/>
 									}
 								</ChatBubble>
+							);
+						} else if (currentMessage.isNotif === 'play') {
+							return (
+								<ChatGameInvite
+									key={index}
+									messageId={currentMessage.id || 0}
+									sender={currentMessage.login}
+									recipient={currentMessage.targetLogin}
+									sentAt={currentMessage.sentAt}
+									reply={currentMessage.reply}
+								></ChatGameInvite>
 							);
 						} else {
 							return (
