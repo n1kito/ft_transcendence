@@ -23,6 +23,7 @@ import {
 import RetrieveAccessToken from './components/RetrieveAccessToken/RetrieveAccessToken';
 import IconContextProvider from './contexts/IconContext';
 import { GameProvider } from './contexts/GameContext';
+import { WindowProvider } from './contexts/WindowContext';
 
 // These are functions that will return a component passed as parameter depending on user authentification status
 const ProtectedLogin = showComponentIfNotLoggedIn(Login);
@@ -37,31 +38,33 @@ function App() {
 						<GameProvider>
 							<Layout>
 								<IconContextProvider>
-									<Routes>
-										<Route path="/" element={<ProtectedLogin />} />
-										{/* <Route path="/desktop" element={<ProtectedDesktop />} /> */}
-										{/* <Route path="/friends" element={<ProtectedDesktop />} /> */}
-										{/* <Route path="/" element={<Login />} /> */}
-										<Route path="/desktop" element={<Desktop />} />
-										{/* <Route path="/friends" element={<Desktop />} /> */}
-										<Route
-											path="/retrieve-token"
-											element={<RetrieveAccessToken />}
-										/>
-										<Route
-											path="*"
-											element={
-												<DesktopIcon
-													name="Error :("
-													id={-1}
-													iconSrc={roadconeIcon}
-													onDoubleClick={() => {
-														/* TODO: redirect to the homepage ? */
-													}}
-												/>
-											}
-										/>
-									</Routes>
+									<WindowProvider>
+										<Routes>
+											<Route path="/" element={<ProtectedLogin />} />
+											{/* <Route path="/desktop" element={<ProtectedDesktop />} /> */}
+											{/* <Route path="/friends" element={<ProtectedDesktop />} /> */}
+											{/* <Route path="/" element={<Login />} /> */}
+											<Route path="/desktop" element={<Desktop />} />
+											{/* <Route path="/friends" element={<Desktop />} /> */}
+											<Route
+												path="/retrieve-token"
+												element={<RetrieveAccessToken />}
+											/>
+											<Route
+												path="*"
+												element={
+													<DesktopIcon
+														name="Error :("
+														id={-1}
+														iconSrc={roadconeIcon}
+														onDoubleClick={() => {
+															/* TODO: redirect to the homepage ? */
+														}}
+													/>
+												}
+											/>
+										</Routes>
+									</WindowProvider>
 								</IconContextProvider>
 							</Layout>
 						</GameProvider>

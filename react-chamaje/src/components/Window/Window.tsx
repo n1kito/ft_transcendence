@@ -3,6 +3,7 @@ import './Window.css';
 import WindowTitleBar from './Components/WindowTitleBar/WindowTitleBar';
 import WindowMenu from './Components/WindowMenu/WindowMenu';
 import { motion, useDragControls } from 'framer-motion';
+import { useWindowContext } from 'src/contexts/WindowContext';
 
 export interface MenuLinks {
 	name: string;
@@ -16,6 +17,12 @@ export interface WindowProps {
 	resizable?: boolean;
 	children?: ReactNode;
 	windowDragConstraintRef?: React.RefObject<HTMLDivElement>;
+	initialWindowPosition?: {
+		top?: number;
+		left?: number;
+		bottom?: number;
+		right?: number;
+	};
 	onCloseClick: () => void;
 }
 
@@ -25,9 +32,15 @@ const Window: React.FC<WindowProps> = ({
 	children,
 	links = [],
 	useBeigeBackground = false,
+	initialWindowPosition,
 	windowDragConstraintRef,
 	onCloseClick,
 }) => {
+	const { maxZIndex, updateMaxZIndex } = useWindowContext();
+	const [windowZIndex, setWindowZIndex] = useState(maxZIndex);
+	const [initialXPosition, setInitialXPosition] = useState<number>(0);
+	const [initialYPosition, setInitialYPosition] = useState<number>(0);
+
 	const [dragIsEnabled, setDragIsEnabled] = useState(false);
 	const windowRef = useRef<HTMLDivElement | null>(null);
 	const [windowIsBeingResized, setWindowIsBeingResized] = useState(false);
@@ -43,6 +56,10 @@ const Window: React.FC<WindowProps> = ({
 	const dragControls = useDragControls();
 
 	function triggerDragOnElem(event: React.PointerEvent<HTMLDivElement>) {
+		// Change the z-index of the window even when just dragging it
+		updateMaxZIndex();
+		setWindowZIndex(windowZIndex + 1);
+		// And start dragging !
 		dragControls.start(event, {});
 	}
 
@@ -95,10 +112,38 @@ const Window: React.FC<WindowProps> = ({
 		}
 	}, [resizable, windowIsBeingResized]);
 
+	// When the component mounts, bring it to the front by updating its z-index
+	// and give it saved coordinates if they exist
+	useEffect(() => {
+		updateMaxZIndex();
+		if (windowRef.current) {
+			windowRef.current.style.zIndex = String(maxZIndex + 1);
+		}
+	}, []);
+
+	// Handler when window needs to be brought to the front of the screen
+	const bringToFront = () => {
+		updateMaxZIndex();
+		if (windowRef.current) {
+			windowRef.current.style.zIndex = String(maxZIndex + 1);
+		}
+	};
+
 	return (
 		<motion.div
-			initial={{ opacity: 0, scale: 0 }}
-			animate={{ scale: 1, opacity: 1 }}
+			id={`${windowTitle.toLowerCase()}-window`}
+			initial={{
+				left: initialWindowPosition?.left || 'initial',
+				top: initialWindowPosition?.top || 'initial',
+				bottom: initialWindowPosition?.bottom || 'initial',
+				right: initialWindowPosition?.right || 'initial',
+				opacity: 0,
+				scale: 0,
+			}}
+			animate={{
+				scale: 1,
+				opacity: 1,
+			}}
 			exit={{ opacity: 0, scale: 0 }}
 			transition={{ duration: 0.2 }}
 			className="window-wrapper"
@@ -108,6 +153,7 @@ const Window: React.FC<WindowProps> = ({
 			dragListener={false}
 			dragConstraints={windowDragConstraintRef}
 			ref={windowRef}
+			onClick={bringToFront}
 			onAnimationComplete={() => {
 				// Once the div has fully transitionned in,
 				// store its initial dimensions in the corresponding state

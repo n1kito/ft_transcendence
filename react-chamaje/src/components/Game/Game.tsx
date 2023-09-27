@@ -107,6 +107,7 @@ const Game: React.FC<IGameProps> = ({
 
 	return (
 		<Window
+			initialWindowPosition={{ bottom: 25, left: 25 }}
 			windowTitle="Game"
 			onCloseClick={() => {
 				console.log('Player intentionally closed the window.');

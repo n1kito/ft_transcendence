@@ -18,6 +18,7 @@ const Channels: React.FC<IPrivateMessagesProps> = ({
 
 	return (
 		<Window
+			initialWindowPosition={{ right: 50 }}
 			windowTitle="Channels"
 			useBeigeBackground={true}
 			onCloseClick={onCloseClick}

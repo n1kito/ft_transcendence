@@ -25,7 +25,7 @@ async function bootstrap() {
 	app.use(cookieParser());
 
 	// Setup a global filter to catch all unexpected exceptions
-	app.useGlobalFilters(new AllExceptionsFilter());
+	// app.useGlobalFilters(new AllExceptionsFilter());
 
 	app.use(
 		'/images',

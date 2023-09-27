@@ -20,7 +20,8 @@
 	cursor: default;
 	/* overflow: hidden; */
 	overflow: visible;
-	position: relative;
+	/* position: relative; */
+	position: absolute;
 }
 
 .window-content {

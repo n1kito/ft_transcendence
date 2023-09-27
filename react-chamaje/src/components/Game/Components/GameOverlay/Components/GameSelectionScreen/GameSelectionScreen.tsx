@@ -119,7 +119,7 @@ const GameSelectionScreen: React.FC<IGameSelectionScreenProps> = () => {
 							gameData.userPowerupsDisabled ? [360, 75, 80] : [200, 70, 90]
 						}
 					>
-						power-ups
+						✨ power-ups
 						{gameData.userPowerupsDisabled || gameData.opponentPowerupsDisabled
 							? ' ✗'
 							: ' ✔'}

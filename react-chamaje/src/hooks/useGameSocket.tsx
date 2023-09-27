@@ -24,13 +24,18 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 	// on hook init
 	useEffect(() => {
 		if (!isAuthentificated) return;
+
+		// Define queryParameters for the socket connection so we can
+		// handle the case where there is no opponentLogin
+		const queryParameters: { opponentLogin?: string } = {};
+		if (opponentLogin) queryParameters.opponentLogin = opponentLogin;
 		if (!socketRef.current) {
 			// Initialize the socket connection
 			socketRef.current = io({
 				path: '/ws/',
 				reconnection: false,
 				auth: { accessToken: accessToken },
-				query: { opponentLogin: opponentLogin },
+				query: queryParameters,
 				transports: ['websocket'], // Limit to websocket only
 				timeout: 2000, // Connection timeout in ms
 			});

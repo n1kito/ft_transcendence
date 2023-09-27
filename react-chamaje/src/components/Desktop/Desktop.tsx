@@ -25,7 +25,7 @@ const Desktop = () => {
 	const [profileWindowIsOpen, setProfileWindowIsOpen] = useState(false);
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
 	const [channelsWindowIsOpen, setChannelsWindowIsOpen] = useState(false);
-	const [gameWindowIsOpen, setGameWindowIsOpen] = useState(true);
+	const [gameWindowIsOpen, setGameWindowIsOpen] = useState(false);
 
 	// const navigate = useNavigate();
 	const { isAuthentificated, logOut, accessToken } = useAuth();
@@ -106,32 +106,35 @@ const Desktop = () => {
 						login="mjallada"
 						onCloseClick={() => setProfileWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
+						key="profile-window"
 					/>
 				)}
 				{chatWindowIsOpen && (
 					<PrivateMessages
 						onCloseClick={() => setChatWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
+						key="private-messages-window"
 					/>
 				)}
 				{channelsWindowIsOpen && (
 					<Channels
 						onCloseClick={() => setChannelsWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
+						key="channels-window"
 					/>
 				)}
 				{gameWindowIsOpen && (
 					<Game
-						opponentLogin={
-							userData.login == 'mjallada'
-								? 'freexav'
-								: userData.login == 'jeepark'
-								? 'cgosseli'
-								: ''
-						}
+						// opponentLogin={
+						// 	userData.login == 'mjallada'
+						// 		? 'freexav'
+						// 		: userData.login == 'jeepark'
+						// 		? 'cgosseli'
+						// 		: ''
+						// }
 						onCloseClick={() => setGameWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
-						// opponentId={userData?.id === 7 ? 8 : 7}
+						key="game-window"
 					/>
 				)}
 			</AnimatePresence>
