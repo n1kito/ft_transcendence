@@ -8,13 +8,20 @@ export function showComponentIfNotLoggedIn<P extends object>(
 ) {
 	const WrappedComponent: React.FC<P> = (props) => {
 		const navigate = useNavigate();
-		const { isAuthentificated } = useAuth();
+		const { isAuthentificated, isTwoFAEnabled, isTwoFaVerified } = useAuth();
 
 		useEffect(() => {
-			if (isAuthentificated) {
+			// if authenticate and 2FA was disabled or
+			// if authenticate and 2FA was enabled and code was verified
+			// go to desktop
+
+			if (
+				(isAuthentificated && !isTwoFAEnabled) ||
+				(isAuthentificated && isTwoFAEnabled && isTwoFaVerified)
+			) {
 				navigate('/desktop');
 			}
-		}, [isAuthentificated, navigate]);
+		}, [isAuthentificated, navigate, isTwoFAEnabled]);
 		return <Component {...props} />;
 	};
 

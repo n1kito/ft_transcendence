@@ -16,6 +16,10 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CustomRequest } from './user.controller';
 import { Prisma } from '@prisma/client';
 import { plainToClass } from 'class-transformer';
+import * as fs from 'fs';
+import { constants } from 'fs';
+import { error } from 'console';
+import { SearchUserDto } from './dto/search-user.dto';
 // import { IMatchHistory } from 'shared-types';
 
 interface IMatchHistory {
@@ -73,6 +77,18 @@ export class UserService {
 					login: updateUserDto.login,
 				},
 			});
+
+			const isLoginLocked: boolean = !!updateUserDto.login;
+			const isEmailLocked: boolean = !!updateUserDto.email;
+
+			const lock = await this.prisma.user.update({
+				where: { id: userId },
+				data: {
+					login_is_locked: isLoginLocked,
+					email_is_locked: isEmailLocked,
+				},
+			});
+
 			// Check if there are any validation errors from dto, throw error
 			if (this.errors.length > 0) {
 				throw new CustomException(this.errors);
@@ -345,4 +361,150 @@ export class UserService {
 			}
 			return false;
 		}
+	async deleteUser(userId: number) {
+		try {
+			const user = await this.prisma.findUserById(userId);
+			// retrieve user's image name in database and create path
+			const imagePath = `./images/${user.image}`;
+			// delete user
+			const isdeleted = await this.prisma.user.delete({
+				where: { id: userId },
+			});
+			// if success then delete static image file im ./images
+			fs.access(imagePath, constants.F_OK, (err) => {
+				if (err) return;
+				fs.unlink(imagePath, (error) => {
+					if (error) throw error;
+				});
+			});
+		} catch (error) {
+			throw Error('Could not delete user');
+		}
+	}
+
+	async deleteFriend(userId: number, friendUserIdToDelete: number) {
+		try {
+			// retrieve user's data including its friends list
+			const user = await this.prisma.user.findUnique({
+				where: {
+					id: userId,
+				},
+				include: {
+					friends: true,
+				},
+			});
+
+			if (!user) throw new Error('User not found');
+
+			// in friends array, remove the requested friend by its id
+			const updatedFriends = user.friends
+				.filter((friend) => friend.id !== friendUserIdToDelete)
+				.map((friend) => ({
+					id: friend.id,
+				}));
+
+			// set the updated friends array
+			const updatedUser = await this.prisma.user.update({
+				where: {
+					id: userId,
+				},
+				data: {
+					friends: {
+						set: updatedFriends,
+					},
+				},
+			});
+		} catch (error) {
+			throw new Error('Could not delete friend');
+		}
+	}
+
+	async addFriend(userId: number, friendUserIdToAdd: number) {
+		try {
+			// Retrieve user's data including friends list
+			let user = await this.prisma.user.findUnique({
+				where: {
+					id: userId,
+				},
+				include: {
+					friends: true,
+				},
+			});
+
+			if (!user) throw 'User not found';
+
+			// Check if the friend to add already exists in the user's friends list
+			const friendExists = user.friends.some(
+				(friend) => friend.id === friendUserIdToAdd,
+			);
+
+			if (friendExists) {
+				throw 'Already a friend';
+			}
+
+			// update user's friends array with the newly added friend
+			user = await this.prisma.user.update({
+				where: {
+					id: userId,
+				},
+				data: {
+					friends: {
+						connect: {
+							id: friendUserIdToAdd,
+						},
+					},
+				},
+				include: {
+					friends: true,
+				},
+			});
+		} catch (error) {
+			throw error;
+		}
+	}
+
+	async uploadAvatar(file: Express.Multer.File, userId: number) {
+		// get user in db
+		let user = await this.prisma.findUserById(userId);
+		if (!user) {
+			throw 'User not found';
+		}
+		// retrieve avatar name in database
+		const oldAvatarName = user.image;
+		// append it to get filepath
+		const filePathToDelete = `./images/${oldAvatarName}`;
+
+		try {
+			// update image path in database
+			user = await this.prisma.user.update({
+				where: {
+					id: userId,
+				},
+				data: {
+					image: file.filename,
+					image_is_locked: true,
+				},
+			});
+			// if success delete old avatar
+			fs.access(filePathToDelete, constants.F_OK, (err) => {
+				if (err) console.log(`${file} ${err ? 'does not exist' : 'exists'}`);
+				fs.unlink(filePathToDelete, (error) => {
+					if (error) throw error;
+				});
+			});
+		} catch (error) {
+			throw new Error('Could not update avatar');
+		}
+	}
+
+	async validateLoginDto(login: string): Promise<boolean> {
+		// init searchUserDto
+		const searchUserDto = new SearchUserDto();
+		searchUserDto.login = login;
+
+		// Validate the searchUserDto
+		const errors = await validate(searchUserDto);
+		// if found error return true
+		return errors.length > 0 ? true : false;
+	}
 }

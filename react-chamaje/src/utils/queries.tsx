@@ -1,4 +1,3 @@
-
 /* ********************************************************************* */
 /* ******************************* CHAT ******************************** */
 /* ********************************************************************* */
@@ -249,7 +248,7 @@ export async function inviteToChannelQuery(
 			credentials: 'include',
 			body: JSON.stringify({
 				channelId: channelId,
-				secondUserId: secondUserId
+				secondUserId: secondUserId,
 			}),
 		});
 		if (!response.ok) {

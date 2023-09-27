@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/userAuth';
 
 const RetrieveAccessToken = () => {
-	const { updateAccessToken } = useAuth();
+	const { updateAccessToken, isTwoFAEnabled, setIsTwoFAEnabled } = useAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
 
@@ -27,8 +27,14 @@ const RetrieveAccessToken = () => {
 					if (data.accessToken) {
 						// Store token in AuthContext
 						updateAccessToken(data.accessToken);
-						// Redirect user to desktop
-						navigate('/desktop');
+
+						// Redirect user back to login page to continue login process with google authenticator
+						if (data.twofa) {
+							setIsTwoFAEnabled(true);
+							navigate('/');
+						}
+						// else redirect to desktop page
+						else navigate('/desktop');
 					}
 				} catch (error) {
 					console.error('Error fetching access token: ', error);

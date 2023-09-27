@@ -4,12 +4,16 @@ import { config } from 'dotenv';
 import * as cookieParser from 'cookie-parser';
 import * as express from 'express';
 import { join } from 'path';
+import { ExpressAdapter } from '@nestjs/platform-express';
 
 // Configure dotenv
 config();
 
 async function bootstrap() {
-	const app = await NestFactory.create(AppModule);
+	const app = await NestFactory.create(
+		AppModule,
+		new ExpressAdapter(express()),
+	);
 	// const corsOptions: CorsOptions = {
 	// 	origin: 'http://localhost:3001',
 	// 	methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -35,6 +39,7 @@ async function bootstrap() {
 			),
 		),
 	);
+	app.use('/images', express.static('images'));
 	await app.listen(3000, '0.0.0.0').catch((error) => {
 		console.error('Error starting the application:', error);
 	});

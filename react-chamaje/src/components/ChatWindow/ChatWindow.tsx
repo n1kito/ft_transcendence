@@ -523,7 +523,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 									}
 									sender={currentMessage.login}
 									time={date.toLocaleString('en-US', dateFormatOptions)}
-									senderAvatar={currentMessage.avatar}
+									senderAvatar={`/api/images/${currentMessage.avatar}`}
 									isAdmin={isAdmin || isOwner}
 								>
 									{

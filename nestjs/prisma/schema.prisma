@@ -12,15 +12,19 @@ datasource db {
 }
 
 model User {
-    id           Int      @id @unique @default(autoincrement())
-    ft_id        Int?     @unique
-    hash         String?
-    login        String   @unique
-    email        String   @unique
-    image        String?
-    createdAt    DateTime @default(now())
-    token        String?
-    onlineStatus Boolean  @default(false)
+    id              Int         @id @unique @default(autoincrement())
+    ft_id           Int?        @unique
+    hash            String?
+    login           String      @unique
+    email           String      @unique
+    image           String?
+    createdAt       DateTime    @default(now())
+    token           String?
+
+    // Two Factor authentication
+    twoFactorAuthenticationSecret       String? 
+    isTwoFactorAuthenticationEnabled    Boolean @default(false)
+    isTwoFactorAuthenticationVerified   Boolean @default(false)
 
     // Friendship system
     friends          User[]  @relation("Friendship")

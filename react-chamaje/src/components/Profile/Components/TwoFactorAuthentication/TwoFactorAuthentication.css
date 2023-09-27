@@ -1,0 +1,38 @@
+/* Styling the TwoFactorAuthentication component */
+
+.two-factor-auth-wrapper {
+	display: flex;
+	flex-direction: row;
+	gap: 1rem;
+	width: 100%;
+}
+
+.qr-code {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	width: 50%;
+	align-items: center;
+}
+
+.validation-code {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	/* width: 50%; */
+	align-items: center;
+}
+
+.validation-code-form {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+
+	padding: 0.5rem;
+	gap: 1rem;
+}
+.qr-code img {
+	border-radius: 0.6;
+	overflow: hidden;
+	width: 60%;
+}

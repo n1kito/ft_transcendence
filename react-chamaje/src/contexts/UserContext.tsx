@@ -2,6 +2,7 @@ import React, {
 	Dispatch,
 	SetStateAction,
 	createContext,
+	useEffect,
 	useState,
 } from 'react';
 // import { IChatStruct } from 'src/components/PrivateMessages/PrivateMessages';
@@ -23,8 +24,6 @@ export interface UserData {
 	image: string;
 	login: string;
 	email: string;
-	friends: [];
-	chatSocket: WebSocketService | null;
 	killCount?: number;
 	// TODO: the killcount was set as optional here to remove a compiling error with ProfileSettings.tsx but need to check it's ok
 	// same for the other properties below
@@ -44,24 +43,78 @@ export interface UserData {
 	// chat properties
 }
 
+// interface UserContextType {
+// 	userData: UserData | null;
+// 	setUserData: Dispatch<SetStateAction<UserData | null>>;
+// }
+
+// Default content for an empty userdata object
+const defaultUserData: UserData = {
+	// User informatiom
+	id: 0,
+	login: '',
+	image: '',
+	email: '',
+
+	// Profile information
+	gamesCount: 0,
+	// Target
+	targetDiscoveredByUser: false,
+};
+
 interface UserContextType {
-	userData: UserData | null;
-	setUserData: Dispatch<SetStateAction<UserData | null>>;
+	userData: UserData;
+	updateUserData: (updates: Partial<UserData>) => void;
+	resetUserData: () => void;
 }
 
 // TODO: should we setup a custom type here ?
 export const UserContext = createContext<UserContextType>({
-	userData: null,
-	setUserData: () => {
+	userData: defaultUserData,
+	updateUserData: () => {
+		throw new Error('updateUSerGata function must be overriden');
+	},
+	resetUserData: () => {
 		throw new Error('setUserData function must be overridden');
 	},
 });
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-	const [userData, setUserData] = useState<UserData | null>(null);
+	// State of the context
+	// We use our initial state aboe to initialize it
+	const [userData, setUserData] = useState<UserData>(defaultUserData);
+
+	// TODO: remove this and corresponding logs
+	// Logs the updates to userData as they happen
+	// useEffect(() => {
+	// 	logUserData(`${JSON.stringify(userData, null, 4)}`);
+	// }, [userData]);
+
+	// We want a helper function that will allow us to update one, many or all
+	// properties of the game state without having to override the entire thing manually
+	const updateUserData = (updates: Partial<UserData>) => {
+		setUserData((prevUserData: UserData) => ({
+			...prevUserData,
+			...updates,
+		}));
+	};
+
+	// Helper function to reset the user data state to its initial state in one function call
+	const resetUserData = () => {
+		logUserData('reset the userData context');
+		setUserData(defaultUserData);
+	};
+
+	const logUserData = (content: string) => {
+		console.log(
+			`%c UserDataUpdated %c ${content}`,
+			'background: yellow; color:red',
+			'',
+		);
+	};
 
 	return (
-		<UserContext.Provider value={{ userData, setUserData }}>
+		<UserContext.Provider value={{ userData, updateUserData, resetUserData }}>
 			{children}
 		</UserContext.Provider>
 	);

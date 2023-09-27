@@ -41,7 +41,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	const [searchedLogin, setSearchedLogin] = useState('');
 	const [searchUserError, setSearchUserError] = useState('');
 	const [searchUserSuccess, setSearchUserSuccess] = useState('');
-	const { userData, setUserData } = useContext(UserContext);
+	const { userData } = useContext(UserContext);
 	const { accessToken } = useAuth();
 	const {
 		chatData,
@@ -336,7 +336,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 											<FriendBadge
 												key={'PM' + room.chatId}
 												badgeTitle={room.name}
-												badgeImageUrl={`http://localhost:3000${room.avatar}`}
+												badgeImageUrl={`/api/images/${room.avatar}`}
 												onlineIndicator={friend ? friend.onlineStatus : false}
 												isClickable={true}
 												onClick={() => {

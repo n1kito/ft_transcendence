@@ -19,6 +19,7 @@ class WebSocketService {
 		try {
 			// Listen for the 'connect' event
 			this.socket.on('connect', () => {
+				console.log('🟢 ', this.userId, ' just connected');
 				this.sendServerConnection();
 			});
 			// Listen for the 'disconnect' event prevent reconnection from wanted disconnection
@@ -31,6 +32,7 @@ class WebSocketService {
 					this.socket.connect();
 				} else {
 					// this.endConnection(this.userId);
+					console.log('🔴 disconnection');
 					this.socket.disconnect();
 				}
 			});
@@ -46,8 +48,13 @@ class WebSocketService {
 	/* ********************************************************************* */
 	/* ************************** CONNECTED STATUS ************************* */
 	/* ********************************************************************* */
+	getSocketId(): string {
+		return this.socket.id;
+	}
+
 	sendServerConnection() {
 		try {
+			// console.log('🟢 ping server !');
 			this.socket.emit('ServerConnection', this.userId);
 		} catch (e) {
 			console.error(e, ': WebSocketService sendServerConnection');
@@ -165,4 +172,5 @@ class WebSocketService {
 		console.log('makeAdmin listener off');
 	}
 }
+
 export default WebSocketService;
