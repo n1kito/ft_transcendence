@@ -28,6 +28,8 @@ export interface IMessage {
 	target?: number;
 	channelInvitation?: string;
 	targetLogin?: string;
+	reply?: boolean;
+	id?: number;
 }
 
 export interface IUserAction {

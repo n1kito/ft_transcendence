@@ -29,6 +29,8 @@ import { KickDTO } from './dto/kick.dto';
 import { FindPMDTO } from './dto/findPM.dto';
 import { InviteDTO } from './dto/invite.dto';
 import { removeEmitHelper } from 'typescript';
+import { SetInviteReplyDTO } from './dto/setInviteReply.dto';
+import { PassThrough } from 'stream';
 
 @Controller('chat')
 export class ChatController {
@@ -71,7 +73,6 @@ export class ChatController {
 		@Res() res: Response,
 	) {
 		try {
-			console.error('🛑🛑🛑', chatId);
 			const nbChatId = +chatId;
 			const userId = this.tokenService.ExtractUserId(
 				request.headers['authorization'],
@@ -847,6 +848,49 @@ export class ChatController {
 		} catch (e) {
 			console.error('error finding private message: ', e.message);
 			res.status(400).json({ message: 'Could not find private message' });
+		}
+	}
+
+	@Put('/setInviteReply')
+	async setInviteReply(
+		@Req() request: CustomRequest,
+		@Body(new ValidationPipe()) validatedData: SetInviteReplyDTO,
+		@Res() response: Response,
+	) {
+		try {
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			// check if the user received the message
+			this.chatService
+				.checkRecipient(userId, validatedData.messageId)
+				.then(() => {
+					this.chatService
+						.replyToInvite(validatedData.messageId, validatedData.reply)
+						.then(() => {
+							response
+								.status(200)
+								.json({ message: 'You replied to the invitation' });
+						})
+						.catch((e) => {
+							console.error(
+								'User could not reply to the invitation: ',
+								e.message,
+							);
+							response
+								.status(400)
+								.json({ message: 'You could not reply to the invitation' });
+						});
+				})
+				.catch((e) => {
+					console.error('User trying to respond to another users message');
+					response
+						.status(403)
+						.json({ message: 'This message was not for to you' });
+				});
+		} catch (e) {
+			response.status(400).json({ message: e.message });
+			console.error('Error setting password: ', e.message);
 		}
 	}
 }
