@@ -12,7 +12,7 @@ import { GameService } from './game.service';
 // import { GameRoomStatus, PlayerGameStatus, gameRoom } from '@prisma/client';
 import { IPlayerMovementPayload } from 'shared-lib/types/game';
 import { TokenService } from 'src/token/token.service';
-
+import webSocketRateLimit from './GameEntities/RateLimit';
 interface IRoomInformationProps {
 	id: number;
 	state: string;
@@ -58,6 +58,7 @@ export class GameGateway
 			console.error('token not found');
 			clientSocket.disconnect();
 		}
+
 		try {
 			this.tokenService.verifyToken(token);
 			this.gameService.handleNewClientConnection(clientSocket).then(() => {});
@@ -100,9 +101,13 @@ export class GameGateway
 	@SubscribeMessage('player-moved')
 	handlePlayerMovement(clientSocket: Socket, payload: IPlayerMovementPayload) {
 		try {
+			// watch `player-moved` messages rate
+			webSocketRateLimit.protect(this.server, clientSocket);
 			this.gameService.handlePlayerMovement(clientSocket, payload.direction);
 		} catch (error) {
 			console.error('handlePlayerMovement():', error.message);
+			// clientSocket.disconnect();
+			clientSocket.emit('error', error.message);
 		}
 	}
 

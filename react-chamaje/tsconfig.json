@@ -17,5 +17,5 @@
 		"jsx": "react-jsx",
 		"baseUrl": "."
 	},
-	"include": ["src"]
+	"include": ["src", "../nestjs/src/game/GameEntities/RateLimit.ts"]
 }

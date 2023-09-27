@@ -6,7 +6,6 @@ import { Socket, io } from 'socket.io-client';
 import useAuth from './userAuth';
 import type { IPlayerInformation } from '../../../shared-lib/types/game';
 import { IPlayerMovementPayload } from 'shared-lib/types/game';
-
 export const useGameSocket = () => {
 	// Import necessary contexts
 	const { userData } = useContext(UserContext);
@@ -15,7 +14,6 @@ export const useGameSocket = () => {
 
 	// Set a socket Ref so I can use it anywhere in this hook
 	const socketRef = useRef<Socket | null>(null);
-
 	// on hook init
 	useEffect(() => {
 		if (!socketRef.current) {
@@ -73,7 +71,12 @@ export const useGameSocket = () => {
 		// 	});
 		// });
 		gameData.socket.on('error', (error) => {
-			console.error('General Error:', error);
+			updateGameData({
+				connectionErrorStatus: `${error}`,
+				opponentIsReconnecting: false,
+			});
+			if (gameData.socket && error === 'Rate Limit exceeded')
+				gameData.socket.disconnect();
 		});
 		// Listen for the 'disconnect' event prevent reconnection from wanted disconnection
 		gameData.socket.on('disconnect', (reason) => {
