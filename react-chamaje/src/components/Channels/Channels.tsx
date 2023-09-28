@@ -307,7 +307,6 @@ const Channels: React.FC<IChannelsProps> = ({
 					chatData.chatsList.find((current) => current.isChannel === true) ? (
 						chatData.chatsList.map((room, index) => {
 							if (room.isChannel) {
-								// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
 								return (
 									<FriendBadge
 										key={'Channel' + room.chatId}

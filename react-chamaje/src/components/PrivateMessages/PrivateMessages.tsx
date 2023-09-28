@@ -49,12 +49,8 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	const [searchUserSuccess, setSearchUserSuccess] = useState('');
 	const { userData } = useContext(UserContext);
 	const { accessToken } = useAuth();
-	const {
-		chatData,
-		updateChatList,
-		getNewChatsList,
-		getNewBlockedUsers,
-	} = useContext(ChatContext);
+	const { chatData, updateChatList, getNewChatsList, getNewBlockedUsers } =
+		useContext(ChatContext);
 
 	/* ********************************************************************* */
 	/* ***************************** WEBSOCKET ***************************** */
@@ -79,7 +75,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 				updatedMessages.push(message);
 				setMessages(updatedMessages);
 			} else {
-
 				// notifications : copy the chat list and add newMessage to the chat concerned
 				let updatedChatList: IChatStruct[] = [];
 				for (const current of chatData.chatsList) {
@@ -116,7 +111,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 		}
 	}, [chatData.chatsList]);
 
-	
 	/* ********************************************************************* */
 	/* ******************************* LOGIC ******************************* */
 	/* ********************************************************************* */
@@ -276,6 +270,8 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 						{
 							name: 'New Chat',
 							onClick: () => {
+								setSearchUserError('');
+								setSearchUserSuccess('');
 								setSettingsPanelIsOpen(true);
 							},
 						},
@@ -323,6 +319,8 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 									isEmptyBadge={true}
 									isChannelBadge={false}
 									onClick={() => {
+										setSearchUserError('');
+										setSearchUserSuccess('');
 										setSettingsPanelIsOpen(true);
 									}}
 								/>

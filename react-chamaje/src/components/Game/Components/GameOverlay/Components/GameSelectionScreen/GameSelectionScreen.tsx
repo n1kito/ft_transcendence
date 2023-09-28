@@ -47,7 +47,7 @@ const GameSelectionScreen: React.FC<IGameSelectionScreenProps> = () => {
 								setNavParam('friendProfile', gameData.opponentInfo?.login);
 							}}
 							isActive={gameData.player2Ready}
-							onlineIndicator={true}
+							// onlineIndicator={true}
 						/>
 					) : (
 						<GameLocatingBadge />

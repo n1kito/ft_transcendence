@@ -9,7 +9,6 @@ import {
 } from 'class-validator';
 
 export class BlockUserDTO {
-	// TODO: do I need to escape more characters? (add '!' ?)
     @IsNotEmpty()
     @IsNumber()
     @IsDefined()
