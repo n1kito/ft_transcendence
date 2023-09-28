@@ -42,6 +42,7 @@ import {
 	IUserBlocked,
 } from 'src/contexts/ChatContext';
 import ChatNotification from './Components/ChatNotification/ChatNotification';
+import { GameContext } from 'src/contexts/GameContext';
 
 export interface IChatWindowProps {
 	onCloseClick: () => void;
@@ -119,6 +120,8 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 		getNewBlockedUsers,
 	} = useContext(ChatContext);
 	const chatContentRef = useRef<HTMLDivElement>(null);
+
+	const { updateGameData } = useContext(GameContext);
 
 	/* ********************************************************************* */
 	/* ***************************** WEBSOCKET ***************************** */
@@ -358,6 +361,11 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 									pCurrent,
 									name,
 								);
+								updateGameData({
+									opponentInfo: { login: name || '', image: '' },
+								});
+
+								setGameWindowIsOpen(true);
 							})
 							.catch((e) => {
 								console.error('Could not send invitation: ', e.message);
