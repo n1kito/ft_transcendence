@@ -26,8 +26,6 @@ interface IFriendsListProps {
 	setShowFriendProfile: React.Dispatch<React.SetStateAction<boolean>>;
 	setProfileLogin: React.Dispatch<React.SetStateAction<string>>;
 	setIsMyFriend: React.Dispatch<React.SetStateAction<boolean>>;
-	// friendIsPlaying: boolean;
-	// setFriendIsPlaying?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const FriendsList: React.FC<IFriendsListProps> = ({
@@ -40,8 +38,6 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 	setShowFriendProfile,
 	setProfileLogin,
 	setIsMyFriend,
-	// setFriendIsPlaying,
-	// friendIsPlaying,
 }) => {
 	const { userData, updateUserData } = useContext(UserContext);
 	const { accessToken } = useAuth();
@@ -123,10 +119,6 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 		if (loginInputError) setLoginInputError('');
 		// if (setProfileError) setProfileError('');
 	}, [settingsPanelIsOpen]);
-
-	useEffect(() => {
-		console.log(friends);
-	}, [friends]);
 
 	return (
 		<Window
