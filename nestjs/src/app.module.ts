@@ -1,4 +1,9 @@
-import { Module } from '@nestjs/common';
+import {
+	MiddlewareConsumer,
+	Module,
+	NestModule,
+	Options,
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
@@ -11,8 +16,9 @@ import { PrismaService } from './services/prisma-service/prisma.service';
 import { TokenModule } from './token/token.module';
 import { GameModule } from './game/game.module';
 import { GameService } from './game/game.service';
-import { ConnectionStatusModule } from './chatWebSocket/chatWebSocket.module';
 import { ChatModule } from './chat/chat.module';
+import { AuthMiddleWare } from './middleware/auth.middleware';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
 	imports: [
@@ -23,11 +29,14 @@ import { ChatModule } from './chat/chat.module';
 		PrismaModule,
 		TokenModule,
 		GameModule,
-		ConnectionStatusModule,
 		ChatModule,
 	],
 	controllers: [AppController],
 	// providers: [AppService, PrismaService, GameService],
 	providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+	configure(consumer: MiddlewareConsumer) {
+		consumer.apply(AuthMiddleWare).forRoutes('*');
+	}
+}

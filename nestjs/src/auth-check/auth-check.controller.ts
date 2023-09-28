@@ -6,10 +6,11 @@ import {
 	HttpStatus,
 	Post,
 	Req,
+	Res,
 } from '@nestjs/common';
 import { AuthCheckService } from './auth-check.service';
 import * as jwt from 'jsonwebtoken';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { TokenService } from 'src/token/token.service';
 
 @Controller('auth-check')
@@ -19,7 +20,8 @@ export class AuthCheckController {
 	// This method checks if the user is authenticated by verifying the access token
 	async checkAuth(
 		@Headers('Authorization') authorization: string,
-	): Promise<{ isAuthentificated: boolean }> {
+		@Res() res: Response,
+	) {
 		try {
 			// Check that an authorization header was included
 			if (!authorization) {
@@ -44,7 +46,8 @@ export class AuthCheckController {
 			// Determine if the user is authenticated based on the presence of a decoded token
 			const isAuthentificated = !!decodedToken;
 			// Return whether the user is authenticated
-			return { isAuthentificated };
+			// return { isAuthentificated };
+			return res.status(200).json({ isAuthentificated: isAuthentificated });
 		} catch (error) {
 			// Handle specific token verification errors and unauthorized cases
 			if (
@@ -52,11 +55,11 @@ export class AuthCheckController {
 				error.name === 'TokenExpiredError' ||
 				error instanceof HttpException // Catch our custom exceptions
 			) {
-				console.log('There was an error with auth-check: ' + error);
 				// If the token is invalid or expired, throw an Unauthorized exception
-				throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+				// throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+				// throw error;
+				return res.status(401).json('unauthorized: invalid or expired token');
 			}
-			throw error;
 		}
 	}
 }
