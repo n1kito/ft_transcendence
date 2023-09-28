@@ -1007,14 +1007,16 @@ export class GameService {
 			}
 			// Update the bestie in the database, if there is one
 			if (mostFrequentOpponentId)
-				await this.prisma.user.update({
-					where: {
-						id: userId,
-					},
-					data: {
-						bestieId: mostFrequentOpponentId,
-					},
-				});
+				this.prisma.user
+					.update({
+						where: {
+							id: userId,
+						},
+						data: {
+							bestieId: mostFrequentOpponentId,
+						},
+					})
+					.catch((e) => console.error('update bestie error: ', e.message));
 		} catch (error) {
 			throw new Error(`updateBestie(): ${error.message}`);
 		}
