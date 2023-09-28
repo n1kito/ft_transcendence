@@ -33,7 +33,7 @@ const Desktop = () => {
 	let iconId = 0;
 
 	// Navigation hook
-	const {params, setNavParam, removeNavParam, getNavParam} =
+	const { params, setNavParam, removeNavParam, getNavParam } =
 		useNavigationParams();
 
 	const { userData, updateUserData, resetUserData } = useContext(UserContext);

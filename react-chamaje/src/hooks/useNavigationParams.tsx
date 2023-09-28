@@ -1,11 +1,11 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 
 type UseNavigationParamsReturnType = {
-	params: URLSearchParams,
-	setNavParam: (name: string, value?: string) => void,
-	resetNavParams: () => void,
-	removeNavParam: (name: string) => void,
-	getNavParam: (name: string) => string | null,
+	params: URLSearchParams;
+	setNavParam: (name: string, value?: string) => void;
+	resetNavParams: () => void;
+	removeNavParam: (name: string) => void;
+	getNavParam: (name: string) => string | null;
 };
 
 export const useNavigationParams = (): UseNavigationParamsReturnType => {
@@ -46,5 +46,5 @@ export const useNavigationParams = (): UseNavigationParamsReturnType => {
 
 	// Return the URLSearchParams object so components can read current URL parameters
 	// and can modify URL parameters with setParams()
-	return {params, setNavParam, resetNavParams, removeNavParam, getNavParam};
+	return { params, setNavParam, resetNavParams, removeNavParam, getNavParam };
 };

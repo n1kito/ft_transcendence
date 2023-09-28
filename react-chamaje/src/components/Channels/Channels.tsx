@@ -214,6 +214,7 @@ const Channels: React.FC<IChannelsProps> = ({
 					setPwdInput('');
 				})
 				.catch((e) => {
+					console.log(e);
 					console.error('Error creating channel: ', e.message);
 					setSettingsNameError(e.message);
 				});
