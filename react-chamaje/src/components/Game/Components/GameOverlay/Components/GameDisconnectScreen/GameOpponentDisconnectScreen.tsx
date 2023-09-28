@@ -38,7 +38,7 @@ const GameOpponentDisconnectScreen: React.FC<
 	return (
 		<>
 			<GameScreenTitle>
-				{`${gameData.opponentInfo?.login || 'Opponent'}`} left :(
+				{`${gameData.opponentInfo?.login || 'Opponent'}`} left :
 			</GameScreenTitle>
 			<span className="game-opponent-disconnect-message">
 				let's wait a bit and see if they come back shall we ? ({waitTime})<br />

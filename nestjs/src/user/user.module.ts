@@ -12,14 +12,4 @@ import { ChatService } from 'src/chat/chat.service';
 	controllers: [UserController],
 	providers: [UserService, PrismaService, ChatService],
 })
-export class UserModule implements NestModule {
-	// This `configure` method is part of the `NestModule` interface and will be called by NestJS when the application starts.
-	configure(consumer: MiddlewareConsumer) {
-		// Here, we are taking the `consumer` object provided by NestJS...
-		consumer
-			// ...and calling the `apply` method on it to apply our `AuthMiddleware`...
-			.apply(AuthMiddleWare)
-			// ...to all routes handled by `UserController`.
-			.forRoutes(UserController);
-	}
-}
+export class UserModule {}

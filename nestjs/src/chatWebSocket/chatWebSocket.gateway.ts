@@ -31,6 +31,12 @@ interface ICommunication {
 	targetLogin?: string;
 }
 
+interface IStatus {
+	userId: number;
+	online: boolean;
+	playing: boolean;
+}
+
 interface IGameInvit {
 	inviterLogin: string;
 	chatId: number;
@@ -81,20 +87,50 @@ export class chatWebSocketGateway
 	// when a client connects to the server, the server emits to all connected
 	// clients the login of this user
 	@SubscribeMessage('ServerConnection')
+<<<<<<< HEAD
+	handleServerConnection(@MessageBody() content: IStatus): void {
+		console.log('content:', content);
+		this.server.emit(
+			'ClientLogIn',
+			content.userId,
+			content.online,
+			content.playing,
+		);
+		console.log(
+			'\n🟢🟢' + content.userId + ' just arrived!🟢🟢\n' + 'status:',
+			content.online,
+			content.playing,
+		);
+=======
 	handleServerConnection(@MessageBody() data: number): void {
 		this.server.emit('ClientLogIn', data);
 		console.log('\n[🟢]' + data + ' just arrived!\n');
+>>>>>>> main
 	}
 
 	// when a client received a 'userLoggedIn' message, it sends back a
 	// response to make itself known to other clients
 	@SubscribeMessage('ServerLogInResponse')
 	handleServerLogInResponse(
-		@MessageBody() data: number,
+		@MessageBody() content: IStatus,
 		@ConnectedSocket() client: Socket,
 	): void {
+<<<<<<< HEAD
+		this.server.emit(
+			'ClientLogInResponse',
+			content.userId,
+			content.online,
+			content.playing,
+		);
+		console.log(
+			'🟢 ClientLogInResponse: ' + content.userId,
+			content.online,
+			content.playing,
+		);
+=======
 		this.server.emit('ClientLogInResponse', data);
 		console.log('[🟢] ClientLogInResponse: ' + data);
+>>>>>>> main
 	}
 
 	@SubscribeMessage('ServerEndedConnection')

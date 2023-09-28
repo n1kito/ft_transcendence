@@ -24,8 +24,6 @@ const InputField: React.FC<InputFieldProps> = ({
 			onChange(newValue);
 		}
 	};
-
-	useEffect(() => {}, []);
 	return (
 		<div className="inputFieldWrapper">
 			<input

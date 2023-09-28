@@ -7,7 +7,6 @@ import { GameContext } from '../../../../contexts/GameContext';
 
 const GameOverlay = () => {
 	const { gameData } = useContext(GameContext);
-
 	return (
 		<div className="game-overlay-wrapper">
 			{gameData.connectedToServer &&

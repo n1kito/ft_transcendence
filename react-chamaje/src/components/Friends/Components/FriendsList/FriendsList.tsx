@@ -82,17 +82,18 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 						login: data.login,
 						image: data.image,
 						onlineStatus: false,
+						playingStatus: false,
 					};
 					// add the new friend to the existing friends list
 					const updatedFriends = [...friends, newFriend];
 					// update the state with the updated friends list
 					setFriends(updatedFriends);
 					// ping to update online status
-					chatData.socket?.sendServerConnection();
+					chatData.socket?.sendServerConnection('online');
 				}
 			})
 			.catch((error) => {
-				setLoginInputError(error);
+				setLoginInputError(error.message);
 			});
 	};
 
@@ -156,6 +157,7 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 							badgeTitle={friend.login}
 							badgeImageUrl={`/api/images/${friend.image}`}
 							onlineIndicator={friend.onlineStatus}
+							playingIndicator={friend.playingStatus}
 							isClickable={true}
 							onClick={() => {
 								onBadgeClick(friend.login);

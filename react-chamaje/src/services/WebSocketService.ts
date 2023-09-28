@@ -4,7 +4,12 @@ import useAuth from 'src/hooks/userAuth';
 
 interface callbackInterface {
 	(data: any): void;
+	// (status: any): void;
 }
+interface callbackStatusInterface {
+	(id: any, online: boolean, playing: boolean): void;
+}
+
 class WebSocketService {
 	public socket: Socket;
 	private userId: number;
@@ -19,7 +24,8 @@ class WebSocketService {
 		try {
 			// Listen for the 'connect' event
 			this.socket.on('connect', () => {
-				this.sendServerConnection();
+				console.log('🟢 ', this.userId, ' just connected');
+				this.sendServerConnection('online');
 			});
 			// Listen for the 'disconnect' event prevent reconnection from wanted disconnection
 			this.socket.on('disconnect', (reason) => {
@@ -50,22 +56,38 @@ class WebSocketService {
 		return this.socket.id;
 	}
 
-	sendServerConnection() {
+	sendServerConnection(status: string) {
 		try {
-			this.socket.emit('ServerConnection', this.userId);
+			console.log('🟢 ping server !', status);
+			//status
+			const isonline = status === 'online' ? true : false;
+			const isplaying = status === 'playing' ? true : false;
+
+			this.socket.emit('ServerConnection', {
+				userId: this.userId,
+				online: isonline,
+				playing: isplaying,
+			});
 		} catch (e) {
 			console.error(e, ': WebSocketService sendServerConnection');
 		}
 	}
 
-	onClientLogIn(callback: callbackInterface) {
-		this.socket.on('ClientLogIn', (data: number) => {
-			callback(data);
-			this.socket.emit('ServerLogInResponse', this.userId);
-		});
+	onClientLogIn(callback: callbackStatusInterface) {
+		this.socket.on(
+			'ClientLogIn',
+			(id: number, online: boolean, playing: boolean) => {
+				callback(id, online, playing);
+				this.socket.emit('ServerLogInResponse', {
+					userId: this.userId,
+					online: online,
+					playing: playing,
+				});
+			},
+		);
 	}
 
-	onClientLogInResponse(callback: callbackInterface) {
+	onClientLogInResponse(callback: callbackStatusInterface) {
 		this.socket.on('ClientLogInResponse', callback);
 	}
 

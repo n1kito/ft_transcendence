@@ -17,6 +17,8 @@ export interface IFriendBadgeProps extends ShadowWrapperProps {
 	dashedBorder?: boolean;
 	isActive?: boolean;
 	shaking?: boolean;
+	setFriendIsPlaying?: React.Dispatch<React.SetStateAction<boolean>>;
+	playingIndicator?: boolean;
 }
 
 const FriendBadge: React.FC<IFriendBadgeProps> = ({
@@ -32,6 +34,8 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 	dashedBorder = isEmptyBadge || false,
 	shaking = false,
 	onClick,
+	setFriendIsPlaying,
+	playingIndicator = false,
 }) => {
 	const userContext = useContext(UserContext);
 	let displayTitle = badgeTitle;
@@ -39,7 +43,7 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 		displayTitle = badgeTitle.slice(0, 20) + '...';
 	}
 
-	const [friendIsPlaying, setFriendIsPlaying] = useState(false);
+	// const [friendIsPlaying, setFriendIsPlaying] = useState(false);
 	const [isShaking, setIsShaking] = useState(false);
 
 	useEffect(() => {
@@ -86,10 +90,10 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 						<span className="friend-name">{displayTitle}</span>
 					</>
 				)}
-				{!isEmptyBadge && onlineIndicator && (
+				{!isEmptyBadge && (onlineIndicator || playingIndicator) && (
 					<OnlineIndicator
 						isOnline={onlineIndicator}
-						isPlaying={friendIsPlaying}
+						isPlaying={playingIndicator}
 					/>
 				)}
 			</div>

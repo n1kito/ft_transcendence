@@ -19,7 +19,7 @@ export class TokenController {
 				isTwoFactorAuthVerified: data.isTwoFactorAuthVerified,
 			});
 		} catch (error) {
-			res.status(500).json({ error: 'Could not refresh token' });
+			res.status(401).json({ error: 'Invalid or expired refresh token' });
 		}
 	}
 }
