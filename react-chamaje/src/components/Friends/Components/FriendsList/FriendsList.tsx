@@ -15,6 +15,7 @@ import { addFriend, fetchFriends } from 'src/utils/FriendsQueries';
 import { fetchProfileData } from 'src/utils/UserQueries';
 import ChatWindow from 'src/components/ChatWindow/ChatWindow';
 import { ChatContext } from 'src/contexts/ChatContext';
+import { useNavigationParams } from 'src/hooks/useNavigationParams';
 
 interface IFriendsListProps {
 	onCloseClick: () => void;
