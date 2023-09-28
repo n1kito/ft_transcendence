@@ -20,7 +20,6 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 
 	// Set a socket Ref so I can use it anywhere in this hook
 	const socketRef = useRef<Socket | null>(null);
-
 	// on hook init
 	useEffect(() => {
 		if (!isAuthentificated) return;
@@ -83,7 +82,12 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 			});
 		});
 		gameData.socket.on('error', (error) => {
-			console.error('General Error:', error);
+			updateGameData({
+				connectionErrorStatus: `${error}`,
+				opponentIsReconnecting: false,
+			});
+			if (gameData.socket && error === 'Rate Limit exceeded')
+				gameData.socket.disconnect();
 		});
 		// Listen for the 'disconnect' event prevent reconnection from wanted disconnection
 		gameData.socket.on('disconnect', (reason) => {

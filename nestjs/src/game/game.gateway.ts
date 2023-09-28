@@ -9,14 +9,22 @@ import {
 import { Server, Socket } from 'socket.io';
 import { GameService } from './game.service';
 import { IPlayerMovementPayload } from 'shared-lib/types/game';
-
+import { PrismaService } from 'src/services/prisma-service/prisma.service';
+import { TokenService } from 'src/token/token.service';
+import webSocketRateLimit from './GameEntities/RateLimit';
 @WebSocketGateway({ path: '/ws/game' })
 export class GameGateway
 	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
 	@WebSocketServer() server: Server;
 
-	constructor(private readonly gameService: GameService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly tokenService: TokenService,
+		private readonly gameService: GameService,
+	) {
+		// webSocketRateLimiter('10s', 100);
+	}
 
 	/*
 	░█░░░▀█▀░█▀▀░█▀▀░█▀▀░█░█░█▀▀░█░░░█▀▀░
@@ -35,11 +43,20 @@ export class GameGateway
 	░▀▀▀░▀▀▀░▀░▀░▀░▀░▀▀▀░▀▀▀░░▀░░▀▀▀░▀▀▀░▀░▀░
 	*/
 
-	async handleConnection(clientSocket: Socket) {
+	handleConnection(clientSocket: Socket) {
+		// verify if user is authenticated
+		const token = clientSocket.handshake.auth.accessToken;
+		if (!token) {
+			console.error('token not found');
+			clientSocket.disconnect();
+		}
+
 		try {
-			await this.gameService.handleNewClientConnection(clientSocket);
+			this.tokenService.verifyToken(token);
+			this.gameService.handleNewClientConnection(clientSocket).then(() => {});
 		} catch (error) {
-			console.error('[⚠️ ] handleConnection():', error.message);
+			console.error('handleConnection():', error.message);
+			clientSocket.disconnect();
 		}
 	}
 
@@ -70,9 +87,13 @@ export class GameGateway
 	@SubscribeMessage('player-moved')
 	handlePlayerMovement(clientSocket: Socket, payload: IPlayerMovementPayload) {
 		try {
+			// watch `player-moved` messages rate
+			webSocketRateLimit.protect(this.server, clientSocket);
 			this.gameService.handlePlayerMovement(clientSocket, payload.direction);
 		} catch (error) {
-			console.error('[⚠️ ] handlePlayerMovement():', error.message);
+			console.error('handlePlayerMovement():', error.message);
+			// clientSocket.disconnect();
+			clientSocket.emit('error', error.message);
 		}
 	}
 
