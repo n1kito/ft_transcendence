@@ -31,6 +31,12 @@ interface ICommunication {
 	targetLogin?: string;
 }
 
+interface IStatus {
+	userId: number;
+	online: boolean;
+	playing: boolean;
+}
+
 export interface IMessage {
 	chatId: number;
 	sentById: number;
@@ -76,20 +82,39 @@ export class chatWebSocketGateway
 	// when a client connects to the server, the server emits to all connected
 	// clients the login of this user
 	@SubscribeMessage('ServerConnection')
-	handleServerConnection(@MessageBody() data: any): void {
-		this.server.emit('ClientLogIn', data.id);
-		console.log('\n🟢🟢' + data + ' just arrived!🟢🟢\n');
+	handleServerConnection(@MessageBody() content: IStatus): void {
+		console.log('content:', content);
+		this.server.emit(
+			'ClientLogIn',
+			content.userId,
+			content.online,
+			content.playing,
+		);
+		console.log(
+			'\n🟢🟢' + content.userId + ' just arrived!🟢🟢\n' + 'status:',
+			content.online,
+			content.playing,
+		);
 	}
 
 	// when a client received a 'userLoggedIn' message, it sends back a
 	// response to make itself known to other clients
 	@SubscribeMessage('ServerLogInResponse')
 	handleServerLogInResponse(
-		@MessageBody() data: number,
+		@MessageBody() content: IStatus,
 		@ConnectedSocket() client: Socket,
 	): void {
-		this.server.emit('ClientLogInResponse', data);
-		console.log('🟢 ClientLogInResponse: ' + data);
+		this.server.emit(
+			'ClientLogInResponse',
+			content.userId,
+			content.online,
+			content.playing,
+		);
+		console.log(
+			'🟢 ClientLogInResponse: ' + content.userId,
+			content.online,
+			content.playing,
+		);
 	}
 
 	@SubscribeMessage('ServerEndedConnection')

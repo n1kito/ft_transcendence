@@ -33,14 +33,12 @@ interface IGameProps {
 	onCloseClick: () => void;
 	// gameRoomInfo?: IGameRoomProps;
 	opponentLogin?: string | undefined;
-	setFriendIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Game: React.FC<IGameProps> = ({
 	onCloseClick,
 	windowDragConstraintRef,
 	opponentLogin = undefined,
-	setFriendIsPlaying,
 }) => {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const gameInstance = useRef<GameRenderer | null>(null);
@@ -80,15 +78,11 @@ const Game: React.FC<IGameProps> = ({
 				);
 		}
 		//TODO: announce others i am in a game
-		console.log('👀 game start');
-		// setFriendIsPlaying(true);
-		chatData.socket?.sendServerConnection('playing');
 
 		return () => {
 			gameInstance.current?.stopGame();
 			gameInstance.current?.removeEventListeners();
 			resetGameData();
-			setFriendIsPlaying(false);
 		};
 	}, []);
 

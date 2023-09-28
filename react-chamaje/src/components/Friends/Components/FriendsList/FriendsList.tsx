@@ -26,7 +26,7 @@ interface IFriendsListProps {
 	setShowFriendProfile: React.Dispatch<React.SetStateAction<boolean>>;
 	setProfileLogin: React.Dispatch<React.SetStateAction<string>>;
 	setIsMyFriend: React.Dispatch<React.SetStateAction<boolean>>;
-	friendIsPlaying: boolean;
+	// friendIsPlaying: boolean;
 	// setFriendIsPlaying?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -41,7 +41,7 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 	setProfileLogin,
 	setIsMyFriend,
 	// setFriendIsPlaying,
-	friendIsPlaying,
+	// friendIsPlaying,
 }) => {
 	const { userData, updateUserData } = useContext(UserContext);
 	const { accessToken } = useAuth();
@@ -124,6 +124,10 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 		// if (setProfileError) setProfileError('');
 	}, [settingsPanelIsOpen]);
 
+	useEffect(() => {
+		console.log(friends);
+	}, [friends]);
+
 	return (
 		<Window
 			windowTitle="Friends"
@@ -156,7 +160,7 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 							badgeTitle={friend.login}
 							badgeImageUrl={`/api/images/${friend.image}`}
 							onlineIndicator={friend.onlineStatus}
-							friendIsPlaying={friendIsPlaying}
+							playingIndicator={friend.playingStatus}
 							isClickable={true}
 							onClick={() => {
 								onBadgeClick(friend.login);
