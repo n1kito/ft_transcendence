@@ -700,7 +700,7 @@ export class GameService {
 			// Remove the user from their current room
 			const index = this.rooms[roomId].playersSocketIds.indexOf(socketId);
 			if (index > -1) this.rooms[roomId].playersSocketIds.splice(index, 1);
-			// NOTE: removed this, the user can just press shuffle is needed
+			// TODO: CHECK THIS NOTE: removed this, the user can just press shuffle is needed
 			// // If the room was reserved, make it not reserved anymore, so
 			// // the user can keep playing with other players
 			// this.rooms[roomId].requestedOpponent = undefined;

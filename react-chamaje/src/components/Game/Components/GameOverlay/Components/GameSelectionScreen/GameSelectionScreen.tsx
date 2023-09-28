@@ -42,7 +42,7 @@ const GameSelectionScreen: React.FC<IGameSelectionScreenProps> = () => {
 							badgeImageUrl={gameData.opponentInfo.image}
 							isClickable={true}
 							isActive={gameData.player2Ready}
-							onlineIndicator={false}
+							onlineIndicator={true}
 						/>
 					) : (
 						<GameLocatingBadge />
