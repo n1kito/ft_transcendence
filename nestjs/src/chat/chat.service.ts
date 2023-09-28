@@ -521,20 +521,35 @@ export class ChatService {
 	}
 
 	// true if the user received the message
-	async checkRecipient(userId: number, messageId: number) {
-		const res = await this.prisma.message.findUnique({
-			where: { id: messageId },
-			select: { chatId: true, userId: true },
-		});
-		const isUserInChat = await this.isUserInChat(userId, res.chatId);
+	async checkRecipient(userId: number, chatId: number) {
+		const isUserInChat = await this.isUserInChat(userId, chatId);
 		if (!isUserInChat) return false;
-		else if (userId !== res.userId) return true;
-		return false;
+		this.prisma.chat
+			.findUnique({
+				where: { id: chatId },
+				select: {
+					messages: true,
+				},
+			})
+			.then(async (res) => {
+				for (const message of res.messages) {
+					if (
+						message.isNotif &&
+						message.isNotif === 'play' &&
+						message.reply === null &&
+						message.userId !== userId
+					) {
+						return true;
+					}
+				}
+				return false;
+			});
+
 	}
 
-	async replyToInvite(messageId: number, reply: boolean) {
-		const res = await this.prisma.message.update({
-			where: { id: messageId },
+	async replyToInvite(chatId: number, reply: boolean) {
+		const res = await this.prisma.message.updateMany({
+			where: { chatId: chatId, reply: null },
 			data: {
 				reply: reply,
 			},

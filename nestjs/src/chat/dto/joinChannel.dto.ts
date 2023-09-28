@@ -18,7 +18,7 @@ export class JoinChannelDTO {
 	@NotContains('/')
 	@NotContains('\\')
 	@MaxLength(35)
-	@MinLength(5)
+	@MinLength(2)
     @NotContains(';')
 	@IsDefined()
 	name?: string;

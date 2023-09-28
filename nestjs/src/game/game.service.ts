@@ -128,6 +128,7 @@ export class GameService {
 					newlyConnectedSocketId,
 					newlyConnectedUserId,
 					requestedOpponentId,
+					false,
 				);
 
 			// If our client's room is now full, send each user their opponent's
@@ -473,9 +474,10 @@ export class GameService {
 						`This is the information of socket [${newlyConnectedSocketId}] user #${newlyConnectedUserid}: `,
 						userInformation,
 					);
-					this.server
-						.to(opponentSocketId)
-						.emit('opponent-info', userInformation);
+					this.server.to(opponentSocketId).emit('opponent-info', {
+						...userInformation,
+						playerIsInTheRoom: true,
+					});
 				});
 			// Retrieving and sharing opponent's information with newly connected user
 			this.prisma.user
@@ -493,9 +495,10 @@ export class GameService {
 						`This is the information of socket [${newlyConnectedSocketId}]'s opponent, user #${opponentUserId}: `,
 						opponentInformation,
 					);
-					this.server
-						.to(newlyConnectedSocketId)
-						.emit('opponent-info', opponentInformation);
+					this.server.to(newlyConnectedSocketId).emit('opponent-info', {
+						...opponentInformation,
+						playerIsInTheRoom: true,
+					});
 				});
 		} catch (error) {
 			throw new Error(`sharePlayersInfo(): ${error.message}`);
@@ -507,6 +510,7 @@ export class GameService {
 		newlyConnectedSocketId: string,
 		newlyConnectedUserid: number,
 		opponentUserId: number,
+		playerIsInTheRoom: boolean = false,
 	) {
 		try {
 			this.prisma.user
@@ -520,9 +524,10 @@ export class GameService {
 					},
 				})
 				.then((opponentInformation: IPlayerInformation) => {
-					this.server
-						.to(newlyConnectedSocketId)
-						.emit('opponent-info', opponentInformation);
+					this.server.to(newlyConnectedSocketId).emit('opponent-info', {
+						...opponentInformation,
+						playerIsInTheRoom,
+					});
 				});
 		} catch (error) {
 			throw new Error(`shareOpponentInfo(): ${error.message}`);
@@ -584,11 +589,7 @@ export class GameService {
 				});
 				// Start the game and start sending game status to each user
 				gameInstance.startGame();
-				// TODO: these should be able to be moved somewhere more logical
 				gameInstance.eventEmitter.on('game-ended', () => {
-					// TODO: if the user disconnects right as the game ends we might have an issue here
-					// where the game instance gets destroyed before we can store it
-
 					// Creating a copy in case one of the users disconnects
 					const gameInstanceCopy = {
 						player1SocketId: Object.keys(gameInstance.players)[0],
@@ -694,10 +695,9 @@ export class GameService {
 			// Remove the user from their current room
 			const index = this.rooms[roomId].playersSocketIds.indexOf(socketId);
 			if (index > -1) this.rooms[roomId].playersSocketIds.splice(index, 1);
-			// TODO: CHECK THIS NOTE: removed this, the user can just press shuffle is needed
-			// // If the room was reserved, make it not reserved anymore, so
-			// // the user can keep playing with other players
-			// this.rooms[roomId].requestedOpponent = undefined;
+			// If the room was reserved, make it not reserved anymore, so
+			// the user can keep playing with other players
+			this.rooms[roomId].requestedOpponent = undefined;
 			// Remove the roomId from the user's entry in the client map
 			if (this.connectedClients.has(socketId))
 				this.connectedClients.get(socketId).roomId = undefined;
@@ -762,11 +762,6 @@ export class GameService {
 			throw new Error(`findAnotherRoom(): ${error.message}`);
 		}
 	}
-
-	// TODO: opponent left the room, should handle several cases:
-	// 1 - the game hasn't started, the player's opponent info should be reset and their ready
-	// state should be reset as well
-	// 2 - the game has started, it's marked as finished and recorded in the DB
 
 	/*
 	░█░█░▀█▀░▀█▀░█░░░█▀▀

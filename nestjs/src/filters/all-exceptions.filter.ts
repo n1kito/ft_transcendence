@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { WsException } from '@nestjs/websockets'; // Importing WsException class for WebSocket
 
-// This is a global filter that will catch all unhandled throws from 
+// This is a global filter that will catch all unhandled throws from
 // HTTP and WS processes
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -29,9 +29,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
 					? exception.getStatus()
 					: HttpStatus.INTERNAL_SERVER_ERROR;
 
+			let detailedMessage = exception['message'] || 'Internal server error';
+
+			if (exception instanceof HttpException) {
+				const response = exception.getResponse();
+				detailedMessage = response['message']
+					? response['message']
+					: detailedMessage;
+			}
+
 			response.status(status).json({
 				statusCode: status,
-				message: exception['message'] || 'Internal server error',
+				message: detailedMessage,
 				timestamp: new Date().toISOString(),
 				path: request.url,
 			});

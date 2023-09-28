@@ -124,7 +124,7 @@ const Prompt: React.FC<PromptProps> = ({
 								strings: instruction,
 								autoStart: true,
 								loop: false,
-								cursor: `${activePrompt ? '|' : ''}`,
+								// cursor: `${activePrompt ? '|' : ''}`,
 								delay: 20,
 							}}
 						/>

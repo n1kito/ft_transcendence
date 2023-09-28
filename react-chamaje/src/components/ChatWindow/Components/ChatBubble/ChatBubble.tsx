@@ -9,6 +9,7 @@ import { access } from 'fs';
 import { ChatContext } from 'src/contexts/ChatContext';
 import { useDragControls } from 'framer-motion';
 import { UserContext } from 'src/contexts/UserContext';
+import { useNavigationParams } from 'src/hooks/useNavigationParams';
 
 interface IChatBubbleProps {
 	userId: number;
@@ -42,9 +43,12 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 	const { chatData } = useContext(ChatContext);
 	const { userData } = useContext(UserContext);
 	const { accessToken } = useAuth();
+	// Navigation hook
+	const { setNavParam } = useNavigationParams();
 
 	const openFriendProfile = () => {
 		setProfileIsOpen(true);
+		setNavParam('friendProfile', sender);
 		setShowFriendProfile(true);
 		setProfileLogin(sender);
 	};
@@ -83,7 +87,6 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 										// socket
 										mute(accessToken, chatId, userId)
 											.then((data) => {
-												console.log(data);
 												chatData.socket?.sendMessage(
 													'',
 													chatId,
@@ -106,7 +109,6 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 										// chatData.socket => send kick message
 										kick(accessToken, chatId, userId)
 											.then((data) => {
-												console.log(data);
 												chatData.socket?.kick(userId, chatId);
 												chatData.socket?.sendMessage(
 													'',
@@ -131,7 +133,6 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 										// socket
 										ban(accessToken, chatId, userId)
 											.then((data) => {
-												console.log(data);
 												chatData.socket?.kick(userId, chatId);
 												chatData.socket?.sendMessage(
 													'',
@@ -156,7 +157,6 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 										// socket => make admin
 										makeAdmin(accessToken, chatId, userId)
 											.then((data) => {
-												console.log(data);
 												chatData.socket?.makeAdmin(userId, chatId);
 												chatData.socket?.sendMessage(
 													'',

@@ -2,7 +2,15 @@ import React from 'react';
 import './TitleList.css';
 import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import Title from '../Title/Title';
-import burgerIcon from './icons/burger-icon.svg';
+import chickIcon from './icons/chick_icon.svg';
+import cookieIcon from './icons/cookie_icon.svg';
+import heartIcon from './icons/heart_icon.svg';
+import skullIcon from './icons/skull_icon.svg';
+import swordsIcon from './icons/swords_icon.svg';
+import targetIcon from './icons/target_icon.svg';
+import ripIcon from './icons/rip_icon.svg';
+import kimonoIcon from './icons/kimono_icon.svg';
+
 import AchievementBadge from '../AchievementBadge/AchievementBadge';
 import { IUserData } from '../../../../../../shared-lib/types/user';
 
@@ -19,51 +27,51 @@ const TitleList: React.FC<ITitleListProps> = ({ profileData }) => {
 					<Title highlightColor="#FBD9F6">Titles</Title>
 					<div className="titles-container">
 						<AchievementBadge
-							name="Rookie 🐤"
+							name="Rookie"
 							description="You played your first game ! 🗡️"
-							icon={burgerIcon}
+							icon={chickIcon}
 							achieved={(profileData?.gamesCount ?? 0) > 0}
 						></AchievementBadge>
 						<AchievementBadge
 							name="Terminator 🦾"
 							description="You have never lost a single game. 👁️👄👁️"
-							icon={burgerIcon}
+							icon={ripIcon}
 							achieved={(profileData?.winRate ?? 0) == 100}
 						></AchievementBadge>
 						<AchievementBadge
 							name="Tough cookie 🍪"
 							description="You are hard to defeat, your killrate is insane !"
-							icon={burgerIcon}
+							icon={cookieIcon}
 							achieved={(profileData?.winRate ?? 0) >= 100}
 						></AchievementBadge>
 						<AchievementBadge
 							name="Padawan ✨"
 							description="You have already won 10 games,\nthe force is obviously with you. 💅"
-							icon={burgerIcon}
+							icon={kimonoIcon}
 							achieved={(profileData?.killCount ?? 0) >= 10}
 						></AchievementBadge>
 						<AchievementBadge
 							name="Are you not entertained ? ⚔️"
 							description="You have won 100 games, wow,\nI mean, come on now. 💪"
-							icon={burgerIcon}
+							icon={swordsIcon}
 							achieved={(profileData?.killCount ?? 0) >= 100}
 						></AchievementBadge>
 						<AchievementBadge
-							name="Thick as thieves 💖"
+							name="Thick as thieves"
 							description="You have made a bestie 👯"
-							icon={burgerIcon}
+							icon={heartIcon}
 							achieved={(profileData?.bestieLogin?.length ?? 0) > 0}
 						></AchievementBadge>
 						<AchievementBadge
 							name="Kill Bill 💀"
 							description="You have made an enemy. A mortal enemy 🤺"
-							icon={burgerIcon}
+							icon={skullIcon}
 							achieved={(profileData?.rivalLogin?.length ?? 0) > 0}
 						></AchievementBadge>
 						<AchievementBadge
 							name="John Wick"
-							description="You have located your first target.\nYour mission is to beat that target. 🎯"
-							icon={burgerIcon}
+							description="You have located your target.\nYour mission is to beat that target. 🎯"
+							icon={targetIcon}
 							achieved={profileData?.targetDiscoveredByUser || false}
 						></AchievementBadge>
 					</div>

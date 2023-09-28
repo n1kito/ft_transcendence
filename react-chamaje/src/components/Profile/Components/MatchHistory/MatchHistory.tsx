@@ -43,7 +43,7 @@ const MatchHistory: React.FC<IMatchHistoryProps> = ({ profileData }) => {
 									adversaryLogin={adversaryLogin}
 									adversaryScore={adversaryScore}
 									userScore={userScore}
-									badgeImageUrl={adversaryImage}
+									badgeImageUrl={`/api/images/${adversaryImage}`}
 									key={index}
 								/>
 							);

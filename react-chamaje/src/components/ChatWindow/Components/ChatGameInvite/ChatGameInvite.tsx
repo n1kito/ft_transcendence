@@ -5,9 +5,12 @@ import Button from '../../../Shared/Button/Button';
 import { UserContext } from 'src/contexts/UserContext';
 import { setInviteReply } from 'src/utils/queries';
 import useAuth from 'src/hooks/userAuth';
+import { GameContext } from 'src/contexts/GameContext';
+import { ChatContext } from 'src/contexts/ChatContext';
+import { useNavigationParams } from 'src/hooks/useNavigationParams';
 
 interface IGameInviteProps {
-	messageId: number;
+	chatId: number;
 	sender: string | undefined;
 	recipient: string | undefined;
 	sentAt: Date;
@@ -15,7 +18,7 @@ interface IGameInviteProps {
 }
 
 const ChatGameInvite: React.FC<IGameInviteProps> = ({
-	messageId,
+	chatId,
 	sender,
 	recipient,
 	sentAt,
@@ -25,24 +28,36 @@ const ChatGameInvite: React.FC<IGameInviteProps> = ({
 	const [inviteAccepted, setInviteAccepted] = useState(false);
 	const { userData } = useContext(UserContext);
 	const { accessToken } = useAuth();
+	const { updateGameData } = useContext(GameContext);
+	const { chatData } = useContext(ChatContext);
+	const { setNavParam } = useNavigationParams();
+
+	// const
 
 	const acceptInvite = () => {
-		setInviteReply(messageId, true, accessToken)
+		setInviteReply(chatId, true, accessToken)
 			.then(() => {
 				setInviteAccepted(true);
+				chatData.socket?.sendAcceptInvite(sender || '', chatId);
 			})
 			.catch((e) => {
-				console.error('You could not responde to the invitation: ', e.message);
+				console.error('You could not respond to the invitation: ', e.message);
 			});
+
+		// TODO: fix ?
 		// open a game window
+		updateGameData({ opponentInfo: { login: sender || '', image: '' } });
+		setNavParam('game');
+		// setGameWindowIsOpen(true);
 	};
 	const declineInvite = () => {
-		setInviteReply(messageId, false, accessToken)
+		setInviteReply(chatId, false, accessToken)
 			.then(() => {
 				setInviteDeclined(true);
+				chatData.socket?.sendDeclineInvite(sender || '', chatId);
 			})
 			.catch((e) => {
-				console.error('You could not responde to the invitation: ', e.message);
+				console.error('You could not respond to the invitation: ', e.message);
 			});
 	};
 
@@ -54,7 +69,6 @@ const ChatGameInvite: React.FC<IGameInviteProps> = ({
 		sentAtDate.setMinutes(sentAtDate.getMinutes() + 15);
 		const nowDate = new Date();
 		if (sentAtDate < nowDate && (reply === undefined || reply === null)) {
-			console.log('coucou!');
 			setInviteDeclined(true);
 		}
 	}, []);
