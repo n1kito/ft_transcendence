@@ -11,8 +11,6 @@ interface ITitleListProps {
 }
 
 const TitleList: React.FC<ITitleListProps> = ({ profileData }) => {
-	// const { userData } = useContext(UserContext);
-	console.log({ profileData });
 	return (
 		<div className="title-list-wrapper">
 			<ShadowWrapper shadow={true}>

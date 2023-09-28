@@ -9,14 +9,24 @@ import {
 	Res,
 	UnauthorizedException,
 	Req,
+	HttpCode,
+	NotFoundException,
+	Put,
+	ValidationPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import * as jwt from 'jsonwebtoken';
 import { Response } from 'express';
 import { TokenService } from 'src/token/token.service';
+import { toDataURL } from 'qrcode';
+import { twoFactorAuthenticationCodeDto } from './dto/two-factor-auth-code.dto';
 
 interface AuthorizationResponse {
 	url: string;
+}
+
+export interface CustomRequest extends Request {
+	userId: number;
 }
 
 // TODO: implement a middleware that checks if the JWT token received with each request is correct
@@ -61,10 +71,11 @@ export class AuthController {
 
 			// Generate a new access token and a refresh token based on the payload
 			// const accessToken = this.tokenService.generateAccessToken(payload);
-			const refreshToken = this.tokenService.generateRefreshToken(payload);
+			const refreshToken = await this.tokenService.generateRefreshToken(
+				payload,
+			);
+			// TODO: error 401 due to asynchron issue ?
 
-			// Attach the generated access and refresh tokens as cookies in the response
-			// this.tokenService.attachAccessTokenCookie(res, accessToken);
 			this.tokenService.attachRefreshTokenCookie(res, refreshToken);
 
 			// Define the URL to redirect the user after successful authentication
@@ -75,17 +86,20 @@ export class AuthController {
 		}
 	}
 
+	// Create and return an access token with jwt
+	// Also inform if user has enabled two-factor authentication
 	@Post('retrieve-access-token')
-	async retrieveAccessToken(@Body() body: { code: string }): Promise<{
+	async retrieveAccessTokenAndTwoFAStatus(
+		@Body() body: { code: string },
+	): Promise<{
 		accessToken: string;
+		isTwoFactorAuthenticationEnabled: boolean;
 	}> {
 		// Retrieve the code
 		const { code } = body;
-		console.log(code);
 		// Check the code
-		// if (!this.authService.checkTemporaryAuthCode(code))
-		// 	throw new Error('Code is invalid, could not generate access token');
-		// Generate the access token
+		if (!this.authService.checkTemporaryAuthCode(code))
+			throw new Error('Code is invalid, could not generate access token');
 		// Prepare the payload for generating tokens
 		const payload = {
 			userId: this.authService.getUserId(),
@@ -98,8 +112,16 @@ export class AuthController {
 		const accessToken = this.tokenService.generateAccessToken(payload);
 		// Delete the temporary authorization code
 		this.authService.deleteTemporaryAuthCode();
-		// Return the token
-		return { accessToken: accessToken };
+
+		// verify if 2fa is enabled if so return true;
+		const isTwoFactorAuthenticationEnabled =
+			await this.authService.istwofaEnabled(payload.userId);
+
+		// return access token and two-factor authentication state
+		return {
+			accessToken: accessToken,
+			isTwoFactorAuthenticationEnabled: isTwoFactorAuthenticationEnabled,
+		};
 	}
 
 	@Get('success')
@@ -110,5 +132,102 @@ export class AuthController {
 	@Get('login-failed')
 	loginFailed(): string {
 		return 'User could not login 🛑';
+	}
+
+	// if user enables two-factor authentication, generate a secret
+	// and create a one-time qr code to link the user and chamaje
+	// via google authenticator
+	@Post('2fa/turn-on')
+	async turnOn2fa(@Request() request, @Body() body): Promise<any> {
+		// extract access token from header, decode it and retrieve userId
+		const userId = this.tokenService.ExtractUserId(
+			request.headers['authorization'],
+		);
+		if (!userId)
+			throw new Error('Invalid access token: user is not authorized');
+
+		// generate a 2fa secret and stores it in database and create a
+		// one-time password authentication URL
+		const oneTimePasswordAuthUrl = await this.authService.generate2faSecret(
+			userId,
+		);
+		// convert one-time password authentication url to QR code url
+		const qrCodeUrl = toDataURL(oneTimePasswordAuthUrl);
+		// return qr code url
+		return qrCodeUrl;
+	}
+
+	@Post('2fa/turn-off')
+	async turnOff2fa(@Request() request, @Res() res) {
+		try {
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			const ret = await this.authService.turnOffTwoFactorAuthentication(userId);
+			return res.status(200).json({ message: ret });
+		} catch (error) {
+			return res.status(500).json({ message: error });
+		}
+	}
+
+	@Post('2fa/authenticate')
+	@HttpCode(200)
+	async authenticate2fa(
+		@Request() request,
+		@Body(new ValidationPipe())
+		{ twoFactorAuthenticationCode }: twoFactorAuthenticationCodeDto,
+		@Res() res,
+	) {
+		try {
+			// verifiy access token and retrieve userId
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+			// verify one time password submitted by the user
+			const isCodeValid =
+				await this.authService.isTwoFactorAuthenticationCodeValid(
+					twoFactorAuthenticationCode,
+					userId,
+				);
+			// if one time password is invalid, return error
+			if (!isCodeValid) {
+				return res.status(401).json({ message: 'Invalid two-factor code' });
+			}
+			// else return 2FA authentication success
+			return res
+				.status(200)
+				.json({ message: 'two-factor authentication enabled!' });
+		} catch (error) {
+			console.error('🧠 dto error: ', error);
+		}
+	}
+
+	@Put('logout')
+	async logOut(
+		@Request() request,
+		@Body() body: { state: boolean },
+		@Res() res,
+	): Promise<any> {
+		try {
+			// verifiy access token and retrieve userId
+			const userId = this.tokenService.ExtractUserId(
+				request.headers['authorization'],
+			);
+
+			// set isTwoFactorAuthenticationVerified status to false
+			// this way, when the user logs out, has to enter a new one-time password
+			// generated by google authenticator
+			this.authService.updateVerifyStatus(userId, false);
+
+			// revoke refresh token
+			res.cookie('refreshToken', '', {
+				httpOnly: true,
+				expires: new Date(0), // Set expiration to a past date
+			});
+			return res.status(200).json({ message: 'successful 2FA log out' });
+		} catch (error) {
+			console.error(error);
+			return res.status(500).json({ message: 'error 2FA log out' });
+		}
 	}
 }

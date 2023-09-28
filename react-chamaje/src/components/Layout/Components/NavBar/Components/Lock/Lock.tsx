@@ -2,14 +2,17 @@ import React, { useContext } from 'react';
 import './Lock.css';
 import { UserContext } from 'src/contexts/UserContext';
 import useAuth from 'src/hooks/userAuth';
+import { ChatContext } from 'src/contexts/ChatContext';
 
 const Lock = () => {
 	const { userData } = useContext(UserContext);
+	const { chatData } = useContext(ChatContext);
 	const { logOut } = useAuth();
 
 	const handleClick = () => {
 		logOut();
-		userData?.chatSocket?.endConnection();
+		chatData.socket?.endConnection();
+		// userData?.chatSocket?.endConnection();
 	};
 	return (
 		<div id="lockWrapper" title="Click to log out" onClick={handleClick}>

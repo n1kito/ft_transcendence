@@ -34,7 +34,7 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 	const [hasStartedRoulette, setHasStartedRoulette] = useState(false);
 	const [isShaking, setIsShaking] = useState(false);
 	const { accessToken } = useAuth();
-	const { userData, setUserData } = useContext(UserContext);
+	const { userData, updateUserData } = useContext(UserContext);
 	const [targetHasBeenAssigned, setTargetHasBeenAssigned] = useState(
 		targetDiscoveredByUser,
 	);

@@ -12,6 +12,11 @@ import { Server, Socket } from 'socket.io';
 import * as jwt from 'jsonwebtoken';
 import { disconnect } from 'process';
 
+interface IFriend {
+	userId: number;
+	login: string;
+}
+
 function decodeToken(client: Socket): any {
 	return jwt.verify(
 		client.handshake.auth.accessToken,
@@ -66,7 +71,5 @@ export class ConnectionStatusGateway
 		console.log('\n🔴🔴' + data + ' just left!🔴🔴\n');
 		this.server.emit('ClientLogOut', data);
 		client.disconnect();
-
-		// client.disconnect();
 	}
 }

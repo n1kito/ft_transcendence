@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import './SettingsWindow.css';
 
 interface ISettingsWindowProps {

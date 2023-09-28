@@ -1,12 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
+import { access } from 'fs';
+import { UserContext } from './UserContext';
 
 interface IAuthContext {
 	isAuthentificated: boolean;
+	setIsAuthentificated: (status: boolean) => void;
+	isTwoFAEnabled: boolean;
+	setIsTwoFAEnabled: (status: boolean) => void;
 	logOut: () => void; // function that will log out the user
 	refreshToken: () => Promise<void>;
 	updateAccessToken: (generatedAccessToken: string) => void;
 	accessToken: string;
+	setAccessToken: (token: string) => void;
+	isTwoFaVerified: boolean;
+	setIsTwoFaVerified: (status: boolean) => void;
 }
 
 // Create the AuthContext using React's createContext
@@ -24,7 +32,10 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 	children,
 }: AuthProviderProps) => {
 	const [isAuthentificated, setIsAuthentificated] = useState(false);
+	const [isTwoFAEnabled, setIsTwoFAEnabled] = useState(false);
+	const [isTwoFaVerified, setIsTwoFaVerified] = useState(false);
 	const [accessToken, setAccessToken] = useState('');
+
 	// Effect to check authentication status when component mounts
 	useEffect(() => {
 		const checkAuth = async () => {
@@ -37,9 +48,10 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 					},
 					credentials: 'include',
 				});
+				const data = await response.json();
+
 				// If authenticated, update state accordingly
 				if (response.ok) {
-					const data = await response.json();
 					setIsAuthentificated(data.isAuthentificated);
 				} else if (response.status === 401) {
 					try {
@@ -49,8 +61,6 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 						// Log the user out if token refresh fails
 						logOut();
 					}
-					// Log the user out in case of other authentication errors
-					logOut();
 				}
 			} catch (error) {
 				// Log the user out if fetching authentication status fails
@@ -61,10 +71,21 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 	}, []);
 
 	// Log the user out by removing cookies and updating state
-	const logOut = () => {
-		Cookies.remove('refreshToken');
+	const logOut = async () => {
+		try {
+			const response = await fetch('/api/login/logout', {
+				method: 'PUT',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+				credentials: 'include',
+			});
+		} catch (error) {
+			console.error(error);
+		}
 		setAccessToken('');
 		setIsAuthentificated(false);
+		setIsTwoFaVerified(false);
 	};
 
 	// Function to refresh the token by making a request to the server
@@ -81,16 +102,18 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 				const data = await response.json();
 				if (data.accessToken) {
 					updateAccessToken(data.accessToken);
-					// Update authentication status if token refresh is successful
 					setIsAuthentificated(true);
+
+					setIsTwoFAEnabled(data.isTwoFactorAuthEnabled);
+					setIsTwoFaVerified(data.isTwoFactorAuthVerified);
 				}
 			} else {
-				console.log('Refresh response is NOT ok');
+				console.error('Refresh response is NOT ok');
 			}
 		} catch (error) {
 			console.log('Refresh token failed, logging out');
 			// Log the user out if token refresh fails
-			logOut();
+			// logOut();
 			console.log('Error occurred while refreshing token:', error);
 		}
 	};
@@ -105,10 +128,16 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 		<AuthContext.Provider
 			value={{
 				isAuthentificated,
+				setIsAuthentificated,
+				isTwoFAEnabled,
+				setIsTwoFAEnabled,
 				logOut,
 				refreshToken,
 				updateAccessToken,
 				accessToken,
+				setAccessToken,
+				isTwoFaVerified,
+				setIsTwoFaVerified,
 			}}
 		>
 			{children}

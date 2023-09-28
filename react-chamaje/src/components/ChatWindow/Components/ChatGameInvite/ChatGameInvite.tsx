@@ -1,23 +1,63 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import './ChatGameInvite.css';
 import Title from '../../../Profile/Components/Title/Title';
 import Button from '../../../Shared/Button/Button';
+import { UserContext } from 'src/contexts/UserContext';
+import { setInviteReply } from 'src/utils/queries';
+import useAuth from 'src/hooks/userAuth';
 
 interface IGameInviteProps {
+	messageId: number;
 	sender: string | undefined;
 	recipient: string | undefined;
+	sentAt: Date;
+	reply?: boolean;
 }
 
-const ChatGameInvite: React.FC<IGameInviteProps> = ({ sender, recipient }) => {
+const ChatGameInvite: React.FC<IGameInviteProps> = ({
+	messageId,
+	sender,
+	recipient,
+	sentAt,
+	reply = undefined,
+}) => {
 	const [inviteDeclined, setInviteDeclined] = useState(false);
 	const [inviteAccepted, setInviteAccepted] = useState(false);
+	const { userData } = useContext(UserContext);
+	const { accessToken } = useAuth();
 
 	const acceptInvite = () => {
-		setInviteAccepted(true);
+		setInviteReply(messageId, true, accessToken)
+			.then(() => {
+				setInviteAccepted(true);
+			})
+			.catch((e) => {
+				console.error('You could not responde to the invitation: ', e.message);
+			});
+		// open a game window
 	};
 	const declineInvite = () => {
-		setInviteDeclined(true);
+		setInviteReply(messageId, false, accessToken)
+			.then(() => {
+				setInviteDeclined(true);
+			})
+			.catch((e) => {
+				console.error('You could not responde to the invitation: ', e.message);
+			});
 	};
+
+	useEffect(() => {
+		setInviteAccepted(reply || false);
+		setInviteDeclined(reply === undefined || reply === null ? false : !reply);
+		// set the invitation to declined if it has been more than 15minutes
+		let sentAtDate = new Date(sentAt);
+		sentAtDate.setMinutes(sentAtDate.getMinutes() + 15);
+		const nowDate = new Date();
+		if (sentAtDate < nowDate && (reply === undefined || reply === null)) {
+			console.log('coucou!');
+			setInviteDeclined(true);
+		}
+	}, []);
 
 	return (
 		<div
@@ -25,15 +65,24 @@ const ChatGameInvite: React.FC<IGameInviteProps> = ({ sender, recipient }) => {
 				(inviteDeclined || inviteAccepted) && 'invite-declined'
 			}`}
 		>
-			{inviteAccepted ? (
-				<Title>{`You accepted to play pong with @${sender} :)`}</Title>
+			{sender === userData?.login ? (
+				inviteAccepted ? (
+					<Title>{`${recipient} accepted to play pong with you :)`}</Title>
+				) : inviteDeclined ? (
+					<Title>{`${recipient} declined your pong invite :(`}</Title>
+				) : (
+					<Title>{`You invited ${recipient} to play pong !`}</Title>
+				)
+			) : inviteAccepted ? (
+				<Title>{`You accepted to play pong with ${sender} :)`}</Title>
 			) : inviteDeclined ? (
-				<Title>{`You declined ${sender}'s pong invite :(`}</Title>
+				<Title>{`You declined ${sender}s' pong invite :(`}</Title>
 			) : (
-				<Title>{`@${sender} invites you to play pong !`}</Title>
+				<Title>{`${sender} invites you to play pong !`}</Title>
 			)}
 
-			{!inviteDeclined && !inviteAccepted && (
+			{!inviteAccepted && !inviteDeclined && sender !== userData?.login && (
+				// {!inviteDeclined && !inviteAccepted && sender !== userData?.login && (
 				<div className="invite-buttons">
 					<Button baseColor={[151, 51, 91]} onClick={() => acceptInvite()}>
 						yes

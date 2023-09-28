@@ -17,7 +17,7 @@ type ValidationError = {
 
 const ProfileSettings: React.FC = () => {
 	// Access userData from the UserContext
-	const { userData, setUserData } = useContext(UserContext);
+	const { userData, updateUserData } = useContext(UserContext);
 	const { accessToken } = useAuth();
 
 	// States to hold username and email values
@@ -99,17 +99,15 @@ const ProfileSettings: React.FC = () => {
 					...userData,
 					login: username,
 					email: email,
-					id: userData?.id || undefined,
+					id: userData ? userData.id : 0,
 					image: userData?.image || '',
-					friends: userData?.friends || [],
-					chatSocket: userData?.chatSocket || null,
+					// friends: userData?.friends || [],
 					// winRate: userData?.winRate || 0,
 					// gamesCount: userData?.gamesCount || 0,
 				};
-				setUserData(updatedUserData);
+				updateUserData(updatedUserData);
 			}
 			const responseData = await response.clone().json();
-			console.log(responseData);
 			if (response.status === 409 || response.status === 400) {
 				responseData.errors.forEach((error: any) => {
 					if (error.field === 'login') {
@@ -133,6 +131,7 @@ const ProfileSettings: React.FC = () => {
 						value={username}
 						onChange={handleUsernameChange}
 						error={usernameError}
+						maxlength={8}
 					/>
 					<InputField
 						value={email}

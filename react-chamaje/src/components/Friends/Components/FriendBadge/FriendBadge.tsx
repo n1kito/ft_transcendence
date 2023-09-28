@@ -5,6 +5,7 @@ import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import { ShadowWrapperProps } from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import OnlineIndicator from '../../../Profile/Components/Shared/OnlineIndicator/OnlineIndicator';
 import { UserContext } from 'src/contexts/UserContext';
+import { on } from 'events';
 
 export interface IFriendBadgeProps extends ShadowWrapperProps {
 	badgeTitle?: string;
@@ -14,6 +15,7 @@ export interface IFriendBadgeProps extends ShadowWrapperProps {
 	isChannelBadge?: boolean;
 	isEmptyBadge?: boolean;
 	dashedBorder?: boolean;
+	shaking?: boolean;
 }
 
 const FriendBadge: React.FC<IFriendBadgeProps> = ({
@@ -23,26 +25,44 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 	badgeImageUrl = m3ganAvatar,
 	toolTip = '',
 	isChannelBadge = false,
-	onlineIndicator = !isChannelBadge,
+	onlineIndicator = false,
 	isEmptyBadge = false,
 	dashedBorder = isEmptyBadge || false,
+	shaking = false,
 	onClick,
 }) => {
 	const userContext = useContext(UserContext);
-	const [friends, setFriends] = useState(userContext.userData?.friends); // TODO: this should not be done this way, it should be linked to the user's actual status
 	let displayTitle = badgeTitle;
 	if (isChannelBadge && badgeTitle.length > 20) {
 		displayTitle = badgeTitle.slice(0, 20) + '...';
 	}
 
 	const [friendIsPlaying, setFriendIsPlaying] = useState(false);
+	const [isShaking, setIsShaking] = useState(false);
+
+	useEffect(() => {
+		if (shaking) {
+			const shakeInterval = setInterval(() => {
+				setIsShaking(true);
+				const shakeDuration = 1000; // Shake for 1 seconds
+				setTimeout(() => {
+					setIsShaking(false);
+				}, shakeDuration);
+			}, 5000); // Start shaking every 10 seconds
+
+			// Clean up interval on unmount or when hasStartedRoulette changes to true
+			return () => clearInterval(shakeInterval);
+		}
+	}, [shaking]);
 
 	return (
+		// <div className={isShaking ? 'shake' : ''}>
 		<ShadowWrapper
 			shadow={isEmptyBadge ? true : shadow}
 			isClickable={isEmptyBadge ? true : isClickable}
 			onClick={onClick}
 			dashedBorder={dashedBorder}
+			shaking={shaking}
 		>
 			<div
 				className={`badge-wrapper ${isEmptyBadge ? 'is-empty-badge' : ''} ${
@@ -68,6 +88,7 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 				)}
 			</div>
 		</ShadowWrapper>
+		// </div>
 	);
 };
 

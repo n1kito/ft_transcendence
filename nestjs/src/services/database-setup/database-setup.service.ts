@@ -20,39 +20,61 @@ export class DatabaseSetupService implements OnModuleInit {
 							{
 								login: 'sosophie',
 								email: 'sophie@42.fr',
-								image: '/images/sophie.jpg',
+								image: 'sophie.jpg',
 								isDefaultProfile: true,
 							},
 							{
 								login: 'freexav',
 								email: 'xavier@42.fr',
-								image: '/images/xavier.jpg',
+								image: 'xavier.jpg',
 								isDefaultProfile: true,
 							},
 							{
 								login: 'chucky75',
 								email: 'chucky@murderdolls.fr',
-								image: '/images/chucky.jpg',
+								image: 'chucky.jpg',
 								isDefaultProfile: true,
 							},
 							{
 								login: 'm3gan',
 								email: 'm3g@n.droid',
-								image: '/images/m3gan.jpg',
+								image: 'm3gan.jpg',
 								isDefaultProfile: true,
 							},
 							{
 								login: 't1t1bon',
 								email: 'tintin@bon.fr',
-								image: '/images/emmanuel.jpg',
+								image: 'emmanuel.jpg',
 								isDefaultProfile: true,
 							},
 							{
 								login: 'norminet',
 								email: 'norminet@42.fr',
-								image: '/images/norminet.jpg',
+								image: 'norminet.jpg',
 								isDefaultProfile: true,
 							},
+						],
+					});
+					await this.prisma.chat.createMany({
+						data: [
+							{ isChannel: false, isPrivate: false, isProtected: false },
+							{ isChannel: false, isPrivate: false, isProtected: false },
+							{ isChannel: false, isPrivate: false, isProtected: false },
+						],
+					});
+					await this.prisma.chatSession.createMany({
+						data: [
+							{ userId: 1, chatId: 1 },
+							{ userId: 2, chatId: 1 },
+							{ userId: 2, chatId: 2 },
+							{ userId: 6, chatId: 3 },
+						],
+					});
+					await this.prisma.message.createMany({
+						data: [
+							{ content: 'Miaou', userId: 6 },
+							{ content: 'This is Sophie here', userId: 1 },
+							{ content: "Tu changes quand d'opérateur ?", userId: 2 },
 						],
 					});
 				} catch (error) {
