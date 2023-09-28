@@ -541,7 +541,7 @@ export async function findPrivateMessage(
 }
 
 export async function setInviteReply(
-	messageId: number,
+	chatId: number,
 	reply: boolean,
 	accessToken: string,
 ) {
@@ -554,7 +554,7 @@ export async function setInviteReply(
 			},
 			credentials: 'include',
 			body: JSON.stringify({
-				messageId: messageId,
+				chatId: chatId,
 				reply: reply,
 			}),
 		});

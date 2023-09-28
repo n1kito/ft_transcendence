@@ -19,7 +19,6 @@ class WebSocketService {
 		try {
 			// Listen for the 'connect' event
 			this.socket.on('connect', () => {
-				console.log('🟢 ', this.userId, ' just connected');
 				this.sendServerConnection();
 			});
 			// Listen for the 'disconnect' event prevent reconnection from wanted disconnection
@@ -32,7 +31,6 @@ class WebSocketService {
 					this.socket.connect();
 				} else {
 					// this.endConnection(this.userId);
-					console.log('🔴 disconnection');
 					this.socket.disconnect();
 				}
 			});
@@ -54,7 +52,6 @@ class WebSocketService {
 
 	sendServerConnection() {
 		try {
-			// console.log('🟢 ping server !');
 			this.socket.emit('ServerConnection', this.userId);
 		} catch (e) {
 			console.error(e, ': WebSocketService sendServerConnection');
@@ -83,19 +80,13 @@ class WebSocketService {
 	/* ********************************************************************* */
 	/* ******************************** CHAT ******************************* */
 	/* ********************************************************************* */
-	// joinLobby() {
-	// 	this.socket.emit('joinLobby');
-	// 	console.log('🚪 Entering lobby')
-	// }
 
 	joinRoom(chatId: number) {
 		this.socket.emit('joinRoom', chatId);
-		console.log('🚪 Entering room n.', chatId);
 	}
 
 	leaveRoom(chatId: number) {
 		this.socket.emit('leaveRoom', chatId);
-		console.log('🚪 Leaving room n.', chatId);
 	}
 
 	sendMessage(
@@ -119,30 +110,17 @@ class WebSocketService {
 			targetLogin: targetLogin || null,
 			channelInvitation: channelInvitation || null,
 		});
-		console.log('sending message to ' + chatId + ': ' + message);
 	}
 
 	// used when on active chat
 	onReceiveMessage(callback: callbackInterface) {
 		this.socket.on('receiveMessage', callback);
-		console.log('message listener on');
 	}
 
 	// used when leaving active chat but staying in room
 	offReceiveMessage(callback: callbackInterface) {
 		this.socket.off('receiveMessage', callback);
-		console.log('message listener off');
 	}
-
-	// replyToInvit(chatId: number, messageId: number, reply: boolean) {
-	// 	this.socket.emit('replyToInvit', {
-	// 		chatId: chatId,
-	// 		messageId: messageId,
-	// 		reply: reply,
-	// 	});
-	// 	console.log('reply');
-
-	// }
 
 	/* ********************************************************************* */
 	/* ******************************* ADMIN ******************************* */
@@ -152,17 +130,14 @@ class WebSocketService {
 			chatId: chatId,
 			userId: userId,
 		});
-		console.log('kicking user ' + userId + ' from chat ' + chatId);
 	}
 
 	onKick(callback: callbackInterface) {
 		this.socket.on('kick', callback);
-		console.log('kick listener on');
 	}
 
 	offKick(callback: callbackInterface) {
 		this.socket.off('kick', callback);
-		console.log('kick listener off');
 	}
 
 	makeAdmin(userId: number, chatId: number) {
@@ -174,12 +149,44 @@ class WebSocketService {
 
 	onMakeAdmin(callback: callbackInterface) {
 		this.socket.on('makeAdmin', callback);
-		console.log('makeAdmin listener on');
 	}
 
 	offMakeAdmin(callback: callbackInterface) {
 		this.socket.off('makeAdmin', callback);
-		console.log('makeAdmin listener off');
+	}
+
+	/* ********************************************************************* */
+	/* ******************************* GAME ******************************** */
+	/* ********************************************************************* */
+
+	sendAcceptInvite(inviterLogin: string, chatId: number) {
+		this.socket.emit('acceptInvite', {
+			inviterLogin: inviterLogin,
+			chatId: chatId,
+		});
+	}
+
+	onSendAcceptInvite(callback: callbackInterface) {
+		this.socket.on('acceptInvite', callback);
+	}
+
+	offSendAcceptInvite(callback: callbackInterface) {
+		this.socket.off('acceptInvite', callback);
+	}
+
+	sendDeclineInvite(inviterLogin: string, chatId: number) {
+		this.socket.emit('declineInvite', {
+			inviterLogin: inviterLogin,
+			chatId: chatId,
+		});
+	}
+
+	onsendDeclineInvite(callback: callbackInterface) {
+		this.socket.on('declineInvite', callback);
+	}
+
+	offsendDeclineInvite(callback: callbackInterface) {
+		this.socket.off('declineInvite', callback);
 	}
 }
 

@@ -20,6 +20,7 @@ export interface IGameBallPosition {
 export type IPlayerInformation = {
 	login: string;
 	image: string;
+	playerIsInTheRoom?: boolean;
 };
 
 export interface IPlayerState {

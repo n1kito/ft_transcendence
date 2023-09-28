@@ -16,6 +16,7 @@ import FriendsIcon from './Icons/NOTEBOOK.svg';
 import GameIcon from './Icons/CD.svg';
 import ChannelsIcon from './Icons/EARTH.svg';
 import Game from '../Game/Game';
+import { GameContext, GameProvider } from '../../contexts/GameContext';
 import { ChatContext } from 'src/contexts/ChatContext';
 import { addFriend, fetchFriends } from 'src/utils/FriendsQueries';
 import FriendsList from '../Friends/Components/FriendsList/FriendsList';
@@ -44,6 +45,7 @@ const Desktop = () => {
 		useState(false);
 	const [channelsWindowIsOpen, setChannelsWindowIsOpen] = useState(false);
 	const [gameWindowIsOpen, setGameWindowIsOpen] = useState(false);
+	const { gameData } = useContext(GameContext);
 
 	const [showFriendProfile, setShowFriendProfile] = useState(false);
 
@@ -432,6 +434,7 @@ const Desktop = () => {
 				)}
 				{gameWindowIsOpen && (
 					<Game
+						opponentLogin={gameData.opponentInfo?.login}
 						onCloseClick={() => {
 							removeNavParam('game');
 							setGameWindowIsOpen(false);

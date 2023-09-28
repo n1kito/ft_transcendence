@@ -101,10 +101,6 @@ const Channels: React.FC<IChannelsProps> = ({
 					}
 					getNewChatsList(updatedChatList);
 				}
-				console.log(
-					'%cYou received a message from another chat',
-					'color:lightblue;',
-				);
 			}
 		};
 		chatData.socket?.onReceiveMessage(onReceiveMessage);
@@ -156,7 +152,6 @@ const Channels: React.FC<IChannelsProps> = ({
 	// on click on an avatar open the window, set the userId and chatId, and fetch
 	// the messages.
 	const openPrivateMessageWindow: any = (roomId: number) => {
-		console.log('roomId', roomId);
 		const chatId = chatData.chatsList.map((currentChat) => {
 			if (roomId === currentChat.chatId) {
 				setChatWindowId(currentChat.chatId);
@@ -234,7 +229,6 @@ const Channels: React.FC<IChannelsProps> = ({
 							isChannel: true,
 						},
 					]);
-					console.log('Channel joined successfully');
 				})
 				.then(() => {
 					setChannelNameInput('');
@@ -313,7 +307,6 @@ const Channels: React.FC<IChannelsProps> = ({
 					chatData.chatsList.find((current) => current.isChannel === true) ? (
 						chatData.chatsList.map((room, index) => {
 							if (room.isChannel) {
-								// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
 								return (
 									<FriendBadge
 										key={'Channel' + room.chatId}

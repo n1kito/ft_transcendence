@@ -11,6 +11,8 @@ import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/Settings
 import Title from '../Profile/Components/Title/Title';
 import InputField from '../Profile/Components/InputField/InputField';
 import Button from '../Shared/Button/Button';
+import mysteryBox from '../Profile/Components/TargetBadge/images/mysteryBox.png';
+
 import {
 	createChatPrivateMessage,
 	fetchChats,
@@ -47,13 +49,8 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	const [searchUserSuccess, setSearchUserSuccess] = useState('');
 	const { userData } = useContext(UserContext);
 	const { accessToken } = useAuth();
-	const {
-		chatData,
-		updateChatData,
-		updateChatList,
-		getNewChatsList,
-		getNewBlockedUsers,
-	} = useContext(ChatContext);
+	const { chatData, updateChatList, getNewChatsList, getNewBlockedUsers } =
+		useContext(ChatContext);
 
 	/* ********************************************************************* */
 	/* ***************************** WEBSOCKET ***************************** */
@@ -78,13 +75,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 				updatedMessages.push(message);
 				setMessages(updatedMessages);
 			} else {
-				console.log(
-					'message.chatId',
-					message.chatId,
-					'chatData.chatsList',
-					chatData.chatsList,
-				);
-
 				// notifications : copy the chat list and add newMessage to the chat concerned
 				let updatedChatList: IChatStruct[] = [];
 				for (const current of chatData.chatsList) {
@@ -99,10 +89,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					}
 					getNewChatsList(updatedChatList);
 				}
-				console.log(
-					'%cYou received a message from another chat',
-					'color:lightblue;',
-				);
 			}
 		};
 		chatData.socket?.onReceiveMessage(onReceiveMessage);
@@ -126,32 +112,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	}, [chatData.chatsList]);
 
 	/* ********************************************************************* */
-	/* ******************************* DEBUG ******************************* */
-	/* ********************************************************************* */
-
-	// useEffect(() => {
-	// 	console.log(' PrivateMessage - messages', messages);
-	// }, [messages]);
-	// useEffect(() => {
-	// 	console.log(' PrivateMessage - privateMessages', privateMessages);
-	// }, [privateMessages]);
-
-	// useEffect(() => {
-	// 	console.log(
-	// 		'%cchatData.chatsList',
-	// 		'background-color: red',
-	// 		chatData.chatsList,
-	// 	);
-	// }, [chatData.chatsList]);
-
-	// useEffect(() => {
-	// 	console.log(' PrivateMessage - chatWindowId', chatWindowId);
-	// }, [chatWindowId]);
-
-	// useEffect(() => {
-	// 	console.log(' PrivateMessage - searchUserSuccess', searchUserSuccess);
-	// }, [searchUserSuccess]);
-	/* ********************************************************************* */
 	/* ******************************* LOGIC ******************************* */
 	/* ********************************************************************* */
 
@@ -163,7 +123,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 				// updateChatList(data);
 				getBlockedUsers(accessToken)
 					.then((users) => {
-						console.warn('I fetched my blocked users', users);
 						getNewBlockedUsers(users);
 					})
 					.catch(() => {
@@ -172,7 +131,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 			})
 			.catch((e) => {
 				console.error('Error fetching private conversations: ', e);
-				console.warn('userData', userData);
 			});
 	}, []);
 
@@ -241,7 +199,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 
 	// find the user by login and create the chat
 	const createNewChatFromLogin = () => {
-		console.log('searchedLogin', searchedLogin);
 		if (searchedLogin) {
 			findUserByLogin(searchedLogin, accessToken)
 				// .then((response) => response.json())
@@ -249,7 +206,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					if (data.message) {
 						throw new Error('User not found');
 					}
-					console.log('response data', data);
 					// if the user is found, create the PM and update the PM list
 					if (!userData) {
 						return;
@@ -312,6 +268,8 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 						{
 							name: 'New Chat',
 							onClick: () => {
+								setSearchUserError('');
+								setSearchUserSuccess('');
 								setSettingsPanelIsOpen(true);
 							},
 						},
@@ -336,12 +294,13 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 										const friend = friends.find((friend) => {
 											return friend.id === participantId;
 										});
-										// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
 										return (
 											<FriendBadge
 												key={'PM' + room.chatId}
 												badgeTitle={room.name || 'anonymous'}
-												badgeImageUrl={`/api/images/${room.avatar}`}
+												badgeImageUrl={
+													room.name ? `/api/images/${room.avatar}` : mysteryBox
+												}
 												onlineIndicator={friend ? friend.onlineStatus : false}
 												isClickable={true}
 												onClick={() => {
@@ -358,6 +317,8 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 									isEmptyBadge={true}
 									isChannelBadge={false}
 									onClick={() => {
+										setSearchUserError('');
+										setSearchUserSuccess('');
 										setSettingsPanelIsOpen(true);
 									}}
 								/>

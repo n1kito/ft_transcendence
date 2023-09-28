@@ -44,7 +44,7 @@ export class SendMessageDTO {
 	@IsString()
 	@IsOptional()
 	@MaxLength(35)
-	@MinLength(5)
+	@MinLength(2)
 	@IsDefined()
 	channelInvitation?: string;
 

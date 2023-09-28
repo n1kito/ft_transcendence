@@ -31,6 +31,11 @@ interface ICommunication {
 	targetLogin?: string;
 }
 
+interface IGameInvit {
+	inviterLogin: string;
+	chatId: number;
+}
+
 export interface IMessage {
 	chatId: number;
 	sentById: number;
@@ -78,7 +83,7 @@ export class chatWebSocketGateway
 	@SubscribeMessage('ServerConnection')
 	handleServerConnection(@MessageBody() data: number): void {
 		this.server.emit('ClientLogIn', data);
-		console.log('\n🟢🟢' + data + ' just arrived!🟢🟢\n');
+		console.log('\n[🟢]' + data + ' just arrived!\n');
 	}
 
 	// when a client received a 'userLoggedIn' message, it sends back a
@@ -89,7 +94,7 @@ export class chatWebSocketGateway
 		@ConnectedSocket() client: Socket,
 	): void {
 		this.server.emit('ClientLogInResponse', data);
-		console.log('🟢 ClientLogInResponse: ' + data);
+		console.log('[🟢] ClientLogInResponse: ' + data);
 	}
 
 	@SubscribeMessage('ServerEndedConnection')
@@ -97,7 +102,7 @@ export class chatWebSocketGateway
 		@MessageBody() data: number,
 		@ConnectedSocket() client: Socket,
 	): void {
-		console.log('\n🔴🔴' + data + ' just left!🔴🔴\n');
+		console.log('\n[🔴]' + data + ' just left!\n');
 		this.server.emit('ClientLogOut', data);
 		client.disconnect();
 
@@ -113,7 +118,7 @@ export class chatWebSocketGateway
 		@ConnectedSocket() client: Socket,
 	): void {
 		client.join(roomId.toString());
-		console.log('🚪🚪🚪' + client.id + 'just entered room n.' + roomId);
+		console.log('[🚪]' + client.id + 'just entered room n.' + roomId);
 	}
 
 	@SubscribeMessage('leaveRoom')
@@ -122,7 +127,7 @@ export class chatWebSocketGateway
 		@ConnectedSocket() client: Socket,
 	): void {
 		client.leave(roomId.toString());
-		console.log('🚪🚪🚪' + client.id + 'just left room n.' + roomId);
+		console.log('[🚪]' + client.id + 'just left room n.' + roomId);
 	}
 
 	@SubscribeMessage('sendMessage')
@@ -181,5 +186,26 @@ export class chatWebSocketGateway
 		console.log(
 			'👑👑👑 making admin :' + content.userId + ' of room ' + content.chatId,
 		);
+	}
+
+	/* ********************************************************************* */
+	/* ******************************** GAME ******************************* */
+	/* ********************************************************************* */
+	@SubscribeMessage('acceptInvite')
+	handleAcceptInvite(
+		@MessageBody() content: IGameInvit,
+		@ConnectedSocket() client: Socket,
+	): void {
+		this.server.emit('acceptInvite', content);
+		console.log('[🏓] invitation of ' + content.inviterLogin + 'accepted');
+	}
+
+	@SubscribeMessage('declineInvite')
+	handleDeclineInvite(
+		@MessageBody() content: IGameInvit,
+		@ConnectedSocket() client: Socket,
+	): void {
+		this.server.emit('declineInvite', content);
+		console.log('[🏓] invitation of ' + content.inviterLogin + 'declined');
 	}
 }

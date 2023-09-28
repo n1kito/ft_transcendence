@@ -11,7 +11,6 @@ import {
 } from 'class-validator';
 
 export class InviteDTO {
-	// TODO: do I need to escape more characters? (add '!' ?)
 	@IsNotEmpty()
 	@IsNumber()
 	@IsDefined()

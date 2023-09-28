@@ -122,29 +122,33 @@ export class AuthService {
 
 			// TODO: add try/catch around this if we want to have more precise error logs ?
 			// Find the user in our database
-			const userInDb = await this.prisma.user.findUnique({
-				where: { ft_id: this.userData.ft_id },
-			});
-			// If the user was not found, create it with the retrieved data
-			if (userInDb == null) {
-				const newUser = await this.prisma.user.create({
-					data: this.userData,
+			try {
+				const userInDb = await this.prisma.user.findUnique({
+					where: { ft_id: this.userData.ft_id },
 				});
-				// give the user some default friends
-				// TODO: add our 5 default users as the new user's friend
-				await this.addDefaultUsersAsFriends(newUser);
-				// give the user a random target
-				await this.assignRandomTargetToUser(newUser);
-				// Store the user id in the local object, so we can use it in the JWT token
-				this.userId = newUser.id;
-				// locally save avatar retrieved from 42 api then update image name
-				await this.saveAvatar(responseData.image.versions.small);
-			}
-			// if the user already exists, update their information (if they have not manually overwritten it themselves)
-			else {
-				await this.updateUserInfo(userInDb);
-				// this.yourDataRepository.save(mappedData);
-				this.userId = userInDb.id;
+				// If the user was not found, create it with the retrieved data
+				if (userInDb == null) {
+					const newUser = await this.prisma.user.create({
+						data: this.userData,
+					});
+					// give the user some default friends
+					// TODO: add our 5 default users as the new user's friend
+					await this.addDefaultUsersAsFriends(newUser);
+					// give the user a random target
+					await this.assignRandomTargetToUser(newUser);
+					// Store the user id in the local object, so we can use it in the JWT token
+					this.userId = newUser.id;
+					// locally save avatar retrieved from 42 api then update image name
+					await this.saveAvatar(responseData.image.versions.small);
+				}
+				// if the user already exists, update their information (if they have not manually overwritten it themselves)
+				else {
+					await this.updateUserInfo(userInDb);
+					// this.yourDataRepository.save(mappedData);
+					this.userId = userInDb.id;
+				}
+			} catch (e) {
+				console.error('userIndb error: ', e.message);
 			}
 		} catch (error) {
 			// TODO:: handle error accordingly
