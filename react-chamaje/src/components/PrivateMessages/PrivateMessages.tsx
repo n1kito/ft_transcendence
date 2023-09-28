@@ -123,7 +123,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 				// updateChatList(data);
 				getBlockedUsers(accessToken)
 					.then((users) => {
-						console.warn('I fetched my blocked users', users);
 						getNewBlockedUsers(users);
 					})
 					.catch(() => {
@@ -132,7 +131,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 			})
 			.catch((e) => {
 				console.error('Error fetching private conversations: ', e);
-				console.warn('userData', userData);
 			});
 	}, []);
 
