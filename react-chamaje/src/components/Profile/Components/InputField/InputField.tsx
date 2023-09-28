@@ -25,8 +25,7 @@ const InputField: React.FC<InputFieldProps> = ({
 		}
 	};
 
-	useEffect(() => {
-	}, []);
+	useEffect(() => {}, []);
 	return (
 		<div className="inputFieldWrapper">
 			<input

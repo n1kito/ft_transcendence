@@ -47,7 +47,7 @@ const ChatGameInvite: React.FC<IGameInviteProps> = ({
 		// TODO: fix ?
 		// open a game window
 		updateGameData({ opponentInfo: { login: sender || '', image: '' } });
-		setNavParam('game')
+		setNavParam('game');
 		// setGameWindowIsOpen(true);
 	};
 	const declineInvite = () => {
@@ -55,7 +55,6 @@ const ChatGameInvite: React.FC<IGameInviteProps> = ({
 			.then(() => {
 				setInviteDeclined(true);
 				chatData.socket?.sendDeclineInvite(sender || '', chatId);
-
 			})
 			.catch((e) => {
 				console.error('You could not respond to the invitation: ', e.message);

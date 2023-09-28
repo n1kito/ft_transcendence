@@ -123,7 +123,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	const { updateGameData } = useContext(GameContext);
 	const { setNavParam } = useNavigationParams();
 
-
 	/* ********************************************************************* */
 	/* ***************************** WEBSOCKET ***************************** */
 	/* ********************************************************************* */
@@ -360,8 +359,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 								updateGameData({
 									opponentInfo: { login: name || '', image: '' },
 								});
-								setNavParam('game')
-
+								setNavParam('game');
 							})
 							.catch((e) => {
 								console.error('Could not send invitation: ', e.message);
@@ -522,7 +520,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 			}
 		}
 	}, [messages]);
-
 
 	/* ********************************************************************* */
 	/* ******************************* RETURN ****************************** */

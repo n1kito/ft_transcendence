@@ -122,8 +122,6 @@ class WebSocketService {
 		this.socket.off('receiveMessage', callback);
 	}
 
-
-
 	/* ********************************************************************* */
 	/* ******************************* ADMIN ******************************* */
 	/* ********************************************************************* */
@@ -162,27 +160,33 @@ class WebSocketService {
 	/* ********************************************************************* */
 
 	sendAcceptInvite(inviterLogin: string, chatId: number) {
-		this.socket.emit('acceptInvite', { inviterLogin: inviterLogin, chatId: chatId });
+		this.socket.emit('acceptInvite', {
+			inviterLogin: inviterLogin,
+			chatId: chatId,
+		});
 	}
 
 	onSendAcceptInvite(callback: callbackInterface) {
-		this.socket.on('acceptInvite', callback)
+		this.socket.on('acceptInvite', callback);
 	}
 
 	offSendAcceptInvite(callback: callbackInterface) {
-		this.socket.off('acceptInvite', callback)
+		this.socket.off('acceptInvite', callback);
 	}
 
 	sendDeclineInvite(inviterLogin: string, chatId: number) {
-		this.socket.emit('declineInvite', { inviterLogin: inviterLogin, chatId: chatId });
+		this.socket.emit('declineInvite', {
+			inviterLogin: inviterLogin,
+			chatId: chatId,
+		});
 	}
 
 	onsendDeclineInvite(callback: callbackInterface) {
-		this.socket.on('declineInvite', callback)
+		this.socket.on('declineInvite', callback);
 	}
 
 	offsendDeclineInvite(callback: callbackInterface) {
-		this.socket.off('declineInvite', callback)
+		this.socket.off('declineInvite', callback);
 	}
 }
 

@@ -77,7 +77,7 @@ const GameSelectionScreen: React.FC<IGameSelectionScreenProps> = () => {
 					<Button
 						onClick={() => updateGameData({ player1Ready: true })}
 						disabled={
-							!gameData.opponentInfo ||
+							!gameData.opponentInfo?.playerIsInTheRoom ||
 							(gameData.player1Ready && !gameData.player2Ready)
 						}
 					>
@@ -152,7 +152,7 @@ const GameSelectionScreen: React.FC<IGameSelectionScreenProps> = () => {
 						onClick={() => {
 							updateGameData({ userWantsNewOpponent: true });
 						}}
-						disabled={gameData.player1Ready || !gameData.opponentInfo}
+						disabled={/*gameData.player1Ready || */ !gameData.opponentInfo}
 						baseColor={[300, 91, 84]}
 					>
 						shuffle

@@ -41,7 +41,6 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 	);
 	const [badgeImage, setBadgeImage] = useState<string | undefined>(mysteryBox);
 	const { setNavParam } = useNavigationParams();
-
 	const updateBackgroundImage = () => {
 		setImageIndex((prevIndex) => (prevIndex + 1) % rouletteImages.length);
 	};
@@ -140,8 +139,9 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 			<FriendBadge
 				isClickable={true}
 				badgeTitle={badgeTitle}
-				badgeImageUrl={`/api/images/${badgeImage}`}
-				onlineIndicator={targetHasBeenAssigned}
+				badgeImageUrl={
+					targetHasBeenAssigned ? `/api/images/${badgeImage}` : badgeImage
+				}
 			/>
 			{targetHasBeenAssigned && <BlackBadge>@{targetLogin}</BlackBadge>}
 		</div>
