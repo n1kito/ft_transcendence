@@ -102,4 +102,9 @@
 	border-radius: 50%;
 	border: 2px solid black;
 	box-shadow: 1px 1px pink;
+	transition: opacity 0.5s linear;
+}
+
+.navBar-info-hidden {
+	opacity: 0;
 }

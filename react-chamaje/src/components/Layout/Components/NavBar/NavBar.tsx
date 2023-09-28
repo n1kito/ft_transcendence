@@ -20,11 +20,20 @@ const NavBar: React.FC<navBarProps> = ({ isLoggedIn = true }) => {
 			<div className="menuItems">Miaou ?</div>
 			<div className="siteTitle">chamaje</div>
 			<div className="toolBox">
-				{userData && <span>{userData.login}</span>}
+				<span
+					className={
+						isAuthentificated && userData.login ? '' : 'navBar-info-hidden'
+					}
+				>
+					{userData.login}
+				</span>
 				<FullscreenTrigger />
-				{isAuthentificated && (
-					<img className="userAvatar" src={userData.image} />
-				)}
+				<img
+					className={`userAvatar ${
+						!isAuthentificated || !userData.image ? 'navBar-info-hidden' : ''
+					}`}
+					src={userData.image}
+				/>
 				{isAuthentificated && <Lock />}
 				<Clock />
 			</div>
