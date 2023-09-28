@@ -800,7 +800,7 @@ export class GameService {
 	// Find the playerID associated with a socketId
 	getUserIdFromSocketId(socketId: string): number | undefined {
 		if (this.connectedClients.has(socketId))
-			this.connectedClients.get(socketId).userId;
+			return this.connectedClients.get(socketId).userId;
 		return undefined;
 	}
 
