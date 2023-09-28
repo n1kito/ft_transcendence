@@ -54,6 +54,7 @@ export interface IChatWindowProps {
 	setMessages: Dispatch<SetStateAction<IMessage[]>>;
 	setShowFriendProfile: React.Dispatch<React.SetStateAction<boolean>>;
 	setProfileLogin: React.Dispatch<React.SetStateAction<string>>;
+	setGameWindowIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 interface IChatInfo {
@@ -82,6 +83,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	setChatWindowIsOpen,
 	setShowFriendProfile,
 	setProfileLogin,
+	setGameWindowIsOpen,
 }) => {
 	/* ********************************************************************* */
 	/* ******************************* FRONT ******************************* */
@@ -637,6 +639,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							recipient={inviteToPlayMsg.targetLogin}
 							sentAt={inviteToPlayMsg.sentAt}
 							reply={inviteToPlayMsg.reply}
+							setGameWindowIsOpen={setGameWindowIsOpen}
 						></ChatGameInvite>
 					) : (
 						<></>

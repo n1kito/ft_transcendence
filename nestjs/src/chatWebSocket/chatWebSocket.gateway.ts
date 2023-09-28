@@ -31,6 +31,11 @@ interface ICommunication {
 	targetLogin?: string;
 }
 
+interface IGameInvit {
+	inviterLogin: string;
+	chatId: number;
+}
+
 export interface IMessage {
 	chatId: number;
 	sentById: number;
@@ -181,5 +186,26 @@ export class chatWebSocketGateway
 		console.log(
 			'👑👑👑 making admin :' + content.userId + ' of room ' + content.chatId,
 		);
+	}
+
+	/* ********************************************************************* */
+	/* ******************************** GAME ******************************* */
+	/* ********************************************************************* */
+	@SubscribeMessage('acceptInvite')
+	handleAcceptInvite(
+		@MessageBody() content: IGameInvit,
+		@ConnectedSocket() client: Socket,
+	): void {
+		this.server.emit('acceptInvite', content);
+		console.log('🏓🏓🏓 invitation of ' + content.inviterLogin + 'accepted');
+	}
+
+	@SubscribeMessage('declineInvite')
+	handleDeclineInvite(
+		@MessageBody() content: IGameInvit,
+		@ConnectedSocket() client: Socket,
+	): void {
+		this.server.emit('declineInvite', content);
+		console.log('🏓🏓🏓 invitation of ' + content.inviterLogin + 'declined');
 	}
 }

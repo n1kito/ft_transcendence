@@ -19,7 +19,7 @@ import FriendsIcon from './Icons/NOTEBOOK.svg';
 import GameIcon from './Icons/CD.svg';
 import ChannelsIcon from './Icons/EARTH.svg';
 import Game from '../Game/Game';
-import { GameProvider } from '../../contexts/GameContext';
+import { GameContext, GameProvider } from '../../contexts/GameContext';
 import { ChatContext } from 'src/contexts/ChatContext';
 import {
 	addFriend,
@@ -49,6 +49,7 @@ const Desktop = () => {
 		useState(false);
 	const [channelsWindowIsOpen, setChannelsWindowIsOpen] = useState(false);
 	const [gameWindowIsOpen, setGameWindowIsOpen] = useState(false);
+	const { gameData } = useContext(GameContext);
 
 	const [showFriendProfile, setShowFriendProfile] = useState(false);
 
@@ -375,6 +376,7 @@ const Desktop = () => {
 						// chatWindowControl={setChatWindowIsOpen}
 						setShowFriendProfile={setShowFriendProfile}
 						setProfileLogin={setFriendLogin}
+						setGameWindowIsOpen={setGameWindowIsOpen}
 					/>
 				)}
 				{channelsWindowIsOpen && (
@@ -384,17 +386,12 @@ const Desktop = () => {
 						key="channels-window"
 						setShowFriendProfile={setShowFriendProfile}
 						setProfileLogin={setFriendLogin}
+						setGameWindowIsOpen={setGameWindowIsOpen}
 					/>
 				)}
 				{gameWindowIsOpen && (
 					<Game
-						// opponentLogin={
-						// 	userData.login == 'mjallada'
-						// 		? 'freexav'
-						// 		: userData.login == 'jeepark'
-						// 		? 'cgosseli'
-						// 		: ''
-						// }
+						opponentLogin={gameData.opponentInfo?.login}
 						onCloseClick={() => setGameWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
 						key="game-window"

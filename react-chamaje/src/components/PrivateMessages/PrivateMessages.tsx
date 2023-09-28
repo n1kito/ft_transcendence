@@ -28,6 +28,7 @@ interface IPrivateMessagesProps {
 	friends: IFriendStruct[];
 	setShowFriendProfile: React.Dispatch<React.SetStateAction<boolean>>;
 	setProfileLogin: React.Dispatch<React.SetStateAction<string>>;
+	setGameWindowIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 	// chatWindowControl: (state: boolean) => void;
 }
 
@@ -37,6 +38,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	friends,
 	setShowFriendProfile,
 	setProfileLogin,
+	setGameWindowIsOpen,
 	// chatWindowControl,
 }) => {
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
@@ -401,6 +403,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					setChatWindowIsOpen={setChatWindowIsOpen}
 					setShowFriendProfile={setShowFriendProfile}
 					setProfileLogin={setProfileLogin}
+					setGameWindowIsOpen={setGameWindowIsOpen}
 				/>
 			)}
 		</>

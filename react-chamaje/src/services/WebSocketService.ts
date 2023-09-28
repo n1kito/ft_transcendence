@@ -181,6 +181,40 @@ class WebSocketService {
 		this.socket.off('makeAdmin', callback);
 		console.log('makeAdmin listener off');
 	}
+
+	/* ********************************************************************* */
+	/* ******************************* GAME ******************************** */
+	/* ********************************************************************* */
+
+	sendAcceptInvite(inviterLogin: string, chatId: number) {
+		this.socket.emit('acceptInvite', { inviterLogin: inviterLogin, chatId: chatId });
+		console.log('sent invite accept to ' + inviterLogin);
+	}
+
+	onSendAcceptInvite(callback: callbackInterface) {
+		this.socket.on('acceptInvite', callback)
+		console.log('acceptInvite listener on');
+	}
+
+	offSendAcceptInvite(callback: callbackInterface) {
+		this.socket.off('acceptInvite', callback)
+		console.log('acceptInvite listener off');
+	}
+
+	sendDeclineInvite(inviterLogin: string, chatId: number) {
+		this.socket.emit('declineInvite', { inviterLogin: inviterLogin, chatId: chatId });
+		console.log('sent invite decline to ' + inviterLogin);
+	}
+
+	onsendDeclineInvite(callback: callbackInterface) {
+		this.socket.on('declineInvite', callback)
+		console.log('declineInvite listener on');
+	}
+
+	offsendDeclineInvite(callback: callbackInterface) {
+		this.socket.off('declineInvite', callback)
+		console.log('declineInvite listener off');
+	}
 }
 
 export default WebSocketService;
