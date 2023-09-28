@@ -17,7 +17,11 @@ const NavBar: React.FC<navBarProps> = ({ isLoggedIn = true }) => {
 
 	return (
 		<div className={`navBar ${isLoggedIn ? 'loggedIn' : ''}`}>
-			<div className="menuItems">Miaou ?</div>
+			<div className="menuItems">
+				<span className={isAuthentificated ? '' : 'navBar-info-hidden'}>
+					Miaou ?
+				</span>
+			</div>
 			<div className="siteTitle">chamaje</div>
 			<div className="toolBox">
 				<span
@@ -34,7 +38,9 @@ const NavBar: React.FC<navBarProps> = ({ isLoggedIn = true }) => {
 					}`}
 					src={userData.image}
 				/>
-				{isAuthentificated && <Lock />}
+				<span className={isAuthentificated ? '' : 'navBar-info-hidden'}>
+					<Lock />
+				</span>
 				<Clock />
 			</div>
 		</div>

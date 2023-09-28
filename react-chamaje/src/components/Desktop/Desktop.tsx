@@ -121,7 +121,7 @@ const Desktop = () => {
 		if (isAuthentificated) fetchUserData();
 
 		// Check the current URL and update the windows accordingly
-		// checkURLParams();
+		checkURLParams();
 
 		return () => {
 			chatData.socket?.endConnection();

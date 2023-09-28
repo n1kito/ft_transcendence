@@ -14,20 +14,11 @@
 	align-items: center;
 	color: white;
 	font-weight: bold;
-	transition: all 1s linear;
-	/* font-family: 'VT323', monospace; */
-	/* font-size: 1.2rem; */
+	/* transition: all 0.5s linear; */
 	font-family: 'Roboto Mono', monospace;
 	letter-spacing: 1px;
 	font-weight: normal;
 	border: 2px solid transparent;
-	/* background-color: white; */
-	/* border: 1px solid black; */
-	/* color: black; */
-}
-
-.navBar * {
-	/* outline: 1px solid black; */
 }
 
 .toolBox {
@@ -98,6 +89,7 @@
 
 .userAvatar {
 	height: 2rem;
+	width: 2rem;
 	aspect-ratio: 1/1;
 	border-radius: 50%;
 	border: 2px solid black;
@@ -106,5 +98,6 @@
 }
 
 .navBar-info-hidden {
+	display: none;
 	opacity: 0;
 }
