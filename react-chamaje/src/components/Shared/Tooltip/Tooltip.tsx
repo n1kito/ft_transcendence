@@ -27,7 +27,6 @@ const Tooltip: React.FC<ITooltipProps> = ({
 				isHovered || isVisible ? 'tooltip-visible' : ''
 			}`}
 			onMouseEnter={() => {
-				console.log('tooltip is hovered');
 				setIsHovered(true);
 			}}
 			onMouseLeave={() => setIsHovered(false)}

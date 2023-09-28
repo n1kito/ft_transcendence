@@ -99,14 +99,15 @@ const ProfileSettings: React.FC = () => {
 					// ...userData,
 					login: username,
 					email: email,
+					id: userData ? userData.id : 0,
 					image: userData?.image || '',
+					// friends: userData?.friends || [],
 					// winRate: userData?.winRate || 0,
 					// gamesCount: userData?.gamesCount || 0,
 				};
 				updateUserData(updatedUserData);
 			}
 			const responseData = await response.clone().json();
-			console.log(responseData);
 			if (response.status === 409 || response.status === 400) {
 				responseData.errors.forEach((error: any) => {
 					if (error.field === 'login') {
@@ -130,6 +131,7 @@ const ProfileSettings: React.FC = () => {
 						value={username}
 						onChange={handleUsernameChange}
 						error={usernameError}
+						maxlength={8}
 					/>
 					<InputField
 						value={email}

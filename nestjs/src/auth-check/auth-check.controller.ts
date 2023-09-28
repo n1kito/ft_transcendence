@@ -15,7 +15,6 @@ import { TokenService } from 'src/token/token.service';
 @Controller('auth-check')
 export class AuthCheckController {
 	constructor(private readonly authCheckService: AuthCheckService) {}
-	// TODO: do we need a separate service here ? It's a simple check
 	@Get()
 	// This method checks if the user is authenticated by verifying the access token
 	async checkAuth(

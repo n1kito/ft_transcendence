@@ -7,6 +7,9 @@ postgresql
 # Dependencies
 **/node_modules
 
+# Prisma migrations
+**/migrations
+
 # Logs
 logs
 *.log

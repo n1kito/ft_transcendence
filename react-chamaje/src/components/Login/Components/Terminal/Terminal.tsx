@@ -2,13 +2,19 @@ import React, { useEffect, useState } from 'react';
 import './Terminal.css';
 import Prompt from '../Prompt/Prompt';
 
-const Terminal = () => {
+interface TerminalProps {
+	instruction: string;
+	type: string;
+	redirUrl: string;
+}
+
+const Terminal: React.FC<TerminalProps> = (props) => {
 	return (
 		<div id="terminal">
 			<Prompt
-				instruction="Would you like to login with 42 ? (Y/n)"
-				type="bool"
-				redirUrl="/api/login/auth"
+				instruction={props.instruction}
+				type={props.type}
+				redirUrl={props.redirUrl}
 			></Prompt>
 			{/* <Prompt instruction='Please input your email:'></Prompt> */}
 			{/* <Prompt instruction='enter your password:'></Prompt> */}

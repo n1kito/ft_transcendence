@@ -91,6 +91,7 @@ export class GameService {
 				console.log(
 					`[❗] User #${newlyConnectedUserId} is already connected, disconnecting them.`,
 				);
+				console.log('Connected clients:', this.connectedClients);
 				this.server.to(newlyConnectedSocketId).emit('connection_limit_reached');
 				throw new Error('user reached max connections');
 			}

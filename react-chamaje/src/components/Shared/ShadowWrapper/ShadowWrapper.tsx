@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import './ShadowWrapper.css';
 
 export interface ShadowWrapperProps {
@@ -7,6 +7,7 @@ export interface ShadowWrapperProps {
 	isClickable?: boolean;
 	backgroundColor?: string;
 	dashedBorder?: boolean;
+	shaking?: boolean;
 	onClick?: () => void;
 }
 
@@ -16,13 +17,32 @@ const ShadowWrapper: React.FC<ShadowWrapperProps> = ({
 	shadow = isClickable,
 	backgroundColor = '',
 	dashedBorder = false,
+	shaking = false,
 	onClick,
 }) => {
+	const [isShaking, setIsShaking] = useState(false);
+
+	useEffect(() => {
+		if (shaking) {
+			const shakeInterval = setInterval(() => {
+				setIsShaking(true);
+				const shakeDuration = 1000; // Shake for 1 seconds
+				setTimeout(() => {
+					setIsShaking(false);
+				}, shakeDuration);
+			}, 5000); // Start shaking every 10 seconds
+
+			// Clean up interval on unmount or when hasStartedRoulette changes to true
+			return () => clearInterval(shakeInterval);
+		}
+	}, [shaking]);
+
 	return (
 		<div
 			className={`shadow-wrapper ${shadow ? 'shadow' : ''} ${
 				isClickable ? 'clickable' : ''
-			} ${dashedBorder ? 'dashed-border' : ''}`}
+			} ${dashedBorder ? 'dashed-border' : ''}
+			${isShaking ? 'shake' : ''}`}
 			style={{ backgroundColor: backgroundColor }}
 			onClick={isClickable ? onClick : undefined}
 		>

@@ -5,11 +5,12 @@ import { AuthMiddleWare } from 'src/middleware/auth.middleware';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { AuthModule } from 'src/auth/auth.module';
 import { TokenModule } from 'src/token/token.module';
+import { ChatService } from 'src/chat/chat.service';
 
 @Module({
 	imports: [TokenModule],
 	controllers: [UserController],
-	providers: [UserService, PrismaService],
+	providers: [UserService, PrismaService, ChatService],
 })
 export class UserModule implements NestModule {
 	// This `configure` method is part of the `NestModule` interface and will be called by NestJS when the application starts.

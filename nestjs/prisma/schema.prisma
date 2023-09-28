@@ -12,15 +12,20 @@ datasource db {
 }
 
 model User {
-    id        Int      @id @unique @default(autoincrement())
-    ft_id     Int?     @unique
-    hash      String?
-    login     String   @unique
-    email     String   @unique
-    image     String?
-    createdAt DateTime @default(now())
+    id              Int         @id @unique @default(autoincrement())
+    ft_id           Int?        @unique
+    hash            String?
+    login           String      @unique
+    email           String      @unique
+    image           String?
+    createdAt       DateTime    @default(now())
     updatedAt DateTime @updatedAt
-    token     String?
+    token           String?
+
+    // Two Factor authentication
+    twoFactorAuthenticationSecret       String? 
+    isTwoFactorAuthenticationEnabled    Boolean @default(false)
+    isTwoFactorAuthenticationVerified   Boolean @default(false)
 
     // Friendship system
     friends          User[]  @relation("Friendship")
@@ -52,6 +57,19 @@ model User {
     targetedBy             User[]  @relation("Target")
     targetDiscoveredByUser Boolean @default(false)
 
+    // Chat logic
+    chatsSessions chatSession[]
+    Message       Message[]
+
+    // blockedUsers Int[]
+    blockedUsers UserBlocked[] @relation("BlockedUsers")
+    blockedBy    UserBlocked[]
+
+    bannedFromChat   Chat? @relation(fields: [bannedFromChatId], references: [id])
+    bannedFromChatId Int?
+    invitedToChat    Chat? @relation("invited", fields: [invitedToChatId], references: [id])
+    invitedToChatId  Int?
+
     // Rival logic
     rival   User?  @relation("Rival", fields: [rivalId], references: [id])
     rivalId Int?
@@ -71,4 +89,62 @@ model gameSession {
     player1  User  @relation("player1", fields: [player1Id], references: [id])
     player2  User  @relation("player2", fields: [player2Id], references: [id])
     winner User  @relation("winner", fields: [winnerId], references: [id])
+}
+
+// Chat logic
+model Chat {
+    id           Int           @id @default(autoincrement())
+    participants chatSession[]
+    messages     Message[]
+    isChannel    Boolean
+    isPrivate    Boolean
+    isProtected  Boolean
+    password     String?
+    name         String?
+    bannedUsers  User[]
+    invitedUsers User[]        @relation("invited")
+}
+
+model chatSession {
+    id Int @id @default(autoincrement())
+
+    Chat   Chat? @relation(fields: [chatId], references: [id])
+    chatId Int?
+
+    User   User? @relation(fields: [userId], references: [id])
+    userId Int?
+
+    isOwner Boolean?
+    isAdmin Boolean?
+    isMuted DateTime?
+}
+
+model Message {
+    id Int @id @default(autoincrement())
+
+    Chat   Chat? @relation(fields: [chatId], references: [id])
+    chatId Int?
+
+    sentBy User @relation(fields: [userId], references: [id])
+    userId Int
+
+    sentAt DateTime @default(now())
+
+    content String
+
+    isNotif           String?
+    target            Int?
+    channelInvitation String?
+    reply             Boolean?
+}
+
+model UserBlocked {
+    id        Int      @id @default(autoincrement())
+    blockedAt DateTime
+
+    userBlocking   User? @relation(name: "BlockedUsers", fields: [userBlockingId], references: [id])
+    userBlockingId Int?
+
+    userBlocked   User? @relation(fields: [userBlockedId], references: [id])
+    userBlockedId Int?
 }

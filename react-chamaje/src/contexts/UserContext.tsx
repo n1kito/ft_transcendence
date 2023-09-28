@@ -6,6 +6,8 @@ import React, {
 	useState,
 } from 'react';
 import { IUserData, IMatchHistory } from '../../../shared-lib/types/user';
+// import { IChatStruct } from 'src/components/PrivateMessages/PrivateMessages';
+import WebSocketService from 'src/services/WebSocketService';
 
 // export interface IMatchHistory {
 // 	player1Login: string;
@@ -49,6 +51,7 @@ import { IUserData, IMatchHistory } from '../../../shared-lib/types/user';
 // Default content for an empty userdata object
 const defaultUserData: IUserData = {
 	// User informatiom
+	id: 0,
 	login: '',
 	image: '',
 	// Profile information
@@ -56,6 +59,11 @@ const defaultUserData: IUserData = {
 	// Target
 	targetDiscoveredByUser: false,
 };
+
+// interface UserContextType {
+// 	userData: UserData | null;
+// 	setUserData: Dispatch<SetStateAction<UserData | null>>;
+// }
 
 interface UserContextType {
 	userData: IUserData;

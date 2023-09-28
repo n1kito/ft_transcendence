@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 import Login from './components/Login/Login';
 import Layout from './components/Layout/Layout';
@@ -24,6 +24,8 @@ import RetrieveAccessToken from './components/RetrieveAccessToken/RetrieveAccess
 import IconContextProvider from './contexts/IconContext';
 import { GameProvider } from './contexts/GameContext';
 import { WindowProvider } from './contexts/WindowContext';
+import { Socket, io } from 'socket.io-client';
+import { ChatProvider } from './contexts/ChatContext';
 
 // These are functions that will return a component passed as parameter depending on user authentification status
 const ProtectedLogin = showComponentIfNotLoggedIn(Login);
@@ -34,41 +36,43 @@ function App() {
 		<AuthContextProvider>
 			<UserProvider>
 				<div className="App">
-					<BrowserRouter>
-						<GameProvider>
-							<Layout>
-								<IconContextProvider>
-									<WindowProvider>
-										<Routes>
-											<Route path="/" element={<ProtectedLogin />} />
-											{/* <Route path="/desktop" element={<ProtectedDesktop />} /> */}
-											{/* <Route path="/friends" element={<ProtectedDesktop />} /> */}
-											{/* <Route path="/" element={<Login />} /> */}
-											<Route path="/desktop" element={<Desktop />} />
-											{/* <Route path="/friends" element={<Desktop />} /> */}
-											<Route
-												path="/retrieve-token"
-												element={<RetrieveAccessToken />}
-											/>
-											<Route
-												path="*"
-												element={
-													<DesktopIcon
-														name="Error :("
-														id={-1}
-														iconSrc={roadconeIcon}
-														onDoubleClick={() => {
-															/* TODO: redirect to the homepage ? */
-														}}
-													/>
-												}
-											/>
-										</Routes>
-									</WindowProvider>
-								</IconContextProvider>
-							</Layout>
-						</GameProvider>
-					</BrowserRouter>
+					<ChatProvider>
+						<BrowserRouter>
+							<GameProvider>
+								<Layout>
+									<IconContextProvider>
+										<WindowProvider>
+											<Routes>
+												<Route path="/" element={<ProtectedLogin />} />
+												<Route path="/desktop" element={<ProtectedDesktop />} />
+												<Route path="/friends" element={<ProtectedDesktop />} />
+												{/* <Route path="/" element={<Login />} /> */}
+												<Route path="/desktop" element={<Desktop />} />
+												{/* <Route path="/friends" element={<Desktop />} /> */}
+												<Route
+													path="/retrieve-token"
+													element={<RetrieveAccessToken />}
+												/>
+												<Route
+													path="*"
+													element={
+														<DesktopIcon
+															name="Error :("
+															id={-1}
+															iconSrc={roadconeIcon}
+															onDoubleClick={() => {
+																/* TODO: redirect to the homepage ? */
+															}}
+														/>
+													}
+												/>
+											</Routes>
+										</WindowProvider>
+									</IconContextProvider>
+								</Layout>
+							</GameProvider>
+						</BrowserRouter>
+					</ChatProvider>
 				</div>
 			</UserProvider>
 		</AuthContextProvider>
@@ -76,9 +80,3 @@ function App() {
 }
 
 export default App;
-
-{
-	/* <Route path="/" element={<ProtectedLogin />} />
-								<Route path="/desktop" element={<ProtectedDesktop />} />
-								<Route path="/friends" element={<ProtectedDesktop />} /> */
-}

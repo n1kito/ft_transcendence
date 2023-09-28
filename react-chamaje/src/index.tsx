@@ -8,9 +8,11 @@ const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement,
 );
 root.render(
+	// TODO: removed strict mode for debugging
 	// <React.StrictMode>
 	<>
 		<App />
+		//TODO: clean this up
 		{/* svg noise filter applied to the entire body element */}
 		{/* <svg className="filter-svg">
 			<filter id="noise-filter">
@@ -21,9 +23,9 @@ root.render(
 					stitchTiles="stitch"
 				/>
 			</filter>
-		</svg> */}
+		</svg>
+		{/* </React.StrictMode>, */}
 	</>,
-	// </React.StrictMode>,
 );
 
 // If you want to start measuring performance in your app, pass a function

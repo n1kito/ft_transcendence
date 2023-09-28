@@ -1,31 +1,140 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, {
+	Dispatch,
+	SetStateAction,
+	useContext,
+	useEffect,
+	useRef,
+	useState,
+} from 'react';
 import './ChatWindow.css';
 import Window from '../Window/Window';
 import Button from '../Shared/Button/Button';
 import ChatBubble from './Components/ChatBubble/ChatBubble';
 import { UserContext } from '../../contexts/UserContext';
-import ChattNotification from './Components/ChattNotification/ChattNotification';
 import ChatGameInvite from './Components/ChatGameInvite/ChatGameInvite';
 import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/SettingsWindow';
 import Title from '../Profile/Components/Title/Title';
 import InputField from '../Profile/Components/InputField/InputField';
+import useAuth from 'src/hooks/userAuth';
+import DOMPurify from 'dompurify';
+import {
+	blockUserQuery,
+	createChatPrivateMessage,
+	fetchChannels,
+	findPrivateMessage,
+	findUserByLogin,
+	getAdminRights,
+	getChatInfo,
+	inviteToChannelQuery,
+	leaveChat,
+	makePrivate,
+	sendMessageQuery,
+	setNewPassword,
+	unblockUserQuery,
+} from 'src/utils/queries';
+// import { IChatStruct } from '../PrivateMessages/PrivateMessages';
+import {
+	ChatContext,
+	IChatStruct,
+	IMessage,
+	IUserAction,
+	IUserBlocked,
+} from 'src/contexts/ChatContext';
+import ChatNotification from './Components/ChatNotification/ChatNotification';
 
 export interface IChatWindowProps {
-	login: string;
+	onCloseClick: () => void;
+	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
+	name: string;
+	chatId: number;
+	messages: IMessage[];
+	isChannel?: boolean;
+	setChatWindowIsOpen: Dispatch<SetStateAction<boolean>>;
+	setMessages: Dispatch<SetStateAction<IMessage[]>>;
+	setShowFriendProfile: React.Dispatch<React.SetStateAction<boolean>>;
+	setProfileLogin: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const ChatWindow: React.FC<IChatWindowProps> = ({ login }) => {
-	// TODO: remove this
-	const doNothing = () => {};
+interface IChatInfo {
+	isChannel: boolean;
+	isPrivate: boolean;
+	isProtected: boolean;
+}
+
+const dateFormatOptions: Intl.DateTimeFormatOptions = {
+	year: '2-digit',
+	month: '2-digit',
+	day: '2-digit',
+	hour: '2-digit',
+	minute: '2-digit',
+	hour12: true,
+};
+
+const ChatWindow: React.FC<IChatWindowProps> = ({
+	name,
+	onCloseClick,
+	windowDragConstraintRef,
+	chatId,
+	messages,
+	setMessages,
+	isChannel = false,
+	setChatWindowIsOpen,
+	setShowFriendProfile,
+	setProfileLogin,
+}) => {
+	/* ********************************************************************* */
+	/* ******************************* FRONT ******************************* */
+	/* ********************************************************************* */
+
 	const [textareaIsFocused, setTextareaIsFocused] = useState(false);
 	const [textareaIsEmpty, setTextareaIsEmpty] = useState(true);
 	const [textareaContent, setTextareaContent] = useState('');
+	const [pwdContent, setPwdContent] = useState('');
 
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
+	const [settingPwdError, setSettingPwdError] = useState('');
+	const [settingPwdSuccess, setSettingPwdSuccess] = useState('');
+
 	const [channelIsPrivate, setChannelIsPrivate] = useState(false);
+	const [isOwner, setIsOwner] = useState(false);
+	const [isAdmin, setIsAdmin] = useState(false);
+	const [isBlocked, setIsBlocked] = useState(false);
+	const [secondUserId, setSecondUserId] = useState(0);
+
+	const [isInviting, setIsInviting] = useState(false);
+	const [searchedLogin, setSearchedLogin] = useState('');
+	const [searchUserError, setSearchUserError] = useState('');
+	const [searchUserSuccess, setSearchUserSuccess] = useState('');
 
 	const { userData } = useContext(UserContext);
+	const {
+		chatData,
+		updateChatList,
+		getNewChatsList,
+		updateBlockedUsers,
+		getNewBlockedUsers,
+	} = useContext(ChatContext);
 	const chatContentRef = useRef<HTMLDivElement>(null);
+
+	/* ********************************************************************* */
+	/* ***************************** WEBSOCKET ***************************** */
+	/* ********************************************************************* */
+
+	// listen for makeAdmin messages
+	useEffect(() => {
+		if (!chatData.socket) {
+			return;
+		}
+		const onMakeAdmin = (data: IUserAction) => {
+			if (data.userId === userData?.id && data.chatId === chatId) {
+				setIsAdmin(true);
+			}
+		};
+		chatData.socket?.onMakeAdmin(onMakeAdmin);
+		return () => {
+			chatData.socket?.offMakeAdmin(onMakeAdmin);
+		};
+	}, [chatId]);
 
 	const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
 		const newValue = event.target.value;
@@ -33,105 +142,466 @@ const ChatWindow: React.FC<IChatWindowProps> = ({ login }) => {
 		setTextareaIsEmpty(newValue === '');
 	};
 
+	// On enter, send the message if not empty
+	const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+		if (event.key === 'Enter' && !event.shiftKey) {
+			event.preventDefault();
+			if (!textareaIsEmpty) sendMessage();
+		}
+	};
+
+	const handlePwdInput = (newValue: string) => {
+		// const newValue = event.target.value;
+		setPwdContent(newValue);
+	};
+
+	// get the user to the last message
 	useEffect(() => {
 		const container = chatContentRef.current;
-		if (container) {
-			// Make the new messages show up at the bottom
-			container.scrollTop = container.scrollHeight;
-		}
-	}, []); // TODO: this should track the state of the messages passed to the component, so when new messages are added they appear at the bottom of the div
+		container?.scrollIntoView({ behavior: 'smooth' });
+	}, [messages]);
 
+	/* ************************** links functions ************************** */
 	const openSettingsPanel = () => {
 		setSettingsPanelIsOpen(!settingsPanelIsOpen);
+		setSettingPwdSuccess('');
+		setSettingPwdError('');
 	};
+	/* ********************************************************************* */
+	/* ********************** channel links functions ********************** */
+
+	const inviteToChannel = () => {
+		setIsInviting(true);
+		setSearchUserError('');
+		setSearchUserSuccess('');
+	};
+	const handleLoginChange = (login: string) => {
+		setSearchedLogin(login);
+		setSearchUserError('');
+		setSearchUserSuccess('');
+	};
+
+	// find the user by login and create the chat
+	const inviteUserToChannel = () => {
+		console.log('searchedLogin', searchedLogin);
+		if (searchedLogin) {
+			findUserByLogin(searchedLogin, accessToken)
+				// .then((response) => response.json())
+				.then(async (data) => {
+					if (data.message) {
+						throw new Error('User not found');
+					}
+					console.log('response data', data);
+					// if the user is found, create the PM and update the PM list
+					if (!userData) {
+						return;
+					}
+					// invite to the Channel and create a chat with the user if it did not already exist
+					inviteToChannelQuery(accessToken, chatId, data.id)
+						.then(() => {
+							createChatPrivateMessage(data.id, userData.id, accessToken)
+								.then((creationData) => {
+									sendMessageQuery(
+										accessToken,
+										'',
+										creationData.chatId,
+										undefined,
+										'invite',
+										data.id,
+										name,
+									)
+										.then(() => {
+											console.log('Invitation sent');
+											setSearchUserSuccess('Invitation sent');
+											chatData.socket?.sendMessage(
+												'',
+												creationData.chatId,
+												userData.login,
+												'',
+												'invite',
+												data.id,
+												searchedLogin,
+												name,
+											);
+										})
+										.catch((e) => {
+											setSearchUserError(e.message);
+											console.error('Could not send invitation: ', e.message);
+										});
+								})
+								.catch((e) => {
+									if (
+										e.message ===
+										'You already have a conversation with that person'
+									) {
+										findPrivateMessage(data.id, userData.id, accessToken)
+											.then((finderData) => {
+												sendMessageQuery(
+													accessToken,
+													'',
+													finderData.chatId,
+													undefined,
+													'invite',
+													data.id,
+													name,
+												)
+													.then(() => {
+														chatData.socket?.sendMessage(
+															'',
+															finderData.chatId,
+															userData.login,
+															'',
+															'invite',
+															data.id,
+															searchedLogin,
+															name,
+														);
+														setSearchUserSuccess('Invitation sent');
+														console.log('Invitation sent');
+													})
+													.catch((e) => {
+														console.error(
+															'Could not send invitation: ',
+															e.message,
+														);
+													});
+											})
+											.catch((e) => {
+												console.error(
+													'Could not find private message: ',
+													e.message,
+												);
+											});
+									} else {
+										console.error('Could not create chat: ', e.message);
+									}
+								});
+						})
+						.catch((e) => {
+							setSearchUserError(e.message);
+							console.error('Could not invite user');
+						});
+				})
+				.catch((e: string) => {
+					console.error(e);
+					setSearchUserError('Could not find user');
+				});
+		}
+	};
+
+	const leaveChannel = () => {
+		leaveChat(accessToken, chatId)
+			.then(async () => {
+				const updatedChatsList = chatData.chatsList.filter(
+					(channel) => channel.chatId !== chatId,
+				);
+				console.log('updatedChatsList', updatedChatsList);
+				chatData.socket?.leaveRoom(chatId);
+				getNewChatsList(updatedChatsList);
+				setChatWindowIsOpen(false);
+			})
+			.catch((e) => {
+				if (e.message === 'You are not in this chat') {
+					setChatWindowIsOpen(false);
+				}
+				console.error('Error leaving channel: ', e.message);
+			});
+	};
+
+	/* ********************************************************************* */
+	/* ************************* PM links functions ************************ */
+	const leavePM = () => {
+		leaveChat(accessToken, chatId)
+			.then(async () => {
+				// fetchPrivateMessages(accessToken)
+				// 	.then((data) => setChatsList(data))
+				// 	.catch((e) => {
+				// 		console.error('Error fetching private messages: ', e);
+				// 	});
+				const updatedChatsList = chatData.chatsList.filter(
+					(privateMessage) => privateMessage.chatId !== chatId,
+				);
+				getNewChatsList(updatedChatsList);
+				chatData.socket?.leaveRoom(chatId);
+				setChatWindowIsOpen(false);
+			})
+			.catch((e) => {
+				console.error('Error leaving chat - chatWindow: ', e);
+			});
+	};
+
+	const inviteToPlay = () => {
+		// get userID to invite
+		for (const current of chatData.chatsList) {
+			if (current.chatId === chatId) {
+				for (const pCurrent of current.participants) {
+					if (pCurrent !== userData?.id) {
+						sendMessageQuery(
+							accessToken,
+							'',
+							chatId,
+							pCurrent,
+							'play',
+							pCurrent,
+						)
+							.then(() => {
+								chatData.socket?.sendMessage(
+									'',
+									chatId,
+									userData ? userData?.login : '',
+									'',
+									'play',
+									pCurrent,
+									name,
+								);
+							})
+							.catch((e) => {
+								console.error('Could not send invitation: ', e.message);
+							});
+					}
+				}
+			}
+		}
+	};
+
+	const blockUser = () => {
+		// get the userID to block
+		for (const current of chatData.chatsList) {
+			if (current.chatId === chatId) {
+				for (const pCurrent of current.participants) {
+					if (pCurrent !== userData?.id) {
+						if (!isBlocked) {
+							blockUserQuery(accessToken, pCurrent)
+								.then(() => {
+									updateBlockedUsers([
+										{ userBlockedId: pCurrent, blockedAt: new Date() },
+									]);
+									setIsBlocked(true);
+								})
+								.catch((e) => {
+									console.error('Could not block user: ', e.message);
+								});
+						} else {
+							unblockUserQuery(accessToken, pCurrent)
+								.then(() => {
+									const updatedBlockedUsers = chatData.blockedUsers.filter(
+										(user) => user.userBlockedId !== secondUserId,
+									);
+									getNewBlockedUsers(updatedBlockedUsers);
+									setIsBlocked(true);
+								})
+								.catch((e) => {
+									console.error('Could not block user: ', e.message);
+								});
+						}
+					}
+				}
+			}
+		}
+	};
+	/* ********************************************************************* */
+
+	// empty the textarea when changing active chat
+	// get the chat info
+	// get the userId of the correspond if not a channel
+	useEffect(() => {
+		setTextareaContent('');
+		setTextareaIsEmpty(true);
+		getChatInfo(accessToken, chatId).then((chatInfo: IChatInfo) => {
+			setChannelIsPrivate(chatInfo.isPrivate);
+		});
+		if (!isChannel && userData) {
+			const chat = chatData.chatsList.find(
+				(target) => target.chatId === chatId,
+			);
+			if (chat)
+				setSecondUserId(
+					chat.participants.at(0) === userData.id
+						? chat.participants.at(1) || 0
+						: chat.participants.at(0) || 0,
+				);
+		}
+	}, [chatId]);
+
+	// check if that user is blocked
+	useEffect(() => {
+		for (const current of chatData.blockedUsers)
+			if (current.userBlockedId === secondUserId) {
+				setIsBlocked(true);
+				return;
+			}
+		setIsBlocked(false);
+	}, [secondUserId, chatData.blockedUsers]);
+	/* ********************************************************************* */
+	/* ******************************** CHAT ******************************* */
+	/* ********************************************************************* */
+
+	const { accessToken } = useAuth();
+
+	// On mount, join the room associated with the chat
+	// socket io ignores if it was already joined
+	useEffect(() => {
+		if (chatId) chatData.socket?.joinRoom(chatId);
+	}, [chatId]);
+
+	// every time we change room, check if we are the owner (if its a channel)
+	useEffect(() => {
+		if (isChannel) {
+			getAdminRights(accessToken, chatId)
+				.then((data) => {
+					setIsAdmin(data.isAdmin);
+					setIsOwner(data.isOwner);
+				})
+				.catch((e) => {
+					setIsAdmin(false);
+					setIsOwner(false);
+				});
+		}
+	}, [chatId]);
+
+	const sendMessage = async () => {
+		if (!isChannel) {
+			const user = chatData.blockedUsers.find(
+				(target) => target.userBlockedId === secondUserId,
+			);
+			if (user) return;
+		}
+
+		sendMessageQuery(accessToken, textareaContent, chatId, secondUserId)
+			.then(() => {
+				// socket sending message
+				chatData.socket?.sendMessage(
+					textareaContent,
+					chatId,
+					userData?.login || '',
+					userData?.image || '',
+				);
+				// display users' own message by updating the messages[]
+				const updatedMessages: IMessage[] = messages.map((val) => {
+					return val;
+				});
+				updatedMessages.push({
+					chatId: chatId,
+					sentById: userData ? userData.id : 0,
+					sentAt: new Date(),
+					content: textareaContent,
+					login: userData ? userData?.login : '',
+				});
+				setMessages(updatedMessages);
+				setTextareaContent('');
+				setTextareaIsEmpty(true);
+			})
+			.catch((e) => {
+				console.error('Could not send message to the database: ', e);
+			});
+	};
+
+	useEffect(() => {
+		console.log('messages', messages);
+	}, [messages]);
+	/* ********************************************************************* */
+	/* ******************************* RETURN ****************************** */
+	/* ********************************************************************* */
 
 	return (
 		<Window
-			windowTitle={`Chat with ${login}`}
-			onCloseClick={() => doNothing()}
-			links={[
-				{ name: 'Profile', onClick: () => null },
-				{ name: 'Play', onClick: () => null },
-				{ name: 'Block', onClick: () => null },
-				{ name: 'Delete chat', onClick: () => null },
-				{ name: 'Settings', onClick: openSettingsPanel },
-			]}
+			windowTitle={isChannel ? name : `Chat with ${name || 'anonymous'}`}
+			onCloseClick={onCloseClick}
+			windowDragConstraintRef={windowDragConstraintRef}
+			links={
+				isChannel
+					? [
+							isOwner || isAdmin || !channelIsPrivate
+								? { name: 'Invite', onClick: inviteToChannel }
+								: { name: '' },
+							{ name: 'Leave', onClick: leaveChannel },
+							isOwner
+								? { name: 'Settings', onClick: openSettingsPanel }
+								: { name: '' },
+					  ]
+					: [
+							{
+								name: 'Profile',
+								onClick: () => {
+									setShowFriendProfile(true);
+									setProfileLogin(name);
+								},
+							},
+							{ name: 'Play', onClick: inviteToPlay },
+							{ name: isBlocked ? 'Unblock' : 'Block', onClick: blockUser },
+							{ name: 'Leave chat', onClick: leavePM },
+					  ]
+			}
 			useBeigeBackground={true}
 		>
 			<div className="chat-wrapper">
-				<div className="chat-content" ref={chatContentRef}>
-					<ChatBubble
-						sender="Jee"
-						time="24/09/1992 - 11:11 PM"
-						senderAvatar="https://cdnb.artstation.com/p/assets/images/images/059/395/601/large/liqudiv-zhan-liqudiv-midjourney-ai-overpaint-web-20220605-2.jpg?1676302872"
-					>
-						Salut, c’est pas Jee !
-					</ChatBubble>
-					<ChatBubble
-						wasSent={true}
-						sender="Nikito"
-						time="24/09/1992 - 11:11 PM"
-					>
-						Bah t'es qui alors
-					</ChatBubble>
-					<ChatBubble
-						sender="Jee"
-						time="24/09/1992 - 11:11 PM"
-						senderAvatar="https://cdnb.artstation.com/p/assets/images/images/059/395/601/large/liqudiv-zhan-liqudiv-midjourney-ai-overpaint-web-20220605-2.jpg?1676302872"
-					>
-						Tu parles mieux déjà
-					</ChatBubble>
-					<ChatBubble
-						sender="Jee"
-						time="24/09/1992 - 11:11 PM"
-						senderAvatar="https://cdnb.artstation.com/p/assets/images/images/059/395/601/large/liqudiv-zhan-liqudiv-midjourney-ai-overpaint-web-20220605-2.jpg?1676302872"
-					>
-						Salut, c’est pas Jee !
-					</ChatBubble>
-					<ChatBubble
-						sender="Jee"
-						time="24/09/1992 - 11:11 PM"
-						senderAvatar="https://cdnb.artstation.com/p/assets/images/images/059/395/601/large/liqudiv-zhan-liqudiv-midjourney-ai-overpaint-web-20220605-2.jpg?1676302872"
-					>
-						Salut, c’est pas Jee !
-					</ChatBubble>
-					<ChatBubble
-						sender="Jee"
-						time="24/09/1992 - 11:11 PM"
-						senderAvatar="https://cdnb.artstation.com/p/assets/images/images/059/395/601/large/liqudiv-zhan-liqudiv-midjourney-ai-overpaint-web-20220605-2.jpg?1676302872"
-					>
-						Salut, c’est pas Jee !
-					</ChatBubble>
-					<ChatBubble
-						sender="Jee"
-						time="24/09/1992 - 11:11 PM"
-						senderAvatar="https://cdnb.artstation.com/p/assets/images/images/059/395/601/large/liqudiv-zhan-liqudiv-midjourney-ai-overpaint-web-20220605-2.jpg?1676302872"
-					>
-						Salut, c’est pas Jee !
-					</ChatBubble>
-					<ChatBubble
-						sender="Jee"
-						time="24/09/1992 - 11:11 PM"
-						senderAvatar="https://cdnb.artstation.com/p/assets/images/images/059/395/601/large/liqudiv-zhan-liqudiv-midjourney-ai-overpaint-web-20220605-2.jpg?1676302872"
-					>
-						Salut, c’est pas Jee !
-					</ChatBubble>
-					<ChattNotification type="Muted" sender="Nikito" recipient="Jee" />
-					<ChatBubble
-						sender="Jee"
-						time="24/09/1992 - 11:11 PM"
-						senderAvatar="https://cdnb.artstation.com/p/assets/images/images/059/395/601/large/liqudiv-zhan-liqudiv-midjourney-ai-overpaint-web-20220605-2.jpg?1676302872"
-					>
-						Salut, c’est pas Jee !
-					</ChatBubble>
-					<ChatGameInvite sender="Jee" recipient="Nikito" />
-					<ChatBubble
-						wasSent={true}
-						sender={userData?.login}
-						time="24/09/1992 - 11:11 PM"
-					>
-						Je suis très mal à l'aise
-					</ChatBubble>
+				<div className="chat-content">
+					{messages.map((currentMessage, index) => {
+						const date: Date = new Date(currentMessage.sentAt);
+						const messageWithNewlines = currentMessage.content.replace(
+							/\n/g,
+							'<br />',
+						);
+						// keep the message displayed safe from XSS attacks
+						const sanitizedData = () => ({
+							__html: DOMPurify.sanitize(messageWithNewlines),
+						});
+						const isLast = index === messages.length - 1;
+						for (const currentBlocked of chatData.blockedUsers) {
+							if (currentBlocked.userBlockedId === currentMessage.sentById) {
+								const currentDate = new Date(currentBlocked.blockedAt);
+								if (date > currentDate) return;
+							}
+						}
+						if (!currentMessage.isNotif) {
+							return (
+								<ChatBubble
+									key={index}
+									userId={currentMessage.sentById}
+									chatId={chatId}
+									wasSent={
+										userData && currentMessage.sentById === userData.id
+											? true
+											: false
+									}
+									sender={currentMessage.login}
+									time={date.toLocaleString('en-US', dateFormatOptions)}
+									senderAvatar={`/api/images/${currentMessage.avatar}`}
+									isAdmin={isAdmin || isOwner}
+									setShowFriendProfile={setShowFriendProfile}
+									setProfileLogin={setProfileLogin}
+								>
+									{
+										<div
+											dangerouslySetInnerHTML={sanitizedData()}
+											ref={isLast ? chatContentRef : undefined}
+										/>
+									}
+								</ChatBubble>
+							);
+						} else if (currentMessage.isNotif === 'play') {
+							return (
+								<ChatGameInvite
+									key={index}
+									messageId={currentMessage.id || 0}
+									sender={currentMessage.login}
+									recipient={currentMessage.targetLogin}
+									sentAt={currentMessage.sentAt}
+									reply={currentMessage.reply}
+								></ChatGameInvite>
+							);
+						} else {
+							return (
+								<ChatNotification
+									key={index}
+									type={currentMessage.isNotif}
+									sender={currentMessage.login}
+									recipient={currentMessage.targetLogin}
+									channelName={currentMessage.channelInvitation || undefined}
+								></ChatNotification>
+							);
+						}
+					})}
 				</div>
 				<div
 					className={`chat-input ${
@@ -139,11 +609,17 @@ const ChatWindow: React.FC<IChatWindowProps> = ({ login }) => {
 					}`}
 				>
 					<textarea
+						value={textareaContent}
 						onFocus={() => setTextareaIsFocused(true)}
 						onBlur={() => setTextareaIsFocused(false)}
 						onChange={handleInputChange}
+						onKeyDown={handleKeyDown}
 					></textarea>
-					<Button baseColor={[151, 51, 91]} disabled={textareaIsEmpty}>
+					<Button
+						baseColor={[151, 51, 91]}
+						disabled={textareaIsEmpty}
+						onClick={sendMessage}
+					>
 						send
 					</Button>
 				</div>
@@ -156,14 +632,62 @@ const ChatWindow: React.FC<IChatWindowProps> = ({ login }) => {
 					<Title highlightColor="yellow">Visibility</Title>
 					<Button
 						baseColor={channelIsPrivate ? [111, 60, 84] : [40, 100, 80]}
-						onClick={() => setChannelIsPrivate(!channelIsPrivate)}
+						onClick={async () => {
+							makePrivate(accessToken, chatId, !channelIsPrivate)
+								.then(() => {
+									setChannelIsPrivate(!channelIsPrivate);
+								})
+								.catch((e) => {
+									console.error('Could not make private: ', e.message);
+								});
+						}}
 					>
 						make {channelIsPrivate ? 'public' : 'private'}
 					</Button>
 					<Title highlightColor="yellow">Channel password</Title>
 					<div className="settings-form">
-						<InputField value="password"></InputField>
-						<Button>update</Button>
+						<InputField
+							onChange={handlePwdInput}
+							success={settingPwdSuccess}
+							error={settingPwdError}
+						></InputField>
+						<Button
+							onClick={async () => {
+								setSettingPwdError('');
+								setSettingPwdSuccess('');
+
+								setNewPassword(accessToken, chatId, pwdContent)
+									.then(() => {
+										setPwdContent('');
+										setSettingPwdSuccess('Password changed successfully');
+									})
+									.catch((e) => {
+										console.error('Could not set the password');
+										setSettingPwdError(e.message);
+									});
+							}}
+						>
+							update
+						</Button>
+					</div>
+				</SettingsWindow>
+			)}
+			{isInviting && (
+				<SettingsWindow settingsWindowVisible={setIsInviting}>
+					<Title highlightColor="yellow">User name</Title>
+					<div className="settings-form">
+						<InputField
+							onChange={handleLoginChange}
+							error={searchUserError}
+							success={searchUserSuccess}
+						></InputField>
+						<Button
+							onClick={() => {
+								inviteUserToChannel();
+							}}
+						>
+							invite user
+						</Button>
 					</div>
 				</SettingsWindow>
 			)}

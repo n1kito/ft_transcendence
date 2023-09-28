@@ -11,11 +11,15 @@ export class TokenController {
 	async refreshToken(@Req() req: Request, @Res() res: Response) {
 		try {
 			// generate a new access token
-			const newAccessToken = await this.tokenService.refreshToken(req);
+			const data = await this.tokenService.refreshToken(req);
 			res.status(200);
-			res.send({ accessToken: newAccessToken });
+			res.send({
+				accessToken: data.accessToken,
+				isTwoFactorAuthEnabled: data.isTwoFactorAuthEnabled,
+				isTwoFactorAuthVerified: data.isTwoFactorAuthVerified,
+			});
 		} catch (error) {
-			throw new Error('Could not refresh token: ' + error);
+			res.status(500).json({ error: 'Could not refresh token' });
 		}
 	}
 }

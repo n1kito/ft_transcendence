@@ -12,7 +12,7 @@ export class TokenService {
 
 	constructor(private readonly prisma: PrismaService) {
 		this.jwtSecretKey = process.env.JWT_SECRET_KEY;
-		this.accessTokenExpiresIn = 10 * 60; // Access token expiry time in seconds
+		this.accessTokenExpiresIn = 100 * 60; // Access token expiry time in seconds
 		this.refreshTokenExpiresIn = 30 * 24 * 60 * 60; // Refresh token expiry time in seconds
 	}
 
@@ -28,7 +28,7 @@ export class TokenService {
 
 	// Generate a refresh token using the payload and secret key
 	// Set the expiration time for the token using refreshTokenExpiresIn
-	generateRefreshToken(payload: any): string {
+	async generateRefreshToken(payload: any): Promise<string> {
 		const refreshToken = jwt.sign(payload, this.jwtSecretKey, {
 			expiresIn: this.refreshTokenExpiresIn,
 		});
@@ -98,7 +98,11 @@ export class TokenService {
 
 	// After refresh token and userId are verified,
 	// generate a new access token
-	async refreshToken(@Req() req: Request): Promise<string> {
+	async refreshToken(@Req() req: Request): Promise<{
+		accessToken: string;
+		isTwoFactorAuthEnabled: boolean;
+		isTwoFactorAuthVerified: boolean;
+	}> {
 		try {
 			// retrieve refreshToken from cookies in request
 			const refreshToken = req.cookies['refreshToken'];
@@ -118,7 +122,16 @@ export class TokenService {
 			// If user is valid, generate a new access token
 			const newAccessToken = this.generateAccessToken({ userId });
 
-			return newAccessToken;
+			// let isTwoFactorAuthEnabled: boolean;
+			const response = await this.prisma.user.findUnique({
+				where: { id: userId },
+			});
+
+			return {
+				accessToken: newAccessToken,
+				isTwoFactorAuthEnabled: response.isTwoFactorAuthenticationEnabled,
+				isTwoFactorAuthVerified: response.isTwoFactorAuthenticationVerified,
+			};
 		} catch (error) {
 			throw new Error('Invalid or expired refresh token');
 		}

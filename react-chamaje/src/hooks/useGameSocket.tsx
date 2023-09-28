@@ -32,7 +32,7 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 		if (!socketRef.current) {
 			// Initialize the socket connection
 			socketRef.current = io({
-				path: '/ws/',
+				path: '/ws/game-socket',
 				reconnection: false,
 				auth: { accessToken: accessToken },
 				query: queryParameters,

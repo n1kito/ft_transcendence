@@ -9,7 +9,7 @@ export interface IMatchHistory {
 
 export interface IUserData {
 	// User informatiom
-	id?: number;
+	id: number;
 	login: string;
 	image: string;
 	email?: string;
@@ -30,4 +30,3 @@ export interface IUserData {
 	// Games
 	matchHistory?: IMatchHistory[];
 }
-

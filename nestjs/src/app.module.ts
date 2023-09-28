@@ -11,6 +11,8 @@ import { PrismaService } from './services/prisma-service/prisma.service';
 import { TokenModule } from './token/token.module';
 import { GameModule } from './game/game.module';
 import { GameService } from './game/game.service';
+import { ConnectionStatusModule } from './chatWebSocket/chatWebSocket.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
 	imports: [
@@ -21,6 +23,8 @@ import { GameService } from './game/game.service';
 		PrismaModule,
 		TokenModule,
 		GameModule,
+		ConnectionStatusModule,
+		ChatModule,
 	],
 	controllers: [AppController],
 	// providers: [AppService, PrismaService, GameService],

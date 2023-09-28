@@ -21,6 +21,11 @@
 	padding: 0.5rem 1rem;
 }
 
+.chat-bubble-message img {
+	border-radius: 0 !important;
+	border: none !important;
+}
+
 .chat-bubble-info {
 	color: grey;
 	font-size: 0.8rem;
