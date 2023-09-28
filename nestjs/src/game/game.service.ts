@@ -51,14 +51,7 @@ export class GameService {
 
 	private roomAssignmentMutex: Mutex = new Mutex();
 
-	constructor(private readonly prisma: PrismaService) {
-		this.rooms['test-room'] = {
-			playersSocketIds: ['sample-id'],
-		};
-		this.connectedClients.set('sample-id', {
-			userId: 18,
-		});
-	}
+	constructor(private readonly prisma: PrismaService) {}
 
 	setServer(server: Server) {
 		this.server = server;
