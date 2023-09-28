@@ -81,6 +81,7 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 					setBadgeTitle('Target');
 					setIsAnimationRunning(false);
 					setTargetHasBeenAssigned(true);
+					if (isOwnProfile) updateUserData({ targetDiscoveredByUser: true });
 					updateTargetStatus();
 				}, 1000);
 			}

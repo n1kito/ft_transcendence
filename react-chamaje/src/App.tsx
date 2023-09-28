@@ -45,10 +45,6 @@ function App() {
 											<Routes>
 												<Route path="/" element={<ProtectedLogin />} />
 												<Route path="/desktop" element={<ProtectedDesktop />} />
-												<Route path="/friends" element={<ProtectedDesktop />} />
-												{/* <Route path="/" element={<Login />} /> */}
-												<Route path="/desktop" element={<Desktop />} />
-												{/* <Route path="/friends" element={<Desktop />} /> */}
 												<Route
 													path="/retrieve-token"
 													element={<RetrieveAccessToken />}
@@ -60,9 +56,7 @@ function App() {
 															name="Error :("
 															id={-1}
 															iconSrc={roadconeIcon}
-															onDoubleClick={() => {
-																/* TODO: redirect to the homepage ? */
-															}}
+															onDoubleClick={() => {}}
 														/>
 													}
 												/>

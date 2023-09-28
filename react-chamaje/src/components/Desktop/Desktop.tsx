@@ -5,10 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 import useAuth from '../../hooks/userAuth';
 import Profile from '../Profile/Profile';
-import { io } from 'socket.io-client';
 import WebSocketService from 'src/services/WebSocketService';
-import Button from './../Shared/Button/Button';
-import { createRoot } from 'react-dom/client';
 import PrivateMessages from '../PrivateMessages/PrivateMessages';
 import { AnimatePresence } from 'framer-motion';
 import Channels from '../Channels/Channels';
@@ -19,15 +16,10 @@ import FriendsIcon from './Icons/NOTEBOOK.svg';
 import GameIcon from './Icons/CD.svg';
 import ChannelsIcon from './Icons/EARTH.svg';
 import Game from '../Game/Game';
-import { GameProvider } from '../../contexts/GameContext';
 import { ChatContext } from 'src/contexts/ChatContext';
-import {
-	addFriend,
-	deleteFriend,
-	fetchFriends,
-} from 'src/utils/FriendsQueries';
-import { error } from 'console';
+import { addFriend, fetchFriends } from 'src/utils/FriendsQueries';
 import FriendsList from '../Friends/Components/FriendsList/FriendsList';
+import { useNavigationParams } from 'src/hooks/useNavigationParams';
 
 // Friend structure to keep track of them and their online/ingame status
 export interface IFriendStruct {
@@ -38,9 +30,12 @@ export interface IFriendStruct {
 }
 
 const Desktop = () => {
-	// const [isWindowOpen, setIsWindowOpen] = useState(false);
 	let iconId = 0;
-	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
+
+	// Navigation hook
+	const { params, setNavParam, removeNavParam, getNavParam } =
+		useNavigationParams();
+
 	const { userData, updateUserData, resetUserData } = useContext(UserContext);
 	const { chatData, updateChatData } = useContext(ChatContext);
 	const [friendsWindowIsOpen, setFriendsWindowIsOpen] = useState(false);
@@ -55,20 +50,12 @@ const Desktop = () => {
 	const [friendLogin, setFriendLogin] = useState('');
 	const [deletedFriend, setDeletedFriend] = useState('');
 	const [addedFriend, setAddedFriend] = useState('');
-	const [profileError, setProfileError] = useState('');
 	const [nbOnline, SetNbOnline] = useState(0);
 
 	const [isMyFriend, setIsMyFriend] = useState(false);
 	const navigate = useNavigate();
-	const {
-		isAuthentificated,
-		setIsAuthentificated,
-		refreshToken,
-		logOut,
-		accessToken,
-		setIsTwoFAEnabled,
-		isTwoFAEnabled,
-	} = useAuth();
+	const { isAuthentificated, logOut, accessToken, setIsTwoFAEnabled } =
+		useAuth();
 
 	const windowDragConstraintRef = useRef(null);
 
@@ -105,8 +92,36 @@ const Desktop = () => {
 			console.log('Error: ', error);
 		}
 	};
+
+	const checkURLParams = () => {
+		setGameWindowIsOpen(params.has('game'));
+		setProfileWindowIsOpen(
+			params.has('profile') && getNavParam('profile') == userData.login,
+		);
+		setChannelsWindowIsOpen(params.has('channels'));
+		setPrivateMessageWindowIsOpen(params.has('privateMessages'));
+		setFriendsWindowIsOpen(params.has('friendsList'));
+		if (params.has('friendProfile')) {
+			const friendLogin = getNavParam('friendProfile');
+			if (friendLogin) {
+				setShowFriendProfile(true);
+				setFriendLogin(friendLogin);
+			}
+		} else {
+			setShowFriendProfile(false);
+		}
+	};
+
+	useEffect(() => {
+		// Check the current URL and update the windows accordingly
+		checkURLParams();
+	}, [params]);
+
 	useEffect(() => {
 		if (isAuthentificated) fetchUserData();
+
+		// Check the current URL and update the windows accordingly
+		checkURLParams();
 
 		return () => {
 			chatData.socket?.endConnection();
@@ -234,6 +249,7 @@ const Desktop = () => {
 
 	// on badge click, display friend's profile
 	const handleBadgeClick = (friendLogin: string) => {
+		setNavParam('friendProfile', friendLogin);
 		setFriendLogin(friendLogin);
 		setIsMyFriend(true);
 		setShowFriendProfile(true);
@@ -297,31 +313,46 @@ const Desktop = () => {
 				name="Game"
 				iconSrc={GameIcon}
 				id={++iconId}
-				onDoubleClick={() => setGameWindowIsOpen(true)}
+				onDoubleClick={() => {
+					// setGameWindowIsOpen(true);
+					setNavParam('game');
+				}}
 			/>
 			<DesktopIcon
 				name="Profile"
 				iconSrc={ProfileIcon}
 				id={++iconId}
-				onDoubleClick={() => setProfileWindowIsOpen(true)}
+				onDoubleClick={() => {
+					// setProfileWindowIsOpen(true);
+					setNavParam('profile', userData.login);
+				}}
 			/>
 			<DesktopIcon
 				name="Chat"
 				iconSrc={ChatIcon}
 				id={++iconId}
-				onDoubleClick={() => setPrivateMessageWindowIsOpen(true)}
+				onDoubleClick={() => {
+					// setPrivateMessageWindowIsOpen(true);
+					setNavParam('privateMessages');
+				}}
 			/>
 			<DesktopIcon
 				name="Channels"
 				iconSrc={ChannelsIcon}
 				id={++iconId}
-				onDoubleClick={() => setChannelsWindowIsOpen(true)}
+				onDoubleClick={() => {
+					// setChannelsWindowIsOpen(true);
+					setNavParam('channels');
+				}}
 			/>
 			<DesktopIcon
 				name="Friends"
 				iconSrc={FriendsIcon}
 				id={++iconId}
-				onDoubleClick={() => setFriendsWindowIsOpen(true)}
+				onDoubleClick={() => {
+					// setFriendsWindowIsOpen(true);
+					setNavParam('friendsList');
+				}}
 			/>
 			<AnimatePresence>
 				{profileWindowIsOpen && (
@@ -330,7 +361,10 @@ const Desktop = () => {
 						login={userData?.login}
 						setLogin={setFriendLogin}
 						isMyFriend={false}
-						onCloseClick={() => setProfileWindowIsOpen(false)}
+						onCloseClick={() => {
+							removeNavParam('profile');
+							// setProfileWindowIsOpen(false);
+						}}
 						windowDragConstraintRef={windowDragConstraintRef}
 						nbOnline={nbOnline}
 						setNbOnline={SetNbOnline}
@@ -339,7 +373,10 @@ const Desktop = () => {
 				{friendsWindowIsOpen && (
 					<FriendsList
 						key="Friend-list-window"
-						onCloseClick={() => setFriendsWindowIsOpen(false)}
+						onCloseClick={() => {
+							removeNavParam('friendsList');
+							// setFriendsWindowIsOpen(false);
+						}}
 						windowDragConstraintRef={windowDragConstraintRef}
 						friends={friends}
 						nbFriendsOnline={nbOnline}
@@ -354,6 +391,7 @@ const Desktop = () => {
 					<Profile
 						login={friendLogin}
 						onCloseClick={() => {
+							removeNavParam('friendProfile');
 							setProfileWindowIsOpen(false), setShowFriendProfile(false);
 						}}
 						windowDragConstraintRef={windowDragConstraintRef}
@@ -369,7 +407,10 @@ const Desktop = () => {
 				{privateMessageWindowIsOpen && (
 					<PrivateMessages
 						key={'pmKeyInDesktop'}
-						onCloseClick={() => setPrivateMessageWindowIsOpen(false)}
+						onCloseClick={() => {
+							removeNavParam('privateMessages');
+							setPrivateMessageWindowIsOpen(false);
+						}}
 						windowDragConstraintRef={windowDragConstraintRef}
 						friends={friends}
 						// chatWindowControl={setChatWindowIsOpen}
@@ -379,7 +420,10 @@ const Desktop = () => {
 				)}
 				{channelsWindowIsOpen && (
 					<Channels
-						onCloseClick={() => setChannelsWindowIsOpen(false)}
+						onCloseClick={() => {
+							removeNavParam('channels');
+							setChannelsWindowIsOpen(false);
+						}}
 						windowDragConstraintRef={windowDragConstraintRef}
 						key="channels-window"
 						setShowFriendProfile={setShowFriendProfile}
@@ -388,14 +432,10 @@ const Desktop = () => {
 				)}
 				{gameWindowIsOpen && (
 					<Game
-						// opponentLogin={
-						// 	userData.login == 'mjallada'
-						// 		? 'freexav'
-						// 		: userData.login == 'jeepark'
-						// 		? 'cgosseli'
-						// 		: ''
-						// }
-						onCloseClick={() => setGameWindowIsOpen(false)}
+						onCloseClick={() => {
+							removeNavParam('game');
+							setGameWindowIsOpen(false);
+						}}
 						windowDragConstraintRef={windowDragConstraintRef}
 						key="game-window"
 						// setShowFriendProfile={setShowFriendProfile}
