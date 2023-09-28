@@ -25,17 +25,11 @@ import { Request, Response } from 'express';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { IUserData, IMatchHistory } from 'shared-lib/types/user';
-import { validate } from 'class-validator';
-import { get } from 'http';
 import { ChatService } from 'src/chat/chat.service';
-import { pairwise } from 'rxjs';
 import { BlockUserDTO } from './dto/blockUser.dto';
 import { TokenService } from 'src/token/token.service';
-import { twoFactorAuthenticationCodeDto } from 'src/auth/dto/two-factor-auth-code.dto';
-import { SearchUserDto } from './dto/search-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterError, diskStorage } from 'multer';
-import path from 'path';
 
 export interface CustomRequest extends Request {
 	userId: number;
@@ -225,7 +219,7 @@ export class UserController {
 		@Res() response: Response,
 	) {
 		try {
-			// verify `login` with SearchUserDto
+			// verify `login` with
 			const errorDto = await this.userService.validateLoginDto(login);
 			if (errorDto)
 				return response.status(400).json({ message: 'Validation failed' });
@@ -265,7 +259,7 @@ export class UserController {
 		@Res() response: Response,
 	) {
 		try {
-			// verify `login` with SearchUserDto
+			// verify `login` with
 			const errorDto = await this.userService.validateLoginDto(login);
 			if (errorDto)
 				return response.status(400).json({ message: 'Validation failed' });
@@ -353,6 +347,11 @@ export class UserController {
 			const userId = this.userService.authenticateUser(request);
 			if (!userId)
 				return response.status(401).json({ message: 'User is unauthorized' });
+
+			const isFileTypeValid = await this.userService.verifyFileType(file);
+			if (!isFileTypeValid)
+				return response.status(403).json({ message: 'Invalid File Type' });
+
 			// upload new avatar
 			await this.userService.uploadAvatar(file, userId);
 			// send response ok with the avatar's filename

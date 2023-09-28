@@ -89,7 +89,7 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 				}
 			})
 			.catch((error) => {
-				setLoginInputError(error);
+				setLoginInputError(error.message);
 			});
 	};
 

@@ -278,8 +278,8 @@ const Profile: React.FC<ProfileProps> = ({
 				},
 				body: formData,
 			});
+			const data = await response.json();
 			if (response.ok) {
-				const data = await response.json();
 				console.log(data.image, userData);
 
 				const updatedUserData = {
@@ -290,12 +290,10 @@ const Profile: React.FC<ProfileProps> = ({
 				setProfileData(updatedUserData);
 				setChangedAvatar(true);
 				setSettingsPanelIsOpen(false);
-			} else if (response.status === 500) {
-				const messageError = await response.json();
-				console.error(messageError);
+			} else {
+				setFileError(data.message);
 			}
 		} catch (error) {
-			alert();
 			console.error(error);
 		}
 	};

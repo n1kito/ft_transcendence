@@ -15,7 +15,8 @@ import { IMatchHistory } from 'shared-lib/types/user';
 import * as fs from 'fs';
 import { constants } from 'fs';
 import { SearchUserDto } from './dto/search-user.dto';
-
+import { promisify } from 'util';
+import { existsSync, createReadStream, readFile } from 'fs';
 //  custom exception class to store an array of errors each containing
 // `statusCode` `field` and `message` properties.
 export class CustomException extends HttpException {
@@ -274,24 +275,24 @@ export class UserService {
 
 	async blockUser(userId: number, userToBlock: number) {
 		const response = await this.prisma.userBlocked.create({
-		  data: {
-			blockedAt: new Date(),
-			userBlockingId: userId, // The user performing the block
-			userBlockedId: userToBlock,
-		  },
+			data: {
+				blockedAt: new Date(),
+				userBlockingId: userId, // The user performing the block
+				userBlockedId: userToBlock,
+			},
 		});
 		return response;
-	}	
+	}
 
 	async unblockUser(userId: number, userToBlock: number) {
 		const response = await this.prisma.userBlocked.deleteMany({
 			where: {
 				userBlockingId: userId,
 				userBlockedId: userToBlock,
-			}
+			},
 		});
 		return response;
-	}	
+	}
 
 	async getBlockedUsers(userId: number) {
 		const response = await this.prisma.user.findUnique({
@@ -320,22 +321,23 @@ export class UserService {
 		return false;
 	}
 
-		// return true if the user blocked the second user
-		async isUserBlocked(userId: number, secondUser: number) {
-			const response = await this.prisma.user.findFirst({
-				where: {
-					id: userId,
-				},
-				select: {
-					blockedUsers: true,
-				},
-			});
-			if (!response.blockedUsers) return false;
-			for (const current of response.blockedUsers) {
-				if (current.userBlockedId === secondUser) return true;
-			}
-			return false;
+	// return true if the user blocked the second user
+	async isUserBlocked(userId: number, secondUser: number) {
+		const response = await this.prisma.user.findFirst({
+			where: {
+				id: userId,
+			},
+			select: {
+				blockedUsers: true,
+			},
+		});
+		if (!response.blockedUsers) return false;
+		for (const current of response.blockedUsers) {
+			if (current.userBlockedId === secondUser) return true;
 		}
+		return false;
+	}
+
 	async deleteUser(userId: number) {
 		try {
 			const user = await this.prisma.findUserById(userId);
@@ -436,6 +438,52 @@ export class UserService {
 		} catch (error) {
 			throw error;
 		}
+	}
+
+	async verifyFileType(file: Express.Multer.File): Promise<boolean> {
+		// Helper functions for checking file type
+		function isValidJpeg(data: Buffer): boolean {
+			// Check for the presence of the JPEG Start of Image (SOI) marker
+			return data.indexOf(Buffer.from([0xff, 0xd8])) === 0;
+		}
+
+		function isValidPng(data: Buffer): boolean {
+			// Check for the PNG header (first 8 bytes)
+			return (
+				data.length >= 8 &&
+				data[0] === 0x89 &&
+				data[1] === 0x50 &&
+				data[2] === 0x4e &&
+				data[3] === 0x47 &&
+				data[4] === 0x0d &&
+				data[5] === 0x0a &&
+				data[6] === 0x1a &&
+				data[7] === 0x0a
+			);
+		}
+
+		function isValidJpg(data: Buffer): boolean {
+			// Check for the presence of the JPEG Start of Image (SOI) marker
+			return data.indexOf(Buffer.from([0xff, 0xd8])) === 0;
+		}
+		// Convert the file to base64
+		const base64Data = await promisify(readFile)(file.path);
+		// Verify the image type based on the content
+
+		if (
+			isValidJpeg(base64Data) ||
+			isValidJpg(base64Data) ||
+			isValidPng(base64Data)
+		)
+			return true;
+		const filePathToDelete = `./images/${file.filename}`;
+		fs.access(filePathToDelete, constants.F_OK, (err) => {
+			if (err) console.log(`${file} ${err ? 'does not exist' : 'exists'}`);
+			fs.unlink(filePathToDelete, (error) => {
+				if (error) throw error;
+			});
+		});
+		return false;
 	}
 
 	async uploadAvatar(file: Express.Multer.File, userId: number) {
