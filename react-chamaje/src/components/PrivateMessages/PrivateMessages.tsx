@@ -72,6 +72,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 			}
 			// if it is the active chat, load message
 			if (message.chatId === chatWindowId) {
+				console.log('received message avatar: ', message.avatar);
 				const updatedMessages: IMessage[] = messages.map((val) => {
 					return val;
 				});

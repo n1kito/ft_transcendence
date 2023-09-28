@@ -469,12 +469,14 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 
 		sendMessageQuery(accessToken, textareaContent, chatId, secondUserId)
 			.then(() => {
+				const myImage = userData.image.replace('/api/images/','');
+				console.log('image sent: ', myImage);
 				// socket sending message
 				chatData.socket?.sendMessage(
 					textareaContent,
 					chatId,
 					userData?.login || '',
-					userData?.image || '',
+					myImage || '',
 				);
 				// display users' own message by updating the messages[]
 				const updatedMessages: IMessage[] = messages.map((val) => {
@@ -554,6 +556,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							}
 						}
 						if (!currentMessage.isNotif) {
+							console.log('currentMessage.avatar', currentMessage.avatar);
 							return (
 								<ChatBubble
 									key={index}
