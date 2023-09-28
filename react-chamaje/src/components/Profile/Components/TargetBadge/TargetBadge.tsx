@@ -14,6 +14,7 @@ import OnlineIndicator from '../Shared/OnlineIndicator/OnlineIndicator';
 import { UserContext } from '../../../../contexts/UserContext';
 import { AuthContext } from '../../../../contexts/AuthContext';
 import useAuth from '../../../../hooks/userAuth';
+import { useNavigationParams } from 'src/hooks/useNavigationParams';
 
 const rouletteImages = [chucky, norminet, scream, sophie, theRing, xavier];
 
@@ -39,6 +40,7 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 		targetDiscoveredByUser,
 	);
 	const [badgeImage, setBadgeImage] = useState<string | undefined>(mysteryBox);
+	const { setNavParam } = useNavigationParams();
 
 	const updateBackgroundImage = () => {
 		setImageIndex((prevIndex) => (prevIndex + 1) % rouletteImages.length);
@@ -80,6 +82,7 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 					setBadgeTitle('Target');
 					setIsAnimationRunning(false);
 					setTargetHasBeenAssigned(true);
+					if (isOwnProfile) updateUserData({ targetDiscoveredByUser: true });
 					updateTargetStatus();
 				}, 1000);
 			}
@@ -96,7 +99,7 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 	};
 
 	const openUserProfile = () => {
-		console.log('this should open you targets profile');
+		setNavParam('friendProfile', targetLogin);
 	};
 
 	useEffect(() => {
@@ -137,7 +140,7 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 			<FriendBadge
 				isClickable={true}
 				badgeTitle={badgeTitle}
-				badgeImageUrl={badgeImage}
+				badgeImageUrl={`/api/images/${badgeImage}`}
 				onlineIndicator={targetHasBeenAssigned}
 			/>
 			{targetHasBeenAssigned && <BlackBadge>@{targetLogin}</BlackBadge>}

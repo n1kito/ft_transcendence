@@ -9,6 +9,7 @@ import { access } from 'fs';
 import { ChatContext } from 'src/contexts/ChatContext';
 import { useDragControls } from 'framer-motion';
 import { UserContext } from 'src/contexts/UserContext';
+import { useNavigationParams } from 'src/hooks/useNavigationParams';
 
 interface IChatBubbleProps {
 	userId: number;
@@ -42,9 +43,12 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 	const { chatData } = useContext(ChatContext);
 	const { userData } = useContext(UserContext);
 	const { accessToken } = useAuth();
+	// Navigation hook
+	const { setNavParam } = useNavigationParams();
 
 	const openFriendProfile = () => {
 		setProfileIsOpen(true);
+		setNavParam('friendProfile', sender);
 		setShowFriendProfile(true);
 		setProfileLogin(sender);
 	};

@@ -17,21 +17,23 @@ const NavBar: React.FC<navBarProps> = ({ isLoggedIn = true }) => {
 
 	return (
 		<div className={`navBar ${isLoggedIn ? 'loggedIn' : ''}`}>
-			<div className="menuItems">
-				{/* <Button></Button> */}
-				<a href="#" title="Link name">
-					Game
-				</a>
-				<a>Friends</a>
-				<a>Settings</a>
-			</div>
+			<div className="menuItems">Miaou ?</div>
 			<div className="siteTitle">chamaje</div>
 			<div className="toolBox">
-				<span>{userData ? userData.login : ''}</span>
+				<span
+					className={
+						isAuthentificated && userData.login ? '' : 'navBar-info-hidden'
+					}
+				>
+					{userData.login}
+				</span>
 				<FullscreenTrigger />
-				{isAuthentificated && (
-					<img className="userAvatar" src={userData.image} />
-				)}
+				<img
+					className={`userAvatar ${
+						!isAuthentificated || !userData.image ? 'navBar-info-hidden' : ''
+					}`}
+					src={userData.image}
+				/>
 				{isAuthentificated && <Lock />}
 				<Clock />
 			</div>

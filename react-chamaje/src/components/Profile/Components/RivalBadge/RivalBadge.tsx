@@ -4,6 +4,7 @@ import BlackBadge from '../Shared/BlackBadge/BlackBadge';
 import FriendBadge from '../../../Friends/Components/FriendBadge/FriendBadge';
 import OnlineIndicator from '../Shared/OnlineIndicator/OnlineIndicator';
 import { UserContext } from '../../../../contexts/UserContext';
+import { useNavigationParams } from 'src/hooks/useNavigationParams';
 
 interface IRivalBadgeProps {
 	rivalLogin: string;
@@ -11,9 +12,10 @@ interface IRivalBadgeProps {
 
 const RivalBadge: React.FC<IRivalBadgeProps> = ({ rivalLogin }) => {
 	const { userData } = useContext(UserContext);
+	const { setNavParam } = useNavigationParams();
+
 	const openRivalProfile = () => {
-		// TODO:
-		console.log(`This should open ${rivalLogin}'s profile`);
+		setNavParam('friendProfile', rivalLogin);
 	};
 	return (
 		<div className="rival-badge">
@@ -22,6 +24,7 @@ const RivalBadge: React.FC<IRivalBadgeProps> = ({ rivalLogin }) => {
 				isClickable={true}
 				onlineIndicator={true}
 				onClick={openRivalProfile}
+				badgeImageUrl={`/api/images/${userData.rivalImage}`}
 			/>
 			<BlackBadge>@{rivalLogin}</BlackBadge>
 		</div>

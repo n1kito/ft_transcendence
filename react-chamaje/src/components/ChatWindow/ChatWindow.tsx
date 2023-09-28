@@ -43,6 +43,7 @@ import {
 } from 'src/contexts/ChatContext';
 import ChatNotification from './Components/ChatNotification/ChatNotification';
 import { GameContext } from 'src/contexts/GameContext';
+import { useNavigationParams } from 'src/hooks/useNavigationParams';
 
 export interface IChatWindowProps {
 	onCloseClick: () => void;
@@ -55,7 +56,6 @@ export interface IChatWindowProps {
 	setMessages: Dispatch<SetStateAction<IMessage[]>>;
 	setShowFriendProfile: React.Dispatch<React.SetStateAction<boolean>>;
 	setProfileLogin: React.Dispatch<React.SetStateAction<string>>;
-	setGameWindowIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 interface IChatInfo {
@@ -84,7 +84,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	setChatWindowIsOpen,
 	setShowFriendProfile,
 	setProfileLogin,
-	setGameWindowIsOpen,
 }) => {
 	/* ********************************************************************* */
 	/* ******************************* FRONT ******************************* */
@@ -122,6 +121,8 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	const chatContentRef = useRef<HTMLDivElement>(null);
 
 	const { updateGameData } = useContext(GameContext);
+	const { setNavParam } = useNavigationParams();
+
 
 	/* ********************************************************************* */
 	/* ***************************** WEBSOCKET ***************************** */
@@ -359,8 +360,8 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 								updateGameData({
 									opponentInfo: { login: name || '', image: '' },
 								});
+								setNavParam('game')
 
-								setGameWindowIsOpen(true);
 							})
 							.catch((e) => {
 								console.error('Could not send invitation: ', e.message);
@@ -631,7 +632,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							recipient={inviteToPlayMsg.targetLogin}
 							sentAt={inviteToPlayMsg.sentAt}
 							reply={inviteToPlayMsg.reply}
-							setGameWindowIsOpen={setGameWindowIsOpen}
 						></ChatGameInvite>
 					) : (
 						<></>

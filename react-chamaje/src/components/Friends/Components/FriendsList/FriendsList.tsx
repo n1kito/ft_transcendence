@@ -15,6 +15,7 @@ import { addFriend, fetchFriends } from 'src/utils/FriendsQueries';
 import { fetchProfileData } from 'src/utils/UserQueries';
 import ChatWindow from 'src/components/ChatWindow/ChatWindow';
 import { ChatContext } from 'src/contexts/ChatContext';
+import { useNavigationParams } from 'src/hooks/useNavigationParams';
 
 interface IFriendsListProps {
 	onCloseClick: () => void;
@@ -47,6 +48,8 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 	const [isFriendAdded, setIsFriendAdded] = useState(false);
 	const [settingsMode, setSettingsMode] = useState('');
 	const { chatData } = useContext(ChatContext);
+
+	const { setNavParam, removeNavParam } = useNavigationParams();
 
 	// input validation before sending request
 	const handleLoginChange = (username: string) => {
@@ -102,12 +105,14 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 					setIsMyFriend(
 						friends.some((friend) => friend.login === searchedLogin),
 					);
-					setShowFriendProfile(true);
+					setNavParam('friendProfile', searchedLogin);
+					// setShowFriendProfile(true);
 					setSettingsPanelIsOpen(false);
 				})
 				.catch((error) => {
 					setLoginInputError(error.message);
-					setShowFriendProfile(false);
+					// setShowFriendProfile(false);
+					removeNavParam('friendProfile');
 				});
 	};
 

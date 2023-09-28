@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import './AchievementBadge.css';
-import burgerIcon from './../../icons/burger-icon.svg';
 import Tooltip from '../../../Shared/Tooltip/Tooltip';
 
 interface IAchievementBadgeProps {

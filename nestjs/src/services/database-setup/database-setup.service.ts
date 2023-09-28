@@ -72,7 +72,7 @@ export class DatabaseSetupService implements OnModuleInit {
 					});
 					await this.prisma.message.createMany({
 						data: [
-							{ content: 'Miaou', userId: 6 },
+							{ content: 'Miaou ?', userId: 6 },
 							{ content: 'This is Sophie here', userId: 1 },
 							{ content: "Tu changes quand d'opérateur ?", userId: 2 },
 						],

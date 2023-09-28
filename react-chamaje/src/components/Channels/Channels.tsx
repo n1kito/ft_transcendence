@@ -29,7 +29,6 @@ interface IChannelsProps {
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
 	setShowFriendProfile: React.Dispatch<React.SetStateAction<boolean>>;
 	setProfileLogin: React.Dispatch<React.SetStateAction<string>>;
-	setGameWindowIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Channels: React.FC<IChannelsProps> = ({
@@ -37,7 +36,6 @@ const Channels: React.FC<IChannelsProps> = ({
 	windowDragConstraintRef,
 	setShowFriendProfile,
 	setProfileLogin,
-	setGameWindowIsOpen,
 }) => {
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [settingsMode, setSettingsMode] = useState('');
@@ -211,6 +209,7 @@ const Channels: React.FC<IChannelsProps> = ({
 					setPwdInput('');
 				})
 				.catch((e) => {
+					console.log(e);
 					console.error('Error creating channel: ', e.message);
 					setSettingsNameError(e.message);
 				});
@@ -380,7 +379,6 @@ const Channels: React.FC<IChannelsProps> = ({
 					setChatWindowIsOpen={setChatWindowIsOpen}
 					setShowFriendProfile={setShowFriendProfile}
 					setProfileLogin={setProfileLogin}
-					setGameWindowIsOpen={setGameWindowIsOpen}
 				/>
 			)}
 		</>

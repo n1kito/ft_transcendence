@@ -7,13 +7,13 @@ import { setInviteReply } from 'src/utils/queries';
 import useAuth from 'src/hooks/userAuth';
 import { GameContext } from 'src/contexts/GameContext';
 import { ChatContext } from 'src/contexts/ChatContext';
+import { useNavigationParams } from 'src/hooks/useNavigationParams';
 
 interface IGameInviteProps {
 	chatId: number;
 	sender: string | undefined;
 	recipient: string | undefined;
 	sentAt: Date;
-	setGameWindowIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 	reply?: boolean;
 }
 
@@ -23,7 +23,6 @@ const ChatGameInvite: React.FC<IGameInviteProps> = ({
 	recipient,
 	sentAt,
 	reply = undefined,
-	setGameWindowIsOpen,
 }) => {
 	const [inviteDeclined, setInviteDeclined] = useState(false);
 	const [inviteAccepted, setInviteAccepted] = useState(false);
@@ -31,6 +30,8 @@ const ChatGameInvite: React.FC<IGameInviteProps> = ({
 	const { accessToken } = useAuth();
 	const { updateGameData } = useContext(GameContext);
 	const { chatData } = useContext(ChatContext);
+	const { setNavParam } = useNavigationParams();
+
 	// const
 
 	const acceptInvite = () => {
@@ -46,7 +47,8 @@ const ChatGameInvite: React.FC<IGameInviteProps> = ({
 		// TODO: fix ?
 		// open a game window
 		updateGameData({ opponentInfo: { login: sender || '', image: '' } });
-		setGameWindowIsOpen(true);
+		setNavParam('game')
+		// setGameWindowIsOpen(true);
 	};
 	const declineInvite = () => {
 		setInviteReply(chatId, false, accessToken)
