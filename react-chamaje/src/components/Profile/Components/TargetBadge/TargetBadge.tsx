@@ -46,7 +46,6 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 
 	const updateTargetStatus = async () => {
 		try {
-			console.log('trying to fucking update the target update status');
 			const response = await fetch('/api/user/me/updateTargetStatus', {
 				method: 'PUT',
 				credentials: 'include',

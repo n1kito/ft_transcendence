@@ -49,7 +49,7 @@ export class ConnectionStatusGateway
 	@SubscribeMessage('ServerConnection')
 	handleServerConnection(@MessageBody() data: number): void {
 		this.server.emit('ClientLogIn', data);
-		console.log('\n🟢🟢' + data + ' just arrived!🟢🟢\n');
+		console.log('\n[🟢]' + data + ' just arrived!\n');
 	}
 
 	// when a client received a 'userLoggedIn' message, it sends back a
@@ -60,7 +60,7 @@ export class ConnectionStatusGateway
 		@ConnectedSocket() client: Socket,
 	): void {
 		this.server.emit('ClientLogInResponse', data);
-		console.log('🟢 ClientLogInResponse: ' + data);
+		console.log('[🟢] ClientLogInResponse: ' + data);
 	}
 
 	@SubscribeMessage('ServerEndedConnection')
@@ -68,7 +68,7 @@ export class ConnectionStatusGateway
 		@MessageBody() data: number,
 		@ConnectedSocket() client: Socket,
 	): void {
-		console.log('\n🔴🔴' + data + ' just left!🔴🔴\n');
+		console.log('\n[🔴]' + data + ' just left!\n');
 		this.server.emit('ClientLogOut', data);
 		client.disconnect();
 	}

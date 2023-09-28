@@ -190,7 +190,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 
 	// find the user by login and create the chat
 	const inviteUserToChannel = () => {
-		console.log('searchedLogin', searchedLogin);
 		if (searchedLogin) {
 			findUserByLogin(searchedLogin, accessToken)
 				// .then((response) => response.json())
@@ -198,7 +197,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 					if (data.message) {
 						throw new Error('User not found');
 					}
-					console.log('response data', data);
 					// if the user is found, create the PM and update the PM list
 					if (!userData) {
 						return;
@@ -218,7 +216,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 										name,
 									)
 										.then(() => {
-											console.log('Invitation sent');
 											setSearchUserSuccess('Invitation sent');
 											chatData.socket?.sendMessage(
 												'',
@@ -264,7 +261,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 															name,
 														);
 														setSearchUserSuccess('Invitation sent');
-														console.log('Invitation sent');
 													})
 													.catch((e) => {
 														console.error(
@@ -302,7 +298,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 				const updatedChatsList = chatData.chatsList.filter(
 					(channel) => channel.chatId !== chatId,
 				);
-				console.log('updatedChatsList', updatedChatsList);
 				chatData.socket?.leaveRoom(chatId);
 				getNewChatsList(updatedChatsList);
 				setChatWindowIsOpen(false);
@@ -482,7 +477,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 		sendMessageQuery(accessToken, textareaContent, chatId, secondUserId)
 			.then(() => {
 				const myImage = userData.image.replace('/api/images/', '');
-				console.log('image sent: ', myImage);
 				// socket sending message
 				chatData.socket?.sendMessage(
 					textareaContent,
@@ -511,7 +505,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	};
 
 	useEffect(() => {
-		console.log('messages', messages);
 		for (const current of messages) {
 			const date = new Date(current.sentAt);
 			date.setMinutes(date.getMinutes() + 15);
@@ -529,15 +522,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 		}
 	}, [messages]);
 
-	useEffect(() => {
-		console.log('inviteToPlayMsg', inviteToPlayMsg);
-		// for (const current of messages) {
-		// 	if (current.isNotif && current.isNotif === 'play') {
-		// 		console.log('is it the last one ?', current.sentAt);
-		// 		setInviteToPlayMsg(current);
-		// 	}
-		// }
-	}, [inviteToPlayMsg]);
 
 	/* ********************************************************************* */
 	/* ******************************* RETURN ****************************** */

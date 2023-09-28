@@ -76,19 +76,12 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 			}
 			// if it is the active chat, load message
 			if (message.chatId === chatWindowId) {
-				console.log('%creceived message: ', 'color:red', message);
 				const updatedMessages: IMessage[] = messages.map((val) => {
 					return val;
 				});
 				updatedMessages.push(message);
 				setMessages(updatedMessages);
 			} else {
-				console.log(
-					'message.chatId',
-					message.chatId,
-					'chatData.chatsList',
-					chatData.chatsList,
-				);
 
 				// notifications : copy the chat list and add newMessage to the chat concerned
 				let updatedChatList: IChatStruct[] = [];
@@ -104,10 +97,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					}
 					getNewChatsList(updatedChatList);
 				}
-				console.log(
-					'%cYou received a message from another chat',
-					'color:lightblue;',
-				);
 			}
 		};
 		chatData.socket?.onReceiveMessage(onReceiveMessage);
@@ -130,32 +119,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 		}
 	}, [chatData.chatsList]);
 
-	/* ********************************************************************* */
-	/* ******************************* DEBUG ******************************* */
-	/* ********************************************************************* */
-
-	// useEffect(() => {
-	// 	console.log(' PrivateMessage - messages', messages);
-	// }, [messages]);
-	// useEffect(() => {
-	// 	console.log(' PrivateMessage - privateMessages', privateMessages);
-	// }, [privateMessages]);
-
-	// useEffect(() => {
-	// 	console.log(
-	// 		'%cchatData.chatsList',
-	// 		'background-color: red',
-	// 		chatData.chatsList,
-	// 	);
-	// }, [chatData.chatsList]);
-
-	// useEffect(() => {
-	// 	console.log(' PrivateMessage - chatWindowId', chatWindowId);
-	// }, [chatWindowId]);
-
-	// useEffect(() => {
-	// 	console.log(' PrivateMessage - searchUserSuccess', searchUserSuccess);
-	// }, [searchUserSuccess]);
+	
 	/* ********************************************************************* */
 	/* ******************************* LOGIC ******************************* */
 	/* ********************************************************************* */
@@ -246,7 +210,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 
 	// find the user by login and create the chat
 	const createNewChatFromLogin = () => {
-		console.log('searchedLogin', searchedLogin);
 		if (searchedLogin) {
 			findUserByLogin(searchedLogin, accessToken)
 				// .then((response) => response.json())
@@ -254,7 +217,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					if (data.message) {
 						throw new Error('User not found');
 					}
-					console.log('response data', data);
 					// if the user is found, create the PM and update the PM list
 					if (!userData) {
 						return;

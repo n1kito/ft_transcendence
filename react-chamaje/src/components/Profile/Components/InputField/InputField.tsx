@@ -26,7 +26,6 @@ const InputField: React.FC<InputFieldProps> = ({
 	};
 
 	useEffect(() => {
-		console.log('isPassword', isPassword);
 	}, []);
 	return (
 		<div className="inputFieldWrapper">

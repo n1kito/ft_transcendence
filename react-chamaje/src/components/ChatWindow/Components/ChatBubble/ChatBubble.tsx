@@ -83,7 +83,6 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 										// socket
 										mute(accessToken, chatId, userId)
 											.then((data) => {
-												console.log(data);
 												chatData.socket?.sendMessage(
 													'',
 													chatId,
@@ -106,7 +105,6 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 										// chatData.socket => send kick message
 										kick(accessToken, chatId, userId)
 											.then((data) => {
-												console.log(data);
 												chatData.socket?.kick(userId, chatId);
 												chatData.socket?.sendMessage(
 													'',
@@ -131,7 +129,6 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 										// socket
 										ban(accessToken, chatId, userId)
 											.then((data) => {
-												console.log(data);
 												chatData.socket?.kick(userId, chatId);
 												chatData.socket?.sendMessage(
 													'',
@@ -156,7 +153,6 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 										// socket => make admin
 										makeAdmin(accessToken, chatId, userId)
 											.then((data) => {
-												console.log(data);
 												chatData.socket?.makeAdmin(userId, chatId);
 												chatData.socket?.sendMessage(
 													'',

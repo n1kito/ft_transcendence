@@ -374,7 +374,6 @@ export class UserController {
 		const response = await this.userService.getPublicDataFromUserId(userIdToNb);
 		if (!response) return { message: 'User not found' };
 		const ret = { login: response.login, image: response.image };
-		console.log('ret', ret);
 		return ret;
 	}
 
@@ -450,7 +449,6 @@ export class UserController {
 					};
 				}),
 			);
-			console.log('rooms', rooms);
 			res.status(200).json(rooms);
 			// return rooms;
 		} catch (e) {
@@ -494,7 +492,6 @@ export class UserController {
 					};
 				}),
 			);
-			console.log('rooms', rooms);
 			return rooms;
 		} catch (e) {
 			console.error('Could not fetch channels: ', e);
