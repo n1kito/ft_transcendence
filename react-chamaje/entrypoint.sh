@@ -9,5 +9,5 @@ npm install -g npm
 # npm audit fix --force
 
 npm install
-# npm run build
+npm run build
 npm start
