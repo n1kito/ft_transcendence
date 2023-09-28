@@ -49,7 +49,7 @@ export interface IUserAction {
 	userId: number;
 }
 
-@WebSocketGateway({ namespace: 'chat-socket' })
+@WebSocketGateway({ path: 'ws/chat' })
 export class chatWebSocketGateway
 	implements OnGatewayConnection, OnGatewayDisconnect
 {

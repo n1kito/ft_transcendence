@@ -10,7 +10,7 @@ import { Server, Socket } from 'socket.io';
 import { GameService } from './game.service';
 import { IPlayerMovementPayload } from 'shared-lib/types/game';
 
-@WebSocketGateway({ namespace: 'game-socket' })
+@WebSocketGateway({ path: '/ws/game' })
 export class GameGateway
 	implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
