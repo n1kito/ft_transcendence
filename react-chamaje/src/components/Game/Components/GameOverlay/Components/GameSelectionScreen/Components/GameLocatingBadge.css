@@ -1,0 +1,34 @@
+.game-locating-badge-wrapper {
+	width: 6rem;
+	height: 8rem;
+	border-radius: 0.5rem;
+	position: relative;
+	/* background-color: black; */
+}
+
+.game-locating-badge-wrapper::after {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	content: '?';
+	color: yellow;
+	font-family: 'VT323', monospace;
+	font-size: 5rem;
+	/* color: transparent; */
+	/* background-image: linear-gradient(green, blue); */
+	text-shadow: yellowgreen 1px 0 10px;
+	/* background-clip: text; */
+}
+
+.game-locating-badge-background {
+	opacity: 0.8;
+	width: 100%;
+	height: 100%;
+	background-size: cover;
+	background-position: center;
+	border-radius: 0.5rem;
+	position: absolute;
+	top: 0;
+	left: 0;
+}

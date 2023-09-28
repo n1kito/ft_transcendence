@@ -19,7 +19,7 @@
 	box-shadow: 0.7rem 0.7rem 0 0 #f8ef57;
 	cursor: default;
 	overflow: hidden;
-	position: relative;
+	position: absolute;
 }
 
 .window-content {
@@ -28,6 +28,8 @@
 	text-align: left;
 	border-radius: 10px;
 	position: relative;
+	/* NOT SURE ABOUT THE FOLLOWING, ADDED IT SO THE GAME COULD RESIZE CORRECTLY WITH WINDOW WHEN USER RESIZES IT */
+	height: 100%;
 }
 
 .window-resize-handle {

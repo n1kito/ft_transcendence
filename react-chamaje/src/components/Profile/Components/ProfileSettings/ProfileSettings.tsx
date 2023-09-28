@@ -96,7 +96,7 @@ const ProfileSettings: React.FC = () => {
 			// Update the userData in the context with the updated user data
 			if (response.ok) {
 				const updatedUserData = {
-					...userData,
+					// ...userData,
 					login: username,
 					email: email,
 					id: userData ? userData.id : 0,

@@ -1,0 +1,42 @@
+.power-up-button-wrapper {
+	font-family: 'VT323', monospace;
+	font-size: 1.7rem;
+
+	background-color: black;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	height: 1rem;
+	aspect-ratio: 1/1;
+	padding: 0.5rem;
+
+	border-radius: 50%;
+	border: 3px solid #ffb2b2;
+	box-shadow: 1px 3px #57f8ab;
+
+	position: relative;
+
+	transition: opacity 0.2s linear;
+}
+
+.power-up-button-wrapper span {
+	color: transparent;
+	background: linear-gradient(
+		to right,
+		#c2ffb6b0,
+		#fea4b6fe,
+		#ffa3b6,
+		#dda9ff,
+		#a2d1ff
+	);
+	background-clip: text;
+}
+
+.power-up-button-pressed {
+	filter: saturate(0);
+	box-shadow: none;
+	top: 3px;
+	left: 1px;
+	opacity: 0.5;
+}

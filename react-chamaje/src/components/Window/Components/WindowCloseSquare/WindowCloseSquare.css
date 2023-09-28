@@ -25,5 +25,12 @@
 .close-square:hover .inside-square {
 	width: 60%;
 	height: 60%;
+	background: linear-gradient(
+		48deg,
+		#c2ffb6 0%,
+		#fea4b6 31.5%,
+		#dda9ff 66.57%,
+		#a2d1ff 97.56%
+	);
 	background-color: #f8ef57;
 }

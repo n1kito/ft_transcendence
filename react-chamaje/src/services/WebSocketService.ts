@@ -12,7 +12,7 @@ class WebSocketService {
 	constructor(accessToken: string, userId: number) {
 		this.userId = userId;
 		this.socket = io({
-			path: '/ws/',
+			path: '/ws/chat/',
 			reconnection: false,
 			auth: { accessToken },
 		});

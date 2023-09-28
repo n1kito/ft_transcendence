@@ -1,5 +1,5 @@
 services:
-  api:
+  nestjs:
     container_name: nestjs-container
     build:
       dockerfile: Dockerfile
@@ -8,6 +8,7 @@ services:
       target: development
     volumes:
       - ${PWD}/nestjs:/app
+      - ${PWD}/shared-lib:/shared-lib # mount the shared library into the nestjs container
       # - /usr/src/app/node_modules # creates an anonymous volume for node_modules which does not mount any directory from the host machine, thus it does not overwrite the node_modules that you've built in your Dockerfile.
     env_file:
       - .env
@@ -59,9 +60,10 @@ services:
     ports:
       - '3001:3000'
     depends_on:
-      - api
+      - nestjs
     volumes:
       - ${PWD}/react-chamaje:/app
+      - ${PWD}/shared-lib:/shared-lib # mount the shared library into the react container
     networks:
       - chamaje
 
@@ -73,7 +75,7 @@ services:
       - '8080:80' # Expose Nginx on port 8080
     depends_on:
       - react
-      - api
+      - nestjs
     networks:
       - chamaje
 

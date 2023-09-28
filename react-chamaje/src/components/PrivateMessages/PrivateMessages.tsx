@@ -302,6 +302,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 		<>
 			<div className="private-messages-window">
 				<Window
+					initialWindowPosition={{ bottom: 25, left: 25 }}
 					windowTitle="Private Messages"
 					useBeigeBackground={true}
 					onCloseClick={onCloseClick}

@@ -19,6 +19,7 @@ model User {
     email           String      @unique
     image           String?
     createdAt       DateTime    @default(now())
+    updatedAt DateTime @updatedAt
     token           String?
 
     // Two Factor authentication
@@ -37,11 +38,18 @@ model User {
     image_is_locked Boolean @default(false)
 
     // Games logic
-    gamesPlayed gameSession[]
+    gamesPlayedAsPlayer1 gameSession[] @relation("player1")
+    gamesPlayedAsPlayer2 gameSession[] @relation("player2")
+    gamesWon             gameSession[] @relation("winner")
 
     // Profile variables
     // These could be resolved upon fetch requests, but more efficient to store them directly
     killCount Int @default(0)
+
+    // Bestie logic
+    bestie    User?  @relation("Bestie", fields: [bestieId], references: [id])
+    bestieId  Int?   @unique
+    bestiedBy User[] @relation("Bestie")
 
     // Target logic
     target                 User?   @relation("Target", fields: [targetId], references: [id])
@@ -61,22 +69,26 @@ model User {
     bannedFromChatId Int?
     invitedToChat    Chat? @relation("invited", fields: [invitedToChatId], references: [id])
     invitedToChatId  Int?
-}
 
-model Game {
-    id       Int           @id @default(autoincrement())
-    playedAt DateTime      @default(now())
-    players  gameSession[]
+    // Rival logic
+    rival   User?  @relation("Rival", fields: [rivalId], references: [id])
+    rivalId Int?
+    rivalOf User[] @relation("Rival")
 }
 
 model gameSession {
-    id       Int     @id @default(autoincrement())
-    user     User    @relation(fields: [userId], references: [id])
-    userId   Int
-    game     Game    @relation(fields: [gameId], references: [id])
-    gameId   Int
-    score    Int
-    isWinner Boolean
+    id           Int        @id @default(autoincrement())
+    createdAt    DateTime   @default(now())
+    updatedAt    DateTime   @updatedAt
+    player1Id    Int
+    player2Id    Int
+    player1Score   Int
+    player2Score   Int
+    winnerId     Int
+
+    player1  User  @relation("player1", fields: [player1Id], references: [id])
+    player2  User  @relation("player2", fields: [player2Id], references: [id])
+    winner User  @relation("winner", fields: [winnerId], references: [id])
 }
 
 // Chat logic

@@ -4,7 +4,6 @@ import Lock from './Components/Lock/Lock';
 import Clock from './Components/Clock/Clock';
 import { UserContext } from '../../../../contexts/UserContext';
 import FullscreenTrigger from './Components/FullscreenTrigger/FullscreenTrigger';
-import AnnaWintour from './../../../../images/Anna_Wintour.jpg';
 import useAuth from 'src/hooks/userAuth';
 export interface navBarProps {
 	isLoggedIn?: boolean;
@@ -13,11 +12,11 @@ export interface navBarProps {
 // modified image display when loading page and when login page state
 
 const NavBar: React.FC<navBarProps> = ({ isLoggedIn = true }) => {
-	const navClasses = 'navBar' + `${isLoggedIn ? ' loggedIn' : ''}`;
 	const { userData } = useContext(UserContext);
 	const { isAuthentificated } = useAuth();
+
 	return (
-		<div className={navClasses}>
+		<div className={`navBar ${isLoggedIn ? 'loggedIn' : ''}`}>
 			<div className="menuItems">
 				{/* <Button></Button> */}
 				<a href="#" title="Link name">
@@ -30,11 +29,10 @@ const NavBar: React.FC<navBarProps> = ({ isLoggedIn = true }) => {
 			<div className="toolBox">
 				<span>{userData ? userData.login : ''}</span>
 				<FullscreenTrigger />
-				<img
-					className="userAvatar"
-					src={isAuthentificated && userData ? userData.image : AnnaWintour}
-				/>
-				<Lock />
+				{isAuthentificated && (
+					<img className="userAvatar" src={userData.image} />
+				)}
+				{isAuthentificated && <Lock />}
 				<Clock />
 			</div>
 		</div>

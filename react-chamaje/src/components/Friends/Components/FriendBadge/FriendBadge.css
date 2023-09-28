@@ -9,7 +9,7 @@
 	padding: 0;
 	width: fit-content;
 	overflow: hidden;
-	border-radius: 0.6rem;
+	border-radius: 0.5rem;
 }
 
 .badge-avatar {
@@ -19,6 +19,7 @@
 	height: 6rem;
 	overflow: hidden;
 	position: relative;
+	transition: opacity 0.5s linear;
 }
 
 .badge-avatar img {
@@ -56,6 +57,11 @@
 
 .channel-badge {
 	padding: 0.5rem 1.5rem;
+}
+
+.disable-friend-badge {
+	/* filter: saturate(0); */
+	opacity: 0.5;
 }
 
 @keyframes shake {

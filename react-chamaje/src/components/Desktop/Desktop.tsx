@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import './Desktop.css';
 import DesktopIcon from './Components/DesktopIcon/DesktopIcon';
 import { useNavigate } from 'react-router-dom';
-import FriendsList from '../Friends/Components/FriendsList/FriendsList';
 import { UserContext } from '../../contexts/UserContext';
 import useAuth from '../../hooks/userAuth';
 import Profile from '../Profile/Profile';
@@ -12,13 +11,15 @@ import Button from './../Shared/Button/Button';
 import { createRoot } from 'react-dom/client';
 import PrivateMessages from '../PrivateMessages/PrivateMessages';
 import { AnimatePresence } from 'framer-motion';
-import ChatWindow from '../ChatWindow/ChatWindow';
+import Channels from '../Channels/Channels';
 
 import ProfileIcon from './Icons/CARD.svg';
 import ChatIcon from './Icons/PC.svg';
 import FriendsIcon from './Icons/NOTEBOOK.svg';
 import GameIcon from './Icons/CD.svg';
-import Channels from '../Channels/Channels';
+import ChannelsIcon from './Icons/EARTH.svg';
+import Game from '../Game/Game';
+import { GameProvider } from '../../contexts/GameContext';
 import { ChatContext } from 'src/contexts/ChatContext';
 import {
 	addFriend,
@@ -26,6 +27,7 @@ import {
 	fetchFriends,
 } from 'src/utils/FriendsQueries';
 import { error } from 'console';
+import FriendsList from '../Friends/Components/FriendsList/FriendsList';
 
 // Friend structure to keep track of them and their online/ingame status
 export interface IFriendStruct {
@@ -34,18 +36,19 @@ export interface IFriendStruct {
 	image: string;
 	onlineStatus: boolean;
 }
-let nbFriendsOnline = 0;
 
 const Desktop = () => {
 	// const [isWindowOpen, setIsWindowOpen] = useState(false);
 	let iconId = 0;
+	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
 	const { userData, updateUserData, resetUserData } = useContext(UserContext);
 	const { chatData, updateChatData } = useContext(ChatContext);
-	const [openFriendsWindow, setFriendsWindowIsOpen] = useState(false);
-	const [openProfileWindow, setProfileWindowIsOpen] = useState(false);
+	const [friendsWindowIsOpen, setFriendsWindowIsOpen] = useState(false);
+	const [profileWindowIsOpen, setProfileWindowIsOpen] = useState(false);
 	const [privateMessageWindowIsOpen, setPrivateMessageWindowIsOpen] =
 		useState(false);
 	const [channelsWindowIsOpen, setChannelsWindowIsOpen] = useState(false);
+	const [gameWindowIsOpen, setGameWindowIsOpen] = useState(false);
 
 	const [showFriendProfile, setShowFriendProfile] = useState(false);
 
@@ -294,7 +297,7 @@ const Desktop = () => {
 				name="Game"
 				iconSrc={GameIcon}
 				id={++iconId}
-				onDoubleClick={() => setFriendsWindowIsOpen(true)}
+				onDoubleClick={() => setGameWindowIsOpen(true)}
 			/>
 			<DesktopIcon
 				name="Profile"
@@ -310,7 +313,7 @@ const Desktop = () => {
 			/>
 			<DesktopIcon
 				name="Channels"
-				iconSrc={ChatIcon}
+				iconSrc={ChannelsIcon}
 				id={++iconId}
 				onDoubleClick={() => setChannelsWindowIsOpen(true)}
 			/>
@@ -321,7 +324,7 @@ const Desktop = () => {
 				onDoubleClick={() => setFriendsWindowIsOpen(true)}
 			/>
 			<AnimatePresence>
-				{openProfileWindow && (
+				{profileWindowIsOpen && (
 					<Profile
 						key="profile-window"
 						login={userData?.login}
@@ -333,7 +336,7 @@ const Desktop = () => {
 						setNbOnline={SetNbOnline}
 					/>
 				)}
-				{openFriendsWindow && (
+				{friendsWindowIsOpen && (
 					<FriendsList
 						key="Friend-list-window"
 						onCloseClick={() => setFriendsWindowIsOpen(false)}
@@ -376,11 +379,27 @@ const Desktop = () => {
 				)}
 				{channelsWindowIsOpen && (
 					<Channels
-						key="channelKeyInDesktop"
 						onCloseClick={() => setChannelsWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
+						key="channels-window"
 						setShowFriendProfile={setShowFriendProfile}
 						setProfileLogin={setFriendLogin}
+					/>
+				)}
+				{gameWindowIsOpen && (
+					<Game
+						// opponentLogin={
+						// 	userData.login == 'mjallada'
+						// 		? 'freexav'
+						// 		: userData.login == 'jeepark'
+						// 		? 'cgosseli'
+						// 		: ''
+						// }
+						onCloseClick={() => setGameWindowIsOpen(false)}
+						windowDragConstraintRef={windowDragConstraintRef}
+						key="game-window"
+						// setShowFriendProfile={setShowFriendProfile}
+						// setProfileLogin={setFriendLogin}
 					/>
 				)}
 			</AnimatePresence>

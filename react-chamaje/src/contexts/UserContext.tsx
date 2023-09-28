@@ -5,66 +5,69 @@ import React, {
 	useEffect,
 	useState,
 } from 'react';
+import { IUserData, IMatchHistory } from '../../../shared-lib/types/user';
 // import { IChatStruct } from 'src/components/PrivateMessages/PrivateMessages';
 import WebSocketService from 'src/services/WebSocketService';
 
-export interface IMatchHistory {
-	player1Login: string;
-	player1Score: number;
-	player1Image: string;
-	player2Login: string;
-	player2Score: number;
-	player2Image: string;
-}
+// export interface IMatchHistory {
+// 	player1Login: string;
+// 	player1Score: number;
+// 	player1Image: string;
+// 	player2Login: string;
+// 	player2Score: number;
+// 	player2Image: string;
+// }
 
-export interface UserData {
-	// Define the structure of your user data
-	// For example:
-	id: number;
-	image: string;
-	login: string;
-	email: string;
-	killCount?: number;
-	// TODO: the killcount was set as optional here to remove a compiling error with ProfileSettings.tsx but need to check it's ok
-	// same for the other properties below
-	winRate?: number;
-	gamesCount?: number;
-	bestFriendLogin?: string;
-	rank?: number;
-	targetLogin?: string;
-	targetImage?: string;
-	rivalLogin?: string;
-	rivalImage?: string;
-	bestieLogin?: string;
-	bestieImage?: string;
-	matchHistory?: IMatchHistory[];
-	targetDiscoveredByUser?: boolean;
-	// ... other properties
-	// chat properties
-}
+// export interface UserData {
+// 	// Define the structure of your user data
+// 	// For example:
+// 	id?: number;
+// 	image: string;
+// 	login: string;
+// 	email: string;
+// 	killCount?: number;
+// 	// TODO: the killcount was set as optional here to remove a compiling error with ProfileSettings.tsx but need to check it's ok
+// 	// same for the other properties below
+// 	winRate?: number;
+// 	gamesCount?: number;
+// 	bestFriendLogin?: string;
+// 	rank?: number;
+// 	targetLogin?: string;
+// 	targetImage?: string;
+// 	rivalLogin?: string;
+// 	rivalImage?: string;
+// 	bestieLogin?: string;
+// 	bestieImage?: string;
+// 	matchHistory?: IMatchHistory[];
+// 	targetDiscoveredByUser?: boolean;
+// 	// ... other properties
+// }
 
 // interface UserContextType {
-// 	userData: UserData | null;
-// 	setUserData: Dispatch<SetStateAction<UserData | null>>;
+// 	userData: IUserData | null;
+// 	setUserData: Dispatch<SetStateAction<IUserData | null>>;
 // }
 
 // Default content for an empty userdata object
-const defaultUserData: UserData = {
+const defaultUserData: IUserData = {
 	// User informatiom
 	id: 0,
 	login: '',
 	image: '',
-	email: '',
-
 	// Profile information
 	gamesCount: 0,
 	// Target
 	targetDiscoveredByUser: false,
 };
 
+// interface UserContextType {
+// 	userData: UserData | null;
+// 	setUserData: Dispatch<SetStateAction<UserData | null>>;
+// }
+
 interface UserContextType {
-	userData: UserData;
-	updateUserData: (updates: Partial<UserData>) => void;
+	userData: IUserData;
+	updateUserData: (updates: Partial<IUserData>) => void;
 	resetUserData: () => void;
 }
 
@@ -82,18 +85,18 @@ export const UserContext = createContext<UserContextType>({
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 	// State of the context
 	// We use our initial state aboe to initialize it
-	const [userData, setUserData] = useState<UserData>(defaultUserData);
+	const [userData, setUserData] = useState<IUserData>(defaultUserData);
 
 	// TODO: remove this and corresponding logs
 	// Logs the updates to userData as they happen
-	// useEffect(() => {
-	// 	logUserData(`${JSON.stringify(userData, null, 4)}`);
-	// }, [userData]);
+	useEffect(() => {
+		logUserData(`${JSON.stringify(userData, null, 4)}`);
+	}, [userData]);
 
 	// We want a helper function that will allow us to update one, many or all
 	// properties of the game state without having to override the entire thing manually
-	const updateUserData = (updates: Partial<UserData>) => {
-		setUserData((prevUserData: UserData) => ({
+	const updateUserData = (updates: Partial<IUserData>) => {
+		setUserData((prevUserData: IUserData) => ({
 			...prevUserData,
 			...updates,
 		}));

@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import './Profile.css';
 import ProfilePicBadge from './Components/ProfilePicBadge/ProfilePicBadge';
-import { UserContext, UserData } from '../../contexts/UserContext';
+import { UserContext } from '../../contexts/UserContext';
+import { IUserData } from '../../../../shared-lib/types/user';
 import placeholderImage from '../../images/placeholder-image.png';
 import Title from './Components/Title/Title';
 // import ShadowWrapper from '../Shared/ShadowWrapper/ShadowWrapper';
@@ -59,7 +60,7 @@ const Profile: React.FC<ProfileProps> = ({
 }) => {
 	const { accessToken, isTwoFAEnabled, setIsTwoFAEnabled, logOut } = useAuth();
 	const { userData, updateUserData } = useContext(UserContext);
-	const [profileData, setProfileData] = useState<UserData | null>(null); // Declare profileData state
+	const [profileData, setProfileData] = useState<IUserData | null>(null); // Declare profileData state
 	const isOwnProfile = login == userData?.login;
 
 	// Settings panel

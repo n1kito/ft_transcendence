@@ -22,6 +22,8 @@ import {
 } from './utils/authUtils';
 import RetrieveAccessToken from './components/RetrieveAccessToken/RetrieveAccessToken';
 import IconContextProvider from './contexts/IconContext';
+import { GameProvider } from './contexts/GameContext';
+import { WindowProvider } from './contexts/WindowContext';
 import { Socket, io } from 'socket.io-client';
 import { ChatProvider } from './contexts/ChatContext';
 
@@ -33,50 +35,48 @@ function App() {
 	return (
 		<AuthContextProvider>
 			<UserProvider>
-				<ChatProvider>
-					<div className="App">
+				<div className="App">
+					<ChatProvider>
 						<BrowserRouter>
-							<Layout>
-								<IconContextProvider>
-									<Routes>
-										<Route path="/" element={<ProtectedLogin />} />
-										<Route path="/desktop" element={<ProtectedDesktop />} />
-										<Route path="/friends" element={<ProtectedDesktop />} />
-										{/* <Route path="/" element={<Login />} /> */}
-										{/* <Route path="/desktop" element={<Desktop />} /> */}
-										{/* <Route path="/friends" element={<Desktop />} /> */}
-										<Route
-											path="/retrieve-token"
-											element={<RetrieveAccessToken />}
-										/>
-										<Route
-											path="*"
-											element={
-												<DesktopIcon
-													name="Error :("
-													id={-1}
-													iconSrc={roadconeIcon}
-													onDoubleClick={() => {
-														/* TODO: redirect to the homepage ? */
-													}}
+							<GameProvider>
+								<Layout>
+									<IconContextProvider>
+										<WindowProvider>
+											<Routes>
+												<Route path="/" element={<ProtectedLogin />} />
+												<Route path="/desktop" element={<ProtectedDesktop />} />
+												<Route path="/friends" element={<ProtectedDesktop />} />
+												{/* <Route path="/" element={<Login />} /> */}
+												<Route path="/desktop" element={<Desktop />} />
+												{/* <Route path="/friends" element={<Desktop />} /> */}
+												<Route
+													path="/retrieve-token"
+													element={<RetrieveAccessToken />}
 												/>
-											}
-										/>
-									</Routes>
-								</IconContextProvider>
-							</Layout>
+												<Route
+													path="*"
+													element={
+														<DesktopIcon
+															name="Error :("
+															id={-1}
+															iconSrc={roadconeIcon}
+															onDoubleClick={() => {
+																/* TODO: redirect to the homepage ? */
+															}}
+														/>
+													}
+												/>
+											</Routes>
+										</WindowProvider>
+									</IconContextProvider>
+								</Layout>
+							</GameProvider>
 						</BrowserRouter>
-					</div>
-				</ChatProvider>
+					</ChatProvider>
+				</div>
 			</UserProvider>
 		</AuthContextProvider>
 	);
 }
 
 export default App;
-
-{
-	/* <Route path="/" element={<ProtectedLogin />} />
-								<Route path="/desktop" element={<ProtectedDesktop />} />
-								<Route path="/friends" element={<ProtectedDesktop />} /> */
-}

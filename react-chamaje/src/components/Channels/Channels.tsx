@@ -282,6 +282,7 @@ const Channels: React.FC<IChannelsProps> = ({
 	return (
 		<>
 			<Window
+				initialWindowPosition={{ right: 50 }}
 				windowTitle="Channels"
 				useBeigeBackground={true}
 				onCloseClick={onCloseClick}

@@ -3,6 +3,7 @@ import './Window.css';
 import WindowTitleBar from './Components/WindowTitleBar/WindowTitleBar';
 import WindowMenu from './Components/WindowMenu/WindowMenu';
 import { motion, useDragControls } from 'framer-motion';
+import { useWindowContext } from 'src/contexts/WindowContext';
 
 export interface MenuLinks {
 	name: string;
@@ -16,6 +17,12 @@ export interface WindowProps {
 	resizable?: boolean;
 	children?: ReactNode;
 	windowDragConstraintRef?: React.RefObject<HTMLDivElement>;
+	initialWindowPosition?: {
+		top?: number;
+		left?: number;
+		bottom?: number;
+		right?: number;
+	};
 	onCloseClick: () => void;
 }
 
@@ -25,9 +32,15 @@ const Window: React.FC<WindowProps> = ({
 	children,
 	links = [],
 	useBeigeBackground = false,
+	initialWindowPosition,
 	windowDragConstraintRef,
 	onCloseClick,
 }) => {
+	const { maxZIndex, updateMaxZIndex } = useWindowContext();
+	const [windowZIndex, setWindowZIndex] = useState(maxZIndex);
+	const [initialXPosition, setInitialXPosition] = useState<number>(0);
+	const [initialYPosition, setInitialYPosition] = useState<number>(0);
+
 	const [dragIsEnabled, setDragIsEnabled] = useState(false);
 	const windowRef = useRef<HTMLDivElement | null>(null);
 	const [windowIsBeingResized, setWindowIsBeingResized] = useState(false);
@@ -43,51 +56,53 @@ const Window: React.FC<WindowProps> = ({
 	const dragControls = useDragControls();
 
 	function triggerDragOnElem(event: React.PointerEvent<HTMLDivElement>) {
+		// Change the z-index of the window even when just dragging it
+		updateMaxZIndex();
+		setWindowZIndex(windowZIndex + 1);
+		// And start dragging !
 		dragControls.start(event, {});
 	}
 
+	// Handle window resizing for the game
 	useEffect(() => {
 		if (resizable) {
-			// Handle resizing process
 			const handleResize = (event: MouseEvent) => {
-				if (!windowIsBeingResized) return;
-				if (windowRef.current) {
-					// See how much the mouse has moved
-					const xMoveDistance =
-						event.clientX - previousMouseCoordinates.current.x;
-					const yMoveDistance =
-						event.clientY - previousMouseCoordinates.current.y;
-					// Calculate the new dimensions of the window
-					const newWindowWidth =
-						previousWindowSize.current.width + xMoveDistance;
-					const newWindowHeight =
-						previousWindowSize.current.height + yMoveDistance;
-					// Update the div dimensions
-					// if those new dimensions are not too small or too big
-					if (
-						newWindowHeight <= window.innerHeight * 0.85 &&
-						newWindowHeight >= window.innerHeight * 0.5
-					)
-						windowRef.current.style.height = `${newWindowHeight}px`;
-					if (
-						newWindowWidth <= window.innerWidth * 0.95 &&
-						newWindowWidth >= window.innerWidth * 0.3
-					)
-						windowRef.current.style.width = `${newWindowWidth}px`;
+				if (!windowIsBeingResized || !windowRef.current) return;
+
+				const xMoveDistance =
+					event.clientX - previousMouseCoordinates.current.x;
+				const yMoveDistance =
+					event.clientY - previousMouseCoordinates.current.y;
+
+				const originalWidth = previousWindowSize.current.width;
+				const originalHeight = previousWindowSize.current.height;
+
+				// Calculate aspect ratio
+				const aspectRatio = originalWidth / originalHeight;
+
+				// Calculate new dimensions
+				const newWidth = originalWidth + xMoveDistance;
+				const newHeight = newWidth / aspectRatio; // Keep aspect ratio
+
+				// Validation for height and width
+				if (
+					newHeight <= window.innerHeight * 0.85 &&
+					newHeight >= window.innerHeight * 0.5
+				) {
+					windowRef.current.style.height = `${newHeight}px`;
+					windowRef.current.style.width = `${newWidth}px`;
 				}
 			};
-			// Mouse is released
+
 			const handleMouseUp = () => {
 				if (windowIsBeingResized) {
 					setWindowIsBeingResized(false);
 				}
 			};
 
-			// Add event listener to the window
 			window.addEventListener('mousemove', handleResize);
 			window.addEventListener('mouseup', handleMouseUp);
 
-			// Clean up the event listener when the component unmounts
 			return () => {
 				window.removeEventListener('mousemove', handleResize);
 				window.removeEventListener('mouseup', handleMouseUp);
@@ -95,10 +110,38 @@ const Window: React.FC<WindowProps> = ({
 		}
 	}, [resizable, windowIsBeingResized]);
 
+	// When the component mounts, bring it to the front by updating its z-index
+	// and give it saved coordinates if they exist
+	useEffect(() => {
+		updateMaxZIndex();
+		if (windowRef.current) {
+			windowRef.current.style.zIndex = String(maxZIndex + 1);
+		}
+	}, []);
+
+	// Handler when window needs to be brought to the front of the screen
+	const bringToFront = () => {
+		updateMaxZIndex();
+		if (windowRef.current) {
+			windowRef.current.style.zIndex = String(maxZIndex + 1);
+		}
+	};
+
 	return (
 		<motion.div
-			initial={{ opacity: 0, scale: 0 }}
-			animate={{ scale: 1, opacity: 1 }}
+			id={`${windowTitle.toLowerCase()}-window`}
+			initial={{
+				left: initialWindowPosition?.left || 'initial',
+				top: initialWindowPosition?.top || 'initial',
+				bottom: initialWindowPosition?.bottom || 'initial',
+				right: initialWindowPosition?.right || 'initial',
+				opacity: 0,
+				scale: 0,
+			}}
+			animate={{
+				scale: 1,
+				opacity: 1,
+			}}
 			exit={{ opacity: 0, scale: 0 }}
 			transition={{ duration: 0.2 }}
 			className="window-wrapper"
@@ -108,6 +151,7 @@ const Window: React.FC<WindowProps> = ({
 			dragListener={false}
 			dragConstraints={windowDragConstraintRef}
 			ref={windowRef}
+			onClick={bringToFront}
 			onAnimationComplete={() => {
 				// Once the div has fully transitionned in,
 				// store its initial dimensions in the corresponding state
@@ -125,13 +169,15 @@ const Window: React.FC<WindowProps> = ({
 				onCloseClick={onCloseClick}
 				onMouseDown={triggerDragOnElem}
 			/>
-			<WindowMenu>
-				{links.map((linkElem, index) => (
-					<span onClick={linkElem.onClick} key={index}>
-						{linkElem.name}
-					</span>
-				))}
-			</WindowMenu>
+			{links && links.length > 0 && (
+				<WindowMenu>
+					{links.map((linkElem, index) => (
+						<span onClick={linkElem.onClick} key={index}>
+							{linkElem.name}
+						</span>
+					))}
+				</WindowMenu>
+			)}
 			<div
 				className="window-content"
 				style={{ backgroundColor: useBeigeBackground ? '#FFFBEC' : '' }}

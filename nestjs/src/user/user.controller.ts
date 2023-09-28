@@ -1,12 +1,9 @@
 import {
-	BadRequestException,
 	Body,
-	ConflictException,
 	Controller,
 	Delete,
 	FileTypeValidator,
 	Get,
-	HttpException,
 	HttpStatus,
 	MaxFileSizeValidator,
 	NotFoundException,
@@ -23,10 +20,11 @@ import {
 	ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { PrismaClient } from '@prisma/client';
-import { Request, response, Response } from 'express';
+import { Prisma } from '@prisma/client';
+import { Request, Response } from 'express';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
+import { IUserData, IMatchHistory } from 'shared-lib/types/user';
 import { validate } from 'class-validator';
 import { get } from 'http';
 import { ChatService } from 'src/chat/chat.service';
@@ -42,6 +40,21 @@ import path from 'path';
 export interface CustomRequest extends Request {
 	userId: number;
 }
+
+export type UserWithRelations = Prisma.UserGetPayload<{
+	include: {
+		gamesPlayedAsPlayer1: {
+			include: { player1: true; player2: true };
+		};
+		gamesPlayedAsPlayer2: {
+			include: { player1: true; player2: true };
+		};
+		gamesWon: true;
+		target: true;
+		rival: true;
+		bestie: true;
+	};
+}>;
 
 @Controller('user')
 export class UserController {
@@ -74,7 +87,7 @@ export class UserController {
 		try {
 			console.log('\n🞋 UPDATING TARGET STATUS 🞋\n');
 			const userId = this.userService.authenticateUser(request);
-			const user = await this.prisma.user.update({
+			await this.prisma.user.update({
 				where: { id: userId },
 				data: { targetDiscoveredByUser: true },
 			});
@@ -142,111 +155,65 @@ export class UserController {
 	async getUserInfo(
 		@Param('login') login: string,
 		@Req() request: CustomRequest,
-		@Res() response: Response,
-	) {
-		// When mounting desktop, user/:login (old user/me) is fetched to set userContext.
-		// So when fetching for the first time login is unknown.
-		// Therefore login from database must be retrieved to updated `login`
-		if (login === 'me') {
-			const user = await this.prisma.user.findUnique({
-				where: { id: request.userId },
-			});
-			// update login by user's login
-			login = user.login;
-		}
-
-		const user = await this.prisma.user.findUnique({
-			where: { login },
-			include: { gamesPlayed: true, friends: true },
-		});
-		if (!user) {
-			// Handle case when user is not found
-			return response.status(404).json('User not found');
-		}
-		// identify the login associated with the ID the request is coming from
-		const userRequesting = await this.prisma.user.findUnique({
-			where: { id: request.userId },
-		});
-		const userRequestingLogin = userRequesting?.login;
-		// get how many games the player has played by counting the games where user
-		// was user player1 or player2
-		const gamesCount = user.gamesPlayed.length;
-		// get user's rank
-		const usersWithHigherKillCountThanOurUser = await this.prisma.user.count({
-			where: {
-				killCount: {
-					gt: await this.prisma.user
-						.findUnique({
-							where: { id: user.id },
-							select: { killCount: true },
-						})
-						.then((user) => user?.killCount || 0),
-				},
-			},
-		});
-		// Bestie logic
-		const bestieUser = await this.userService.findUserBestie(user.id);
-		// Rank logic
-		const userRank = usersWithHigherKillCountThanOurUser + 1;
-		// Target logic
-		const targetUser =
-			!user.isDefaultProfile && user.targetId !== null
-				? await this.prisma.user.findUnique({
-						where: { id: user.targetId },
-				  })
-				: undefined;
-		const { rivalLogin, rivalImage } = await this.userService.findUserRival(
-			user.id,
-		);
-		// Match history logic
-		let matchHistory;
+	): Promise<IUserData> {
+		console.log(`[🙆🏻‍♂️] User data requested via /user/${login}`);
 		try {
-			matchHistory = await this.userService.getUserMatchHistory(user.id);
-		} catch (error) {
-			console.log('Error retrieving match history: ', error);
-		}
+			// Try to authenticate the user
+			const requestingUserId: number =
+				this.userService.authenticateUser(request);
+			// Find the database entry corresponding to the user
+			const requestingUser: UserWithRelations =
+				await this.userService.getUserByIdWithRelations(requestingUserId);
+			// See if the user requesting the info is requesting their own information
+			const userWantsTheirOwnInfo: boolean =
+				login === 'me' || requestingUser.login === login;
+			// If the user is trying to fetch someone else's information, retrieve that
+			let requestedUser: UserWithRelations;
+			if (userWantsTheirOwnInfo) requestedUser = requestingUser;
+			else
+				requestedUser = await this.userService.getUserByLoginWithRelations(
+					login,
+				);
 
-		// if the login of the user who sent the request is the same as the login of the user they want the info of,
-		// we return more information
-		if (userRequestingLogin && userRequestingLogin === login) {
-			// return user data except its 2fa secret
-			const { twoFactorAuthenticationSecret, ...updatedUser } = user;
-			const userData = {
-				...updatedUser,
-				gamesCount: gamesCount,
-				killCount: user.killCount,
-				winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
-				rank: userRank,
-				targetLogin: targetUser?.login,
-				targetImage: targetUser?.image,
-				bestieLogin: bestieUser.bestieLogin,
-				bestieImage: bestieUser.bestieImage,
+			// Calculate the dynamic information
+			const calculatedRank: number | undefined =
+				await this.userService.calculateRank(requestedUser.id);
+			const totalGameCount =
+				this.userService.calculateTotalGameCount(requestedUser);
+			const calculatedWinRate: number | undefined = Math.round(
+				this.userService.calculateWinRate(requestedUser),
+			);
+
+			// Match history
+			let matchHistory: IMatchHistory[] | undefined = undefined;
+			if (totalGameCount > 0)
+				matchHistory = this.userService.getUserMatchHistory(
+					requestedUser.gamesPlayedAsPlayer1,
+					requestedUser.gamesPlayedAsPlayer2,
+				);
+
+			return {
+				id: userWantsTheirOwnInfo ? requestedUser.id : undefined,
+				login: requestedUser.login,
+				image: requestedUser.image,
+				email: userWantsTheirOwnInfo ? requestedUser.email : undefined,
+				killCount: requestedUser.killCount,
+				rank: calculatedRank,
+				winRate: calculatedWinRate,
+				gamesCount: totalGameCount,
+				// Target
+				targetLogin: requestedUser.target?.login,
+				targetImage: requestedUser.target?.image,
+				targetDiscoveredByUser: requestedUser.targetDiscoveredByUser,
+				// Bestie
+				bestieLogin: requestedUser.bestie?.login,
 				matchHistory: matchHistory,
-				rivalLogin,
-				rivalImage,
+				// Rival
+				rivalLogin: requestedUser.rival?.login,
+				rivalImage: requestedUser.rival?.image,
 			};
-			return response.status(200).json(userData);
-		}
-		// else, we only return what is needed for the profile component
-		else {
-			const profileData = {
-				login: user.login,
-				image: user.image,
-				// add profile information
-				gamesCount: gamesCount,
-				killCount: user.killCount,
-				winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
-				rank: userRank,
-				targetLogin: targetUser?.login,
-				targetImage: targetUser?.image,
-				targetDiscoveredByUser: user.targetDiscoveredByUser,
-				bestieLogin: bestieUser.bestieLogin,
-				bestieImage: bestieUser.bestieImage,
-				matchHistory: matchHistory,
-				rivalLogin,
-				rivalImage,
-			};
-			return response.status(200).json(profileData);
+		} catch (error) {
+			throw new NotFoundException(error);
 		}
 	}
 
@@ -619,7 +586,7 @@ export class UserController {
 				});
 		} catch (e) {
 			console.error('👋👋👋error unblocking user', e);
-			response
+			res
 				.status(400)
 				.json({ message: 'Something went wrong unblocking the user' });
 		}

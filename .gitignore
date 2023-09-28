@@ -1,6 +1,9 @@
 # Postgresql volume
 postgresql
 
+# Prisma migrations
+**/migrations
+
 # Dependencies
 **/node_modules
 
@@ -42,5 +45,6 @@ npm-debug.log*
 # Ignore Postgresql data files
 *.pgdata
 
-# Prisma migrations
-**/migrations
+# Ignore shared-lib folders in all subfolder except the root folder
+nestjs/shared-lib/
+react-chamaje/shared-lib/

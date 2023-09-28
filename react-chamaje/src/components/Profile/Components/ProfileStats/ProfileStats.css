@@ -18,3 +18,8 @@
 .profile-stats-wrapper > * {
 	/* justify-self: stretch; */
 }
+
+.bestie-tooltip-wrapper,
+.target-tooltip-wrapper {
+	position: relative;
+}

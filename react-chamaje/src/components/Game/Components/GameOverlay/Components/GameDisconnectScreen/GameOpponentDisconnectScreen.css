@@ -1,0 +1,9 @@
+.game-opponent-disconnect-message {
+	color: white;
+	text-align: center;
+	line-height: 2rem;
+}
+
+.game-opponent-disconnect-button {
+	position: relative;
+}

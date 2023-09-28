@@ -46,7 +46,7 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 	const [loginInputError, setLoginInputError] = useState('');
 	const [isFriendAdded, setIsFriendAdded] = useState(false);
 	const [settingsMode, setSettingsMode] = useState('');
-	const {chatData} = useContext(ChatContext)
+	const { chatData } = useContext(ChatContext);
 
 	// input validation before sending request
 	const handleLoginChange = (username: string) => {
@@ -85,7 +85,7 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 					// update the state with the updated friends list
 					setFriends(updatedFriends);
 					// ping to update online status
-					chatData.socket?.sendServerConnection()
+					chatData.socket?.sendServerConnection();
 				}
 			})
 			.catch((error) => {
