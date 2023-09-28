@@ -10,7 +10,7 @@ export class SetInviteReplyDTO {
 	@IsNotEmpty()
 	@IsNumber()
 	@IsDefined()
-	messageId: number;
+	chatId: number;
 
 	@IsNotEmpty()
 	@IsBoolean()

@@ -11,6 +11,8 @@ import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/Settings
 import Title from '../Profile/Components/Title/Title';
 import InputField from '../Profile/Components/InputField/InputField';
 import Button from '../Shared/Button/Button';
+import mysteryBox from '../Profile/Components/TargetBadge/images/mysteryBox.png';
+
 import {
 	createChatPrivateMessage,
 	fetchChats,
@@ -72,7 +74,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 			}
 			// if it is the active chat, load message
 			if (message.chatId === chatWindowId) {
-				console.log('received message avatar: ', message.avatar);
+				console.log('%creceived message: ', 'color:red', message);
 				const updatedMessages: IMessage[] = messages.map((val) => {
 					return val;
 				});
@@ -337,12 +339,13 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 										const friend = friends.find((friend) => {
 											return friend.id === participantId;
 										});
-										// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
 										return (
 											<FriendBadge
 												key={'PM' + room.chatId}
 												badgeTitle={room.name || 'anonymous'}
-												badgeImageUrl={`/api/images/${room.avatar}`}
+												badgeImageUrl={
+													room.name ? `/api/images/${room.avatar}` : mysteryBox
+												}
 												onlineIndicator={friend ? friend.onlineStatus : false}
 												isClickable={true}
 												onClick={() => {

@@ -32,6 +32,7 @@ import {
 	setNewPassword,
 	unblockUserQuery,
 } from 'src/utils/queries';
+import mysteryBox from '../Profile/Components/TargetBadge/images/mysteryBox.png';
 // import { IChatStruct } from '../PrivateMessages/PrivateMessages';
 import {
 	ChatContext,
@@ -105,6 +106,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	const [searchedLogin, setSearchedLogin] = useState('');
 	const [searchUserError, setSearchUserError] = useState('');
 	const [searchUserSuccess, setSearchUserSuccess] = useState('');
+	const [inviteToPlayMsg, setInviteToPlayMsg] = useState<IMessage>();
 
 	const { userData } = useContext(UserContext);
 	const {
@@ -469,7 +471,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 
 		sendMessageQuery(accessToken, textareaContent, chatId, secondUserId)
 			.then(() => {
-				const myImage = userData.image.replace('/api/images/','');
+				const myImage = userData.image.replace('/api/images/', '');
 				console.log('image sent: ', myImage);
 				// socket sending message
 				chatData.socket?.sendMessage(
@@ -500,7 +502,33 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 
 	useEffect(() => {
 		console.log('messages', messages);
+		for (const current of messages) {
+			const date = new Date(current.sentAt);
+			date.setMinutes(date.getMinutes() + 15);
+			const nowDate = new Date();
+			let oldInviteDate = new Date('1900-01-01T00:00:00Z');
+			if (inviteToPlayMsg) oldInviteDate = new Date(inviteToPlayMsg?.sentAt);
+			if (
+				current.isNotif &&
+				current.isNotif === 'play' &&
+				date > nowDate &&
+				oldInviteDate < date
+			) {
+				setInviteToPlayMsg(current);
+			}
+		}
 	}, [messages]);
+
+	useEffect(() => {
+		console.log('inviteToPlayMsg', inviteToPlayMsg);
+		// for (const current of messages) {
+		// 	if (current.isNotif && current.isNotif === 'play') {
+		// 		console.log('is it the last one ?', current.sentAt);
+		// 		setInviteToPlayMsg(current);
+		// 	}
+		// }
+	}, [inviteToPlayMsg]);
+
 	/* ********************************************************************* */
 	/* ******************************* RETURN ****************************** */
 	/* ********************************************************************* */
@@ -511,7 +539,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 			onCloseClick={onCloseClick}
 			windowDragConstraintRef={windowDragConstraintRef}
 			links={
-				isChannel
+				isChannel && name
 					? [
 							isOwner || isAdmin || !channelIsPrivate
 								? { name: 'Invite', onClick: inviteToChannel }
@@ -521,7 +549,8 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 								? { name: 'Settings', onClick: openSettingsPanel }
 								: { name: '' },
 					  ]
-					: [
+					: name
+					? [
 							{
 								name: 'Profile',
 								onClick: () => {
@@ -533,6 +562,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							{ name: isBlocked ? 'Unblock' : 'Block', onClick: blockUser },
 							{ name: 'Leave chat', onClick: leavePM },
 					  ]
+					: []
 			}
 			useBeigeBackground={true}
 		>
@@ -556,7 +586,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							}
 						}
 						if (!currentMessage.isNotif) {
-							console.log('currentMessage.avatar', currentMessage.avatar);
 							return (
 								<ChatBubble
 									key={index}
@@ -567,9 +596,15 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 											? true
 											: false
 									}
-									sender={currentMessage.login}
+									sender={
+										name || currentMessage.login === userData.login
+											? currentMessage.login
+											: 'anonymous'
+									}
 									time={date.toLocaleString('en-US', dateFormatOptions)}
-									senderAvatar={`/api/images/${currentMessage.avatar}`}
+									senderAvatar={
+										name ? `/api/images/${currentMessage.avatar}` : mysteryBox
+									}
 									isAdmin={isAdmin || isOwner}
 									setShowFriendProfile={setShowFriendProfile}
 									setProfileLogin={setProfileLogin}
@@ -582,18 +617,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 									}
 								</ChatBubble>
 							);
-						} else if (currentMessage.isNotif === 'play') {
-							return (
-								<ChatGameInvite
-									key={index}
-									messageId={currentMessage.id || 0}
-									sender={currentMessage.login}
-									recipient={currentMessage.targetLogin}
-									sentAt={currentMessage.sentAt}
-									reply={currentMessage.reply}
-								></ChatGameInvite>
-							);
-						} else {
+						} else if (currentMessage.isNotif !== 'play') {
 							return (
 								<ChatNotification
 									key={index}
@@ -605,6 +629,18 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							);
 						}
 					})}
+					{inviteToPlayMsg ? (
+						<ChatGameInvite
+							key={'invite' + inviteToPlayMsg.sentAt}
+							chatId={chatId}
+							sender={inviteToPlayMsg.login}
+							recipient={inviteToPlayMsg.targetLogin}
+							sentAt={inviteToPlayMsg.sentAt}
+							reply={inviteToPlayMsg.reply}
+						></ChatGameInvite>
+					) : (
+						<></>
+					)}
 				</div>
 				<div
 					className={`chat-input ${
@@ -620,14 +656,14 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 					></textarea>
 					<Button
 						baseColor={[151, 51, 91]}
-						disabled={textareaIsEmpty}
+						disabled={textareaIsEmpty || !name}
 						onClick={sendMessage}
 					>
 						send
 					</Button>
 				</div>
 			</div>
-			{settingsPanelIsOpen && (
+			{settingsPanelIsOpen && name && (
 				<SettingsWindow
 					windowTitle="Settings"
 					settingsWindowVisible={setSettingsPanelIsOpen}
@@ -675,7 +711,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 					</div>
 				</SettingsWindow>
 			)}
-			{isInviting && (
+			{isInviting && name && (
 				<SettingsWindow settingsWindowVisible={setIsInviting}>
 					<Title highlightColor="yellow">User name</Title>
 					<div className="settings-form">

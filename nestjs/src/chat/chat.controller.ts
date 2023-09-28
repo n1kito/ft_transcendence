@@ -863,10 +863,10 @@ export class ChatController {
 			);
 			// check if the user received the message
 			this.chatService
-				.checkRecipient(userId, validatedData.messageId)
+				.checkRecipient(userId, validatedData.chatId)
 				.then(() => {
 					this.chatService
-						.replyToInvite(validatedData.messageId, validatedData.reply)
+						.replyToInvite(validatedData.chatId, validatedData.reply)
 						.then(() => {
 							response
 								.status(200)
@@ -883,7 +883,10 @@ export class ChatController {
 						});
 				})
 				.catch((e) => {
-					console.error('User trying to respond to another users message');
+					console.error(
+						'User trying to respond to another users message: ',
+						e.message,
+					);
 					response
 						.status(403)
 						.json({ message: 'This message was not for to you' });
