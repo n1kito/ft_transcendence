@@ -8,4 +8,4 @@ npm ci
     npx prisma generate
     npx prisma migrate dev --name='initial_migration'
 # fi
-npm run start:dev & npx prisma studio
+npm run start & npx prisma studio
