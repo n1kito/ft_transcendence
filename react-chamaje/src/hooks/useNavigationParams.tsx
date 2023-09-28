@@ -1,12 +1,12 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 
-type UseNavigationParamsReturnType = [
+type UseNavigationParamsReturnType = {
 	params: URLSearchParams,
-	setNavParams: (name: string, value?: string) => void,
+	setNavParam: (name: string, value?: string) => void,
 	resetNavParams: () => void,
-	removeNavParams: (name: string) => void,
+	removeNavParam: (name: string) => void,
 	getNavParam: (name: string) => string | null,
-];
+};
 
 export const useNavigationParams = (): UseNavigationParamsReturnType => {
 	const navigate = useNavigate();
@@ -18,7 +18,7 @@ export const useNavigationParams = (): UseNavigationParamsReturnType => {
 
 	// Function that gets called by any component that wants to update the URL
 	// parameters
-	const setNavParams = (name: string, value?: string) => {
+	const setNavParam = (name: string, value?: string) => {
 		// Set the new parameters onto our URLSearchParams object
 		params.set(name, value ?? '');
 		// Navigate to the new URL
@@ -46,5 +46,5 @@ export const useNavigationParams = (): UseNavigationParamsReturnType => {
 
 	// Return the URLSearchParams object so components can read current URL parameters
 	// and can modify URL parameters with setParams()
-	return [params, setNavParams, resetNavParams, removeNavParam, getNavParam];
+	return {params, setNavParam, resetNavParams, removeNavParam, getNavParam};
 };

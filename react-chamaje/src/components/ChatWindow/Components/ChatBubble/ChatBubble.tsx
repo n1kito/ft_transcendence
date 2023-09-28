@@ -44,12 +44,11 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 	const { userData } = useContext(UserContext);
 	const { accessToken } = useAuth();
 	// Navigation hook
-	const [params, setNavParams, resetNavParams, removeNavParam, getNavParam] =
-		useNavigationParams();
+	const { setNavParam } = useNavigationParams();
 
 	const openFriendProfile = () => {
 		setProfileIsOpen(true);
-		setNavParams('friendProfile', sender);
+		setNavParam('friendProfile', sender);
 		setShowFriendProfile(true);
 		setProfileLogin(sender);
 	};

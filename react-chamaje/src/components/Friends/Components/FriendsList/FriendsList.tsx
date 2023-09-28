@@ -49,6 +49,8 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 	const [settingsMode, setSettingsMode] = useState('');
 	const { chatData } = useContext(ChatContext);
 
+	const { setNavParam, removeNavParam } = useNavigationParams();
+
 	// input validation before sending request
 	const handleLoginChange = (username: string) => {
 		setSearchedLogin(username);
@@ -103,12 +105,14 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 					setIsMyFriend(
 						friends.some((friend) => friend.login === searchedLogin),
 					);
-					setShowFriendProfile(true);
+					setNavParam('friendProfile', searchedLogin);
+					// setShowFriendProfile(true);
 					setSettingsPanelIsOpen(false);
 				})
 				.catch((error) => {
 					setLoginInputError(error.message);
-					setShowFriendProfile(false);
+					// setShowFriendProfile(false);
+					removeNavParam('friendProfile');
 				});
 	};
 

@@ -33,7 +33,7 @@ const Desktop = () => {
 	let iconId = 0;
 
 	// Navigation hook
-	const [params, setNavParams, resetNavParams, removeNavParam, getNavParam] =
+	const {params, setNavParam, removeNavParam, getNavParam} =
 		useNavigationParams();
 
 	const { userData, updateUserData, resetUserData } = useContext(UserContext);
@@ -249,7 +249,7 @@ const Desktop = () => {
 
 	// on badge click, display friend's profile
 	const handleBadgeClick = (friendLogin: string) => {
-		setNavParams('friendProfile', friendLogin);
+		setNavParam('friendProfile', friendLogin);
 		setFriendLogin(friendLogin);
 		setIsMyFriend(true);
 		setShowFriendProfile(true);
@@ -315,7 +315,7 @@ const Desktop = () => {
 				id={++iconId}
 				onDoubleClick={() => {
 					// setGameWindowIsOpen(true);
-					setNavParams('game');
+					setNavParam('game');
 				}}
 			/>
 			<DesktopIcon
@@ -324,7 +324,7 @@ const Desktop = () => {
 				id={++iconId}
 				onDoubleClick={() => {
 					// setProfileWindowIsOpen(true);
-					setNavParams('profile', userData.login);
+					setNavParam('profile', userData.login);
 				}}
 			/>
 			<DesktopIcon
@@ -333,7 +333,7 @@ const Desktop = () => {
 				id={++iconId}
 				onDoubleClick={() => {
 					// setPrivateMessageWindowIsOpen(true);
-					setNavParams('privateMessages');
+					setNavParam('privateMessages');
 				}}
 			/>
 			<DesktopIcon
@@ -342,7 +342,7 @@ const Desktop = () => {
 				id={++iconId}
 				onDoubleClick={() => {
 					// setChannelsWindowIsOpen(true);
-					setNavParams('channels');
+					setNavParam('channels');
 				}}
 			/>
 			<DesktopIcon
@@ -351,7 +351,7 @@ const Desktop = () => {
 				id={++iconId}
 				onDoubleClick={() => {
 					// setFriendsWindowIsOpen(true);
-					setNavParams('friendsList');
+					setNavParam('friendsList');
 				}}
 			/>
 			<AnimatePresence>
