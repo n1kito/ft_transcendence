@@ -1,10 +1,7 @@
 import {
-	BadRequestException,
 	Body,
-	ConflictException,
 	Controller,
 	Get,
-	HttpException,
 	HttpStatus,
 	NotFoundException,
 	Param,
@@ -13,7 +10,7 @@ import {
 	Res,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { Prisma, PrismaClient, User } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { Request, Response } from 'express';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
@@ -45,70 +42,6 @@ export class UserController {
 		private readonly prisma: PrismaService,
 	) {}
 
-	// @Get('me')
-	// async getMyinfo(@Req() request: CustomRequest) {
-	// 	const userId = this.userService.authenticateUser(request); // TODO: should there be a try/catch here? The authenticateUser() method does throw an error
-
-	// 	// Fetch the user information from the database using the userId
-	// 	const user = await this.prisma.user.findUnique({
-	// 		where: { id: request.userId },
-	// 		include: { gamesPlayed: true, target: true }, // Include the gamesPlayed relation
-	// 	});
-
-	// 	// Handle case when user is not found
-	// 	if (!user) {
-	// 		return { message: 'User not found' };
-	// 	}
-
-	// 	// Get user games count
-	// 	const gamesCount = user.gamesPlayed.length;
-	// 	// await this.prisma.game.count({
-	// 	// 	where: {
-	// 	// 		OR: [{ player1Id: user.id }, { player2Id: user.id }],
-	// 	// 	},
-	// 	// });
-
-	// 	// Bestie logic
-	// 	const bestieUser = await this.userService.findUserBestie(user.id);
-
-	// 	// Target logic
-	// 	const targetLogin = user?.target?.login;
-	// 	const targetImage = user?.target?.image;
-	// 	// Rival logic
-	// 	const { rivalLogin, rivalImage } = await this.userService.findUserRival(
-	// 		user.id,
-	// 	);
-
-	// 	// get user's rank
-	// 	const usersWithHigherKillCountThanOurUser = await this.prisma.user.count({
-	// 		where: {
-	// 			killCount: {
-	// 				gt: await this.prisma.user
-	// 					.findUnique({
-	// 						where: { id: user.id },
-	// 						select: { killCount: true },
-	// 					})
-	// 					.then((user) => user?.killCount || 0),
-	// 			},
-	// 		},
-	// 	});
-	// 	const userRank = usersWithHigherKillCountThanOurUser + 1;
-	// 	// Return the user information
-	// 	return {
-	// 		...user,
-	// 		targetLogin,
-	// 		targetImage,
-	// 		gamesCount,
-	// 		bestieLogin: bestieUser.bestieLogin,
-	// 		bestieImage: bestieUser.bestieImage,
-	// 		rivalLogin,
-	// 		rivalImage,
-	// 		killCount: user.killCount,
-	// 		winRate: gamesCount > 0 ? (user.killCount / gamesCount) * 100 : 0,
-	// 		rank: userRank,
-	// 	};
-	// }
-
 	@Put('me/update')
 	async updateMyUser(
 		@Body() updateUserDto: UpdateUserDto,
@@ -131,7 +64,7 @@ export class UserController {
 		try {
 			console.log('\n🞋 UPDATING TARGET STATUS 🞋\n');
 			const userId = this.userService.authenticateUser(request);
-			const user = await this.prisma.user.update({
+			await this.prisma.user.update({
 				where: { id: userId },
 				data: { targetDiscoveredByUser: true },
 			});
@@ -156,7 +89,6 @@ export class UserController {
 				friends: true,
 			},
 		});
-		// TODO: select more fields
 		// Only select some fields for each friend
 		const friends = userRequesting.friends.map((currentFriend) => ({
 			login: currentFriend.login,

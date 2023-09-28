@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { GameContext } from '../contexts/GameContext';
 import { IGameState } from '../../../shared-lib/types/game';
@@ -15,7 +15,7 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 	// Import necessary contexts
 	const { isAuthentificated } = useAuth();
 	const { userData } = useContext(UserContext);
-	const { gameData, updateGameData, resetGameData } = useContext(GameContext);
+	const { gameData, updateGameData } = useContext(GameContext);
 	const { accessToken } = useAuth();
 
 	// Set a socket Ref so I can use it anywhere in this hook
@@ -45,7 +45,6 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 
 		return () => {
 			socketLog('Disconnecting socket 🔴');
-			// // TODO: when the socket is disconnected, all the listener should be removed with the off method I think
 			socketRef.current?.disconnect();
 		};
 	}, [isAuthentificated]);
@@ -97,9 +96,6 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 			} else {
 				if (gameData.socket) gameData.socket.disconnect();
 				socketLog('Disconnected from server ! ❌ ');
-				// updateGameData({
-				// 	connectionErrorStatus: 'You were disconnected, please try again.',
-				// });
 			}
 		});
 
@@ -107,7 +103,6 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 			updateGameData({
 				connectionErrorStatus: 'You were disconnected !',
 			});
-			// setConnectionStatus('Connection error');
 		});
 
 		gameData.socket.on('opponent-info', (information: IPlayerInformation) => {
@@ -135,11 +130,6 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 				gameState: undefined,
 			});
 		});
-
-		// gameData.socket.on('game-has-started', () => {
-		// 	socketLog('The game has staaaaaarted');
-		// 	updateGameData({ gameIsPlaying: true });
-		// });
 
 		gameData.socket.on(
 			'opponent-toggled-powerups',
@@ -180,20 +170,9 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 			});
 		});
 
-		// gameData.socket.on('game-state-update', (serverGameState: IGameState) => {
-		// 	// socketLog('received game state update');
-		// 	// Mark the game as started
-		// 	if (gameData.gameIsPlaying == false)
-		// 		updateGameData({ gameIsPlaying: true });
-		// 	// updateGameData({ gameState: serverGameState });
-		// });
-
-		gameData.socket.on('game-started', (serverGameState: IGameState) => {
-			// socketLog('received game state update');
-			// Mark the game as started
+		gameData.socket.on('game-started', () => {
 			if (gameData.gameIsPlaying == false)
 				updateGameData({ gameIsPlaying: true });
-			// updateGameData({ gameState: serverGameState });
 		});
 
 		gameData.socket.on(
@@ -213,6 +192,12 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 			},
 		);
 	}, [gameData.socket]);
+
+	/*
+	░█░█░▀█▀░▀█▀░█░░░█▀▀
+	░█░█░░█░░░█░░█░░░▀▀█
+	░▀▀▀░░▀░░▀▀▀░▀▀▀░▀▀▀
+	*/
 
 	const notifyPlayerIsReady = () => {
 		socketRef.current?.emit('player-is-ready', {
@@ -235,12 +220,6 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 			gameData.userPowerupsDisabled,
 		);
 	};
-
-	// const notifyPlayerLeft = () => {
-	// 	socketRef.current?.emit('player-left', {
-	// 		playerId: userData?.id,
-	// 	});
-	// };
 
 	const startGame = () => {
 		socketRef.current?.emit('game started');

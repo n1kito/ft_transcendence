@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import './GameOverlay.css';
 import GameSelectionScreen from './Components/GameSelectionScreen/GameSelectionScreen';
 import GameErrorScreen from './Components/GameErrorScreen/GameErrorScreen';

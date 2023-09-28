@@ -17,8 +17,13 @@ export class GameLogic {
 	private gameBroadcastInterval: NodeJS.Timeout | undefined = undefined;
 	private gameStateUpdateInterval: NodeJS.Timeout | undefined = undefined;
 
+	// Game elements and properties
 	players: { [socketId: string]: Paddle } = {};
 	public ball: Ball;
+	public canvasSize = { width: 700, height: 500 };
+	public paddleWidth = 5;
+	public paddleHeight = this.canvasSize.height * 0.2;
+	public ballSize = 10;
 
 	// Game session state
 	public player1UserId: number;
@@ -27,14 +32,6 @@ export class GameLogic {
 	public player2Score: number = 0;
 	public powerupsEnabled: boolean = true;
 	public awaitingPowerUpReply: boolean = false;
-
-	public canvasSize = { width: 700, height: 500 };
-	public paddleWidth = 5;
-	public paddleHeight = this.canvasSize.height * 0.2;
-	public ballSize = 10;
-
-	// private gameStateInterval = 16.6666666667; // 60 FPS
-	// private gameStateInterval = 10; // 60 FPS
 
 	constructor(
 		player1SocketId: string,
@@ -54,8 +51,8 @@ export class GameLogic {
 			this.paddleHeight,
 		);
 		this.player1UserId = player1UserId;
-		// Add player2 with their corresponding paddle mapped to their socketId			const opponentSocketId = Object.keys(this.players).filter((currentSocketId) => currentSocketId != playerSocketId);
 
+		// Add player2 with their corresponding paddle mapped to their socketId
 		this.players[player2SocketId] = new Paddle(
 			this.canvasSize.width - this.paddleWidth,
 			this.canvasSize.height / 2 - this.paddleHeight / 2,
@@ -63,6 +60,7 @@ export class GameLogic {
 			this.paddleHeight,
 		);
 		this.player2UserId = player2UserId;
+
 		// Create ball
 		this.ball = new Ball(
 			this.canvasSize.width / 2 - this.ballSize / 2,
@@ -73,10 +71,15 @@ export class GameLogic {
 		if (Object.keys(this.players).length === 2) {
 			this.log('Game logic instantiated with two players');
 		}
-
-		// Setup the powerup intervals and activation key sequence
 	}
 
+	/*
+	░█▄█░█▀█░█░█░█▀▀░█▄█░█▀▀░█▀█░▀█▀
+	░█░█░█░█░▀▄▀░█▀▀░█░█░█▀▀░█░█░░█░
+	░▀░▀░▀▀▀░░▀░░▀▀▀░▀░▀░▀▀▀░▀░▀░░▀░
+	*/
+
+	// Changed a player's direction and updates their latest position accordingly
 	updatePlayerPosition(
 		playerSocketId: string,
 		direction: 'up' | 'down' | 'immobile',
@@ -87,7 +90,9 @@ export class GameLogic {
 		this.players[playerSocketId].update(this.canvasSize);
 	}
 
-	updateGameState(): void {
+	// Updates the ball position based on its velocity and the position of the
+	// paddles
+	updateBallPosition(): void {
 		const [player1SocketId, player2SocketId] = Object.keys(this.players);
 		this.ball.update(
 			this.players[player1SocketId],
@@ -97,16 +102,7 @@ export class GameLogic {
 		);
 	}
 
-	handleScoreUpdate = (won: boolean) => {
-		if (won) this.player1Score++;
-		else this.player2Score++;
-	};
-
-	log(message: string) {
-		console.log(`[🎲 GAME LOGIC] ${message}`);
-	}
-
-	// Allows to update a player's current direction
+	// Updates a player's current direction
 	setPlayerDirection(
 		playerSocketId: string,
 		direction: 'up' | 'down' | 'immobile',
@@ -114,6 +110,15 @@ export class GameLogic {
 		this.players[playerSocketId].setDirection(direction);
 	}
 
+	/*
+	░█▀▀░█▀█░█▄█░█▀▀░░░█░░░█▀█░█▀█░█▀█
+	░█░█░█▀█░█░█░█▀▀░░░█░░░█░█░█░█░█▀▀
+	░▀▀▀░▀░▀░▀░▀░▀▀▀░░░▀▀▀░▀▀▀░▀▀▀░▀░░
+	*/
+
+	// Sends each player their correct game state, taking care to reverse
+	// some of the properties so each player can be on the left side of their
+	// screen
 	broadcastGameState() {
 		const [player1SocketId, player2SocketId] = Object.keys(this.players);
 
@@ -129,6 +134,7 @@ export class GameLogic {
 			width: this.players[player1SocketId].width,
 			height: this.players[player1SocketId].height,
 			score: this.player1Score,
+			speed: this.players[player1SocketId].speed
 		};
 		const currentPlayer2State: IPlayerState = {
 			x: this.canvasSize.width - this.paddleWidth,
@@ -136,6 +142,7 @@ export class GameLogic {
 			width: this.players[player2SocketId].width,
 			height: this.players[player2SocketId].height,
 			score: this.player2Score,
+			speed: this.players[player2SocketId].speed
 		};
 		const player1StateUpdate: IGameState = {
 			player1: currentPlayer1State,
@@ -172,10 +179,8 @@ export class GameLogic {
 
 	startGame() {
 		this.gameHasStarted = true;
-		// this.broadcastGameState();
 		this.startBroadcasting();
 		this.startGameSimulation();
-		// TODO:
 		if (this.powerupsEnabled) this.initiateRandomPowerUps();
 	}
 
@@ -195,7 +200,7 @@ export class GameLogic {
 		} else if (playerIndex === 2) {
 			this.log('Player 2 is ready to play');
 			this.player2IsReady = true;
-		} else return; // TODO: do something better here
+		}
 	}
 
 	bothPlayersAreReady() {
@@ -326,6 +331,17 @@ export class GameLogic {
 		return finalString;
 	}
 
+	/*
+	░█▀▀░█▀█░█▄█░█▀▀░░░█░░░▀█▀░█▀▀░█▀▀░█▀▀░█░█░█▀▀░█░░░█▀▀
+	░█░█░█▀█░█░█░█▀▀░░░█░░░░█░░█▀▀░█▀▀░█░░░░█░░█░░░█░░░█▀▀
+	░▀▀▀░▀░▀░▀░▀░▀▀▀░░░▀▀▀░▀▀▀░▀░░░▀▀▀░▀▀▀░░▀░░▀▀▀░▀▀▀░▀▀▀
+	*/
+
+	handleScoreUpdate = (won: boolean) => {
+		if (won) this.player1Score++;
+		else this.player2Score++;
+	};
+
 	// Start the game simulation with an interval of 50ms
 	private startGameSimulation() {
 		const gameStateInterval = 1000 / 60;
@@ -333,7 +349,7 @@ export class GameLogic {
 		this.log(`Started game simulation at ${gameStateInterval}ms interval`);
 		if (this.gameHasStarted && !this.gameStateUpdateInterval) {
 			this.gameStateUpdateInterval = setInterval(() => {
-				this.updateGameState();
+				this.updateBallPosition();
 				// Check to see if anyone won
 				if (this.player1Score === 11 || this.player2Score === 11) {
 					this.endGame();
@@ -342,6 +358,14 @@ export class GameLogic {
 		}
 	}
 
+	private stopGameSimulation() {
+		if (this.gameStateUpdateInterval) {
+			clearInterval(this.gameStateUpdateInterval);
+			this.gameStateUpdateInterval = undefined;
+		}
+	}
+
+	// Starts sending game state updates to each player
 	private startBroadcasting() {
 		const gameBroadcastIntervalSpeed = 10;
 		if (this.gameHasStarted && !this.gameBroadcastInterval) {
@@ -351,6 +375,7 @@ export class GameLogic {
 		}
 	}
 
+	// Stops the broadcast of game state
 	private stopBroadcasting() {
 		if (this.gameBroadcastInterval) {
 			clearInterval(this.gameBroadcastInterval);
@@ -358,10 +383,13 @@ export class GameLogic {
 		}
 	}
 
-	private stopGameSimulation() {
-		if (this.gameStateUpdateInterval) {
-			clearInterval(this.gameStateUpdateInterval);
-			this.gameStateUpdateInterval = undefined;
-		}
+	/*
+	░█░█░▀█▀░▀█▀░█░░░█▀▀
+	░█░█░░█░░░█░░█░░░▀▀█
+	░▀▀▀░░▀░░▀▀▀░▀▀▀░▀▀▀
+	*/
+
+	log(message: string) {
+		console.log(`[🎲 GAME LOGIC] ${message}`);
 	}
 }

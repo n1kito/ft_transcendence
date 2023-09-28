@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { GameContext } from '../../../../../../contexts/GameContext';
 import './GameSelectionScreen.css';
 import FriendBadge from '../../../../../Friends/Components/FriendBadge/FriendBadge';
@@ -6,13 +6,12 @@ import { UserContext } from '../../../../../../contexts/UserContext';
 import Tooltip from '../../../../../Shared/Tooltip/Tooltip';
 import Button from '../../../../../Shared/Button/Button';
 import GameScreenTitle from '../Shared/GameScreenTitle/GameScreenTitle';
-import { useGameSocket } from '../../../../../../hooks/useGameSocket';
 import GameLocatingBadge from './Components/GameLocatingBadge';
 
 interface IGameSelectionScreenProps {}
 
 const GameSelectionScreen: React.FC<IGameSelectionScreenProps> = () => {
-	const { gameData, updateGameData, resetGameData } = useContext(GameContext);
+	const { gameData, updateGameData } = useContext(GameContext);
 	const { userData } = useContext(UserContext);
 	const [playTooltipVisible, setPlayTooltipVisible] = useState(false);
 	const [powerupsTooltipVisible, setPowerupsTooltipVisible] = useState(false);
@@ -147,7 +146,7 @@ const GameSelectionScreen: React.FC<IGameSelectionScreenProps> = () => {
 					<Button
 						onClick={() => {
 							updateGameData({ userWantsNewOpponent: true });
-						}} // TODO: this will not work, our user needs to be removed from their current room}
+						}}
 						disabled={gameData.player1Ready || !gameData.opponentInfo}
 						baseColor={[300, 91, 84]}
 					>

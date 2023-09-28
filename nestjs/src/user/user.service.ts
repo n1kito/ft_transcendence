@@ -1,22 +1,16 @@
 import {
-	BadRequestException,
-	ConflictException,
-	ConsoleLogger,
 	HttpException,
 	HttpStatus,
 	Injectable,
 	NotFoundException,
-	Res,
 	ValidationError,
 } from '@nestjs/common';
 import { validate } from 'class-validator';
-import { Request, response, Response } from 'express';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CustomRequest, UserWithRelations } from './user.controller';
 import { Prisma, User, gameSession } from '@prisma/client';
 import { plainToClass } from 'class-transformer';
-// import { IMatchHistory } from 'shared-types';
 import { IMatchHistory } from 'shared-lib/types/user';
 
 //  custom exception class to store an array of errors each containing
@@ -120,93 +114,6 @@ export class UserService {
 			this.pushError(field, `${field} already exists`, HttpStatus.CONFLICT);
 		}
 	}
-
-	// // finds a user's rival
-	// async findUserRival(
-	// 	userId: number,
-	// ): Promise<{ rivalLogin: string; rivalImage: string }> {
-	// 	// Get the games our user has been apart of
-	// 	const userGames = await this.prisma.gameSession.findMany({
-	// 		where: { userId: userId },
-	// 	});
-	// 	// Create an object to tally up how many times our user has lost againt each foe
-	// 	const rivalScores: { [key: number]: number } = {};
-
-	// 	// Iterate through games and count our losses against each enemy
-	// 	for (const game of userGames) {
-	// 		// If we lost
-	// 		if (!game.isWinner) {
-	// 			// Find the winner
-	// 			const winner = await this.prisma.gameSession.findFirst({
-	// 				where: { gameId: game.gameId, isWinner: true },
-	// 			});
-	// 			// Increment the count for this rival
-	// 			if (winner)
-	// 				rivalScores[winner.userId] = (rivalScores[winner.userId] || 0) + 1;
-	// 		}
-	// 	}
-
-	// 	// Identify the rival
-	// 	let rival;
-	// 	const keys = Object.keys(rivalScores);
-	// 	if (keys.length !== 0) {
-	// 		const rivalId = keys.reduce(
-	// 			(a, b) => (rivalScores[a] > rivalScores[b] ? a : b),
-	// 			keys[0],
-	// 		);
-	// 		// Retrieve the full User record for this rival
-	// 		rival = await this.prisma.user.findUnique({
-	// 			where: { id: parseInt(rivalId) },
-	// 		});
-	// 	}
-
-	// 	return { rivalLogin: rival?.login || '', rivalImage: rival?.image || '' };
-	// }
-
-	// async findUserBestie(
-	// 	userId: number,
-	// ): Promise<{ bestieLogin: string; bestieImage: string }> {
-	// 	// Get the games our user has been apart of
-	// 	const gamesPlayed = await this.prisma.gameSession.findMany({
-	// 		where: {
-	// 			userId: userId,
-	// 		},
-	// 		include: {
-	// 			game: {
-	// 				include: {
-	// 					players: true,
-	// 				},
-	// 			},
-	// 		},
-	// 	});
-	// 	// Create an object to tally up how many times our user has played againt each player
-	// 	const opponentsCount: Record<number, number> = {};
-	// 	// Iterate through games and count our losses against each enemy
-	// 	gamesPlayed.forEach((gamePlayed) => {
-	// 		// For each game, iterate through the two players
-	// 		gamePlayed.game.players.forEach((participant) => {
-	// 			// For each player of the game, if the player is not our user, add a count to the opponentsCount object corresponding to their id
-	// 			if (participant.userId !== userId)
-	// 				opponentsCount[participant.userId] =
-	// 					(opponentsCount[participant.userId] || 0) + 1;
-	// 		});
-	// 	});
-	// 	// Find the most played opponent's id
-	// 	let mostPlayedOpponent;
-	// 	const keys = Object.keys(opponentsCount);
-	// 	if (keys.length !== 0) {
-	// 		const mostPlayedOpponentId = Object.keys(opponentsCount).reduce((a, b) =>
-	// 			opponentsCount[a] > opponentsCount[b] ? a : b,
-	// 		);
-	// 		mostPlayedOpponent = await this.prisma.user.findUnique({
-	// 			where: { id: parseInt(mostPlayedOpponentId) },
-	// 		});
-	// 	}
-	// 	return {
-	// 		bestieLogin: mostPlayedOpponent?.login || '',
-	// 		bestieImage: mostPlayedOpponent?.image || '',
-	// 	};
-	// }
 
 	async getUserByIdWithRelations(userId: number): Promise<UserWithRelations> {
 		const user = await this.prisma.user.findUnique({
@@ -319,45 +226,4 @@ export class UserService {
 		}));
 		return filteredGameSessions;
 	}
-
-	// async getUserMatchHistory(userId: number): Promise<IMatchHistory[]> {
-	// 	// Get games session user has been a part of
-	// 	const gameSessions = await this.prisma.gameSession.findMany({
-	// 		where: {
-	// 			userId: userId,
-	// 		},
-	// 		include: {
-	// 			user: true,
-	// 			game: {
-	// 				include: {
-	// 					players: {
-	// 						include: {
-	// 							user: true,
-	// 						},
-	// 					},
-	// 				},
-	// 			},
-	// 		},
-	// 	});
-
-	// 	// Transform them into the IMatchHistory structure
-	// 	return gameSessions.map((gameSession) => {
-	// 		const players = gameSession.game.players;
-
-	// 		// Make sure there are two players in the game
-	// 		if (players.length !== 2)
-	// 			throw new Error('Games should have exactly two players.');
-
-	// 		const [player1, player2] = players;
-
-	// 		return {
-	// 			player1Login: player1.user.login,
-	// 			player1Score: player1.score,
-	// 			player1Image: player1.user.image || '',
-	// 			player2Login: player2.user.login,
-	// 			player2Score: player2.score,
-	// 			player2Image: player2.user.image || '',
-	// 		};
-	// 	});
-	// }
 }

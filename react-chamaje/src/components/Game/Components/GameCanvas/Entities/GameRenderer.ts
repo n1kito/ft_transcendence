@@ -1,6 +1,5 @@
 import { GameLogic } from './GameLogic';
 import { IPlayerMovementPayload } from '../../../../../../../shared-lib/types/game';
-import PowerUp from './PowerUp';
 import { Socket } from 'socket.io-client';
 import { IGameState } from 'shared-lib/types/game';
 
@@ -11,27 +10,19 @@ export class GameRenderer {
 	private gradient: CanvasGradient;
 	private animationFrameId: number | undefined;
 	private playerPositionBroadcastInterval: NodeJS.Timer | undefined;
-	private powerUp: PowerUp | null = null;
-	private previousTime = Date.now();
-	private timeDifferences: number[] = [];
 
 	constructor(
 		socket: Socket | null,
 		canvasRef: React.MutableRefObject<HTMLCanvasElement | null>,
 		gameContext: CanvasRenderingContext2D,
-		// broadcastPlayerPosition: (payload: IPlayerMovementPayload) => void,
 	) {
 		// Storing the game logic instance
-		this.gameLogic = new GameLogic(
-			{ width: canvasRef.current!.width, height: canvasRef.current!.height },
-			// broadcastPlayerPosition,
-		);
+		this.gameLogic = new GameLogic({
+			width: canvasRef.current?.width || 700,
+			height: canvasRef.current?.height || 500,
+		});
 
-		// this.canvasRef = canvasRef;
 		this.gameContext = gameContext;
-
-		// Init the powerup
-		// this.powerUp = new PowerUp(gameContext, this.gameLogic.canvasSize);
 
 		// Init the gradient style
 		this.gradient = this.initGradient();
@@ -42,17 +33,8 @@ export class GameRenderer {
 		// Store socket
 		this.socket = socket;
 
+		// Listen for updates from the server
 		this.socket?.on('game-state-update', (serverGameState: IGameState) => {
-			// const currentTime = Date.now();
-			// const timeDifference = currentTime - this.previousTime;
-
-			// this.timeDifferences.push(timeDifference);
-
-			// const average =
-			// 	this.timeDifferences.reduce((acc, val) => acc + val, 0) /
-			// 	this.timeDifferences.length;
-			// console.log(`Average time difference: ${average}ms`);
-			// this.log('Received game state update !');
 			this.gameLogic.gameStateServerUpdate(serverGameState);
 		});
 	}
@@ -75,17 +57,10 @@ export class GameRenderer {
 
 	// The game loop's only job is to continuously render the canvas
 	gameLoop = (): void => {
-		// const currentState: IPlayerMovementPayload = {
-		// 	direction: this.gameLogic.paddlePlayer.getDirection(),
-		// };
-		// this.socket?.emit('player-moved', currentState);
 		setTimeout(() => {
 			this.animationFrameId = requestAnimationFrame(this.gameLoop);
 			this.draw();
-			// Drawing code goes here
 		}, 1000 / 60);
-		// this.draw();
-		// this.animationFrameId = requestAnimationFrame(this.gameLoop);
 	};
 
 	cancelGameLoop(): void {
@@ -122,7 +97,7 @@ export class GameRenderer {
 		// If a direction was registered, update the paddle's direction
 		if (direction) {
 			this.gameLogic.paddlePlayer.setDirection(direction);
-			this.gameLogic.paddlePlayer.predictPosition(direction);
+			this.gameLogic.paddlePlayer.predictPosition();
 		}
 	};
 
@@ -139,7 +114,6 @@ export class GameRenderer {
 					direction: this.gameLogic.paddlePlayer.getDirection(),
 				};
 				this.socket?.emit('player-moved', currentState);
-				// this.gameLogic.broadcastPlayerPosition(currentState);
 			}, 10);
 		}
 	}
@@ -164,8 +138,6 @@ export class GameRenderer {
 		this.drawNet();
 		// Draw our scores
 		this.drawScores();
-		// Draw the powerup
-		// this.powerUp?.draw();
 		// Draw our ball
 		this.gameLogic.ball.draw(this.gameContext);
 		// Draw our paddles
@@ -173,7 +145,6 @@ export class GameRenderer {
 		this.gameLogic.paddleOpponent.draw(this.gameContext);
 	}
 
-	// clears our canvas
 	clearCanvas(): void {
 		this.gameContext.clearRect(
 			0,
@@ -183,7 +154,6 @@ export class GameRenderer {
 		);
 	}
 
-	// draws the net on our court
 	drawNet(): void {
 		const netWidth = 3;
 		this.gameContext.fillStyle = this.gradient;
@@ -233,6 +203,7 @@ export class GameRenderer {
 	░█░█░░█░░░█░░█░░░▀▀█
 	░▀▀▀░░▀░░▀▀▀░▀▀▀░▀▀▀
 	*/
+
 	log(message: string): void {
 		console.log(`%c Game %c ${message}`, 'background:green;color:yellow', '');
 	}

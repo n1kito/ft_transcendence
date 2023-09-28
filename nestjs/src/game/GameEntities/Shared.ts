@@ -1,11 +1,4 @@
-// Shared entities needed for the other game files
-
-export enum PaddleDirection {
-	up,
-	down,
-	immobile,
-}
-
+// Shared entity used to create the paddle and ball game elements
 export class GameEntity {
 	x: number;
 	y: number;

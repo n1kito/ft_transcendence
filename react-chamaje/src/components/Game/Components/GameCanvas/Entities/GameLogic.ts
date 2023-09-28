@@ -1,12 +1,7 @@
 import Paddle from './Paddle';
 import Ball from './Ball';
-import {
-	IGameState,
-	IPlayerMovementPayload,
-} from '../../../../../../shared-lib/types/game';
-import PowerUp from './PowerUp';
+import { IGameState } from '../../../../../../shared-lib/types/game';
 
-// import { ICurrentGameState } from '@sharedTypes/game';
 export class GameLogic {
 	public paddlePlayer: Paddle;
 	public paddleOpponent: Paddle;
@@ -17,19 +12,13 @@ export class GameLogic {
 
 	public canvasSize: { width: number; height: number };
 
-	// public broadcastPlayerPosition: (payload: IPlayerMovementPayload) => void;
-
-	constructor(
-		canvasSize: { width: number; height: number },
-		// broadcastPlayerPosition: (payload: IPlayerMovementPayload) => void,
-	) {
+	constructor(canvasSize: { width: number; height: number }) {
 		this.canvasSize = canvasSize;
 
 		// Init default values
 		const paddleWidth = 5;
 		const paddleHeight = canvasSize.height * 0.2;
 		const ballSize = 10;
-		// this.broadcastPlayerPosition = broadcastPlayerPosition;
 
 		// Create player1 paddle
 		this.paddlePlayer = new Paddle(
@@ -58,7 +47,7 @@ export class GameLogic {
 		if (!serverState) return;
 
 		// Find out if the score changed
-		let scoreChanged =
+		const scoreChanged =
 			this.playerScore != serverState.player1.score ||
 			this.opponentScore != serverState.player2.score;
 
@@ -79,6 +68,7 @@ export class GameLogic {
 		else this.opponentScore++;
 	};
 
+	// Custom utility log function
 	log(message: string): void {
 		console.log(
 			`%c GameLogic %c ${message}`,

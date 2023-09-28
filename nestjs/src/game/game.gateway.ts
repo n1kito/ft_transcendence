@@ -7,15 +7,8 @@ import {
 	OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { GameService } from './game.service';
-// import { GameRoomStatus, PlayerGameStatus, gameRoom } from '@prisma/client';
 import { IPlayerMovementPayload } from 'shared-lib/types/game';
-
-interface IRoomInformationProps {
-	id: number;
-	state: string;
-}
 
 @WebSocketGateway({
 	path: '/ws/',
@@ -26,7 +19,6 @@ export class GameGateway
 	@WebSocketServer() server: Server;
 
 	constructor(
-		private readonly prisma: PrismaService,
 		private readonly gameService: GameService,
 	) {}
 
@@ -62,12 +54,6 @@ export class GameGateway
 			console.error('[⚠️ ] handleDisconnect:', error.message);
 		}
 	}
-
-	/*
-	░█▀▄░█▀█░█▀█░█▄█░█▀▀
-	░█▀▄░█░█░█░█░█░█░▀▀█
-	░▀░▀░▀▀▀░▀▀▀░▀░▀░▀▀▀
-	*/
 
 	/*
 	░█▀▀░█▀█░█▄█░█▀▀░░░█▀█░█▀▀░▀█▀░▀█▀░█▀█░█▀█░█▀▀

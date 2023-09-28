@@ -1,5 +1,4 @@
 import { GameEntity } from './Shared';
-import Paddle from './Paddle';
 import { IBallState } from '../../../../../../../shared-lib/types/game';
 
 export default class Ball extends GameEntity {

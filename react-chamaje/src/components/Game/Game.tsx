@@ -77,7 +77,7 @@ const Game: React.FC<IGameProps> = ({
 		return () => {
 			gameInstance.current?.stopGame();
 			gameInstance.current?.removeEventListeners();
-			resetGameData(); // TODO: this does not seem to log shit
+			resetGameData();
 		};
 	}, []);
 
@@ -116,7 +116,6 @@ const Game: React.FC<IGameProps> = ({
 			windowDragConstraintRef={windowDragConstraintRef}
 			resizable={true}
 		>
-			{/* TODO: add the player information above the canvas game */}
 			<div className="game-wrapper">
 				{!gameData.gameIsPlaying && <GameOverlay />}
 				{gameData.gameIsPlaying && gameData.gamePowerUp && <GamePowerUp />}

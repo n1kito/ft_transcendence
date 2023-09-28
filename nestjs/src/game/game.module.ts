@@ -1,7 +1,5 @@
-import { MiddlewareConsumer, Module, NestModule, Scope } from '@nestjs/common';
-import { GameController } from './game.controller';
+import { Module } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
-import { AuthMiddleWare } from 'src/middleware/auth.middleware';
 import { GameService } from './game.service';
 import { PrismaService } from 'src/services/prisma-service/prisma.service';
 import { TokenModule } from 'src/token/token.module';
@@ -10,7 +8,6 @@ import AuthService from 'src/auth/auth.service';
 
 @Module({
 	imports: [TokenModule],
-	controllers: [GameController],
 	providers: [
 		PrismaService,
 		UserService,
@@ -20,17 +17,3 @@ import AuthService from 'src/auth/auth.service';
 	],
 })
 export class GameModule {}
-
-// TODO: is this correct ? It's also in user module, is there a way to make that middleware
-// applied to several modules at once?
-// export class GameModule implements NestModule {
-// 	// This `configure` method is part of the `NestModule` interface and will be called by NestJS when the application starts.
-// 	configure(consumer: MiddlewareConsumer) {
-// 		// Here, we are taking the `consumer` object provided by NestJS...
-// 		consumer
-// 			// ...and calling the `apply` method on it to apply our `AuthMiddleware`...
-// 			.apply(AuthMiddleWare)
-// 			// ...to all routes handled by `UserController`.
-// 			.forRoutes(GameController);
-// 	}
-// }

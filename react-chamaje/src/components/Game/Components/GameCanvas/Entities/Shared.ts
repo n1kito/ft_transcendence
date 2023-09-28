@@ -1,10 +1,4 @@
-// Shared entities needed for the other game files
-
-export enum PaddleDirection {
-	up,
-	down,
-	immobile,
-}
+// Shared entity used to create the paddle and ball game elements
 
 export class GameEntity {
 	x: number;
@@ -22,9 +16,6 @@ export class GameEntity {
 	}
 
 	draw(context: CanvasRenderingContext2D): void {
-		// TODO: this interpolates even when the ball is going to the center
-		// whih looks awful, but not sure how to track whether the ball
-		// needs to go back after score changes
 		this.interpolate();
 
 		// setup the visual style

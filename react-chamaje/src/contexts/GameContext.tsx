@@ -84,17 +84,6 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
 	// We use our initial state above to initialize it
 	const [gameData, setGameData] = useState<IGameDataProps>(defaultGameState);
 
-	// TODO: remove this and corresponding logs
-	// Logs the updates to gameData as they happen
-	// useEffect(() => {
-	// 	const gameDataLog = { ...gameData, socket: 'not loggable' };
-	// 	console.log(
-	// 		`%c GameData %c ${JSON.stringify(gameDataLog, null, 4)}`,
-	// 		'color: yellow; background:magenta',
-	// 		'',
-	// 	);
-	// }, [gameData]);
-
 	// We want a helper function that will allow us to update one, many or all
 	// properties of the game state without having to override the entire thing manually
 	const updateGameData = (updates: Partial<IGameDataProps>) => {

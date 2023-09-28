@@ -4,7 +4,7 @@ import './GamePowerUp.css';
 import { GameContext } from 'src/contexts/GameContext';
 
 const GamePowerUp = () => {
-	const { gameData, updateGameData } = useContext(GameContext);
+	const { gameData } = useContext(GameContext);
 
 	const [currentIndex, setCurrentIndex] = useState(0);
 

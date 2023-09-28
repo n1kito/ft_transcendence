@@ -696,7 +696,6 @@ export class GameService {
 	}
 
 	async removeUserFromRoom(roomId: string, socketId: string) {
-		console.log(`Removing socker ${socketId} from room ${roomId}`);
 		try {
 			// Remove the user from their current room
 			const index = this.rooms[roomId].playersSocketIds.indexOf(socketId);

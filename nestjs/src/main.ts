@@ -11,6 +11,7 @@ config();
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
+	// TODO: need this ?
 	// const corsOptions: CorsOptions = {
 	// 	origin: 'http://localhost:3001',
 	// 	methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -25,7 +26,8 @@ async function bootstrap() {
 	app.use(cookieParser());
 
 	// Setup a global filter to catch all unexpected exceptions
-	// app.useGlobalFilters(new AllExceptionsFilter());
+	// TODO: check this together
+	app.useGlobalFilters(new AllExceptionsFilter());
 
 	app.use(
 		'/images',
