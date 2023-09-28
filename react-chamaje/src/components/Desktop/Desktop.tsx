@@ -35,6 +35,7 @@ export interface IFriendStruct {
 	login: string;
 	image: string;
 	onlineStatus: boolean;
+	playingStatus: boolean;
 }
 
 const Desktop = () => {
@@ -71,6 +72,8 @@ const Desktop = () => {
 	} = useAuth();
 
 	const windowDragConstraintRef = useRef(null);
+
+	const [friendIsPlaying, setFriendIsPlaying] = useState(false);
 
 	const fetchUserData = async () => {
 		// Fetch the user data from the server
@@ -158,14 +161,14 @@ const Desktop = () => {
 	 * current user is connected too
 	 */
 	useEffect(() => {
-		const handleLoggedIn = (data: number) => {
+		const handleLoggedIn = (friendId: number) => {
 			setFriends((prevFriends) =>
 				prevFriends.map((friend) => {
 					if (
-						friend.id === data &&
+						friend.id === friendId &&
 						(friend.onlineStatus === false || friend.onlineStatus === undefined)
 					) {
-						return { ...friend, onlineStatus: true };
+						return { ...friend, onlineStatus: true, playingStatus: false };
 					} else {
 						return friend;
 					}
@@ -181,14 +184,14 @@ const Desktop = () => {
 	 * were connected
 	 */
 	useEffect(() => {
-		const handleLoggedInResponse = (data: number) => {
+		const handleLoggedInResponse = (friendId: number) => {
 			setFriends((prevFriends) =>
 				prevFriends.map((friend) => {
 					if (
-						friend.id === data &&
+						friend.id === friendId &&
 						(friend.onlineStatus === false || friend.onlineStatus === undefined)
 					) {
-						return { ...friend, onlineStatus: true };
+						return { ...friend, onlineStatus: true, playingStatus: false };
 					} else {
 						return friend;
 					}
@@ -201,11 +204,11 @@ const Desktop = () => {
 
 	// listen for a `ClientLogOut`
 	useEffect(() => {
-		const handleLoggedOut = (data: number) => {
+		const handleLoggedOut = (friendId: number) => {
 			setFriends((prevFriends) =>
 				prevFriends.map((friend) => {
-					if (friend.id === data && friend.onlineStatus === true) {
-						return { ...friend, onlineStatus: false };
+					if (friend.id === friendId && friend.onlineStatus === true) {
+						return { ...friend, onlineStatus: false, playingStatus: false };
 					} else {
 						return friend;
 					}
@@ -271,13 +274,14 @@ const Desktop = () => {
 							login: data.login,
 							image: data.image,
 							onlineStatus: false,
+							playingStatus: false,
 						};
 						// add the new friend to the existing friends list
 						const updatedFriends = [...friends, newFriend];
 						// update the state with the updated friends list
 						setFriends(updatedFriends);
 						// ping to update online status
-						chatData.socket?.sendServerConnection();
+						chatData.socket?.sendServerConnection('online');
 						// reset AddedFriend state
 						setAddedFriend('');
 					}
@@ -290,6 +294,10 @@ const Desktop = () => {
 			updateFriends();
 		}
 	}, [addedFriend]);
+
+	useEffect(() => {
+		console.log('FRIEND:', friends);
+	}, [friends]);
 
 	return (
 		<div className="desktopWrapper" ref={windowDragConstraintRef}>
@@ -348,6 +356,7 @@ const Desktop = () => {
 						setShowFriendProfile={setShowFriendProfile}
 						setProfileLogin={setFriendLogin}
 						setIsMyFriend={setIsMyFriend}
+						friendIsPlaying={friendIsPlaying}
 					/>
 				)}
 				{showFriendProfile && (
@@ -398,6 +407,7 @@ const Desktop = () => {
 						onCloseClick={() => setGameWindowIsOpen(false)}
 						windowDragConstraintRef={windowDragConstraintRef}
 						key="game-window"
+						setFriendIsPlaying={setFriendIsPlaying}
 						// setShowFriendProfile={setShowFriendProfile}
 						// setProfileLogin={setFriendLogin}
 					/>

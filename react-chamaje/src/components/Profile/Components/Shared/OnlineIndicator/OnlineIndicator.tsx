@@ -10,6 +10,12 @@ const OnlineIndicator: React.FC<IOnlineIndicatorProps> = ({
 	isOnline = false,
 	isPlaying = false,
 }) => {
+	console.log(
+		'\n👀 indicator isOnline:',
+		isOnline,
+		'\n is playing:',
+		isPlaying,
+	);
 	return (
 		<div
 			className={`status-indicator ${

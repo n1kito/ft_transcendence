@@ -49,7 +49,7 @@ export interface IUserAction {
 	userId: number;
 }
 
-@WebSocketGateway({ path: 'ws/chat' })
+@WebSocketGateway({ path: '/ws/chat' })
 export class chatWebSocketGateway
 	implements OnGatewayConnection, OnGatewayDisconnect
 {
@@ -76,8 +76,8 @@ export class chatWebSocketGateway
 	// when a client connects to the server, the server emits to all connected
 	// clients the login of this user
 	@SubscribeMessage('ServerConnection')
-	handleServerConnection(@MessageBody() data: number): void {
-		this.server.emit('ClientLogIn', data);
+	handleServerConnection(@MessageBody() data: any): void {
+		this.server.emit('ClientLogIn', data.id);
 		console.log('\n🟢🟢' + data + ' just arrived!🟢🟢\n');
 	}
 

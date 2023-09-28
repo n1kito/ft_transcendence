@@ -17,6 +17,8 @@ export interface IFriendBadgeProps extends ShadowWrapperProps {
 	dashedBorder?: boolean;
 	isActive?: boolean;
 	shaking?: boolean;
+	setFriendIsPlaying?: React.Dispatch<React.SetStateAction<boolean>>;
+	friendIsPlaying?: boolean;
 }
 
 const FriendBadge: React.FC<IFriendBadgeProps> = ({
@@ -32,6 +34,8 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 	dashedBorder = isEmptyBadge || false,
 	shaking = false,
 	onClick,
+	setFriendIsPlaying,
+	friendIsPlaying,
 }) => {
 	const userContext = useContext(UserContext);
 	let displayTitle = badgeTitle;
@@ -39,7 +43,7 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 		displayTitle = badgeTitle.slice(0, 20) + '...';
 	}
 
-	const [friendIsPlaying, setFriendIsPlaying] = useState(false);
+	// const [friendIsPlaying, setFriendIsPlaying] = useState(false);
 	const [isShaking, setIsShaking] = useState(false);
 
 	useEffect(() => {

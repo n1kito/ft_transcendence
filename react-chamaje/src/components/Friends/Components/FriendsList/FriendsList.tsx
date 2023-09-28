@@ -26,6 +26,8 @@ interface IFriendsListProps {
 	setShowFriendProfile: React.Dispatch<React.SetStateAction<boolean>>;
 	setProfileLogin: React.Dispatch<React.SetStateAction<string>>;
 	setIsMyFriend: React.Dispatch<React.SetStateAction<boolean>>;
+	friendIsPlaying: boolean;
+	// setFriendIsPlaying?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const FriendsList: React.FC<IFriendsListProps> = ({
@@ -38,6 +40,8 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 	setShowFriendProfile,
 	setProfileLogin,
 	setIsMyFriend,
+	// setFriendIsPlaying,
+	friendIsPlaying,
 }) => {
 	const { userData, updateUserData } = useContext(UserContext);
 	const { accessToken } = useAuth();
@@ -79,13 +83,14 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 						login: data.login,
 						image: data.image,
 						onlineStatus: false,
+						playingStatus: false,
 					};
 					// add the new friend to the existing friends list
 					const updatedFriends = [...friends, newFriend];
 					// update the state with the updated friends list
 					setFriends(updatedFriends);
 					// ping to update online status
-					chatData.socket?.sendServerConnection();
+					chatData.socket?.sendServerConnection('online');
 				}
 			})
 			.catch((error) => {
@@ -151,6 +156,7 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 							badgeTitle={friend.login}
 							badgeImageUrl={`/api/images/${friend.image}`}
 							onlineIndicator={friend.onlineStatus}
+							friendIsPlaying={friendIsPlaying}
 							isClickable={true}
 							onClick={() => {
 								onBadgeClick(friend.login);

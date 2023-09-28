@@ -134,6 +134,7 @@ export class UserController {
 				login: currentFriend.login,
 				image: currentFriend.image,
 				onlineStatus: false,
+				playingStatus: false,
 			}));
 			return response.status(200).json({ friends });
 		} catch (error) {
