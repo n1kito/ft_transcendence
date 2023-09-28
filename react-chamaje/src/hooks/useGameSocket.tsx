@@ -178,6 +178,8 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 		gameData.socket.on(
 			'game-ended',
 			(gameEndStatus: { gameHasWinner: boolean; userWon: boolean }) => {
+				socketLog('GAME ENDED');
+
 				// Update necessary values from the game context
 				updateGameData({
 					gameIsPlaying: false,

@@ -62,7 +62,7 @@ export default class Ball extends GameEntity {
 		// base speed and player scores a point
 		else if (this.xVelocity > 0 && this.x + this.width >= canvasWidth) {
 			this.speed = this.BASE_SPEED;
-			// console.log(`score ! x to ${canvasCenter}`);
+			this.x = canvasCenter;
 			playerScored(true);
 		} else {
 			// update the position of the ball
