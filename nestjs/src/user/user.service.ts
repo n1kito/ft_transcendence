@@ -183,7 +183,6 @@ export class UserService {
 
 	calculateWinRate(user: UserWithRelations): number | undefined {
 		const userHasPlayed = this.calculateTotalGameCount(user);
-		console.log('User has played before');
 		return user.gamesWon.length > 0
 			? (user.gamesWon.length / this.calculateTotalGameCount(user)) * 100
 			: userHasPlayed
@@ -499,7 +498,7 @@ export class UserService {
 			return true;
 		const filePathToDelete = `./images/${file.filename}`;
 		fs.access(filePathToDelete, constants.F_OK, (err) => {
-			if (err) console.log(`${file} ${err ? 'does not exist' : 'exists'}`);
+			if (err) return;
 			fs.unlink(filePathToDelete, (error) => {
 				if (error) throw error;
 			});
@@ -531,7 +530,7 @@ export class UserService {
 			});
 			// if success delete old avatar
 			fs.access(filePathToDelete, constants.F_OK, (err) => {
-				if (err) console.log(`${file} ${err ? 'does not exist' : 'exists'}`);
+				if (err) return;
 				fs.unlink(filePathToDelete, (error) => {
 					if (error) throw error;
 				});

@@ -32,19 +32,14 @@ const ChatGameInvite: React.FC<IGameInviteProps> = ({
 	const { chatData } = useContext(ChatContext);
 	const { setNavParam } = useNavigationParams();
 
-	// const
-
 	const acceptInvite = () => {
 		setInviteReply(chatId, true, accessToken)
 			.then(() => {
 				setInviteAccepted(true);
 				chatData.socket?.sendAcceptInvite(sender || '', chatId);
 			})
-			.catch((e) => {
-				console.error('You could not respond to the invitation: ', e.message);
-			});
+			.catch((e) => {});
 
-		// TODO: fix ?
 		// open a game window
 		updateGameData({ opponentInfo: { login: sender || '', image: '' } });
 		setNavParam('game');
@@ -56,16 +51,14 @@ const ChatGameInvite: React.FC<IGameInviteProps> = ({
 				setInviteDeclined(true);
 				chatData.socket?.sendDeclineInvite(sender || '', chatId);
 			})
-			.catch((e) => {
-				console.error('You could not respond to the invitation: ', e.message);
-			});
+			.catch((e) => {});
 	};
 
 	useEffect(() => {
 		setInviteAccepted(reply || false);
 		setInviteDeclined(reply === undefined || reply === null ? false : !reply);
 		// set the invitation to declined if it has been more than 15minutes
-		let sentAtDate = new Date(sentAt);
+		const sentAtDate = new Date(sentAt);
 		sentAtDate.setMinutes(sentAtDate.getMinutes() + 15);
 		const nowDate = new Date();
 		if (sentAtDate < nowDate && (reply === undefined || reply === null)) {

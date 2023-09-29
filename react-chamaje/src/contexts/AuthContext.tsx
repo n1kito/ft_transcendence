@@ -80,9 +80,7 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 				},
 				credentials: 'include',
 			});
-		} catch (error) {
-			console.error(error);
-		}
+		} catch (error) {}
 		setAccessToken('');
 		setIsAuthentificated(false);
 		setIsTwoFaVerified(false);

@@ -9,9 +9,7 @@ import GameScreenTitle from '../Shared/GameScreenTitle/GameScreenTitle';
 import GameLocatingBadge from './Components/GameLocatingBadge';
 import './GameSelectionScreen.css';
 
-interface IGameSelectionScreenProps {}
-
-const GameSelectionScreen: React.FC<IGameSelectionScreenProps> = () => {
+const GameSelectionScreen = () => {
 	const { gameData, updateGameData } = useContext(GameContext);
 	const { userData } = useContext(UserContext);
 	const [playTooltipVisible, setPlayTooltipVisible] = useState(false);
@@ -47,7 +45,6 @@ const GameSelectionScreen: React.FC<IGameSelectionScreenProps> = () => {
 								setNavParam('friendProfile', gameData.opponentInfo?.login);
 							}}
 							isActive={gameData.player2Ready}
-							// onlineIndicator={true}
 						/>
 					) : (
 						<GameLocatingBadge />
@@ -72,7 +69,7 @@ const GameSelectionScreen: React.FC<IGameSelectionScreenProps> = () => {
 						}
 						position="bottom"
 					>
-						Waiting for your opponent to press "play"
+						Waiting for your opponent to press PLAY
 					</Tooltip>
 					<Button
 						onClick={() => updateGameData({ player1Ready: true })}

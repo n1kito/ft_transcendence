@@ -18,7 +18,6 @@ export interface IGameDataProps {
 	// Connection information
 	connectedToServer: boolean;
 	connectionErrorStatus: string | null;
-	//TODO: add other properties
 	// User actions
 	userWantsNewOpponent: boolean;
 	gamePowerUp: string | undefined;
@@ -84,21 +83,21 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
 			...prevGameData,
 			...updates,
 		}));
-		if ('socket' in updates) {
-			logContext(`socket ${updates.socket != undefined ? 'added' : 'removed'}`);
-		} else {
-			logContext(JSON.stringify(updates, null, 4));
-		}
+		// if ('socket' in updates) {
+		// 	logContext(`socket ${updates.socket != undefined ? 'added' : 'removed'}`);
+		// } else {
+		// 	logContext(JSON.stringify(updates, null, 4));
+		// }
 	};
 
 	// Helper function to reset the game state to its initial state in one function call
 	const eraseGameData = () => {
-		logContext('erase the current gameData, including the socket');
+		// logContext('erase the current gameData, including the socket');
 		setGameData(defaultGameState);
 	};
 
 	const resetGameData = () => {
-		logContext('reset the gameData context, excluding the socket');
+		// logContext('reset the gameData context, excluding the socket');
 		const resetGameValues: Partial<IGameDataProps> = defaultGameState;
 		delete resetGameValues.socket;
 		delete resetGameValues.connectedToServer;

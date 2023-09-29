@@ -8,10 +8,6 @@ import sophie from '../../../../../../Profile/Components/TargetBadge/images/roul
 import theRing from '../../../../../../Profile/Components/TargetBadge/images/roulette/the-ring.jpg';
 import xavier from '../../../../../../Profile/Components/TargetBadge/images/roulette/xavier.jpg';
 
-// TODO: this backgrounda animation might be better to do as a css transition loop
-// however it's difficult to do it in css transitions since the /images/ location
-// is not setup in
-
 const GameLocatingBadge = () => {
 	const [imageIndex, setImageIndex] = useState(0);
 

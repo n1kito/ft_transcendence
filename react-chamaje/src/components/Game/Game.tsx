@@ -69,7 +69,6 @@ const Game: React.FC<IGameProps> = ({
 					ctx,
 				);
 		}
-		//TODO: announce others i am in a game
 
 		return () => {
 			gameInstance.current?.stopGame();

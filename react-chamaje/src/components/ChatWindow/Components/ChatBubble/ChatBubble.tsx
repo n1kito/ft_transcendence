@@ -97,9 +97,7 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 													sender,
 												);
 											})
-											.catch((e) => {
-												console.error('Could not mute user: ', e.message);
-											});
+											.catch((e) => {});
 									}}
 								>
 									mute
@@ -120,9 +118,7 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 													sender,
 												);
 											})
-											.catch((e) => {
-												console.error('Could not kick user: ', e.message);
-											});
+											.catch((e) => {});
 									}}
 								>
 									kick
@@ -144,9 +140,7 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 													sender,
 												);
 											})
-											.catch((e) => {
-												console.error('Could not ban user: ', e.message);
-											});
+											.catch((e) => {});
 									}}
 								>
 									ban
@@ -168,12 +162,7 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 													sender,
 												);
 											})
-											.catch((e) => {
-												console.error(
-													'Could not make the user administrator: ',
-													e.message,
-												);
-											});
+											.catch((e) => {});
 									}}
 								>
 									admin
@@ -183,7 +172,7 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 					</div>
 				)}
 				<div className={`chat-bubble-content ${wasSent ? 'green-bubble' : ''}`}>
-					<span className="chat-bubble-info">{`@${sender} – ${time}`}</span>
+					<span className="chat-bubble-info">{`@${sender} – ${time}`}</span>
 					<div className="chat-bubble-message">{children}</div>
 				</div>
 			</div>

@@ -29,7 +29,6 @@ export interface CustomRequest extends Request {
 	userId: number;
 }
 
-// TODO: implement a middleware that checks if the JWT token received with each request is correct
 
 @Controller('login')
 export class AuthController {
@@ -74,7 +73,6 @@ export class AuthController {
 			const refreshToken = await this.tokenService.generateRefreshToken(
 				payload,
 			);
-			// TODO: error 401 due to asynchron issue ?
 
 			this.tokenService.attachRefreshTokenCookie(res, refreshToken);
 
@@ -82,7 +80,7 @@ export class AuthController {
 			const redirectURL = `/retrieve-token` + '?code=' + temporaryAuthCode;
 			return { url: redirectURL };
 		} catch (error) {
-			return { url: 'login-failed' }; // TODO: return error URl and find out how to customize the error message if we want to
+			return { url: 'login-failed' };
 		}
 	}
 
@@ -198,7 +196,7 @@ export class AuthController {
 				.status(200)
 				.json({ message: 'two-factor authentication enabled!' });
 		} catch (error) {
-			console.error('dto error: ', error);
+			return res.status(400).json({ message: error });
 		}
 	}
 
@@ -226,7 +224,6 @@ export class AuthController {
 			});
 			return res.status(200).json({ message: 'successful 2FA log out' });
 		} catch (error) {
-			console.error(error);
 			return res.status(400).json({ message: 'error 2FA log out' });
 		}
 	}

@@ -42,8 +42,6 @@ const Channels: React.FC<IChannelsProps> = ({
 	const [settingsNameError, setSettingsNameError] = useState('');
 	const [settingsPwdError, setSettingsPwdError] = useState('');
 
-	const [channelsList, setChannelsList] = useState<IChatStruct[]>([]);
-
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
 	const [chatWindowId, setChatWindowId] = useState(0);
 	const [chatWindowName, setChatWindowName] = useState('');
@@ -55,13 +53,8 @@ const Channels: React.FC<IChannelsProps> = ({
 
 	const { userData } = useContext(UserContext);
 	const { accessToken } = useAuth();
-	const {
-		chatData,
-		updateChatData,
-		updateChatList,
-		getNewChatsList,
-		getNewBlockedUsers,
-	} = useContext(ChatContext);
+	const { chatData, updateChatList, getNewChatsList, getNewBlockedUsers } =
+		useContext(ChatContext);
 
 	/* ********************************************************************* */
 	/* ***************************** WEBSOCKET ***************************** */
@@ -87,7 +80,7 @@ const Channels: React.FC<IChannelsProps> = ({
 				setMessages(updatedMessages);
 			} else {
 				// notifications : copy the chat list and add newMessage to the chat concerned
-				let updatedChatList: IChatStruct[] = [];
+				const updatedChatList: IChatStruct[] = [];
 				for (const current of chatData.chatsList) {
 					if (current.chatId === message.chatId) {
 						const newChat: IChatStruct = {
@@ -150,15 +143,15 @@ const Channels: React.FC<IChannelsProps> = ({
 
 	// on click on an avatar open the window, set the userId and chatId, and fetch
 	// the messages.
-	const openPrivateMessageWindow: any = (roomId: number) => {
-		const chatId = chatData.chatsList.map((currentChat) => {
+	const openPrivateMessageWindow = (roomId: number) => {
+		chatData.chatsList.map((currentChat) => {
 			if (roomId === currentChat.chatId) {
 				setChatWindowId(currentChat.chatId);
 				setChatWindowName(
 					currentChat.name ? currentChat.name : 'Anonymous channel',
 				);
 				// notifications : set new Message to false when opened
-				let updatedChatList: IChatStruct[] = [];
+				const updatedChatList: IChatStruct[] = [];
 				for (const current of chatData.chatsList) {
 					if (current.chatId === roomId) {
 						const newChat: IChatStruct = {
@@ -181,9 +174,7 @@ const Channels: React.FC<IChannelsProps> = ({
 						setMessages(data);
 						setChatWindowIsOpen(true);
 					})
-					.catch((e) => {
-						console.error('Error fetching messages: ', e.message);
-					});
+					.catch((e) => {});
 				return;
 			}
 		});
@@ -208,8 +199,6 @@ const Channels: React.FC<IChannelsProps> = ({
 					setPwdInput('');
 				})
 				.catch((e) => {
-					console.log(e);
-					console.error('Error creating channel: ', e.message);
 					setSettingsNameError(e.message);
 				});
 		}
@@ -235,7 +224,6 @@ const Channels: React.FC<IChannelsProps> = ({
 				})
 				.catch((e) => {
 					setSettingsNameError(e.message);
-					console.error('Could not join channel: ', e.message);
 				});
 		}
 	};
@@ -261,16 +249,12 @@ const Channels: React.FC<IChannelsProps> = ({
 			.then((data) => {
 				getNewChatsList(data);
 			})
-			.catch((e) => {
-				console.error('Error fetching channels: ', e);
-			});
+			.catch((e) => {});
 		getBlockedUsers(accessToken)
 			.then((data) => {
 				getNewBlockedUsers(data);
 			})
-			.catch(() => {
-				console.error('Could not retreive blocked users');
-			});
+			.catch(() => {});
 	}, []);
 
 	return (

@@ -223,7 +223,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 										})
 										.catch((e) => {
 											setSearchUserError(e.message);
-											console.error('Could not send invitation: ', e.message);
 										});
 								})
 								.catch((e) => {
@@ -255,31 +254,18 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 														);
 														setSearchUserSuccess('Invitation sent');
 													})
-													.catch((e) => {
-														console.error(
-															'Could not send invitation: ',
-															e.message,
-														);
-													});
+													.catch((e) => {});
 											})
-											.catch((e) => {
-												console.error(
-													'Could not find private message: ',
-													e.message,
-												);
-											});
+											.catch((e) => {});
 									} else {
-										console.error('Could not create chat: ', e.message);
 									}
 								});
 						})
 						.catch((e) => {
 							setSearchUserError(e.message);
-							console.error('Could not invite user');
 						});
 				})
 				.catch((e: string) => {
-					console.error(e);
 					setSearchUserError('Could not find user');
 				});
 		}
@@ -299,7 +285,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 				if (e.message === 'You are not in this chat') {
 					setChatWindowIsOpen(false);
 				}
-				console.error('Error leaving channel: ', e.message);
 			});
 	};
 
@@ -320,9 +305,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 				chatData.socket?.leaveRoom(chatId);
 				setChatWindowIsOpen(false);
 			})
-			.catch((e) => {
-				console.error('Error leaving chat - chatWindow: ', e);
-			});
+			.catch((e) => {});
 	};
 
 	const inviteToPlay = () => {
@@ -354,9 +337,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 								});
 								setNavParam('game');
 							})
-							.catch((e) => {
-								console.error('Could not send invitation: ', e.message);
-							});
+							.catch((e) => {});
 					}
 				}
 			}
@@ -377,9 +358,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 									]);
 									setIsBlocked(true);
 								})
-								.catch((e) => {
-									console.error('Could not block user: ', e.message);
-								});
+								.catch((e) => {});
 						} else {
 							unblockUserQuery(accessToken, pCurrent)
 								.then(() => {
@@ -389,9 +368,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 									getNewBlockedUsers(updatedBlockedUsers);
 									setIsBlocked(true);
 								})
-								.catch((e) => {
-									console.error('Could not block user: ', e.message);
-								});
+								.catch((e) => {});
 						}
 					}
 				}
@@ -410,7 +387,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 			.then((chatInfo: IChatInfo) => {
 				setChannelIsPrivate(chatInfo.isPrivate);
 			})
-			.catch((e) => console.error(e.message));
+			.catch();
 		if (!isChannel && userData) {
 			const chat = chatData.chatsList.find(
 				(target) => target.chatId === chatId,
@@ -433,6 +410,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 			}
 		setIsBlocked(false);
 	}, [secondUserId, chatData.blockedUsers]);
+
 	/* ********************************************************************* */
 	/* ******************************** CHAT ******************************* */
 	/* ********************************************************************* */
@@ -493,9 +471,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 				setTextareaContent('');
 				setTextareaIsEmpty(true);
 			})
-			.catch((e) => {
-				console.error('Could not send message to the database: ', e);
-			});
+			.catch((e) => {});
 	};
 
 	useEffect(() => {
@@ -665,9 +641,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 								.then(() => {
 									setChannelIsPrivate(!channelIsPrivate);
 								})
-								.catch((e) => {
-									console.error('Could not make private: ', e.message);
-								});
+								.catch((e) => {});
 						}}
 					>
 						make {channelIsPrivate ? 'public' : 'private'}
@@ -690,7 +664,6 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 										setSettingPwdSuccess('Password changed successfully');
 									})
 									.catch((e) => {
-										console.error('Could not set the password');
 										setSettingPwdError(e.message);
 									});
 							}}

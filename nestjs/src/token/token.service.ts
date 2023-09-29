@@ -22,7 +22,6 @@ export class TokenService {
 		const accessToken = jwt.sign(payload, this.jwtSecretKey, {
 			expiresIn: this.accessTokenExpiresIn,
 		});
-		console.log('generate access token:', accessToken);
 		return accessToken;
 	}
 
@@ -32,7 +31,6 @@ export class TokenService {
 		const refreshToken = jwt.sign(payload, this.jwtSecretKey, {
 			expiresIn: this.refreshTokenExpiresIn,
 		});
-		console.log('generate refresh token:', refreshToken);
 		return refreshToken;
 	}
 
@@ -70,8 +68,6 @@ export class TokenService {
 		res.cookie(tokenName, tokenValue, {
 			httpOnly: true,
 			sameSite: 'strict',
-			// TODO: set this to true for production only, as it sends it over https and https is not used in local environments
-			secure: false,
 			expires: new Date(Date.now() + expiresIn * 1000),
 		});
 	}

@@ -76,7 +76,6 @@ export class UserController {
 		@Res() response: Response,
 	) {
 		try {
-			console.log('\n🞋 UPDATING TARGET STATUS 🞋\n');
 			const userId = this.userService.authenticateUser(request);
 			await this.prisma.user.update({
 				where: { id: userId },
@@ -107,8 +106,6 @@ export class UserController {
 		}
 	}
 
-	// TODO: change route to user/me/friends or something, I just created a separate one to avoid with the /user/me routes Jee created
-	// TODO: move the logic to the service file
 	@Get('friends')
 	async getUserFriends(
 		@Req() request: CustomRequest,
@@ -122,8 +119,7 @@ export class UserController {
 			},
 		});
 		if (!userRequesting)
-			response.status(401).json({ message: 'unauthorized request' });
-		// TODO: select more fields
+			return response.status(401).json({ message: 'unauthorized request' });
 		// Only select some fields for each friend
 		try {
 			const friends = userRequesting.friends.map((currentFriend) => ({
@@ -135,8 +131,7 @@ export class UserController {
 			}));
 			response.status(200).json({ friends });
 		} catch (error) {
-			console.error('FRIENDS ERROR: ', error);
-			response
+			return response
 				.status(400)
 				.json({ message: 'Could not retrieve friends' });
 		}
@@ -148,7 +143,6 @@ export class UserController {
 		@Param('login', new ValidationPipe()) login: string,
 		@Req() request: CustomRequest,
 	): Promise<IUserData> {
-		console.log(`[🙆🏻‍♂️] User data requested via /user/${login}`);
 		try {
 			// Try to authenticate the user
 			const requestingUserId: number =
@@ -360,7 +354,6 @@ export class UserController {
 	}
 
 	// Get public data from userId
-	// TODO: DTO for userID ?
 	@Get('/byId/:userId')
 	async getPublicDataFromUserId(
 		@Req() request: CustomRequest,
@@ -375,7 +368,6 @@ export class UserController {
 	}
 
 	// Get userId from login
-	// TODO: DTO for login ?
 	@Get('/byLogin/:login')
 	async getUserIdFromLogin(
 		@Req() request: CustomRequest,
@@ -452,7 +444,6 @@ export class UserController {
 			res.status(401).json({
 				message: 'Could not fetch private messages',
 			});
-			console.error('Could not retreive private messages: ', e);
 		}
 	}
 
@@ -492,9 +483,7 @@ export class UserController {
 				}),
 			);
 			return rooms;
-		} catch (e) {
-			console.error('Could not fetch channels: ', e);
-		}
+		} catch (e) {}
 	}
 
 	// get messages from chat
@@ -552,7 +541,6 @@ export class UserController {
 					throw new Error('Could find user to block');
 				});
 		} catch (e) {
-			console.error('error blocking a user', e.message);
 			res.status(400).json(e.message);
 		}
 	}
@@ -609,7 +597,6 @@ export class UserController {
 					res.status(400).json(e.message);
 				});
 		} catch (e) {
-			console.error(e.message);
 			res.status(400).json({
 				message: 'Could not retreive blocked users',
 			});
