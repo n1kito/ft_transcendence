@@ -130,7 +130,6 @@ export async function getBlockedUsers(accessToken: string) {
 			credentials: 'include',
 		});
 		if (!response.ok) {
-			console.error('watsup');
 			const responseError = await response.json();
 			throw new Error(responseError.message);
 		}
@@ -222,7 +221,6 @@ export async function joinChannel(
 		});
 		if (!response.ok) {
 			const responseError = await response.json();
-			console.error(responseError.message);
 			throw new Error(responseError.message);
 		}
 		return response.json();
@@ -253,7 +251,6 @@ export async function inviteToChannelQuery(
 		});
 		if (!response.ok) {
 			const responseError = await response.json();
-			console.error(responseError.message);
 			throw new Error(responseError.message);
 		}
 		return response.json();
@@ -400,7 +397,6 @@ export async function getAdminRights(accessToken: string, chatId: number) {
 		return response.json();
 	} catch (e) {
 		if (e instanceof Error && typeof e.message === 'string') {
-			console.error('Error getting your admin informations: ' + e.message);
 			throw new Error('' + e.message);
 		} else
 			throw new Error('Something went wrong getting your admin informations');
@@ -427,13 +423,11 @@ export async function setNewPassword(
 		});
 		if (!response.ok) {
 			const responseError = await response.json();
-			console.log(responseError, responseError);
 			throw new Error(responseError.message);
 		}
 		return response.json();
 	} catch (e) {
 		if (e instanceof Error && typeof e.message === 'string') {
-			console.error('Error setting password: ' + e.message);
 			throw new Error('' + e.message);
 		} else throw new Error('Something went wrong setting password');
 	}
@@ -605,14 +599,6 @@ export async function sendMessageQuery(
 	channelInvitation?: string,
 ) {
 	try {
-		console.log({
-			message: message,
-			chatId: chatId,
-			userId: secondUserId,
-			isNotif: isNotif,
-			targetId: targetId,
-			channelInvitation: channelInvitation,
-		});
 		const response = await fetch('/api/chat/sendMessage', {
 			method: 'PUT',
 			headers: {

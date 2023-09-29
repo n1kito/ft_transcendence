@@ -14,7 +14,6 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({ profileData }) => {
 	const { setNavParam } = useNavigationParams();
 	const [bestieIsHovered, setBestieIsHovered] = useState(false);
 	const [targetIsHovered, setTargetIsHovered] = useState(false);
-	// console.log('Profile data', profileData);
 	return (
 		<div className="profile-stats-wrapper">
 			<Title>Stats</Title>

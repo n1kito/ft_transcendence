@@ -47,7 +47,6 @@ export class GameGateway
 		// verify if user is authenticated
 		const token = clientSocket.handshake.auth.accessToken;
 		if (!token) {
-			console.error('token not found');
 			clientSocket.disconnect();
 		}
 
@@ -55,7 +54,6 @@ export class GameGateway
 			this.tokenService.verifyToken(token);
 			this.gameService.handleNewClientConnection(clientSocket).then(() => {});
 		} catch (error) {
-			console.error('handleConnection():', error.message);
 			clientSocket.disconnect();
 		}
 	}
@@ -63,9 +61,7 @@ export class GameGateway
 	async handleDisconnect(clientSocket: any) {
 		try {
 			this.gameService.handleClientDisconnect(clientSocket);
-		} catch (error) {
-			console.error('[⚠️ ] handleDisconnect:', error.message);
-		}
+		} catch (error) {}
 	}
 
 	/*
@@ -79,9 +75,7 @@ export class GameGateway
 		try {
 			this.gameService.broadcastPlayerIsReady(clientSocket);
 			this.gameService.setPlayerAsReady(clientSocket);
-		} catch (error) {
-			console.error('[⚠️ ] handlePlayerIsReady():', error.message);
-		}
+		} catch (error) {}
 	}
 
 	@SubscribeMessage('player-moved')
@@ -91,7 +85,6 @@ export class GameGateway
 			webSocketRateLimit.protect(this.server, clientSocket);
 			this.gameService.handlePlayerMovement(clientSocket, payload.direction);
 		} catch (error) {
-			console.error('handlePlayerMovement():', error.message);
 			// clientSocket.disconnect();
 			clientSocket.emit('error', error.message);
 		}
@@ -101,9 +94,7 @@ export class GameGateway
 	async handleUserWantsNewOpponent(clientSocket: Socket) {
 		try {
 			await this.gameService.handleUserWantsNewOpponent(clientSocket);
-		} catch (error) {
-			console.error('[⚠️ ] handleUserWantsNewOpponent():', error.message);
-		}
+		} catch (error) {}
 	}
 
 	@SubscribeMessage('powerup-setting-update')
@@ -116,17 +107,13 @@ export class GameGateway
 				clientSocket,
 				userDisabledPowerups,
 			);
-		} catch (error) {
-			console.error('[⚠️ ] handlePowerupSettingUpdate():', error.message);
-		}
+		} catch (error) {}
 	}
 
 	@SubscribeMessage('power-up-activated')
 	handlePowerupActivated(clientSocket: Socket) {
 		try {
 			this.gameService.handlePowerupActivated(clientSocket);
-		} catch (error) {
-			console.error('[⚠️ ] handlePowerupActivated():', error.message);
-		}
+		} catch (error) {}
 	}
 }

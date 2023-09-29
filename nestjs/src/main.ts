@@ -47,7 +47,8 @@ async function bootstrap() {
 		limit: 300, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
 		standardHeaders: 'draft-7', // Set `RateLimit` and `RateLimit-Policy` headers
 		legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-		validate: { trustProxy: false },
+		// validate: { trustProxy: false },
+		validate: { xForwardedForHeader: false },
 	});
 
 	app.use(apiLimiter);

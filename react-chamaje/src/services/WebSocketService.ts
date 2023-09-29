@@ -24,7 +24,6 @@ class WebSocketService {
 		try {
 			// Listen for the 'connect' event
 			this.socket.on('connect', () => {
-				console.log('🟢 ', this.userId, ' just connected');
 				this.sendServerConnection('online');
 			});
 			// Listen for the 'disconnect' event prevent reconnection from wanted disconnection
@@ -40,9 +39,7 @@ class WebSocketService {
 					this.socket.disconnect();
 				}
 			});
-		} catch (e) {
-			console.error(e, ': WebSocketService Constructor');
-		}
+		} catch (e) {}
 	}
 
 	getSocket(): Socket {
@@ -58,7 +55,6 @@ class WebSocketService {
 
 	sendServerConnection(status: string) {
 		try {
-			console.log('🟢 ping server !', status);
 			//status
 			const isonline = status === 'online' ? true : false;
 			const isplaying = status === 'playing' ? true : false;
@@ -68,9 +64,7 @@ class WebSocketService {
 				online: isonline,
 				playing: isplaying,
 			});
-		} catch (e) {
-			console.error(e, ': WebSocketService sendServerConnection');
-		}
+		} catch (e) {}
 	}
 
 	onClientLogIn(callback: callbackStatusInterface) {

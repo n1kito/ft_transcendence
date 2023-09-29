@@ -77,9 +77,7 @@ const Profile: React.FC<ProfileProps> = ({
 				};
 				setProfileData(updatedProfileData);
 			}
-		} catch (error) {
-			console.error('Error: ', error);
-		}
+		} catch (error) {}
 	};
 
 	useEffect(() => {
@@ -117,9 +115,7 @@ const Profile: React.FC<ProfileProps> = ({
 			.then(() => {
 				setIsTwoFAEnabled(false);
 			})
-			.catch((error) => {
-				console.error(error);
-			});
+			.catch((error) => {});
 	};
 
 	// if 2Fa is correctly enable, means 2FA window must unmount and
@@ -135,9 +131,7 @@ const Profile: React.FC<ProfileProps> = ({
 		// if still in authentication process
 		if (isInProcessRef.current) {
 			// turn-off 2FA to prevent setting the user as verified
-			turnOffTwoFactorAuthentication(accessToken).catch((error) => {
-				console.error(error);
-			});
+			turnOffTwoFactorAuthentication(accessToken).catch((error) => {});
 		}
 	};
 
@@ -158,9 +152,7 @@ const Profile: React.FC<ProfileProps> = ({
 			.then(async () => {
 				logOut();
 			})
-			.catch((error) => {
-				console.error(error);
-			});
+			.catch((error) => {});
 	};
 
 	/**************************************************************************************/
@@ -178,9 +170,7 @@ const Profile: React.FC<ProfileProps> = ({
 					setDeletedFriend(login);
 					onCloseClick();
 				})
-				.catch((error) => {
-					console.error(error);
-				});
+				.catch((error) => {});
 	};
 
 	const handleAddFriend = async () => {
@@ -224,7 +214,6 @@ const Profile: React.FC<ProfileProps> = ({
 
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		console.log(selectedFile);
 	};
 
 	const uploadNewAvatar = async () => {
@@ -244,8 +233,6 @@ const Profile: React.FC<ProfileProps> = ({
 			});
 			const data = await response.json();
 			if (response.ok) {
-				console.log(data.image, userData);
-
 				const updatedUserData = {
 					...userData,
 					image: `/api/images/${data.image}`,
@@ -256,9 +243,7 @@ const Profile: React.FC<ProfileProps> = ({
 			} else {
 				setFileError(data.message);
 			}
-		} catch (error) {
-			console.error(error);
-		}
+		} catch (error) {}
 	};
 
 	useEffect(() => {
@@ -274,37 +259,37 @@ const Profile: React.FC<ProfileProps> = ({
 			links={
 				isOwnProfile
 					? [
-						{
-							name: 'Two-Factor Authentication',
-							onClick: () => {
-								setSettingsMode('Two-Factor Authentication');
-								setSettingsPanelIsOpen(true);
+							{
+								name: 'Two-Factor Authentication',
+								onClick: () => {
+									setSettingsMode('Two-Factor Authentication');
+									setSettingsPanelIsOpen(true);
+								},
 							},
-						},
-						{
-							name: 'Delete profile',
+							{
+								name: 'Delete profile',
 
-							onClick: () => {
-								setSettingsMode('Delete Profile');
-								setSettingsPanelIsOpen(true);
+								onClick: () => {
+									setSettingsMode('Delete Profile');
+									setSettingsPanelIsOpen(true);
+								},
 							},
-						},
 					  ]
 					: [
-						isMyFriend
-							? {
-								name: 'Delete Friend',
-								onClick: () => {
-									setSettingsMode('Delete Friend');
-									setSettingsPanelIsOpen(true);
-								},
+							isMyFriend
+								? {
+										name: 'Delete Friend',
+										onClick: () => {
+											setSettingsMode('Delete Friend');
+											setSettingsPanelIsOpen(true);
+										},
 								  }
-							: {
-								name: 'Add Friend',
-								onClick: () => {
-									setSettingsMode('Add Friend');
-									setSettingsPanelIsOpen(true);
-								},
+								: {
+										name: 'Add Friend',
+										onClick: () => {
+											setSettingsMode('Add Friend');
+											setSettingsPanelIsOpen(true);
+										},
 								  },
 					  ]
 			}

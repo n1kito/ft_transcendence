@@ -26,7 +26,6 @@ const GameOpponentDisconnectScreen: React.FC<
 			// 	player2Ready: false,
 			// 	gameIsPlaying: false,
 			// });
-			console.log('Not waiting for reconnection anymore');
 			resetGameData();
 			return;
 		}

@@ -40,9 +40,7 @@ const ChatGameInvite: React.FC<IGameInviteProps> = ({
 				setInviteAccepted(true);
 				chatData.socket?.sendAcceptInvite(sender || '', chatId);
 			})
-			.catch((e) => {
-				console.error('You could not respond to the invitation: ', e.message);
-			});
+			.catch((e) => {});
 
 		// TODO: fix ?
 		// open a game window
@@ -56,9 +54,7 @@ const ChatGameInvite: React.FC<IGameInviteProps> = ({
 				setInviteDeclined(true);
 				chatData.socket?.sendDeclineInvite(sender || '', chatId);
 			})
-			.catch((e) => {
-				console.error('You could not respond to the invitation: ', e.message);
-			});
+			.catch((e) => {});
 	};
 
 	useEffect(() => {

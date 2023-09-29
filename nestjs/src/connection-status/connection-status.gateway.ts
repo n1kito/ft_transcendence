@@ -33,7 +33,6 @@ export class ConnectionStatusGateway
 		try {
 			decodeToken(client);
 		} catch (e) {
-			console.error('Verify token failed:', e);
 			client.disconnect();
 		}
 	}

@@ -51,7 +51,6 @@ const ProfileSettings: React.FC = () => {
 		else {
 			setUsernameError(null);
 		}
-		console.log(usernameError);
 	};
 
 	// Handle email state when it is changed in the inputfield
@@ -78,7 +77,6 @@ const ProfileSettings: React.FC = () => {
 
 			// If there are no changes, there's nothing to update
 			if (Object.keys(updatedFields).length === 0) {
-				console.log('No changes to update.');
 				return;
 			}
 			const response = await fetch('/api/user/me/update', {
@@ -115,9 +113,7 @@ const ProfileSettings: React.FC = () => {
 					}
 				});
 			}
-		} catch (error) {
-			console.error('Error updating user data:', error);
-		}
+		} catch (error) {}
 	};
 
 	return (

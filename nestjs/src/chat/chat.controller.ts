@@ -61,14 +61,8 @@ export class ChatController {
 				isPrivate: response.isPrivate,
 				isProtected: response.isProtected,
 			});
-			// return {
-			// 	isChannel: response.isChannel,
-			// 	isPrivate: response.isPrivate,
-			// 	isProtected: response.isProtected,
-			// };
 		} catch (e) {
 			res.status(400).json({ message: 'Could not retreive chat info' });
-			console.error('error fetching chat info: ', e);
 		}
 	}
 
@@ -98,7 +92,6 @@ export class ChatController {
 			);
 			res.status(200).json(messages);
 		} catch (e) {
-			console.error('error fetching messages: ', e);
 			res.status(403).json({ message: 'Could not retreive messages' });
 		}
 	}
@@ -172,7 +165,6 @@ export class ChatController {
 				response.status(401).json({ message: 'Could not create chat' });
 			}
 		} catch (e) {
-			console.error('error creating a private message: ', e);
 			response.status(401).json({ message: e.message });
 		}
 	}
@@ -238,7 +230,6 @@ export class ChatController {
 				res.status(200).json({ message: 'Message sent successfully' });
 			}
 		} catch (e) {
-			console.error('error sending a message', e);
 			res.status(400).json(e.message);
 		}
 	}
@@ -347,7 +338,6 @@ export class ChatController {
 										.json({ chatId: data.id, participants: data.participants });
 								})
 								.catch((e) => {
-									console.error('error joining a channel: ', e);
 									response.status(400).json({
 										message: 'Could not join the channel',
 									});
@@ -397,13 +387,11 @@ export class ChatController {
 								.json({ message: 'User invited successfully' });
 						})
 						.catch((e) => {
-							console.error('Could not invite user: ', e.message);
 							response.status(400).json({ message: 'Could not invite user' });
 							return;
 						});
 				})
 				.catch((e) => {
-					console.error('Could not find room: ', e.message);
 					response.status(404).json({ message: 'Could not find room' });
 				});
 		} catch (e) {
@@ -447,7 +435,6 @@ export class ChatController {
 				}
 			});
 		} catch (e) {
-			console.error('set private error: ', e.message);
 			res.status(401).json({ message: e.message });
 		}
 	}
@@ -532,7 +519,6 @@ export class ChatController {
 					return;
 				});
 		} catch (e) {
-			console.error('error kicking user', e);
 			response
 				.status(400)
 				.json({ message: 'Something went wrong kicking the user' });
@@ -618,7 +604,6 @@ export class ChatController {
 					return;
 				});
 		} catch (e) {
-			console.error('error making admin', e);
 			response.status(400).json({
 				message: 'Something went wrong making the user administrator',
 			});
@@ -707,7 +692,6 @@ export class ChatController {
 					return;
 				});
 		} catch (e) {
-			console.error('error muting user', e.message);
 			response.status(400).json({
 				message: 'Something went wrong muting the user',
 			});
@@ -785,7 +769,6 @@ export class ChatController {
 											response.status(400).json({
 												message: 'The user could not leave the channel',
 											});
-											console.error('The user could not leave the channel');
 										});
 								})
 
@@ -807,7 +790,6 @@ export class ChatController {
 					return;
 				});
 		} catch (e) {
-			console.error('error banning user', e.message);
 			response.status(400).json({
 				message: 'Something went wrong banning the user from the channel',
 			});
@@ -874,7 +856,6 @@ export class ChatController {
 				});
 		} catch (e) {
 			response.status(400).json({ message: e.message });
-			console.error('Error setting password: ', e.message);
 		}
 	}
 
@@ -900,12 +881,10 @@ export class ChatController {
 					res.status(200).json({ chatId: data.id });
 				})
 				.catch((e) => {
-					console.error('Could not find PM');
 					res.status(404).json({ message: 'Could not find private message' });
 					return;
 				});
 		} catch (e) {
-			console.error('error finding private message: ', e.message);
 			res.status(400).json({ message: 'Could not find private message' });
 		}
 	}
@@ -932,27 +911,18 @@ export class ChatController {
 								.json({ message: 'You replied to the invitation' });
 						})
 						.catch((e) => {
-							console.error(
-								'User could not reply to the invitation: ',
-								e.message,
-							);
 							response
 								.status(400)
 								.json({ message: 'You could not reply to the invitation' });
 						});
 				})
 				.catch((e) => {
-					console.error(
-						'User trying to respond to another users message: ',
-						e.message,
-					);
 					response
 						.status(403)
 						.json({ message: 'This message was not for to you' });
 				});
 		} catch (e) {
 			response.status(400).json({ message: e.message });
-			console.error('Error setting password: ', e.message);
 		}
 	}
 }

@@ -117,21 +117,13 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 
 	// on mounting this component, fetch the privateMessages
 	useEffect(() => {
-		fetchChats(accessToken)
-			.then((data) => {
-				getNewChatsList(data);
-				// updateChatList(data);
-				getBlockedUsers(accessToken)
-					.then((users) => {
-						getNewBlockedUsers(users);
-					})
-					.catch(() => {
-						console.error('Could not retreive blocked users');
-					});
-			})
-			.catch((e) => {
-				console.error('Error fetching private conversations: ', e);
+		fetchChats(accessToken).then((data) => {
+			getNewChatsList(data);
+			// updateChatList(data);
+			getBlockedUsers(accessToken).then((users) => {
+				getNewBlockedUsers(users);
 			});
+		});
 	}, []);
 
 	// on click on an avatar, check if a PM conversation exists.
@@ -143,7 +135,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 		friendId: number | undefined,
 	) => {
 		if (!friendId) return;
-		
+
 		let foundChat = false;
 		chatData.chatsList.map((currentChat) => {
 			if (roomId === currentChat.chatId) {
@@ -168,13 +160,10 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					}
 					getNewChatsList(updatedChatList);
 				}
-				fetchMessages(currentChat.chatId, accessToken)
-					.then((data) => {
-						setMessages(data);
-					})
-					.catch((e) => {
-						console.error('Error fetching messages: ', e);
-					});
+				fetchMessages(currentChat.chatId, accessToken).then((data) => {
+					setMessages(data);
+				});
+
 				foundChat = true;
 				return;
 			}
@@ -183,22 +172,15 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 		// If no corresponding chat were found, create it, set messages to empty
 		// change the chat window and update privateMessages[]
 		if (!foundChat && userData) {
-			createChatPrivateMessage(friendId, userData.id, accessToken)
-				.then(async (data) => {
+			createChatPrivateMessage(friendId, userData.id, accessToken).then(
+				async (data) => {
 					setChatWindowId(data);
 					setMessages([]);
-					fetchChats(accessToken)
-						.then((data) => {
-							updateChatList(data);
-						})
-						.catch((e) => {
-							console.error('Error fetching private conversations: ', e);
-						});
-				})
-				.catch((e) => {
-					console.error('Error creating chat: ', e);
-				});
-			console.error('This chat does not exist');
+					fetchChats(accessToken).then((data) => {
+						updateChatList(data);
+					});
+				},
+			);
 		}
 	};
 
@@ -232,19 +214,15 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 								.then((data) => {
 									getNewChatsList(data);
 								})
-								.catch((e) => {
-									console.error('Error fetching private conversations: ', e);
-								});
+								.catch((e) => {});
 
 							setSettingsPanelIsOpen(false);
 						})
 						.catch((e) => {
-							console.error(e);
 							setSearchUserError('Could not create chat');
 						});
 				})
 				.catch((e: string) => {
-					console.error(e);
 					setSearchUserError('Could not find user');
 				});
 		}
@@ -287,47 +265,47 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 							chatData.chatsList.find(
 								(current) => current.isChannel === false,
 							) ? (
-									chatData.chatsList.map((room) => {
-										if (!room.isChannel) {
+								chatData.chatsList.map((room) => {
+									if (!room.isChannel) {
 										// find the other participant id
-											let participantId: number | undefined;
-											userData && room.participants.at(0) !== userData.id
-												? (participantId = room.participants.at(0))
-												: (participantId = room.participants.at(1));
+										let participantId: number | undefined;
+										userData && room.participants.at(0) !== userData.id
+											? (participantId = room.participants.at(0))
+											: (participantId = room.participants.at(1));
 
-											// if it is a friend, display onlinestatus
-											const friend = friends.find((friend) => {
-												return friend.id === participantId;
-											});
-											return (
-												<FriendBadge
-													key={'PM' + room.chatId}
-													badgeTitle={room.name || 'anonymous'}
-													badgeImageUrl={
-														room.name ? `/api/images/${room.avatar}` : mysteryBox
-													}
-													onlineIndicator={friend ? friend.onlineStatus : false}
-													isClickable={true}
-													onClick={() => {
-														openPrivateMessageWindow(room.chatId, participantId);
-													}}
-													shaking={room.newMessage || false}
-												/>
-											);
-										}
-									})
-								) : (
-									<FriendBadge
-										key={'PMEmptyFriendBadge'}
-										isEmptyBadge={true}
-										isChannelBadge={false}
-										onClick={() => {
-											setSearchUserError('');
-											setSearchUserSuccess('');
-											setSettingsPanelIsOpen(true);
-										}}
-									/>
-								)
+										// if it is a friend, display onlinestatus
+										const friend = friends.find((friend) => {
+											return friend.id === participantId;
+										});
+										return (
+											<FriendBadge
+												key={'PM' + room.chatId}
+												badgeTitle={room.name || 'anonymous'}
+												badgeImageUrl={
+													room.name ? `/api/images/${room.avatar}` : mysteryBox
+												}
+												onlineIndicator={friend ? friend.onlineStatus : false}
+												isClickable={true}
+												onClick={() => {
+													openPrivateMessageWindow(room.chatId, participantId);
+												}}
+												shaking={room.newMessage || false}
+											/>
+										);
+									}
+								})
+							) : (
+								<FriendBadge
+									key={'PMEmptyFriendBadge'}
+									isEmptyBadge={true}
+									isChannelBadge={false}
+									onClick={() => {
+										setSearchUserError('');
+										setSearchUserSuccess('');
+										setSettingsPanelIsOpen(true);
+									}}
+								/>
+							)
 						}
 					</PrivateMessagesList>
 					{settingsPanelIsOpen && (

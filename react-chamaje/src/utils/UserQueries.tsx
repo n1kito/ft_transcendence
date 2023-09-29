@@ -15,9 +15,7 @@ export async function fetchUserData(accessToken: string) {
 			throw new Error(data.message);
 		}
 		return response.json();
-	} catch (error) {
-		console.log('Error: ', error);
-	}
+	} catch (error) {}
 }
 export async function fetchProfileData(
 	searchedLogin: string,

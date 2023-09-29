@@ -91,9 +91,7 @@ const Desktop = () => {
 			} else {
 				logOut();
 			}
-		} catch (error) {
-			console.log('Error: ', error);
-		}
+		} catch (error) {}
 	};
 
 	const checkURLParams = () => {
@@ -159,13 +157,9 @@ const Desktop = () => {
 	// fetch user's friend to set friends state
 	useEffect(() => {
 		if (isAuthentificated) {
-			fetchFriends(accessToken)
-				.then(async (data) => {
-					setFriends(data);
-				})
-				.catch((error) => {
-					console.error('could not fetch friends: ', error);
-				});
+			fetchFriends(accessToken).then(async (data) => {
+				setFriends(data);
+			});
 		}
 	}, []);
 

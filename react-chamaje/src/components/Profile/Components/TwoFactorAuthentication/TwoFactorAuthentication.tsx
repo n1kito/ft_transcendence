@@ -60,29 +60,21 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 	useEffect(() => {
 		// On mount, turn on Two-Factor Authentication
 		// generate a qr code
-		turnOnTwoFactorAuthentication(accessToken)
-			.then((qrCodeUrl) => {
-				// get QR code url from response
-				// and update QrCode state
-				setQrCode(qrCodeUrl);
-			})
-			.catch((error) => {
-				console.error(error);
-			});
+		turnOnTwoFactorAuthentication(accessToken).then((qrCodeUrl) => {
+			// get QR code url from response
+			// and update QrCode state
+			setQrCode(qrCodeUrl);
+		});
 
 		return () => {
 			// On unmount, if ever the process is not completed before
 			// verifyin user's 2FA autentication (meaning validation code
 			// is verified by google auth), turn off 2FA and close window
 			if (!isProcessFinishedRef.current) {
-				turnOffTwoFactorAuthentication(accessToken)
-					.then((data) => {
-						setQrCode('');
-						setIsTwoFAEnabled(false);
-					})
-					.catch((error) => {
-						console.error(error);
-					});
+				turnOffTwoFactorAuthentication(accessToken).then((data) => {
+					setQrCode('');
+					setIsTwoFAEnabled(false);
+				});
 				setTwoFactorAuthWindowisOpen(false);
 			}
 		};
@@ -101,14 +93,10 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 	const handlePageUnload = () => {
 		// Call the API to turn off 2FA here
 		if (!isProcessFinishedRef.current) {
-			turnOffTwoFactorAuthentication(accessToken)
-				.then((data) => {
-					setQrCode('');
-					setIsTwoFAEnabled(false);
-				})
-				.catch((error) => {
-					console.error(error);
-				});
+			turnOffTwoFactorAuthentication(accessToken).then((data) => {
+				setQrCode('');
+				setIsTwoFAEnabled(false);
+			});
 		}
 	};
 

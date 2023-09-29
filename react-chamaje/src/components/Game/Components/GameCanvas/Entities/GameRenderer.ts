@@ -75,13 +75,13 @@ export class GameRenderer {
 	*/
 
 	setupEventListeners(): void {
-		this.log('adding event listeners');
+		// this.log('adding event listeners');
 		window.addEventListener('keydown', this.handleKeyPress);
 		window.addEventListener('keyup', this.handleKeyRelease);
 	}
 
 	removeEventListeners(): void {
-		this.log('removing event listeners');
+		// this.log('removing event listeners');
 		window.removeEventListener('keydown', this.handleKeyPress);
 		window.removeEventListener('keyup', this.handleKeyRelease);
 	}

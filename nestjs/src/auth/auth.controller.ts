@@ -198,7 +198,7 @@ export class AuthController {
 				.status(200)
 				.json({ message: 'two-factor authentication enabled!' });
 		} catch (error) {
-			console.error('dto error: ', error);
+			return res.status(400).json({ message: error });
 		}
 	}
 
@@ -226,7 +226,6 @@ export class AuthController {
 			});
 			return res.status(200).json({ message: 'successful 2FA log out' });
 		} catch (error) {
-			console.error(error);
 			return res.status(400).json({ message: 'error 2FA log out' });
 		}
 	}

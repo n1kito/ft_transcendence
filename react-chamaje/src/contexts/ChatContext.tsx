@@ -100,11 +100,11 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 	// Logs the updates to chatData as they happen
 	useEffect(() => {
 		const chatDataLog = { ...chatData, socket: 'not loggable' };
-		console.log(
-			`%c ChatData %c ${JSON.stringify(chatDataLog, null, 4)}`,
-			'color: yellow; background:magenta',
-			'',
-		);
+		// console.log(
+		// 	`%c ChatData %c ${JSON.stringify(chatDataLog, null, 4)}`,
+		// 	'color: yellow; background:magenta',
+		// 	'',
+		// );
 	}, [chatData]);
 
 	// We want a helper function that will allow us to update one, many or all
@@ -114,11 +114,11 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 			...prevChatData,
 			...updates,
 		}));
-		if ('socket' in updates) {
-			logContext(`socket ${updates.socket != undefined ? 'added' : 'removed'}`);
-		} else {
-			logContext(JSON.stringify(updates, null, 4));
-		}
+		// if ('socket' in updates) {
+		// 	logContext(`socket ${updates.socket != undefined ? 'added' : 'removed'}`);
+		// } else {
+		// 	logContext(JSON.stringify(updates, null, 4));
+		// }
 	};
 
 	const updateChatList = (updates: IChatStruct[]) => {
@@ -150,7 +150,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 	};
 
 	const getNewBlockedUsers = (updates: IUserBlocked[]) => {
-		console.log('%cChatData: ', 'background-color:blue', chatData.chatsList);
+		// console.log('%cChatData: ', 'background-color:blue', chatData.chatsList);
 
 		setChatData((prevChatData) => ({
 			...prevChatData,
@@ -179,12 +179,12 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 
 	// Helper function to reset the chat state to its initial state in one function call
 	const eraseChatData = () => {
-		logContext('erase the current chatData, including the socket');
+		// logContext('erase the current chatData, including the socket');
 		setChatData(defaultChatState);
 	};
 
 	const resetChatData = () => {
-		logContext('reset the chatData context, excluding the socket');
+		// logContext('reset the chatData context, excluding the socket');
 		const resetChatValues: Partial<IChatDataProps> = defaultChatState;
 		// delete resetChatValues.socket;
 		// delete resetChatValues.connectedToServer;
