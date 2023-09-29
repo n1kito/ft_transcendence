@@ -41,7 +41,6 @@ const Channels: React.FC<IChannelsProps> = ({
 	const [settingsMode, setSettingsMode] = useState('');
 	const [settingsNameError, setSettingsNameError] = useState('');
 	const [settingsPwdError, setSettingsPwdError] = useState('');
-	// const [settingsSuccess, setSettingsSuccess] = useState('');
 
 	const [channelsList, setChannelsList] = useState<IChatStruct[]>([]);
 

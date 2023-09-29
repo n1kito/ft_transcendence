@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 import React, {
 	Dispatch,
 	SetStateAction,
@@ -6,21 +7,10 @@ import React, {
 	useRef,
 	useState,
 } from 'react';
-import './ChatWindow.css';
-import Window from '../Window/Window';
-import Button from '../Shared/Button/Button';
-import ChatBubble from './Components/ChatBubble/ChatBubble';
-import { UserContext } from '../../contexts/UserContext';
-import ChatGameInvite from './Components/ChatGameInvite/ChatGameInvite';
-import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/SettingsWindow';
-import Title from '../Profile/Components/Title/Title';
-import InputField from '../Profile/Components/InputField/InputField';
 import useAuth from 'src/hooks/userAuth';
-import DOMPurify from 'dompurify';
 import {
 	blockUserQuery,
 	createChatPrivateMessage,
-	fetchChannels,
 	findPrivateMessage,
 	findUserByLogin,
 	getAdminRights,
@@ -32,18 +22,21 @@ import {
 	setNewPassword,
 	unblockUserQuery,
 } from 'src/utils/queries';
+import { UserContext } from '../../contexts/UserContext';
+import InputField from '../Profile/Components/InputField/InputField';
+import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/SettingsWindow';
 import mysteryBox from '../Profile/Components/TargetBadge/images/mysteryBox.png';
+import Title from '../Profile/Components/Title/Title';
+import Button from '../Shared/Button/Button';
+import Window from '../Window/Window';
+import './ChatWindow.css';
+import ChatBubble from './Components/ChatBubble/ChatBubble';
+import ChatGameInvite from './Components/ChatGameInvite/ChatGameInvite';
 // import { IChatStruct } from '../PrivateMessages/PrivateMessages';
-import {
-	ChatContext,
-	IChatStruct,
-	IMessage,
-	IUserAction,
-	IUserBlocked,
-} from 'src/contexts/ChatContext';
-import ChatNotification from './Components/ChatNotification/ChatNotification';
+import { ChatContext, IMessage, IUserAction } from 'src/contexts/ChatContext';
 import { GameContext } from 'src/contexts/GameContext';
 import { useNavigationParams } from 'src/hooks/useNavigationParams';
+import ChatNotification from './Components/ChatNotification/ChatNotification';
 
 export interface IChatWindowProps {
 	onCloseClick: () => void;
@@ -546,6 +539,8 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							{
 								name: 'Profile',
 								onClick: () => {
+									setNavParam('friendProfile', name);
+									setShowFriendProfile(true);
 									setShowFriendProfile(true);
 									setProfileLogin(name);
 								},

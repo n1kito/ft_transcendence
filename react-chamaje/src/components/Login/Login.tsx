@@ -14,7 +14,6 @@ const Login = ({}) => {
 	const [passkey, setPasskey] = useState('');
 	const {
 		isAuthentificated,
-		isTwoFAEnabled,
 		setIsTwoFAEnabled,
 		isTwoFaVerified,
 	} = useAuth();

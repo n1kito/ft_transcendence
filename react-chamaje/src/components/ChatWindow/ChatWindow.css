@@ -3,10 +3,11 @@
 .chat-wrapper {
 	padding: 0rem 1.5rem 1rem 1.5rem;
 	min-width: 30vw;
-	max-width: 40vw;
 
 	display: flex;
 	flex-direction: column;
+	min-height: 25rem;
+	justify-content: end;
 	/* gap: 1rem; */
 }
 
