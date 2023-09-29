@@ -46,7 +46,7 @@ const Game: React.FC<IGameProps> = ({
 	};
 
 	// Import the game context, so it can be used everywhere
-	const { gameData, updateGameData, resetGameData, eraseGameData } =
+	const { gameData, updateGameData, resetGameData } =
 		useContext(GameContext);
 
 	// use our socket hook
@@ -57,8 +57,6 @@ const Game: React.FC<IGameProps> = ({
 		askForAnotherOpponent,
 		socketRef,
 	} = useGameSocket({ opponentLogin });
-
-	const { chatData } = useContext(ChatContext);
 
 	useEffect(() => {
 		// If the HTML canvas element has loaded,

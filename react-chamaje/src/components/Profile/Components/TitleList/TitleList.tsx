@@ -40,7 +40,7 @@ const TitleList: React.FC<ITitleListProps> = ({ profileData }) => {
 						></AchievementBadge>
 						<AchievementBadge
 							name="Tough cookie 🍪"
-							description="Hhard to defeat, the killrate is insane !"
+							description="Hard to defeat, the winrate is insane ! (> 90%)"
 							icon={cookieIcon}
 							achieved={(profileData?.winRate ?? 0) >= 100}
 						></AchievementBadge>

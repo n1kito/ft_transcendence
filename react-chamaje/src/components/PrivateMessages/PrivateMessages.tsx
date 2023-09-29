@@ -1,18 +1,19 @@
 import React, { useContext, useEffect, useState } from 'react';
-import './PrivateMessages.css';
+import { UserContext } from 'src/contexts/UserContext';
+import useAuth from 'src/hooks/userAuth';
+import ChatWindow from '../ChatWindow/ChatWindow';
+import { IFriendStruct } from '../Desktop/Desktop';
+import FriendBadge from '../Friends/Components/FriendBadge/FriendBadge';
+import InputField from '../Profile/Components/InputField/InputField';
+import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/SettingsWindow';
+import mysteryBox from '../Profile/Components/TargetBadge/images/mysteryBox.png';
+import Title from '../Profile/Components/Title/Title';
+import Button from '../Shared/Button/Button';
 import Window from '../Window/Window';
 import PrivateMessagesList from './Components/PrivateMessagesList/PrivateMessagesList';
-import FriendBadge from '../Friends/Components/FriendBadge/FriendBadge';
-import { IFriendStruct } from '../Desktop/Desktop';
-import ChatWindow from '../ChatWindow/ChatWindow';
-import useAuth from 'src/hooks/userAuth';
-import { UserContext } from 'src/contexts/UserContext';
-import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/SettingsWindow';
-import Title from '../Profile/Components/Title/Title';
-import InputField from '../Profile/Components/InputField/InputField';
-import Button from '../Shared/Button/Button';
-import mysteryBox from '../Profile/Components/TargetBadge/images/mysteryBox.png';
+import './PrivateMessages.css';
 
+import { ChatContext, IChatStruct, IMessage } from 'src/contexts/ChatContext';
 import {
 	createChatPrivateMessage,
 	fetchChats,
@@ -20,7 +21,6 @@ import {
 	findUserByLogin,
 	getBlockedUsers,
 } from 'src/utils/queries';
-import { ChatContext, IChatStruct, IMessage } from 'src/contexts/ChatContext';
 
 interface IPrivateMessagesProps {
 	onCloseClick: () => void;
@@ -76,7 +76,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 				setMessages(updatedMessages);
 			} else {
 				// notifications : copy the chat list and add newMessage to the chat concerned
-				let updatedChatList: IChatStruct[] = [];
+				const updatedChatList: IChatStruct[] = [];
 				for (const current of chatData.chatsList) {
 					if (current.chatId === message.chatId) {
 						const newChat: IChatStruct = {
@@ -138,14 +138,19 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	// If it does, open the window, set the userId and chatId, and fetch
 	// the messages.
 	// Otherwise open clean the messages and open the window
-	const openPrivateMessageWindow: any = (roomId: number, friendId: number) => {
+	const openPrivateMessageWindow = (
+		roomId: number,
+		friendId: number | undefined,
+	) => {
+		if (!friendId) return;
+		
 		let foundChat = false;
-		const chatId = chatData.chatsList.map((currentChat) => {
+		chatData.chatsList.map((currentChat) => {
 			if (roomId === currentChat.chatId) {
 				setChatWindowId(currentChat.chatId);
 				setChatWindowName(currentChat.name);
 				// notifications : set new Message to false when opened
-				let updatedChatList: IChatStruct[] = [];
+				const updatedChatList: IChatStruct[] = [];
 				for (const current of chatData.chatsList) {
 					if (current.chatId === roomId) {
 						const newChat: IChatStruct = {
@@ -282,47 +287,47 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 							chatData.chatsList.find(
 								(current) => current.isChannel === false,
 							) ? (
-								chatData.chatsList.map((room, index) => {
-									if (!room.isChannel) {
+									chatData.chatsList.map((room) => {
+										if (!room.isChannel) {
 										// find the other participant id
-										let participantId: number | undefined;
-										userData && room.participants.at(0) !== userData.id
-											? (participantId = room.participants.at(0))
-											: (participantId = room.participants.at(1));
+											let participantId: number | undefined;
+											userData && room.participants.at(0) !== userData.id
+												? (participantId = room.participants.at(0))
+												: (participantId = room.participants.at(1));
 
-										// if it is a friend, display onlinestatus
-										const friend = friends.find((friend) => {
-											return friend.id === participantId;
-										});
-										return (
-											<FriendBadge
-												key={'PM' + room.chatId}
-												badgeTitle={room.name || 'anonymous'}
-												badgeImageUrl={
-													room.name ? `/api/images/${room.avatar}` : mysteryBox
-												}
-												onlineIndicator={friend ? friend.onlineStatus : false}
-												isClickable={true}
-												onClick={() => {
-													openPrivateMessageWindow(room.chatId, participantId);
-												}}
-												shaking={room.newMessage || false}
-											/>
-										);
-									}
-								})
-							) : (
-								<FriendBadge
-									key={'PMEmptyFriendBadge'}
-									isEmptyBadge={true}
-									isChannelBadge={false}
-									onClick={() => {
-										setSearchUserError('');
-										setSearchUserSuccess('');
-										setSettingsPanelIsOpen(true);
-									}}
-								/>
-							)
+											// if it is a friend, display onlinestatus
+											const friend = friends.find((friend) => {
+												return friend.id === participantId;
+											});
+											return (
+												<FriendBadge
+													key={'PM' + room.chatId}
+													badgeTitle={room.name || 'anonymous'}
+													badgeImageUrl={
+														room.name ? `/api/images/${room.avatar}` : mysteryBox
+													}
+													onlineIndicator={friend ? friend.onlineStatus : false}
+													isClickable={true}
+													onClick={() => {
+														openPrivateMessageWindow(room.chatId, participantId);
+													}}
+													shaking={room.newMessage || false}
+												/>
+											);
+										}
+									})
+								) : (
+									<FriendBadge
+										key={'PMEmptyFriendBadge'}
+										isEmptyBadge={true}
+										isChannelBadge={false}
+										onClick={() => {
+											setSearchUserError('');
+											setSearchUserSuccess('');
+											setSettingsPanelIsOpen(true);
+										}}
+									/>
+								)
 						}
 					</PrivateMessagesList>
 					{settingsPanelIsOpen && (

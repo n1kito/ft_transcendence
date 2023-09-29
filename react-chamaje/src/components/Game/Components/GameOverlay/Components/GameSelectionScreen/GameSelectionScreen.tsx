@@ -1,13 +1,13 @@
 import React, { useContext, useState } from 'react';
+import { useNavigationParams } from 'src/hooks/useNavigationParams';
 import { GameContext } from '../../../../../../contexts/GameContext';
-import './GameSelectionScreen.css';
-import FriendBadge from '../../../../../Friends/Components/FriendBadge/FriendBadge';
 import { UserContext } from '../../../../../../contexts/UserContext';
-import Tooltip from '../../../../../Shared/Tooltip/Tooltip';
+import FriendBadge from '../../../../../Friends/Components/FriendBadge/FriendBadge';
 import Button from '../../../../../Shared/Button/Button';
+import Tooltip from '../../../../../Shared/Tooltip/Tooltip';
 import GameScreenTitle from '../Shared/GameScreenTitle/GameScreenTitle';
 import GameLocatingBadge from './Components/GameLocatingBadge';
-import { useNavigationParams } from 'src/hooks/useNavigationParams';
+import './GameSelectionScreen.css';
 
 interface IGameSelectionScreenProps {}
 
@@ -103,8 +103,8 @@ const GameSelectionScreen: React.FC<IGameSelectionScreenProps> = () => {
 							gameData.opponentPowerupsDisabled
 								? 'Your opponent disabled power-ups. Destroy them.'
 								: gameData.userPowerupsDisabled
-								? 'You disabled the power-ups ? Ok fine.'
-								: 'Power-ups are activated ! Yay !'
+									? 'You disabled the power-ups ? Ok fine.'
+									: 'Power-ups are activated ! Yay !'
 						}`}
 					</Tooltip>
 					<Button

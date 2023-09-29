@@ -7,8 +7,7 @@
 	display: flex;
 	flex-direction: column;
 	min-height: 25rem;
-	justify-content: end;
-	/* gap: 1rem; */
+	justify-content: flex-end;
 }
 
 .chat-content::-webkit-scrollbar {

@@ -1,18 +1,20 @@
 import React, { useContext } from 'react';
-import './RivalBadge.css';
-import BlackBadge from '../Shared/BlackBadge/BlackBadge';
-import FriendBadge from '../../../Friends/Components/FriendBadge/FriendBadge';
-import OnlineIndicator from '../Shared/OnlineIndicator/OnlineIndicator';
-import { UserContext } from '../../../../contexts/UserContext';
 import { useNavigationParams } from 'src/hooks/useNavigationParams';
+import { UserContext } from '../../../../contexts/UserContext';
+import FriendBadge from '../../../Friends/Components/FriendBadge/FriendBadge';
+import BlackBadge from '../Shared/BlackBadge/BlackBadge';
+import './RivalBadge.css';
 
 interface IRivalBadgeProps {
 	rivalLogin: string;
+	rivalImage: string;
 }
 
-const RivalBadge: React.FC<IRivalBadgeProps> = ({ rivalLogin }) => {
+const RivalBadge: React.FC<IRivalBadgeProps> = ({ rivalLogin, rivalImage }) => {
 	const { userData } = useContext(UserContext);
 	const { setNavParam } = useNavigationParams();
+
+	const rivalIsUser = rivalLogin === userData.login;
 
 	const openRivalProfile = () => {
 		setNavParam('friendProfile', rivalLogin);
@@ -24,7 +26,8 @@ const RivalBadge: React.FC<IRivalBadgeProps> = ({ rivalLogin }) => {
 				isClickable={true}
 				onlineIndicator={true}
 				onClick={openRivalProfile}
-				badgeImageUrl={`/api/images/${userData.rivalImage}`}
+				badgeImageUrl={`/api/images/${rivalImage}`}
+				showStatusIndicator={!rivalIsUser}
 			/>
 			<BlackBadge>@{rivalLogin}</BlackBadge>
 		</div>

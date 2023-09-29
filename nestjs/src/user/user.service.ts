@@ -70,8 +70,8 @@ export class UserService {
 				},
 			});
 
-			const isLoginLocked: boolean = !!updateUserDto.login;
-			const isEmailLocked: boolean = !!updateUserDto.email;
+			const isLoginLocked = !!updateUserDto.login;
+			const isEmailLocked = !!updateUserDto.email;
 
 			const lock = await this.prisma.user.update({
 				where: { id: userId },
@@ -182,8 +182,12 @@ export class UserService {
 	}
 
 	calculateWinRate(user: UserWithRelations): number | undefined {
+		const userHasPlayed = this.calculateTotalGameCount(user);
+		console.log('User has played before');
 		return user.gamesWon.length > 0
 			? (user.gamesWon.length / this.calculateTotalGameCount(user)) * 100
+			: userHasPlayed
+			? 0
 			: undefined;
 	}
 
@@ -191,31 +195,48 @@ export class UserService {
 	// If two users have the same number of wins, the user who has won most
 	// recently takes the higher rank.
 	async calculateRank(userId: number): Promise<number | undefined> {
-		// Aggregate and sort our winners
-		const leaderboard = await this.prisma.gameSession.groupBy({
+		// Step 1: Collect all unique players who have played a game
+		const allPlayers = await this.prisma.gameSession.findMany({
+			select: {
+				player1Id: true,
+				player2Id: true,
+			},
+		});
+		const uniquePlayers = new Set(
+			allPlayers.flatMap((p) => [p.player1Id, p.player2Id]),
+		);
+
+		// Step 2: Aggregate and sort our winners
+		const winners = await this.prisma.gameSession.groupBy({
 			by: ['winnerId'],
-			_count: {
-				winnerId: true,
-			},
-			_max: {
-				createdAt: true,
-			},
+			_count: { winnerId: true },
+			_max: { createdAt: true },
 			orderBy: [
-				{
-					_count: {
-						winnerId: 'desc',
-					},
-				},
-				{
-					_max: {
-						createdAt: 'desc',
-					},
-				},
+				{ _count: { winnerId: 'desc' } },
+				{ _max: { createdAt: 'desc' } },
 			],
 		});
-		// Find Rank
+
+		// Step 3: Combine & Sort
+		const leaderboard = Array.from(uniquePlayers).map((playerId) => {
+			const winner = winners.find((w) => w.winnerId === playerId);
+			return {
+				playerId,
+				winCount: winner ? winner._count.winnerId : 0,
+				lastWin: winner ? winner._max.createdAt : null,
+			};
+		});
+
+		leaderboard.sort(
+			(a, b) =>
+				b.winCount - a.winCount ||
+				(b.lastWin?.getTime() || 0) - (a.lastWin?.getTime() || 0),
+		);
+
+		// Step 4: Find Rank
 		const userRank =
-			leaderboard.findIndex((entry) => entry.winnerId === userId) + 1;
+			leaderboard.findIndex((entry) => entry.playerId === userId) + 1;
+
 		return userRank > 0 ? userRank : undefined;
 	}
 

@@ -18,6 +18,7 @@ const rouletteImages = [chucky, norminet, scream, sophie, theRing, xavier];
 interface ITargetBadgeProps {
 	isOwnProfile: boolean;
 	targetLogin: string;
+	targetImage: string;
 	targetDiscoveredByUser: boolean;
 }
 
@@ -25,6 +26,7 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 	isOwnProfile,
 	targetLogin,
 	targetDiscoveredByUser,
+	targetImage,
 }) => {
 	const [imageIndex, setImageIndex] = useState(0);
 	const [badgeTitle, setBadgeTitle] = useState('Target');
@@ -137,7 +139,7 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 				isClickable={true}
 				badgeTitle={badgeTitle}
 				badgeImageUrl={
-					targetHasBeenAssigned ? `/api/images/${badgeImage}` : badgeImage
+					targetHasBeenAssigned ? `/api/images/${targetImage}` : badgeImage
 				}
 			/>
 			{targetHasBeenAssigned && <BlackBadge>@{targetLogin}</BlackBadge>}

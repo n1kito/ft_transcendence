@@ -29,7 +29,7 @@ export interface IGameDataProps {
 
 // Initial state of the gameData
 const defaultGameState: IGameDataProps = {
-	gameIsPlaying: true,
+	gameIsPlaying: false,
 	socket: undefined,
 	player1Ready: false,
 	player2Ready: false,
