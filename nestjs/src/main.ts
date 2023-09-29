@@ -6,7 +6,6 @@ import * as express from 'express';
 import { join } from 'path';
 import { AllExceptionsFilter } from './filters/all-exceptions.filter';
 import { ExpressAdapter } from '@nestjs/platform-express';
-// import { ExpressAdapter } from '@nestjs/platform-express';
 import { rateLimit } from 'express-rate-limit';
 
 // Configure dotenv
