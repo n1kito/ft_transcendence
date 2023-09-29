@@ -11,9 +11,9 @@ export class GameLogic {
 	eventEmitter: EventEmitter = new EventEmitter();
 
 	// Broadcasting functions
-	private player1IsReady: boolean = false;
-	private player2IsReady: boolean = false;
-	private gameHasStarted: boolean = false;
+	private player1IsReady = false;
+	private player2IsReady = false;
+	private gameHasStarted = false;
 	private gameBroadcastInterval: NodeJS.Timeout | undefined = undefined;
 	private gameStateUpdateInterval: NodeJS.Timeout | undefined = undefined;
 
@@ -28,10 +28,10 @@ export class GameLogic {
 	// Game session state
 	public player1UserId: number;
 	public player2UserId: number;
-	public player1Score: number = 0;
-	public player2Score: number = 0;
-	public powerupsEnabled: boolean = true;
-	public awaitingPowerUpReply: boolean = false;
+	public player1Score = 0;
+	public player2Score = 0;
+	public powerupsEnabled = true;
+	public awaitingPowerUpReply = false;
 
 	constructor(
 		player1SocketId: string,
@@ -134,7 +134,7 @@ export class GameLogic {
 			width: this.players[player1SocketId].width,
 			height: this.players[player1SocketId].height,
 			score: this.player1Score,
-			speed: this.players[player1SocketId].speed
+			speed: this.players[player1SocketId].speed,
 		};
 		const currentPlayer2State: IPlayerState = {
 			x: this.canvasSize.width - this.paddleWidth,
@@ -142,7 +142,7 @@ export class GameLogic {
 			width: this.players[player2SocketId].width,
 			height: this.players[player2SocketId].height,
 			score: this.player2Score,
-			speed: this.players[player2SocketId].speed
+			speed: this.players[player2SocketId].speed,
 		};
 		const player1StateUpdate: IGameState = {
 			player1: currentPlayer1State,
@@ -216,10 +216,10 @@ export class GameLogic {
 	// This will randomly trigger power ups, if one is not already waiting to be
 	// activated
 	initiateRandomPowerUps() {
-		const MIN_INTERVAL = 15;
-		const MAX_INTERVAL = 30;
+		const MIN_INTERVAL = 10;
+		const MAX_INTERVAL = 20;
 
-		// Get a random interval between 15 and 60 seconds
+		// Get a random interval between 10 and 20 seconds
 		const randomInterval =
 			Math.floor(Math.random() * (MAX_INTERVAL - MIN_INTERVAL + 1)) +
 			MIN_INTERVAL;

@@ -12,19 +12,6 @@ root.render(
 	// <React.StrictMode>
 	<>
 		<App />
-		//TODO: clean this up
-		{/* svg noise filter applied to the entire body element */}
-		{/* <svg className="filter-svg">
-			<filter id="noise-filter">
-				<feTurbulence
-					type="fractalNoise"
-					baseFrequency="9"
-					numOctaves="5"
-					stitchTiles="stitch"
-				/>
-			</filter>
-		</svg>
-		{/* </React.StrictMode>, */}
 	</>,
 );
 

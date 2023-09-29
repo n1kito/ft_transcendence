@@ -1,9 +1,9 @@
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
-import './Window.css';
-import WindowTitleBar from './Components/WindowTitleBar/WindowTitleBar';
-import WindowMenu from './Components/WindowMenu/WindowMenu';
 import { motion, useDragControls } from 'framer-motion';
+import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import { useWindowContext } from 'src/contexts/WindowContext';
+import WindowMenu from './Components/WindowMenu/WindowMenu';
+import WindowTitleBar from './Components/WindowTitleBar/WindowTitleBar';
+import './Window.css';
 
 export interface MenuLinks {
 	name: string;
@@ -38,8 +38,6 @@ const Window: React.FC<WindowProps> = ({
 }) => {
 	const { maxZIndex, updateMaxZIndex } = useWindowContext();
 	const [windowZIndex, setWindowZIndex] = useState(maxZIndex);
-	const [initialXPosition, setInitialXPosition] = useState<number>(0);
-	const [initialYPosition, setInitialYPosition] = useState<number>(0);
 
 	const [dragIsEnabled, setDragIsEnabled] = useState(false);
 	const windowRef = useRef<HTMLDivElement | null>(null);
@@ -71,26 +69,27 @@ const Window: React.FC<WindowProps> = ({
 
 				const xMoveDistance =
 					event.clientX - previousMouseCoordinates.current.x;
-				const yMoveDistance =
-					event.clientY - previousMouseCoordinates.current.y;
-
 				const originalWidth = previousWindowSize.current.width;
 				const originalHeight = previousWindowSize.current.height;
 
-				// Calculate aspect ratio
-				const aspectRatio = originalWidth / originalHeight;
-
 				// Calculate new dimensions
 				const newWidth = originalWidth + xMoveDistance;
-				const newHeight = newWidth / aspectRatio; // Keep aspect ratio
 
-				// Validation for height and width
-				if (
-					newHeight <= window.innerHeight * 0.85 &&
-					newHeight >= window.innerHeight * 0.5
-				) {
-					windowRef.current.style.height = `${newHeight}px`;
+				// Calculate corresponding height based on aspect ratio
+				const aspectRatio = originalWidth / originalHeight;
+				const newHeight = newWidth / aspectRatio;
+
+				// Validation limits
+				const minWidthPx = 640; // 40rem = 40 * 16px
+				const maxHeightPx = window.innerHeight * 0.9; // 90vh
+
+				if (newWidth >= minWidthPx && newHeight <= maxHeightPx) {
 					windowRef.current.style.width = `${newWidth}px`;
+
+					// Update for next calculation
+					previousWindowSize.current.width = newWidth;
+					previousWindowSize.current.height = newHeight;
+					previousMouseCoordinates.current.x = event.clientX;
 				}
 			};
 
@@ -163,7 +162,6 @@ const Window: React.FC<WindowProps> = ({
 				setDragIsEnabled(true);
 			}}
 		>
-			{/* TODO: I had to put the title bar in a div to give it the onPointerDown property, ideally this would be inclded in the component itself*/}
 			<WindowTitleBar
 				windowTitle={windowTitle}
 				onCloseClick={onCloseClick}

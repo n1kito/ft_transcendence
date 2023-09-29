@@ -2,7 +2,7 @@
 
 .game-wrapper {
 	position: relative;
-	height: 100%;
+	height: fit-content;
 	min-width: 25vw;
 	min-height: 25vh;
 
@@ -29,13 +29,3 @@
 		opacity: 0;
 	}
 }
-
-.game-canvas {
-	background-color: black;
-	height: 100%;
-	width: 100%;
-}
-
-/* .hide-announcement {
-	visibility: hidden;
-} */

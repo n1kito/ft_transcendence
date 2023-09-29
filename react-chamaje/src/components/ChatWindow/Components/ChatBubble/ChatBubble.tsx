@@ -47,9 +47,9 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 	const { setNavParam } = useNavigationParams();
 
 	const openFriendProfile = () => {
-		setProfileIsOpen(true);
 		setNavParam('friendProfile', sender);
 		setShowFriendProfile(true);
+		setProfileIsOpen(true);
 		setProfileLogin(sender);
 	};
 
@@ -86,7 +86,7 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 									onClick={() => {
 										// socket
 										mute(accessToken, chatId, userId)
-											.then((data) => {
+											.then(() => {
 												chatData.socket?.sendMessage(
 													'',
 													chatId,
@@ -108,7 +108,7 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 									onClick={() => {
 										// chatData.socket => send kick message
 										kick(accessToken, chatId, userId)
-											.then((data) => {
+											.then(() => {
 												chatData.socket?.kick(userId, chatId);
 												chatData.socket?.sendMessage(
 													'',
@@ -132,7 +132,7 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 									onClick={() => {
 										// socket
 										ban(accessToken, chatId, userId)
-											.then((data) => {
+											.then(() => {
 												chatData.socket?.kick(userId, chatId);
 												chatData.socket?.sendMessage(
 													'',
@@ -156,7 +156,7 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 									onClick={() => {
 										// socket => make admin
 										makeAdmin(accessToken, chatId, userId)
-											.then((data) => {
+											.then(() => {
 												chatData.socket?.makeAdmin(userId, chatId);
 												chatData.socket?.sendMessage(
 													'',

@@ -413,8 +413,9 @@ const Desktop = () => {
 					<Profile
 						login={friendLogin}
 						onCloseClick={() => {
-							removeNavParam('friendProfile');
 							setProfileWindowIsOpen(false), setShowFriendProfile(false);
+							removeNavParam('profile');
+							removeNavParam('friendProfile');
 						}}
 						windowDragConstraintRef={windowDragConstraintRef}
 						isMyFriend={isMyFriend}

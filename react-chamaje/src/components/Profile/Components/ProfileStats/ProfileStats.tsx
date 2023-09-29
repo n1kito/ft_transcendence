@@ -1,16 +1,17 @@
-import React, { useContext, useState } from 'react';
-import './ProfileStats.css';
-import StatBadge from '../StatBadge/StatBadge';
-import Title from '../Title/Title';
-import { UserContext } from '../../../../contexts/UserContext';
+import React, { useState } from 'react';
+import { useNavigationParams } from 'src/hooks/useNavigationParams';
 import { IUserData } from '../../../../../../shared-lib/types/user';
 import Tooltip from '../../../Shared/Tooltip/Tooltip';
+import StatBadge from '../StatBadge/StatBadge';
+import Title from '../Title/Title';
+import './ProfileStats.css';
 
 interface ProfileStatsProps {
 	profileData: IUserData;
 }
 
 const ProfileStats: React.FC<ProfileStatsProps> = ({ profileData }) => {
+	const { setNavParam } = useNavigationParams();
 	const [bestieIsHovered, setBestieIsHovered] = useState(false);
 	const [targetIsHovered, setTargetIsHovered] = useState(false);
 	// console.log('Profile data', profileData);
@@ -20,7 +21,7 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({ profileData }) => {
 			<div className="profile-stats">
 				<StatBadge title="Rank">#{profileData.rank || '?'}</StatBadge>
 				<StatBadge title="Win Rate">{`${
-					profileData.winRate ? `${profileData.winRate}%` : '?'
+					profileData.winRate != undefined ? `${profileData.winRate}%` : '?'
 				}`}</StatBadge>
 				<StatBadge title="Played">{profileData.gamesCount}</StatBadge>
 				<div
@@ -45,9 +46,9 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({ profileData }) => {
 						isTextContent={true}
 						title="Bestie ♥️"
 						isClickable={profileData.bestieLogin != undefined}
-						onClick={() =>
-							window.alert(`Open profile for ' + ${profileData.bestieLogin}`)
-						}
+						onClick={() => {
+							setNavParam('friendProfile', profileData.bestieLogin);
+						}}
 					>
 						{profileData.bestieLogin ? `@${profileData.bestieLogin}` : '?'}
 					</StatBadge>

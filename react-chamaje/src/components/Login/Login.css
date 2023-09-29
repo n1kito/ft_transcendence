@@ -3,21 +3,25 @@
 @import url('https://use.typekit.net/rgo5nbx.css');
 
 #wrapper {
-	/* position: fixed; */
 	z-index: 1;
-	/* height: 100vh; */
-	/* width: 100vw; */
 	margin: 0;
 	display: flex;
 	flex-direction: column;
-	/* background: rgba(148, 187, 233, 1); */
-	/* background-color: transparent; */
 	font-family: 'Courier New', Courier, monospace;
 	cursor: default;
+	animation: fadeIn 2s ease-in-out;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 #content {
-	/* background-color: purple; */
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -29,18 +33,14 @@
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	/* height:100%; */
 }
 
 #inputField {
-	/* background-color: yellow; */
 	align-self: center;
 	display: flex;
 }
 
 #cursor {
-	/* font-weight: bold; */
-	/* display: none; */
 	animation: blink 1s infinite;
 }
 

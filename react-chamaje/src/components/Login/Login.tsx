@@ -12,12 +12,7 @@ const Login = ({}) => {
 	const constraintRef = useRef(null);
 
 	const [passkey, setPasskey] = useState('');
-	const {
-		isAuthentificated,
-		isTwoFAEnabled,
-		setIsTwoFAEnabled,
-		isTwoFaVerified,
-	} = useAuth();
+	const { isAuthentificated, setIsTwoFAEnabled, isTwoFaVerified } = useAuth();
 
 	// const { userData, setUserData } = useContext(UserContext);
 

@@ -1,13 +1,6 @@
-import React, {
-	Dispatch,
-	SetStateAction,
-	createContext,
-	useEffect,
-	useState,
-} from 'react';
+import React, { createContext, useState } from 'react';
 import { Socket } from 'socket.io-client';
-import { IPlayerInformation } from '../../../shared-lib/types/game';
-import { IGameState } from '../../../shared-lib/types/game';
+import { IGameState, IPlayerInformation } from '../../../shared-lib/types/game';
 
 export interface IGameDataProps {
 	socket: Socket | undefined;
@@ -36,8 +29,8 @@ export interface IGameDataProps {
 
 // Initial state of the gameData
 const defaultGameState: IGameDataProps = {
-	socket: undefined,
 	gameIsPlaying: false,
+	socket: undefined,
 	player1Ready: false,
 	player2Ready: false,
 	userPowerupsDisabled: false,

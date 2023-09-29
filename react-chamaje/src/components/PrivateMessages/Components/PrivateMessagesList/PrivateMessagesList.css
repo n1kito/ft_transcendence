@@ -8,6 +8,7 @@
 	max-height: 75vh;
 	overflow-y: auto;
 	overflow-x: hidden;
+	min-height: 15rem;
 }
 
 .channels-list {

@@ -1,17 +1,14 @@
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
-import './TwoFactorAuthentication.css';
-import Window from 'src/components/Window/Window';
-import Title from '../Title/Title';
-import InputField from '../InputField/InputField';
+import React, { useEffect, useRef, useState } from 'react';
 import Button from 'src/components/Shared/Button/Button';
 import useAuth from 'src/hooks/userAuth';
-import ShadowWrapper from 'src/components/Shared/ShadowWrapper/ShadowWrapper';
 import {
 	logInTwoFactorAuthentication,
 	turnOffTwoFactorAuthentication,
 	turnOnTwoFactorAuthentication,
 } from 'src/utils/TwoFactorAuthQueries';
-import { access } from 'fs';
+import InputField from '../InputField/InputField';
+import Title from '../Title/Title';
+import './TwoFactorAuthentication.css';
 
 export interface TwoFactorAuthenticationProps {
 	setTwoFactorAuthWindowisOpen: React.Dispatch<React.SetStateAction<boolean>>;
