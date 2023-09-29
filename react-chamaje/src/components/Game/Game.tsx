@@ -110,7 +110,6 @@ const Game: React.FC<IGameProps> = ({
 			initialWindowPosition={{ top: 25, left: 25 }}
 			windowTitle="Game"
 			onCloseClick={() => {
-				console.log('Player intentionally closed the window.');
 				onCloseClick();
 			}}
 			windowDragConstraintRef={windowDragConstraintRef}
