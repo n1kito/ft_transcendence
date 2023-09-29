@@ -166,7 +166,7 @@ export class AuthController {
 			const ret = await this.authService.turnOffTwoFactorAuthentication(userId);
 			return res.status(200).json({ message: ret });
 		} catch (error) {
-			return res.status(500).json({ message: error });
+			return res.status(403).json({ message: error });
 		}
 	}
 
@@ -198,7 +198,7 @@ export class AuthController {
 				.status(200)
 				.json({ message: 'two-factor authentication enabled!' });
 		} catch (error) {
-			console.error('🧠 dto error: ', error);
+			console.error('dto error: ', error);
 		}
 	}
 
@@ -227,7 +227,7 @@ export class AuthController {
 			return res.status(200).json({ message: 'successful 2FA log out' });
 		} catch (error) {
 			console.error(error);
-			return res.status(500).json({ message: 'error 2FA log out' });
+			return res.status(403).json({ message: 'error 2FA log out' });
 		}
 	}
 }

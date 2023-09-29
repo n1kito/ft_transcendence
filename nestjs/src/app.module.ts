@@ -19,6 +19,7 @@ import { GameService } from './game/game.service';
 import { ChatModule } from './chat/chat.module';
 import { AuthMiddleWare } from './middleware/auth.middleware';
 import { APP_GUARD } from '@nestjs/core';
+import { ConnectionStatusModule } from './chatWebSocket/chatWebSocket.module';
 
 @Module({
 	imports: [
@@ -30,6 +31,7 @@ import { APP_GUARD } from '@nestjs/core';
 		TokenModule,
 		GameModule,
 		ChatModule,
+		ConnectionStatusModule,
 	],
 	controllers: [AppController],
 	// providers: [AppService, PrismaService, GameService],

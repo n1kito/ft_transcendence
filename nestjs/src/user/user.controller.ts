@@ -90,7 +90,7 @@ export class UserController {
 				.json({ message: 'Target status updated successfully' });
 		} catch (error) {
 			response
-				.status(500)
+				.status(403)
 				.json({ error: 'Could not update target discovery status.' });
 		}
 	}
@@ -104,7 +104,7 @@ export class UserController {
 				.status(200)
 				.json({ message: 'User account deleted successfully' });
 		} catch (error) {
-			return response.status(500).json({
+			return response.status(403).json({
 				error: 'Could not delete user account',
 			});
 		}
