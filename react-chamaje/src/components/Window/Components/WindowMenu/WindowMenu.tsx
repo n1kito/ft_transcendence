@@ -6,7 +6,6 @@ interface WindowMenuProps {
 }
 
 const WindowMenu = ({ children }: WindowMenuProps) => {
-	// TODO: figure out what type props should be
 	return <div className="windowMenu">{children}</div>;
 };
 

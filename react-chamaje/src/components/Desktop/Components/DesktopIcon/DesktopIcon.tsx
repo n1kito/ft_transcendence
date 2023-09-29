@@ -33,7 +33,6 @@ const DesktopIcon: React.FC<IconProps> = ({
 		setSelectedIcon(-1);
 	};
 
-	// TODO: issue with this code is that an event listener is added to the document element for each icon
 	useEffect(() => {
 		const handleClickOutsideOfIcon = (event: MouseEvent) => {
 			const target = event.target as HTMLElement;

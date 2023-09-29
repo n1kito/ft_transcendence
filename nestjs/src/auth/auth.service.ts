@@ -28,13 +28,12 @@ export class AuthService {
 	private readonly stateRandomString: string;
 	private temporaryAuthCode: string;
 	private token: string;
-	private userId: number; // TODO: do we need this ? Added so we could add it to JWT token
+	private userId: number;
 	private userData: UserData;
 	private temporaryCode: string;
 
 	private readonly prisma: PrismaClient;
 
-	// TODO: this is retrieved locally and it's not correct, we should retrieve from the database
 	getLogin(): string {
 		return this.userData.login;
 	}
@@ -83,7 +82,6 @@ export class AuthService {
 		});
 		// Once the response is received, we can parse it
 		const data = await response.json();
-		// TODO: this response does not contain the state I pass to it, why ?
 		console.log(data);
 		if (!data.access_token.length)
 			throw new Error('Could not get access token');
@@ -91,7 +89,6 @@ export class AuthService {
 	}
 
 	checkState(state: string) {
-		// TODO: how can we show the error to the end user ?
 		if (state != this.stateRandomString)
 			throw new Error('State strings do not match');
 	}
@@ -120,7 +117,6 @@ export class AuthService {
 				image: responseData.image.versions.small,
 			};
 
-			// TODO: add try/catch around this if we want to have more precise error logs ?
 			// Find the user in our database
 			try {
 				const userInDb = await this.prisma.user.findUnique({
@@ -132,7 +128,6 @@ export class AuthService {
 						data: this.userData,
 					});
 					// give the user some default friends
-					// TODO: add our 5 default users as the new user's friend
 					await this.addDefaultUsersAsFriends(newUser);
 					// give the user a random target
 					await this.assignRandomTargetToUser(newUser);
@@ -151,7 +146,6 @@ export class AuthService {
 				console.error('userIndb error: ', e.message);
 			}
 		} catch (error) {
-			// TODO:: handle error accordingly
 			console.log(error);
 		}
 	}
@@ -219,8 +213,6 @@ export class AuthService {
 		// For each of them, add them as a friend of our user, and vice-versa
 		const friendUpdates = defaultUsers
 			.map((currentDefaultUser) => {
-				// TODO: check is the default users are not already friends with our main user
-				// but this should not be possible since this is only done on entry creation
 				return [
 					this.prisma.user.update({
 						where: { id: user.id },

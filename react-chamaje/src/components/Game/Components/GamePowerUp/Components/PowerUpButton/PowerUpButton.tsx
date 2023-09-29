@@ -1,3 +1,4 @@
+import React from 'react';
 import './PowerUpButton.css';
 
 interface IPowerUpButtonProps {

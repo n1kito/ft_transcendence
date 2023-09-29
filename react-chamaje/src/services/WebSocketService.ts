@@ -1,10 +1,7 @@
 import { Socket, io } from 'socket.io-client';
-import { AuthContext } from 'src/contexts/AuthContext';
-import useAuth from 'src/hooks/userAuth';
 
 interface callbackInterface {
 	(data: any): void;
-	// (status: any): void;
 }
 interface callbackStatusInterface {
 	(id: any, online: boolean, playing: boolean): void;

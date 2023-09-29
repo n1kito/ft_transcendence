@@ -8,13 +8,11 @@ import Stickerparticles from './Components/Stickerparticles/Stickerparticles';
 import useAuth from 'src/hooks/userAuth';
 import { UserContext } from 'src/contexts/UserContext';
 
-const Login = ({}) => {
+const Login = () => {
 	const constraintRef = useRef(null);
 
 	const [passkey, setPasskey] = useState('');
 	const { isAuthentificated, setIsTwoFAEnabled, isTwoFaVerified } = useAuth();
-
-	// const { userData, setUserData } = useContext(UserContext);
 
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {
@@ -28,8 +26,6 @@ const Login = ({}) => {
 
 		return () => {
 			document.removeEventListener('keydown', handleKeyDown);
-
-			// setIsTwoFAEnabled(isTwoFAEnabled);
 		};
 	}, [passkey]);
 

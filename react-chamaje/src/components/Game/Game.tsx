@@ -46,8 +46,7 @@ const Game: React.FC<IGameProps> = ({
 	};
 
 	// Import the game context, so it can be used everywhere
-	const { gameData, updateGameData, resetGameData } =
-		useContext(GameContext);
+	const { gameData, updateGameData, resetGameData } = useContext(GameContext);
 
 	// use our socket hook
 	const {
@@ -70,7 +69,6 @@ const Game: React.FC<IGameProps> = ({
 					ctx,
 				);
 		}
-		//TODO: announce others i am in a game
 
 		return () => {
 			gameInstance.current?.stopGame();

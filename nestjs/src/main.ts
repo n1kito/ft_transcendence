@@ -13,7 +13,6 @@ import { rateLimit } from 'express-rate-limit';
 config();
 
 async function bootstrap() {
-	const expressApp = express();
 	const app = await NestFactory.create(AppModule);
 
 	app.enableCors({
@@ -23,7 +22,6 @@ async function bootstrap() {
 	app.use(cookieParser());
 
 	// Setup a global filter to catch all unexpected exceptions
-	// TODO: check this together
 	app.useGlobalFilters(new AllExceptionsFilter());
 
 	app.use(

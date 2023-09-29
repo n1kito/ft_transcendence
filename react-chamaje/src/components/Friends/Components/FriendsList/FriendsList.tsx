@@ -151,7 +151,6 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 			<div className="friendsList">
 				{friends &&
 					friends.map((friend, index) => (
-						// TODO: I don't like how the badgeImageUrl is constructed by hand here, it's located in our nest server, maybe there's a better way to do this ?
 						<FriendBadge
 							key={index}
 							badgeTitle={friend.login}

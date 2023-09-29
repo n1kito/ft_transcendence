@@ -44,13 +44,13 @@ const ProfileMissions: React.FC<IProfileMissionsProps> = ({
 				{(isOwnProfile || targetDiscoveredByUser) &&
 				targetLogin &&
 				targetLogin.length > 0 ? (
-						<TargetBadge
-							targetLogin={targetLogin}
-							targetImage={targetImage}
-							isOwnProfile={isOwnProfile}
-							targetDiscoveredByUser={targetDiscoveredByUser}
-						/>
-					) : null}
+					<TargetBadge
+						targetLogin={targetLogin}
+						targetImage={targetImage}
+						isOwnProfile={isOwnProfile}
+						targetDiscoveredByUser={targetDiscoveredByUser}
+					/>
+				) : null}
 			</div>
 		</div>
 	);

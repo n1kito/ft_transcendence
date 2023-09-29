@@ -96,7 +96,6 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 	// We use our initial state above to initialize it
 	const [chatData, setChatData] = useState<IChatDataProps>(defaultChatState);
 
-	// TODO: remove this and corresponding logs
 	// Logs the updates to chatData as they happen
 	useEffect(() => {
 		const chatDataLog = { ...chatData, socket: 'not loggable' };
