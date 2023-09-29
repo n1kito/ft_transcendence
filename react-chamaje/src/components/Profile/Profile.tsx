@@ -18,7 +18,6 @@ import TitleList from './Components/TitleList/TitleList';
 import TwoFactorAuthentication from './Components/TwoFactorAuthentication/TwoFactorAuthentication';
 import './Profile.css';
 
-// TODO: find a way to make the shaddow wrapper widht's 100% so if fills the sidebar
 export interface ProfileProps {
 	login: string | undefined;
 	setLogin?: React.Dispatch<React.SetStateAction<string>>;

@@ -7,7 +7,6 @@ import InputField from '../InputField/InputField';
 import Title from '../Title/Title';
 import './ProfileSettings.css';
 
-// TODO: cursor not allowed
 type ValidationError = {
 	property: string;
 	constraints: {

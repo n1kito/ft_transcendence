@@ -68,8 +68,6 @@ export class TokenService {
 		res.cookie(tokenName, tokenValue, {
 			httpOnly: true,
 			sameSite: 'strict',
-			// TODO: set this to true for production only, as it sends it over https and https is not used in local environments
-			// secure: true,
 			expires: new Date(Date.now() + expiresIn * 1000),
 		});
 	}

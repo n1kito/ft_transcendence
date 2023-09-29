@@ -106,8 +106,6 @@ export class UserController {
 		}
 	}
 
-	// TODO: change route to user/me/friends or something, I just created a separate one to avoid with the /user/me routes Jee created
-	// TODO: move the logic to the service file
 	@Get('friends')
 	async getUserFriends(
 		@Req() request: CustomRequest,
@@ -122,7 +120,6 @@ export class UserController {
 		});
 		if (!userRequesting)
 			return response.status(401).json({ message: 'unauthorized request' });
-		// TODO: select more fields
 		// Only select some fields for each friend
 		try {
 			const friends = userRequesting.friends.map((currentFriend) => ({
@@ -357,7 +354,6 @@ export class UserController {
 	}
 
 	// Get public data from userId
-	// TODO: DTO for userID ?
 	@Get('/byId/:userId')
 	async getPublicDataFromUserId(
 		@Req() request: CustomRequest,
@@ -372,7 +368,6 @@ export class UserController {
 	}
 
 	// Get userId from login
-	// TODO: DTO for login ?
 	@Get('/byLogin/:login')
 	async getUserIdFromLogin(
 		@Req() request: CustomRequest,

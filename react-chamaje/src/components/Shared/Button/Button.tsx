@@ -1,8 +1,6 @@
 import React from 'react';
 import './Button.css';
 
-// TODO: the border around the button should be around the shadow as well, like on gandi
-
 export interface MyButtonProps {
 	baseColor?: number[];
 	onClick?: () => void;

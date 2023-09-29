@@ -37,7 +37,6 @@ const RetrieveAccessToken = () => {
 						else navigate('/desktop');
 					}
 				} catch (error) {
-					//TODO: make an actual error page OR better make the login terminal display an error message
 					navigate('/error');
 				}
 			}

@@ -208,8 +208,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 									isChannel: false,
 								},
 							]);
-							// TODO: Check if we still need to do the part before.
-							// if without it we still get photos, remove it
 							fetchChats(accessToken)
 								.then((data) => {
 									getNewChatsList(data);

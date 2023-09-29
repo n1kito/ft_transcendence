@@ -3,9 +3,7 @@ import { GameContext } from '../../../../../../contexts/GameContext';
 import './GameErrorScreen.css';
 import GameScreenTitle from '../Shared/GameScreenTitle/GameScreenTitle';
 
-interface IGameErrorScreenProps {}
-
-const GameErrorScreen: React.FC<IGameErrorScreenProps> = () => {
+const GameErrorScreen = () => {
 	const { gameData } = useContext(GameContext);
 
 	return (

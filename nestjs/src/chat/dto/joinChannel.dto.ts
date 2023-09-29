@@ -1,8 +1,6 @@
 import {
-	IsBoolean,
 	IsDefined,
 	IsNotEmpty,
-	IsNumber,
 	IsOptional,
 	IsString,
 	MaxLength,
@@ -11,7 +9,6 @@ import {
 } from 'class-validator';
 
 export class JoinChannelDTO {
-	// TODO: do I need to escape more characters? (add '!' ?)
 	@IsOptional()
 	@IsNotEmpty()
 	@IsString()
@@ -19,7 +16,7 @@ export class JoinChannelDTO {
 	@NotContains('\\')
 	@MaxLength(35)
 	@MinLength(2)
-    @NotContains(';')
+	@NotContains(';')
 	@IsDefined()
 	name?: string;
 
@@ -33,5 +30,4 @@ export class JoinChannelDTO {
 	@MinLength(7)
 	@MaxLength(60)
 	password?: string;
-
 }

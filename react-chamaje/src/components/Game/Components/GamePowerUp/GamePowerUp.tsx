@@ -1,3 +1,4 @@
+import React from 'react';
 import { useContext, useEffect, useState } from 'react';
 import PowerUpButton from './Components/PowerUpButton/PowerUpButton';
 import './GamePowerUp.css';

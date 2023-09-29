@@ -14,6 +14,7 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({ profileData }) => {
 	const { setNavParam } = useNavigationParams();
 	const [bestieIsHovered, setBestieIsHovered] = useState(false);
 	const [targetIsHovered, setTargetIsHovered] = useState(false);
+
 	return (
 		<div className="profile-stats-wrapper">
 			<Title>Stats</Title>
@@ -29,7 +30,7 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({ profileData }) => {
 					onMouseLeave={() => setTargetIsHovered(false)}
 				>
 					<Tooltip isVisible={targetIsHovered} position="bottom">
-						How many times you've beaten a target 🥊
+						How many times you have beaten a target 🥊
 					</Tooltip>
 					<StatBadge title="Killcount">{profileData.killCount}</StatBadge>
 				</div>
@@ -39,7 +40,7 @@ const ProfileStats: React.FC<ProfileStatsProps> = ({ profileData }) => {
 					onMouseLeave={() => setBestieIsHovered(false)}
 				>
 					<Tooltip isVisible={bestieIsHovered} position="bottom">
-						The person you've played the most games with 💖
+						The person you have played the most games with 💖
 					</Tooltip>
 					<StatBadge
 						isTextContent={true}
