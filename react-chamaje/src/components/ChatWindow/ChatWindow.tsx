@@ -678,6 +678,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							onChange={handlePwdInput}
 							success={settingPwdSuccess}
 							error={settingPwdError}
+							isPassword={true}
 						></InputField>
 						<Button
 							onClick={async () => {
