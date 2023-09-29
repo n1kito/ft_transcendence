@@ -1,14 +1,13 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import './Game.css';
-import Window from '../Window/Window';
-import GameOverlay from './Components/GameOverlay/GameOverlay';
+import React, { useContext, useEffect, useRef } from 'react';
+import { ChatContext } from 'src/contexts/ChatContext';
 import { GameContext } from '../../contexts/GameContext';
 import { useGameSocket } from '../../hooks/useGameSocket';
-import GameCanvas from './Components/GameCanvas/GameCanvas';
+import Window from '../Window/Window';
 import { GameRenderer } from './Components/GameCanvas/Entities/GameRenderer';
+import GameCanvas from './Components/GameCanvas/GameCanvas';
+import GameOverlay from './Components/GameOverlay/GameOverlay';
 import GamePowerUp from './Components/GamePowerUp/GamePowerUp';
-import { UserContext } from 'src/contexts/UserContext';
-import { ChatContext } from 'src/contexts/ChatContext';
+import './Game.css';
 
 export interface ICanvasProps {
 	width: number;
@@ -31,7 +30,6 @@ export interface IBallProps {
 interface IGameProps {
 	windowDragConstraintRef: React.RefObject<HTMLDivElement>;
 	onCloseClick: () => void;
-	// gameRoomInfo?: IGameRoomProps;
 	opponentLogin?: string | undefined;
 }
 
@@ -42,12 +40,10 @@ const Game: React.FC<IGameProps> = ({
 }) => {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const gameInstance = useRef<GameRenderer | null>(null);
-	// TODO: might not be necessary since I don't change the actual canvas size
-	// upon resize, it should actually be just set to 100%
-	const [canvasSize, setCanvasSize] = useState<ICanvasProps>({
+	const canvasSize: ICanvasProps = {
 		width: 700,
 		height: 500,
-	});
+	};
 
 	// Import the game context, so it can be used everywhere
 	const { gameData, updateGameData, resetGameData, eraseGameData } =
@@ -74,7 +70,6 @@ const Game: React.FC<IGameProps> = ({
 					socketRef.current,
 					canvasRef,
 					ctx,
-					// broadcastPlayerPosition,
 				);
 		}
 		//TODO: announce others i am in a game

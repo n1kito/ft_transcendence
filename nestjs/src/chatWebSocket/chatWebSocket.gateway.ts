@@ -87,7 +87,6 @@ export class chatWebSocketGateway
 	// when a client connects to the server, the server emits to all connected
 	// clients the login of this user
 	@SubscribeMessage('ServerConnection')
-<<<<<<< HEAD
 	handleServerConnection(@MessageBody() content: IStatus): void {
 		console.log('content:', content);
 		this.server.emit(
@@ -101,11 +100,6 @@ export class chatWebSocketGateway
 			content.online,
 			content.playing,
 		);
-=======
-	handleServerConnection(@MessageBody() data: number): void {
-		this.server.emit('ClientLogIn', data);
-		console.log('\n[🟢]' + data + ' just arrived!\n');
->>>>>>> main
 	}
 
 	// when a client received a 'userLoggedIn' message, it sends back a
@@ -115,7 +109,6 @@ export class chatWebSocketGateway
 		@MessageBody() content: IStatus,
 		@ConnectedSocket() client: Socket,
 	): void {
-<<<<<<< HEAD
 		this.server.emit(
 			'ClientLogInResponse',
 			content.userId,
@@ -127,10 +120,6 @@ export class chatWebSocketGateway
 			content.online,
 			content.playing,
 		);
-=======
-		this.server.emit('ClientLogInResponse', data);
-		console.log('[🟢] ClientLogInResponse: ' + data);
->>>>>>> main
 	}
 
 	@SubscribeMessage('ServerEndedConnection')

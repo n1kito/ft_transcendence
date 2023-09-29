@@ -1,6 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
-import './TargetBadge.css';
+import { useNavigationParams } from 'src/hooks/useNavigationParams';
+import { UserContext } from '../../../../contexts/UserContext';
+import useAuth from '../../../../hooks/userAuth';
 import FriendBadge from '../../../Friends/Components/FriendBadge/FriendBadge';
+import BlackBadge from '../Shared/BlackBadge/BlackBadge';
+import './TargetBadge.css';
 import mysteryBox from './images/mysteryBox.png';
 import chucky from './images/roulette/chucky.jpg';
 import norminet from './images/roulette/norminet.jpg';
@@ -8,13 +12,6 @@ import scream from './images/roulette/scream.jpg';
 import sophie from './images/roulette/sophie.jpg';
 import theRing from './images/roulette/the-ring.jpg';
 import xavier from './images/roulette/xavier.jpg';
-import jee from './images/jee.jpeg';
-import BlackBadge from '../Shared/BlackBadge/BlackBadge';
-import OnlineIndicator from '../Shared/OnlineIndicator/OnlineIndicator';
-import { UserContext } from '../../../../contexts/UserContext';
-import { AuthContext } from '../../../../contexts/AuthContext';
-import useAuth from '../../../../hooks/userAuth';
-import { useNavigationParams } from 'src/hooks/useNavigationParams';
 
 const rouletteImages = [chucky, norminet, scream, sophie, theRing, xavier];
 
