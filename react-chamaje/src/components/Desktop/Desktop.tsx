@@ -62,7 +62,6 @@ const Desktop = () => {
 
 	const windowDragConstraintRef = useRef(null);
 
-
 	const fetchUserData = async () => {
 		// Fetch the user data from the server
 		try {

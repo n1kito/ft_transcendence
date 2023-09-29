@@ -2,7 +2,7 @@
 # BUILD FOR LOCAL DEVELOPMENT
 #
 
-FROM node:latest As development
+FROM node:alpine As development
 
 # Necessary to install  usermod and groupmod
 RUN apk update && apk add --no-cache shadow
