@@ -83,8 +83,6 @@ export class DatabaseSetupService implements OnModuleInit {
 			} else {
 				console.log('Database was not empty, not populating it !');
 			}
-		} catch (error) {
-			console.error('Error counting users: ', error);
-		}
+		} catch (error) {}
 	}
 }

@@ -140,7 +140,6 @@ export class GameService {
 				this.handleRoomIsFull(newlyConnectedSocketId, assignedRoomId);
 			}
 		} catch (error) {
-			console.error(`handleNewClientConnection(): ${error.message}`);
 			newlyConnectedSocket.disconnect();
 		}
 	}
@@ -855,9 +854,7 @@ export class GameService {
 						`Successfully created database entry for game in room ${roomId}`,
 					);
 				})
-				.catch((error) => {
-					console.error('Error creating DB game entry:', error.message);
-				});
+				.catch((error) => {});
 
 			// Check if the winner beat their current target and handle that
 			if (await this.userBeatTheirCurrentTarget(winnerId, loserId)) {
@@ -1003,16 +1000,14 @@ export class GameService {
 			}
 			// Update the bestie in the database, if there is one
 			if (mostFrequentOpponentId)
-				this.prisma.user
-					.update({
-						where: {
-							id: userId,
-						},
-						data: {
-							bestieId: mostFrequentOpponentId,
-						},
-					})
-					.catch((e) => console.error('update bestie error: ', e.message));
+				this.prisma.user.update({
+					where: {
+						id: userId,
+					},
+					data: {
+						bestieId: mostFrequentOpponentId,
+					},
+				});
 		} catch (error) {
 			throw new Error(`updateBestie(): ${error.message}`);
 		}

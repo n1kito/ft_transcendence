@@ -73,7 +73,6 @@ export class chatWebSocketGateway
 		try {
 			decodeToken(client);
 		} catch (e) {
-			console.error('Verify token failed:', e);
 			client.disconnect();
 		}
 	}
@@ -88,15 +87,9 @@ export class chatWebSocketGateway
 	// clients the login of this user
 	@SubscribeMessage('ServerConnection')
 	handleServerConnection(@MessageBody() content: IStatus): void {
-		console.log('content:', content);
 		this.server.emit(
 			'ClientLogIn',
 			content.userId,
-			content.online,
-			content.playing,
-		);
-		console.log(
-			'\n🟢🟢' + content.userId + ' just arrived!🟢🟢\n' + 'status:',
 			content.online,
 			content.playing,
 		);
@@ -115,11 +108,6 @@ export class chatWebSocketGateway
 			content.online,
 			content.playing,
 		);
-		console.log(
-			'🟢 ClientLogInResponse: ' + content.userId,
-			content.online,
-			content.playing,
-		);
 	}
 
 	@SubscribeMessage('ServerEndedConnection')
@@ -127,7 +115,6 @@ export class chatWebSocketGateway
 		@MessageBody() data: number,
 		@ConnectedSocket() client: Socket,
 	): void {
-		console.log('\n[🔴]' + data + ' just left!\n');
 		this.server.emit('ClientLogOut', data);
 		client.disconnect();
 
@@ -143,7 +130,6 @@ export class chatWebSocketGateway
 		@ConnectedSocket() client: Socket,
 	): void {
 		client.join(roomId.toString());
-		console.log('[🚪]' + client.id + 'just entered room n.' + roomId);
 	}
 
 	@SubscribeMessage('leaveRoom')
@@ -152,7 +138,6 @@ export class chatWebSocketGateway
 		@ConnectedSocket() client: Socket,
 	): void {
 		client.leave(roomId.toString());
-		console.log('[🚪]' + client.id + 'just left room n.' + roomId);
 	}
 
 	@SubscribeMessage('sendMessage')
@@ -174,12 +159,6 @@ export class chatWebSocketGateway
 		};
 		// sends the message to everyone except the sender
 		client.to(content.chatId.toString()).emit('receiveMessage', messageToSend);
-		console.log(
-			'📣📣📣 sending this message:' +
-				content.message +
-				' to room ' +
-				content.chatId,
-		);
 	}
 
 	// kick and ban
@@ -193,9 +172,6 @@ export class chatWebSocketGateway
 			userId: content.userId,
 		};
 		client.to(content.chatId.toString()).emit('kick', kickMessage);
-		console.log(
-			'🥾🥾🥾 kicking :' + content.userId + ' from room ' + content.chatId,
-		);
 	}
 
 	@SubscribeMessage('makeAdmin')
@@ -208,9 +184,6 @@ export class chatWebSocketGateway
 			userId: content.userId,
 		};
 		client.to(content.chatId.toString()).emit('makeAdmin', message);
-		console.log(
-			'👑👑👑 making admin :' + content.userId + ' of room ' + content.chatId,
-		);
 	}
 
 	/* ********************************************************************* */
@@ -222,7 +195,6 @@ export class chatWebSocketGateway
 		@ConnectedSocket() client: Socket,
 	): void {
 		this.server.emit('acceptInvite', content);
-		console.log('[🏓] invitation of ' + content.inviterLogin + 'accepted');
 	}
 
 	@SubscribeMessage('declineInvite')
@@ -231,6 +203,5 @@ export class chatWebSocketGateway
 		@ConnectedSocket() client: Socket,
 	): void {
 		this.server.emit('declineInvite', content);
-		console.log('[🏓] invitation of ' + content.inviterLogin + 'declined');
 	}
 }

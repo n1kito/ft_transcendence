@@ -99,12 +99,8 @@ const Prompt: React.FC<PromptProps> = ({
 				const data = await response.json();
 				if (response.ok) {
 					navigate('/desktop');
-				} else {
-					console.error('error with two-factor authentication: ', data);
 				}
-			} catch (error) {
-				console.error(error);
-			}
+			} catch (error) {}
 		};
 		// if user has typed `Enter` and the validation code format is valid,
 		// fetch request

@@ -192,38 +192,24 @@ export class ChatService {
 													id: chatId,
 												},
 											})
-											.catch((e) => {
-												console.error('Could not delete chat: ', e);
-											});
+											.catch((e) => {});
 									})
-									.catch((e) => {
-										console.error('Could not delete messages: ', e);
-									});
+									.catch((e) => {});
 							} else if (wasOwner.isOwner) {
 								// if there was people remaining, put the first one to have joined as owner
-								this.prisma.chatSession
-									.update({
-										where: { id: response.participants.at(0).id },
-										data: {
-											isOwner: true,
-											isAdmin: true,
-										},
-									})
-									.then((data) => {
-										console.log('data', data);
-									});
+								this.prisma.chatSession.update({
+									where: { id: response.participants.at(0).id },
+									data: {
+										isOwner: true,
+										isAdmin: true,
+									},
+								});
 							}
 						})
-						.catch((e) => {
-							console.error('Error getting the channel room');
-						});
+						.catch((e) => {});
 				})
-				.catch((e) => {
-					console.error('something went wrong when deleting the channel');
-				});
-		} catch (e) {
-			console.error('could not leave channel: ', e);
-		}
+				.catch((e) => {});
+		} catch (e) {}
 	}
 
 	/* ********************************************************************* */
@@ -240,9 +226,7 @@ export class ChatService {
 					isPrivate: toPrivate,
 				},
 			});
-		} catch (e) {
-			console.error('Could not set chat privacy settings');
-		}
+		} catch (e) {}
 	}
 
 	async getRoom(chatId: number) {
@@ -544,7 +528,6 @@ export class ChatService {
 				}
 				return false;
 			});
-
 	}
 
 	async replyToInvite(chatId: number, reply: boolean) {

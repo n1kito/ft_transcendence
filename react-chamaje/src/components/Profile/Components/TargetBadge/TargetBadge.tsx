@@ -56,11 +56,8 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 			});
 			if (!response.ok) {
 				const errorMessage = await response.text();
-				console.error('Error: ', errorMessage);
 			}
-		} catch (error) {
-			console.error('Target badge fetch error: ', error);
-		}
+		} catch (error) {}
 	};
 
 	const startRoulette = () => {

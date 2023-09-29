@@ -174,9 +174,7 @@ const Channels: React.FC<IChannelsProps> = ({
 						setMessages(data);
 						setChatWindowIsOpen(true);
 					})
-					.catch((e) => {
-						console.error('Error fetching messages: ', e.message);
-					});
+					.catch((e) => {});
 				return;
 			}
 		});
@@ -201,8 +199,6 @@ const Channels: React.FC<IChannelsProps> = ({
 					setPwdInput('');
 				})
 				.catch((e) => {
-					console.log(e);
-					console.error('Error creating channel: ', e.message);
 					setSettingsNameError(e.message);
 				});
 		}
@@ -228,7 +224,6 @@ const Channels: React.FC<IChannelsProps> = ({
 				})
 				.catch((e) => {
 					setSettingsNameError(e.message);
-					console.error('Could not join channel: ', e.message);
 				});
 		}
 	};
@@ -254,16 +249,12 @@ const Channels: React.FC<IChannelsProps> = ({
 			.then((data) => {
 				getNewChatsList(data);
 			})
-			.catch((e) => {
-				console.error('Error fetching channels: ', e);
-			});
+			.catch((e) => {});
 		getBlockedUsers(accessToken)
 			.then((data) => {
 				getNewBlockedUsers(data);
 			})
-			.catch(() => {
-				console.error('Could not retreive blocked users');
-			});
+			.catch(() => {});
 	}, []);
 
 	return (

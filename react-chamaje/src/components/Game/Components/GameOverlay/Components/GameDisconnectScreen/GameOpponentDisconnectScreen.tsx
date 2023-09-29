@@ -12,7 +12,6 @@ const GameOpponentDisconnectScreen = () => {
 
 	useEffect(() => {
 		if (waitTime == 0) {
-			console.log('Not waiting for reconnection anymore');
 			resetGameData();
 			return;
 		}

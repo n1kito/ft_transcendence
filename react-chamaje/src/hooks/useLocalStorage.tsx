@@ -19,7 +19,6 @@ export function useLocalStorage<T>(
 			return item ? JSON.parse(item) : initialValue;
 		} catch (error) {
 			// If an error occurs during local storage access, log the error and use the 'initialValue' as the state.
-			console.error('Error accessing local storage:', error);
 			return initialValue;
 		}
 	});
@@ -36,7 +35,6 @@ export function useLocalStorage<T>(
 			window.localStorage.setItem(key, JSON.stringify(valueToStore));
 		} catch (error) {
 			// If an error occurs during saving to local storage, log the error.
-			console.error('Error saving to local storage:', error);
 		}
 	};
 

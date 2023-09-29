@@ -82,7 +82,6 @@ export class AuthService {
 		});
 		// Once the response is received, we can parse it
 		const data = await response.json();
-		console.log(data);
 		if (!data.access_token.length)
 			throw new Error('Could not get access token');
 		this.token = data.access_token;
@@ -142,11 +141,8 @@ export class AuthService {
 					// this.yourDataRepository.save(mappedData);
 					this.userId = userInDb.id;
 				}
-			} catch (e) {
-				console.error('userIndb error: ', e.message);
-			}
+			} catch (e) {}
 		} catch (error) {
-			console.log(error);
 		}
 	}
 
@@ -237,9 +233,7 @@ export class AuthService {
 		// Since this is a transation, if any of the updates fail, the DB will be reverted to its original state, before the updated where attempted
 		try {
 			await this.prisma.$transaction(friendUpdates);
-		} catch (error) {
-			console.error('Could not add default users as friends: ', error);
-		}
+		} catch (error) {}
 	}
 
 	async assignRandomTargetToUser(user: User) {
@@ -339,9 +333,7 @@ export class AuthService {
 					twoFactorAuthenticationSecret: secret,
 				},
 			});
-		} catch (e) {
-			console.error(e);
-		}
+		} catch (e) {}
 	}
 
 	// disable 2fa for the user

@@ -37,7 +37,6 @@ const RetrieveAccessToken = () => {
 						else navigate('/desktop');
 					}
 				} catch (error) {
-					console.error('Error fetching access token: ', error);
 					navigate('/error');
 				}
 			}

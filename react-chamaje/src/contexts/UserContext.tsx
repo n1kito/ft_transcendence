@@ -36,7 +36,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
 	// Logs the updates to userData as they happen
 	useEffect(() => {
-		logUserData(`${JSON.stringify(userData, null, 4)}`);
+		// logUserData(`${JSON.stringify(userData, null, 4)}`);
 	}, [userData]);
 
 	// We want a helper function that will allow us to update one, many or all
@@ -50,7 +50,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
 	// Helper function to reset the user data state to its initial state in one function call
 	const resetUserData = () => {
-		logUserData('reset the userData context');
+		// logUserData('reset the userData context');
 		setUserData(defaultUserData);
 	};
 

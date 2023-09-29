@@ -43,7 +43,7 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 		}
 
 		return () => {
-			socketLog('Disconnecting socket 🔴');
+			// socketLog('Disconnecting socket 🔴');
 			socketRef.current?.disconnect();
 		};
 	}, [isAuthentificated]);
@@ -61,10 +61,10 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 		if (!gameData.socket) return;
 
 		gameData.socket.on('connect', () => {
-			socketLog('Connected to server ! 🟢 ');
+			// socketLog('Connected to server ! 🟢 ');
 		});
 		gameData.socket.on('identification_ok', () => {
-			socketLog('Server authentification confirmed');
+			// socketLog('Server authentification confirmed');
 			updateGameData({ connectedToServer: true });
 		});
 		gameData.socket.on('connect_error', (error: Error) => {
@@ -99,7 +99,7 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 				if (gameData.socket) gameData.socket.connect();
 			} else {
 				if (gameData.socket) gameData.socket.disconnect();
-				socketLog('Disconnected from server ! ❌ ');
+				// socketLog('Disconnected from server ! ❌ ');
 			}
 		});
 
@@ -110,13 +110,13 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 		});
 
 		gameData.socket.on('opponent-info', (information: IPlayerInformation) => {
-			socketLog(
-				`Received opponent's information: ${JSON.stringify(
-					information,
-					null,
-					4,
-				)}`,
-			);
+			// socketLog(
+			// `Received opponent's information: ${JSON.stringify(
+			// information,
+			// null,
+			// 4,
+			// )}`,
+			// );
 			updateGameData({ opponentInfo: information });
 		});
 
@@ -182,7 +182,7 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 		gameData.socket.on(
 			'game-ended',
 			(gameEndStatus: { gameHasWinner: boolean; userWon: boolean }) => {
-				socketLog('GAME ENDED');
+				// socketLog('GAME ENDED');
 
 				// Update necessary values from the game context
 				updateGameData({
