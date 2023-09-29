@@ -38,7 +38,6 @@ const RetrieveAccessToken = () => {
 					}
 				} catch (error) {
 					console.error('Error fetching access token: ', error);
-					//TODO: make an actual error page OR better make the login terminal display an error message
 					navigate('/error');
 				}
 			}

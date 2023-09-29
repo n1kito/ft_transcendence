@@ -18,7 +18,6 @@ interface ITitleListProps {
 	profileData: IUserData;
 }
 
-// TODO: I might want to use the userContext here instead of passing the data ?
 const TitleList: React.FC<ITitleListProps> = ({ profileData }) => {
 	return (
 		<div className="title-list-wrapper">

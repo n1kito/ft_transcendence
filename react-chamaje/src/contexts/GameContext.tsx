@@ -18,7 +18,6 @@ export interface IGameDataProps {
 	// Connection information
 	connectedToServer: boolean;
 	connectionErrorStatus: string | null;
-	//TODO: add other properties
 	// User actions
 	userWantsNewOpponent: boolean;
 	gamePowerUp: string | undefined;

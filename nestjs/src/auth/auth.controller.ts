@@ -29,7 +29,6 @@ export interface CustomRequest extends Request {
 	userId: number;
 }
 
-// TODO: implement a middleware that checks if the JWT token received with each request is correct
 
 @Controller('login')
 export class AuthController {
@@ -74,7 +73,6 @@ export class AuthController {
 			const refreshToken = await this.tokenService.generateRefreshToken(
 				payload,
 			);
-			// TODO: error 401 due to asynchron issue ?
 
 			this.tokenService.attachRefreshTokenCookie(res, refreshToken);
 
@@ -82,7 +80,7 @@ export class AuthController {
 			const redirectURL = `/retrieve-token` + '?code=' + temporaryAuthCode;
 			return { url: redirectURL };
 		} catch (error) {
-			return { url: 'login-failed' }; // TODO: return error URl and find out how to customize the error message if we want to
+			return { url: 'login-failed' };
 		}
 	}
 

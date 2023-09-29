@@ -16,7 +16,6 @@ const MatchHistoryBadge: React.FC<IMatchHistoryBadgeProps> = ({
 	userScore,
 	adversaryScore,
 }) => {
-	// TODO: implement this state/variable dynamically
 	const [playerWon, setPlayerWon] = useState(false);
 
 	useEffect(() => {

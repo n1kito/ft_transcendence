@@ -18,7 +18,6 @@ import TitleList from './Components/TitleList/TitleList';
 import TwoFactorAuthentication from './Components/TwoFactorAuthentication/TwoFactorAuthentication';
 import './Profile.css';
 
-// TODO: find a way to make the shaddow wrapper widht's 100% so if fills the sidebar
 export interface ProfileProps {
 	login: string | undefined;
 	setLogin?: React.Dispatch<React.SetStateAction<string>>;
@@ -274,37 +273,37 @@ const Profile: React.FC<ProfileProps> = ({
 			links={
 				isOwnProfile
 					? [
-						{
-							name: 'Two-Factor Authentication',
-							onClick: () => {
-								setSettingsMode('Two-Factor Authentication');
-								setSettingsPanelIsOpen(true);
+							{
+								name: 'Two-Factor Authentication',
+								onClick: () => {
+									setSettingsMode('Two-Factor Authentication');
+									setSettingsPanelIsOpen(true);
+								},
 							},
-						},
-						{
-							name: 'Delete profile',
+							{
+								name: 'Delete profile',
 
-							onClick: () => {
-								setSettingsMode('Delete Profile');
-								setSettingsPanelIsOpen(true);
+								onClick: () => {
+									setSettingsMode('Delete Profile');
+									setSettingsPanelIsOpen(true);
+								},
 							},
-						},
 					  ]
 					: [
-						isMyFriend
-							? {
-								name: 'Delete Friend',
-								onClick: () => {
-									setSettingsMode('Delete Friend');
-									setSettingsPanelIsOpen(true);
-								},
+							isMyFriend
+								? {
+										name: 'Delete Friend',
+										onClick: () => {
+											setSettingsMode('Delete Friend');
+											setSettingsPanelIsOpen(true);
+										},
 								  }
-							: {
-								name: 'Add Friend',
-								onClick: () => {
-									setSettingsMode('Add Friend');
-									setSettingsPanelIsOpen(true);
-								},
+								: {
+										name: 'Add Friend',
+										onClick: () => {
+											setSettingsMode('Add Friend');
+											setSettingsPanelIsOpen(true);
+										},
 								  },
 					  ]
 			}

@@ -1,3 +1,4 @@
+import React from 'react';
 import {
 	BrowserRouter,
 	// createBrowserRouter,
@@ -53,7 +54,9 @@ function App() {
 															name="Error :("
 															id={-1}
 															iconSrc={roadconeIcon}
-															onDoubleClick={() => {}}
+															onDoubleClick={() => {
+																return;
+															}}
 														/>
 													}
 												/>
