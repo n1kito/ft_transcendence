@@ -103,8 +103,8 @@ const GameSelectionScreen: React.FC<IGameSelectionScreenProps> = () => {
 							gameData.opponentPowerupsDisabled
 								? 'Your opponent disabled power-ups. Destroy them.'
 								: gameData.userPowerupsDisabled
-									? 'You disabled the power-ups ? Ok fine.'
-									: 'Power-ups are activated ! Yay !'
+								? 'You disabled the power-ups ? Ok fine.'
+								: 'Power-ups are activated ! Yay !'
 						}`}
 					</Tooltip>
 					<Button

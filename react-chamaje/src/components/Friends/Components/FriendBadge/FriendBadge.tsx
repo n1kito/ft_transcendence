@@ -95,11 +95,11 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 				{!isEmptyBadge &&
 					(onlineIndicator || playingIndicator) &&
 					showStatusIndicator && (
-					<OnlineIndicator
-						isOnline={onlineIndicator}
-						isPlaying={playingIndicator}
-					/>
-				)}
+						<OnlineIndicator
+							isOnline={onlineIndicator}
+							isPlaying={playingIndicator}
+						/>
+					)}
 			</div>
 		</ShadowWrapper>
 		// </div>

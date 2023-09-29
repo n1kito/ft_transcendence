@@ -16,6 +16,7 @@ export class GameLogic {
 	private gameHasStarted = false;
 	private gameBroadcastInterval: NodeJS.Timeout | undefined = undefined;
 	private gameStateUpdateInterval: NodeJS.Timeout | undefined = undefined;
+	private powerUpInterval: NodeJS.Timeout | undefined = undefined;
 
 	// Game elements and properties
 	players: { [socketId: string]: Paddle } = {};
@@ -216,10 +217,10 @@ export class GameLogic {
 	// This will randomly trigger power ups, if one is not already waiting to be
 	// activated
 	initiateRandomPowerUps() {
-		const MIN_INTERVAL = 10;
+		const MIN_INTERVAL = 15;
 		const MAX_INTERVAL = 20;
 
-		// Get a random interval between 10 and 20 seconds
+		// Get a random interval between 15 and 20 seconds
 		const randomInterval =
 			Math.floor(Math.random() * (MAX_INTERVAL - MIN_INTERVAL + 1)) +
 			MIN_INTERVAL;
@@ -229,7 +230,7 @@ export class GameLogic {
 			this.sendPowerUpTrigger();
 
 			// Then continue executing at an interval of 'randomInterval * 1000' milliseconds
-			setInterval(() => {
+			this.powerUpInterval = setInterval(() => {
 				this.sendPowerUpTrigger();
 			}, randomInterval * 1000);
 		}, randomInterval * 1000);
@@ -360,6 +361,7 @@ export class GameLogic {
 
 	private stopGameSimulation() {
 		if (this.gameStateUpdateInterval) {
+			clearInterval(this.powerUpInterval);
 			clearInterval(this.gameStateUpdateInterval);
 			this.gameStateUpdateInterval = undefined;
 		}

@@ -35,7 +35,10 @@ export async function addFriend(searchedLogin: string, accessToken: string) {
 		}
 		return response.json();
 	} catch (error) {
-		throw error;
+		if (error instanceof Error && typeof error.message === 'string') {
+			console.error(error.message);
+		}
+		// throw error;
 	}
 }
 

@@ -13,7 +13,7 @@ import { WsException } from '@nestjs/websockets'; // Importing WsException class
 export class AllExceptionsFilter implements ExceptionFilter {
 	catch(exception: unknown, host: ArgumentsHost) {
 		// Log the exception to the console for debugging
-		console.error('An exception was caught by the global filter:', exception);
+		// console.error('An exception was caught by the global filter:', exception);
 
 		// Determine the context type: 'http' or 'ws' (WebSocket)
 		const type = host.getType();
