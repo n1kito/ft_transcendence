@@ -1,36 +1,22 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import './Profile.css';
-import ProfilePicBadge from './Components/ProfilePicBadge/ProfilePicBadge';
-import { UserContext } from '../../contexts/UserContext';
+import { deleteFriend } from 'src/utils/FriendsQueries';
+import { turnOffTwoFactorAuthentication } from 'src/utils/TwoFactorAuthQueries';
+import { deleteMyProfile } from 'src/utils/UserQueries';
 import { IUserData } from '../../../../shared-lib/types/user';
-import placeholderImage from '../../images/placeholder-image.png';
-import Title from './Components/Title/Title';
-// import ShadowWrapper from '../Shared/ShadowWrapper/ShadowWrapper';
+import { UserContext } from '../../contexts/UserContext';
+import useAuth from '../../hooks/userAuth';
+import Button from '../Shared/Button/Button';
+import Window from '../Window/Window';
+import MatchHistory from './Components/MatchHistory/MatchHistory';
+import ProfileMissions from './Components/ProfileMissions/ProfileMissions';
+import ProfilePicBadge from './Components/ProfilePicBadge/ProfilePicBadge';
 import ProfileSettings from './Components/ProfileSettings/ProfileSettings';
 import ProfileStats from './Components/ProfileStats/ProfileStats';
-import ProfileMissions from './Components/ProfileMissions/ProfileMissions';
-import MatchHistory from './Components/MatchHistory/MatchHistory';
-import TitleList from './Components/TitleList/TitleList';
-import burgerIcon from './icons/burger-icon.svg';
-import cdIcon from './icons/cd-icon.svg';
-import coinsIcon from './icons/coins-icon.svg';
-import computerIcon from './icons/computer-icon.svg';
-import friesIcon from './icons/fries-icon.svg';
-import giftIcon from './icons/gift-icon.svg';
-import moneyIcon from './icons/money-icon.svg';
-import rocketIcon from './icons/rocket-icon.svg';
-import Button from '../Shared/Button/Button';
-import useAuth from '../../hooks/userAuth';
-import { profile } from 'console';
-import AchievementBadge from './Components/AchievementBadge/AchievementBadge';
-import Window from '../Window/Window';
 import SettingsWindow from './Components/Shared/SettingsWindow/SettingsWindow';
+import Title from './Components/Title/Title';
+import TitleList from './Components/TitleList/TitleList';
 import TwoFactorAuthentication from './Components/TwoFactorAuthentication/TwoFactorAuthentication';
-import InputField from './Components/InputField/InputField';
-import { useNavigate } from 'react-router-dom';
-import { deleteFriend } from 'src/utils/FriendsQueries';
-import { deleteMyProfile, fetchUserData } from 'src/utils/UserQueries';
-import { turnOffTwoFactorAuthentication } from 'src/utils/TwoFactorAuthQueries';
+import './Profile.css';
 
 // TODO: find a way to make the shaddow wrapper widht's 100% so if fills the sidebar
 export interface ProfileProps {
@@ -54,7 +40,6 @@ const Profile: React.FC<ProfileProps> = ({
 	onCloseClick,
 	nbOnline,
 	setNbOnline,
-	setShowFriendProfile,
 	setDeletedFriend,
 	setAddedFriend,
 }) => {
@@ -70,18 +55,7 @@ const Profile: React.FC<ProfileProps> = ({
 	const [twoFactorAuthWindowisOpen, setTwoFactorAuthWindowIsOpen] =
 		useState(false);
 
-	const [TwoFactorAuthEnableMode, setTwoFactorAuthEnableMode] = useState(false);
-
 	const isInProcessRef = useRef(false);
-
-	const [deleteProfileWindowisOpen, setDeleteProfileWindowisOpen] =
-		useState(false);
-	const navigate = useNavigate();
-	const [changedAvatar, setChangedAvatar] = useState(false);
-
-	const [searchedData, setSearchedData] = useState(false);
-
-	// TODO: fetch profile data should be a separate service so we don't rewrite the function in multiple components
 
 	/**************************************************************************************/
 	/* Profile Data                                                                       */
@@ -111,11 +85,7 @@ const Profile: React.FC<ProfileProps> = ({
 	useEffect(() => {
 		// If we're not on our own profile, fetch our friend's information
 		Promise.resolve().then(async () => {
-			if (!isOwnProfile) {
-				await fetchProfileData();
-			} else {
-				setProfileData(userData);
-			}
+			await fetchProfileData();
 		});
 		return () => {
 			setProfileData(null);
@@ -179,18 +149,13 @@ const Profile: React.FC<ProfileProps> = ({
 		};
 	});
 
-	// on click, open 2FA window
-	const openSettingsPanel = () => {
-		setSettingsPanelIsOpen(!settingsPanelIsOpen);
-	};
-
 	/**************************************************************************************/
 	/* Delete Profile Settings                                                            */
 	/**************************************************************************************/
 
 	const deleteProfile = async () => {
 		deleteMyProfile(accessToken)
-			.then(async (data) => {
+			.then(async () => {
 				logOut();
 			})
 			.catch((error) => {
@@ -201,13 +166,12 @@ const Profile: React.FC<ProfileProps> = ({
 	/**************************************************************************************/
 	/* Friends                                                                            */
 	/**************************************************************************************/
-	const [isFriendDeleted, setIsFriendDeleted] = useState(false);
 
 	// sends request to delete friend
 	const handleDeleteFriend = async () => {
 		if (login && setDeletedFriend)
 			deleteFriend(login, accessToken)
-				.then(async (data) => {
+				.then(async () => {
 					nbOnline--;
 					setNbOnline(nbOnline);
 					setSettingsPanelIsOpen(false);
@@ -288,7 +252,6 @@ const Profile: React.FC<ProfileProps> = ({
 				};
 				updateUserData(updatedUserData);
 				setProfileData(updatedUserData);
-				setChangedAvatar(true);
 				setSettingsPanelIsOpen(false);
 			} else {
 				setFileError(data.message);
@@ -311,37 +274,37 @@ const Profile: React.FC<ProfileProps> = ({
 			links={
 				isOwnProfile
 					? [
-							{
-								name: 'Two-Factor Authentication',
-								onClick: () => {
-									setSettingsMode('Two-Factor Authentication');
-									setSettingsPanelIsOpen(true);
-								},
+						{
+							name: 'Two-Factor Authentication',
+							onClick: () => {
+								setSettingsMode('Two-Factor Authentication');
+								setSettingsPanelIsOpen(true);
 							},
-							{
-								name: 'Delete profile',
+						},
+						{
+							name: 'Delete profile',
 
-								onClick: () => {
-									setSettingsMode('Delete Profile');
-									setSettingsPanelIsOpen(true);
-								},
+							onClick: () => {
+								setSettingsMode('Delete Profile');
+								setSettingsPanelIsOpen(true);
 							},
+						},
 					  ]
 					: [
-							isMyFriend
-								? {
-										name: 'Delete Friend',
-										onClick: () => {
-											setSettingsMode('Delete Friend');
-											setSettingsPanelIsOpen(true);
-										},
+						isMyFriend
+							? {
+								name: 'Delete Friend',
+								onClick: () => {
+									setSettingsMode('Delete Friend');
+									setSettingsPanelIsOpen(true);
+								},
 								  }
-								: {
-										name: 'Add Friend',
-										onClick: () => {
-											setSettingsMode('Add Friend');
-											setSettingsPanelIsOpen(true);
-										},
+							: {
+								name: 'Add Friend',
+								onClick: () => {
+									setSettingsMode('Add Friend');
+									setSettingsPanelIsOpen(true);
+								},
 								  },
 					  ]
 			}
@@ -372,10 +335,10 @@ const Profile: React.FC<ProfileProps> = ({
 							<ProfileMissions
 								profileLogin={profileData.login}
 								targetLogin={profileData.targetLogin || ''}
+								targetImage={profileData.targetImage || ''}
 								rivalLogin={profileData.rivalLogin || ''}
-								targetDiscoveredByUser={
-									profileData.targetDiscoveredByUser || false
-								}
+								rivalImage={profileData.rivalImage || ''}
+								targetDiscoveredByUser={profileData.targetDiscoveredByUser}
 							/>
 							<MatchHistory profileData={profileData} />
 						</div>

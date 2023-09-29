@@ -1,27 +1,31 @@
 import React, { useContext } from 'react';
-import './ProfileMissions.css';
-import Title from '../Title/Title';
-import TargetBadge from '../TargetBadge/TargetBadge';
-import RivalBadge from '../RivalBadge/RivalBadge';
 import { UserContext } from '../../../../contexts/UserContext';
+import RivalBadge from '../RivalBadge/RivalBadge';
+import TargetBadge from '../TargetBadge/TargetBadge';
+import Title from '../Title/Title';
+import './ProfileMissions.css';
 
 interface IProfileMissionsProps {
 	profileLogin: string;
-	rivalLogin?: string;
-	targetLogin?: string;
+	rivalLogin: string;
+	rivalImage: string;
+	targetLogin: string;
+	targetImage: string;
 	targetDiscoveredByUser: boolean;
 }
 
 const ProfileMissions: React.FC<IProfileMissionsProps> = ({
 	profileLogin,
-	rivalLogin = '',
+	rivalLogin,
+	targetImage,
+	rivalImage,
 	targetLogin,
 	targetDiscoveredByUser,
 }) => {
 	const { userData } = useContext(UserContext);
 	const isOwnProfile = profileLogin == userData?.login;
 
-	return isOwnProfile || (rivalLogin && rivalLogin.length > 0) ? (
+	return (
 		<div className="profile-missions-wrapper">
 			<Title
 				toolTip={`${
@@ -35,20 +39,21 @@ const ProfileMissions: React.FC<IProfileMissionsProps> = ({
 			<div className="profile-missions">
 				{!rivalLogin && !targetLogin && <p>No missions yet !</p>}
 				{rivalLogin && rivalLogin.length > 0 && (
-					<RivalBadge rivalLogin={rivalLogin} />
+					<RivalBadge rivalLogin={rivalLogin} rivalImage={rivalImage} />
 				)}
 				{(isOwnProfile || targetDiscoveredByUser) &&
 				targetLogin &&
 				targetLogin.length > 0 ? (
-					<TargetBadge
-						targetLogin={targetLogin}
-						isOwnProfile={isOwnProfile}
-						targetDiscoveredByUser={targetDiscoveredByUser}
-					/>
-				) : null}
+						<TargetBadge
+							targetLogin={targetLogin}
+							targetImage={targetImage}
+							isOwnProfile={isOwnProfile}
+							targetDiscoveredByUser={targetDiscoveredByUser}
+						/>
+					) : null}
 			</div>
 		</div>
-	) : null;
+	);
 };
 
 export default ProfileMissions;

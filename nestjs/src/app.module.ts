@@ -31,7 +31,7 @@ import { ConnectionStatusModule } from './chatWebSocket/chatWebSocket.module';
 		TokenModule,
 		GameModule,
 		ChatModule,
-		ConnectionStatusModule,
+		ConnectionStatusModule
 	],
 	controllers: [AppController],
 	// providers: [AppService, PrismaService, GameService],

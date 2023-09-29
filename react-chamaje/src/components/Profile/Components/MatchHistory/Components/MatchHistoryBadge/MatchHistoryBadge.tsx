@@ -30,7 +30,7 @@ const MatchHistoryBadge: React.FC<IMatchHistoryBadgeProps> = ({
 			<div
 				className={`winning-status ${playerWon ? 'player-won' : 'player-lost'}`}
 			>
-				YOU {`${playerWon ? 'WON' : 'LOST'}`}
+				{`${playerWon ? 'WON' : 'LOST'}`}
 			</div>
 			<FriendBadge
 				badgeTitle={adversaryLogin}

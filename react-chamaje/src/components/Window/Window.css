@@ -29,8 +29,7 @@
 	text-align: left;
 	border-radius: 10px;
 	position: relative;
-	/* NOT SURE ABOUT THE FOLLOWING, ADDED IT SO THE GAME COULD RESIZE CORRECTLY WITH WINDOW WHEN USER RESIZES IT */
-	height: 100%;
+	height: fit-content;
 }
 
 .window-resize-handle {

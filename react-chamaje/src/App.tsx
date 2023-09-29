@@ -1,7 +1,3 @@
-import React, { useEffect, useState } from 'react';
-import './App.css';
-import Login from './components/Login/Login';
-import Layout from './components/Layout/Layout';
 import {
 	BrowserRouter,
 	// createBrowserRouter,
@@ -9,23 +5,24 @@ import {
 	// Router,
 	// RouterProvider,
 	Routes,
-	useNavigate,
 } from 'react-router-dom';
-import Desktop from './components/Desktop/Desktop';
-import { UserProvider } from './contexts/UserContext';
-import AuthContextProvider from './contexts/AuthContext';
+import './App.css';
 import DesktopIcon from './components/Desktop/Components/DesktopIcon/DesktopIcon';
+import Desktop from './components/Desktop/Desktop';
+import Layout from './components/Layout/Layout';
+import Login from './components/Login/Login';
+import RetrieveAccessToken from './components/RetrieveAccessToken/RetrieveAccessToken';
+import AuthContextProvider from './contexts/AuthContext';
+import { ChatProvider } from './contexts/ChatContext';
+import { GameProvider } from './contexts/GameContext';
+import IconContextProvider from './contexts/IconContext';
+import { UserProvider } from './contexts/UserContext';
+import { WindowProvider } from './contexts/WindowContext';
 import roadconeIcon from './images/ROADCONE.svg';
 import {
 	showComponentIfLoggedIn,
 	showComponentIfNotLoggedIn,
 } from './utils/authUtils';
-import RetrieveAccessToken from './components/RetrieveAccessToken/RetrieveAccessToken';
-import IconContextProvider from './contexts/IconContext';
-import { GameProvider } from './contexts/GameContext';
-import { WindowProvider } from './contexts/WindowContext';
-import { Socket, io } from 'socket.io-client';
-import { ChatProvider } from './contexts/ChatContext';
 
 // These are functions that will return a component passed as parameter depending on user authentification status
 const ProtectedLogin = showComponentIfNotLoggedIn(Login);

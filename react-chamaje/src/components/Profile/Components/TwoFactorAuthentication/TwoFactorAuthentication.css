@@ -32,7 +32,8 @@
 	gap: 1rem;
 }
 .qr-code img {
-	border-radius: 0.6;
+	border-radius: 0.6rem;
+	border: 3px solid black;
 	overflow: hidden;
 	width: 60%;
 }

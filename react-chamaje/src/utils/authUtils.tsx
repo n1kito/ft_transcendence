@@ -1,6 +1,6 @@
-import React, { useEffect, FunctionComponent } from 'react';
-import useAuth from '../hooks/userAuth';
+import React, { FunctionComponent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useAuth from '../hooks/userAuth';
 
 // This will redirect the user to "/desktop" if the user is authentificated, or and if not show the component passed as parameter
 export function showComponentIfNotLoggedIn<P extends object>(

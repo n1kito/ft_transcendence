@@ -1,11 +1,11 @@
-import React, { ReactNode, useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { UserContext } from 'src/contexts/UserContext';
+import OnlineIndicator from '../../../Profile/Components/Shared/OnlineIndicator/OnlineIndicator';
+import ShadowWrapper, {
+	ShadowWrapperProps,
+} from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import './FriendBadge.css';
 import m3ganAvatar from './images/m3gan.jpg';
-import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
-import { ShadowWrapperProps } from '../../../Shared/ShadowWrapper/ShadowWrapper';
-import OnlineIndicator from '../../../Profile/Components/Shared/OnlineIndicator/OnlineIndicator';
-import { UserContext } from 'src/contexts/UserContext';
-import { on } from 'events';
 
 export interface IFriendBadgeProps extends ShadowWrapperProps {
 	badgeTitle?: string;
@@ -19,6 +19,7 @@ export interface IFriendBadgeProps extends ShadowWrapperProps {
 	shaking?: boolean;
 	setFriendIsPlaying?: React.Dispatch<React.SetStateAction<boolean>>;
 	playingIndicator?: boolean;
+	showStatusIndicator?: boolean;
 }
 
 const FriendBadge: React.FC<IFriendBadgeProps> = ({
@@ -36,6 +37,7 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 	onClick,
 	setFriendIsPlaying,
 	playingIndicator = false,
+	showStatusIndicator = true,
 }) => {
 	const userContext = useContext(UserContext);
 	let displayTitle = badgeTitle;
@@ -90,7 +92,9 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 						<span className="friend-name">{displayTitle}</span>
 					</>
 				)}
-				{!isEmptyBadge && (onlineIndicator || playingIndicator) && (
+				{!isEmptyBadge &&
+					(onlineIndicator || playingIndicator) &&
+					showStatusIndicator && (
 					<OnlineIndicator
 						isOnline={onlineIndicator}
 						isPlaying={playingIndicator}
