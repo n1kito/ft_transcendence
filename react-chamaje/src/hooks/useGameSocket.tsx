@@ -170,6 +170,7 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 			updateGameData({
 				gamePowerUp: undefined,
 				powerUpDescription: undefined,
+				wonPowerUp: false,
 				powerUpClaimed: false,
 			});
 		});

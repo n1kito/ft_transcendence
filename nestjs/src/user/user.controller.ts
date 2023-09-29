@@ -100,7 +100,7 @@ export class UserController {
 				.status(200)
 				.json({ message: 'User account deleted successfully' });
 		} catch (error) {
-			return response.status(400).json({
+			response.status(400).json({
 				error: 'Could not delete user account',
 			});
 		}
@@ -129,7 +129,7 @@ export class UserController {
 				onlineStatus: false,
 				playingStatus: false,
 			}));
-			return response.status(200).json({ friends });
+			response.status(200).json({ friends });
 		} catch (error) {
 			return response
 				.status(400)
@@ -230,14 +230,14 @@ export class UserController {
 			// add friend
 			await this.userService.addFriend(userId, friend.id);
 			// return newly added friend object
-			return response.status(200).json({
+			response.status(200).json({
 				id: friend.id,
 				login: friend.login,
 				image: friend.image,
 				onlineStatus: false,
 			});
 		} catch (error) {
-			return response.status(400).json({
+			response.status(400).json({
 				message: error,
 			});
 		}
@@ -273,7 +273,7 @@ export class UserController {
 			await this.userService.deleteFriend(userId, friend.id);
 			response.status(200).json({ message: 'Friend deleted successfully' });
 		} catch (error) {
-			return response.status(400).json({
+			response.status(400).json({
 				error: error,
 			});
 		}
@@ -338,16 +338,16 @@ export class UserController {
 			// get userId
 			const userId = this.userService.authenticateUser(request);
 			if (!userId)
-				return response.status(401).json({ message: 'User is unauthorized' });
+				response.status(401).json({ message: 'User is unauthorized' });
 
 			const isFileTypeValid = await this.userService.verifyFileType(file);
 			if (!isFileTypeValid)
-				return response.status(403).json({ message: 'Invalid File Type' });
+				response.status(403).json({ message: 'Invalid File Type' });
 
 			// upload new avatar
 			await this.userService.uploadAvatar(file, userId);
 			// send response ok with the avatar's filename
-			return response.status(200).json({ image: file.filename });
+			response.status(200).json({ image: file.filename });
 		} catch (error) {
 			response.status(400).json({ message: error });
 		}

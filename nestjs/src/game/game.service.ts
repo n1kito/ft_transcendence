@@ -266,7 +266,12 @@ export class GameService {
 			console.log(`[💪] Powerup was activated by [${clientSocket.id}]`);
 			// Handle the actual powerup
 			const roomId = this.getRoomIdFromSocketId(clientSocket.id);
-			if (roomId) {
+			if (
+				roomId &&
+				this.rooms[roomId].gameInstance.awaitingPowerUpReply === true
+			) {
+				this.rooms[roomId].gameInstance.awaitingPowerUpReply = false;
+
 				const opponentSocketId = this.getOpponentSocketId(
 					clientSocket.id,
 					roomId,
