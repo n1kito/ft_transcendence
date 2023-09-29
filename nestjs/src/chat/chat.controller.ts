@@ -45,7 +45,8 @@ export class ChatController {
 	@Get('/chatInfo/:chatId')
 	async getChatInfo(
 		@Req() request: CustomRequest,
-		@Param('chatId') chatId: number,
+		@Param('chatId', new ValidationPipe()) chatId: number,
+		@Res() res: Response,
 	) {
 		try {
 			const chatIdNb = +chatId;
@@ -55,12 +56,18 @@ export class ChatController {
 					id: chatIdNb,
 				},
 			});
-			return {
+			res.status(200).json({
 				isChannel: response.isChannel,
 				isPrivate: response.isPrivate,
 				isProtected: response.isProtected,
-			};
+			});
+			// return {
+			// 	isChannel: response.isChannel,
+			// 	isPrivate: response.isPrivate,
+			// 	isProtected: response.isProtected,
+			// };
 		} catch (e) {
+			res.status(400).json({ message: 'Could not retreive chat info' });
 			console.error('error fetching chat info: ', e);
 		}
 	}
@@ -69,7 +76,7 @@ export class ChatController {
 	@Get('/chatMessages/:chatId')
 	async getChatMessages(
 		@Req() request: CustomRequest,
-		@Param('chatId') chatId: number,
+		@Param('chatId', new ValidationPipe()) chatId: number,
 		@Res() res: Response,
 	) {
 		try {
@@ -148,6 +155,9 @@ export class ChatController {
 										chatId,
 									);
 									response.status(200).json({ chatId: chatId });
+								})
+								.catch((e) => {
+									throw new Error('Could not create chat');
 								});
 						} else {
 							throw new Error(
@@ -211,7 +221,7 @@ export class ChatController {
 									else {
 										await this.chatService.sendMessage(userId, validatedData);
 										res
-											.status(201)
+											.status(200)
 											.json({ message: 'Message sent successfully' });
 									}
 								})
@@ -225,7 +235,7 @@ export class ChatController {
 					});
 			} else {
 				await this.chatService.sendMessage(userId, validatedData);
-				res.status(201).json({ message: 'Message sent successfully' });
+				res.status(200).json({ message: 'Message sent successfully' });
 			}
 		} catch (e) {
 			console.error('error sending a message', e);
@@ -251,10 +261,15 @@ export class ChatController {
 				response.status(400).json({ message: 'You are not in this chat' });
 				return;
 			}
-			await this.chatService.leaveChat(userId, leaveChannel.chatId);
-			response.status(200).json({ message: 'Channel left successfully' });
+			this.chatService
+				.leaveChat(userId, leaveChannel.chatId)
+				.then(() => {
+					response.status(200).json({ message: 'Channel left successfully' });
+				})
+				.catch((e) => {
+					response.status(400).json({ message: 'Error leaving the chat' });
+				});
 		} catch (e) {
-			console.error('👋👋👋error leaving channel', e);
 			response
 				.status(400)
 				.json({ message: 'Something went wrong leaving the channel' });
@@ -489,12 +504,18 @@ export class ChatController {
 										.json({ message: 'User kicked successfully' });
 								})
 								.then(() => {
-									this.chatService.sendNotification(
-										userId,
-										validatedData.chatId,
-										validatedData.targetId,
-										'kick',
-									);
+									this.chatService
+										.sendNotification(
+											userId,
+											validatedData.chatId,
+											validatedData.targetId,
+											'kick',
+										)
+										.catch((e) => {
+											response
+												.status(400)
+												.json({ message: 'could not send the notification' });
+										});
 								});
 						})
 						.catch((e) => {
@@ -564,12 +585,23 @@ export class ChatController {
 										.json({ message: 'The user is now an administrator' });
 								})
 								.then(() => {
-									this.chatService.sendNotification(
-										userId,
-										validatedData.chatId,
-										validatedData.targetId,
-										'admin',
-									);
+									this.chatService
+										.sendNotification(
+											userId,
+											validatedData.chatId,
+											validatedData.targetId,
+											'admin',
+										)
+										.catch((e) => {
+											response
+												.status(400)
+												.json({ message: 'Could not send notification' });
+										});
+								})
+								.catch((e) => {
+									response
+										.status(400)
+										.json({ message: 'Could not make admin' });
 								});
 						})
 						.catch((e) => {
@@ -644,12 +676,21 @@ export class ChatController {
 										.json({ message: 'The user is now muted' });
 								})
 								.then(() => {
-									this.chatService.sendNotification(
-										userId,
-										validatedData.chatId,
-										validatedData.targetId,
-										'mute',
-									);
+									this.chatService
+										.sendNotification(
+											userId,
+											validatedData.chatId,
+											validatedData.targetId,
+											'mute',
+										)
+										.catch((e) => {
+											response
+												.status(400)
+												.json({ message: 'Could not send notification' });
+										});
+								})
+								.catch((e) => {
+									response.status(400).json({ message: 'Could not mute' });
 								});
 						})
 						.catch((e) => {
@@ -727,16 +768,29 @@ export class ChatController {
 											});
 										})
 										.then(() => {
-											this.chatService.sendNotification(
-												userId,
-												validatedData.chatId,
-												validatedData.targetId,
-												'ban',
-											);
+											this.chatService
+												.sendNotification(
+													userId,
+													validatedData.chatId,
+													validatedData.targetId,
+													'ban',
+												)
+												.catch((e) => {
+													response
+														.status(400)
+														.json({ message: 'Could not send notification' });
+												});
 										})
 										.catch(() => {
+											response.status(400).json({
+												message: 'The user could not leave the channel',
+											});
 											console.error('The user could not leave the channel');
 										});
+								})
+
+								.catch((e) => {
+									response.status(400).json({ message: 'Could not ban' });
 								});
 						})
 						.catch((e) => {
@@ -764,7 +818,7 @@ export class ChatController {
 	async getOwnAdminInfo(
 		@Req() request: CustomRequest,
 		@Res() res: Response,
-		@Param('chatId') chatId: number,
+		@Param('chatId', new ValidationPipe()) chatId: number,
 	) {
 		try {
 			const nbChatId: number = +chatId;
@@ -806,6 +860,11 @@ export class ChatController {
 								response.status(200).json({
 									message: 'changed password successfully',
 								});
+							})
+							.catch((e) => {
+								response
+									.status(400)
+									.json({ message: 'could not change password' });
 							});
 					} else {
 						response
@@ -827,7 +886,7 @@ export class ChatController {
 	@Get('/findPrivateMessage/:secondUserId')
 	async findPrivateMessage(
 		@Req() request: CustomRequest,
-		@Param('secondUserId') secondUserId: number,
+		@Param('secondUserId', new ValidationPipe()) secondUserId: number,
 		@Res() res: Response,
 	) {
 		try {

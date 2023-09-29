@@ -406,9 +406,11 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	useEffect(() => {
 		setTextareaContent('');
 		setTextareaIsEmpty(true);
-		getChatInfo(accessToken, chatId).then((chatInfo: IChatInfo) => {
-			setChannelIsPrivate(chatInfo.isPrivate);
-		});
+		getChatInfo(accessToken, chatId)
+			.then((chatInfo: IChatInfo) => {
+				setChannelIsPrivate(chatInfo.isPrivate);
+			})
+			.catch((e) => console.error(e.message));
 		if (!isChannel && userData) {
 			const chat = chatData.chatsList.find(
 				(target) => target.chatId === chatId,
