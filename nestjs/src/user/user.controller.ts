@@ -61,7 +61,7 @@ export class UserController {
 
 	@Put('me/update')
 	async updateMyUser(
-		@Body() updateUser: UpdateUserDto,
+		@Body(new ValidationPipe()) updateUser: UpdateUserDto,
 		@Req() request: CustomRequest,
 		@Res() response: Response,
 	) {
@@ -90,7 +90,7 @@ export class UserController {
 				.json({ message: 'Target status updated successfully' });
 		} catch (error) {
 			response
-				.status(500)
+				.status(400)
 				.json({ error: 'Could not update target discovery status.' });
 		}
 	}
@@ -104,7 +104,7 @@ export class UserController {
 				.status(200)
 				.json({ message: 'User account deleted successfully' });
 		} catch (error) {
-			return response.status(500).json({
+			return response.status(400).json({
 				error: 'Could not delete user account',
 			});
 		}
@@ -148,7 +148,7 @@ export class UserController {
 
 	@Get(':login')
 	async getUserInfo(
-		@Param('login') login: string,
+		@Param('login', new ValidationPipe()) login: string,
 		@Req() request: CustomRequest,
 	): Promise<IUserData> {
 		console.log(`[🙆🏻‍♂️] User data requested via /user/${login}`);
@@ -215,7 +215,7 @@ export class UserController {
 	// add `login` in friends[]
 	@Put(':login/add')
 	async addFriend(
-		@Param('login') login: string,
+		@Param('login', new ValidationPipe()) login: string,
 		@Req() request: CustomRequest,
 		@Res() response: Response,
 	) {
@@ -255,7 +255,7 @@ export class UserController {
 	// delete `login` in friends[]
 	@Delete(':login/delete')
 	async deleteFriend(
-		@Param('login') login: string,
+		@Param('login', new ValidationPipe()) login: string,
 		@Req() request: CustomRequest,
 		@Res() response: Response,
 	) {
@@ -367,7 +367,7 @@ export class UserController {
 	@Get('/byId/:userId')
 	async getPublicDataFromUserId(
 		@Req() request: CustomRequest,
-		@Param('userId') userId: number,
+		@Param('userId', new ValidationPipe()) userId: number,
 	) {
 		// be sure the userId is a number
 		let userIdToNb: number = +userId;
@@ -382,7 +382,7 @@ export class UserController {
 	@Get('/byLogin/:login')
 	async getUserIdFromLogin(
 		@Req() request: CustomRequest,
-		@Param('login') login: string,
+		@Param('login', new ValidationPipe()) login: string,
 	) {
 		// be sure the userId is a number
 		const response = await this.prisma.user.findUnique({
@@ -401,7 +401,7 @@ export class UserController {
 	@Get('me/chats')
 	async getPrivateMessages(
 		@Req() request: CustomRequest,
-		@Param('userId') userId: number,
+		@Param('userId', new ValidationPipe()) userId: number,
 		@Res() res: Response,
 	) {
 		try {
@@ -461,7 +461,7 @@ export class UserController {
 	@Get('me/channels')
 	async getChannels(
 		@Req() request: CustomRequest,
-		@Param('userId') userId: number,
+		@Param('userId', new ValidationPipe()) userId: number,
 	) {
 		try {
 			// this contains an array of the chat sessions
@@ -502,7 +502,7 @@ export class UserController {
 	@Get('/chatMessages/:chatId')
 	async getChatMessages(
 		@Req() request: CustomRequest,
-		@Param('chatId') chatId: number,
+		@Param('chatId', new ValidationPipe()) chatId: number,
 	) {
 		const nbChatId: number = +chatId;
 		// if the userId is in the chat lets go
@@ -556,7 +556,6 @@ export class UserController {
 
 	@Delete('/unblockUser')
 	async leaveChat(
-		// @Body() leaveChannel: LeaveChannelDTO,
 		@Body(new ValidationPipe()) validatedData: BlockUserDTO,
 		@Req() request: CustomRequest,
 		@Res() res: Response,
@@ -579,10 +578,8 @@ export class UserController {
 				})
 				.catch(() => {
 					res.status(404).json({ message: 'Could not find user to unblock' });
-					throw new Error('Could find user to unblock');
 				});
 		} catch (e) {
-			console.error('👋👋👋error unblocking user', e);
 			res
 				.status(400)
 				.json({ message: 'Something went wrong unblocking the user' });
