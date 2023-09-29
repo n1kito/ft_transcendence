@@ -88,6 +88,30 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 		};
 	}, []);
 
+	useEffect(() => {
+		// Add a beforeunload event listener
+		window.addEventListener('beforeunload', handlePageUnload);
+
+		// Remove the event listener when the component unmounts
+		return () => {
+			window.removeEventListener('beforeunload', handlePageUnload);
+		};
+	}, []);
+
+	const handlePageUnload = () => {
+		// Call the API to turn off 2FA here
+		if (!isProcessFinishedRef.current) {
+			turnOffTwoFactorAuthentication(accessToken)
+				.then((data) => {
+					setQrCode('');
+					setIsTwoFAEnabled(false);
+				})
+				.catch((error) => {
+					console.error(error);
+				});
+		}
+	};
+
 	return (
 		<div className="two-factor-auth-wrapper">
 			<div className="qr-code">

@@ -198,7 +198,7 @@ export class AuthController {
 				.status(200)
 				.json({ message: 'two-factor authentication enabled!' });
 		} catch (error) {
-			console.error('🧠 dto error: ', error);
+			console.error('dto error: ', error);
 		}
 	}
 
