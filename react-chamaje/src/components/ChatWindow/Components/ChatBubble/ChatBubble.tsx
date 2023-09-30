@@ -44,6 +44,7 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 	const { setNavParam } = useNavigationParams();
 
 	const openFriendProfile = () => {
+		if (sender === 'anonymous') return;
 		setNavParam('friendProfile', sender);
 		setShowFriendProfile(true);
 		// setProfileIsOpen(true);

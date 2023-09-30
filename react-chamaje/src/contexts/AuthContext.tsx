@@ -104,10 +104,11 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 					setIsTwoFAEnabled(data.isTwoFactorAuthEnabled);
 					setIsTwoFaVerified(data.isTwoFactorAuthVerified);
 				}
+			} else {
+				setAccessToken('');
+				setIsAuthentificated(false);
+				setIsTwoFaVerified(false);
 			}
-			// } else {
-			// 	logOut();
-			// }
 		} catch (error) {
 			// Log the user out if token refresh fails
 			logOut();
