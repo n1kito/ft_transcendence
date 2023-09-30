@@ -76,7 +76,9 @@ const Profile: React.FC<ProfileProps> = ({
 				};
 				setProfileData(updatedProfileData);
 			}
-		} catch (error) {}
+		} catch (error) {
+			return;
+		}
 	};
 
 	useEffect(() => {
@@ -114,7 +116,9 @@ const Profile: React.FC<ProfileProps> = ({
 			.then(() => {
 				setIsTwoFAEnabled(false);
 			})
-			.catch((error) => {});
+			.catch(() => {
+				return;
+			});
 	};
 
 	// if 2Fa is correctly enable, means 2FA window must unmount and
@@ -130,7 +134,9 @@ const Profile: React.FC<ProfileProps> = ({
 		// if still in authentication process
 		if (isInProcessRef.current) {
 			// turn-off 2FA to prevent setting the user as verified
-			turnOffTwoFactorAuthentication(accessToken).catch((error) => {});
+			turnOffTwoFactorAuthentication(accessToken).catch(() => {
+				return;
+			});
 		}
 	};
 
@@ -151,7 +157,9 @@ const Profile: React.FC<ProfileProps> = ({
 			.then(async () => {
 				logOut();
 			})
-			.catch((error) => {});
+			.catch(() => {
+				return;
+			});
 	};
 
 	/**************************************************************************************/
@@ -169,7 +177,9 @@ const Profile: React.FC<ProfileProps> = ({
 					setDeletedFriend(login);
 					onCloseClick();
 				})
-				.catch((error) => {});
+				.catch(() => {
+					return;
+				});
 	};
 
 	const handleAddFriend = async () => {
@@ -242,7 +252,9 @@ const Profile: React.FC<ProfileProps> = ({
 			} else {
 				setFileError(data.message);
 			}
-		} catch (error) {}
+		} catch (error) {
+			return;
+		}
 	};
 
 	useEffect(() => {

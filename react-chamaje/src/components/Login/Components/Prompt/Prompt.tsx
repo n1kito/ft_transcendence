@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import './Prompt.css';
-import Typewriter from 'typewriter-effect';
-import useAuth from 'src/hooks/userAuth';
-import { keyboardKey } from '@testing-library/user-event';
 import { useNavigate } from 'react-router-dom';
+import useAuth from 'src/hooks/userAuth';
+import Typewriter from 'typewriter-effect';
+import './Prompt.css';
 
 interface PromptProps {
 	instruction?: string;
@@ -16,13 +15,11 @@ const Prompt: React.FC<PromptProps> = ({
 	instruction = 'instruction',
 	type = 'input',
 	redirUrl = '',
-	activePrompt = true,
 }) => {
 	const { accessToken } = useAuth();
 	const labelWidth = instruction.length * 0.5;
 
 	const [validationCode, setValidationCode] = useState('');
-	const [inputError, setInputError] = useState(false);
 	const [fetchData, setFetchData] = useState(false);
 
 	const navigate = useNavigate();
@@ -96,11 +93,13 @@ const Prompt: React.FC<PromptProps> = ({
 					// send the validation code to verify it
 					body: JSON.stringify({ twoFactorAuthenticationCode: validationCode }),
 				});
-				const data = await response.json();
+				await response.json();
 				if (response.ok) {
 					navigate('/desktop');
 				}
-			} catch (error) {}
+			} catch (error) {
+				return;
+			}
 		};
 		// if user has typed `Enter` and the validation code format is valid,
 		// fetch request

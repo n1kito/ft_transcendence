@@ -1,8 +1,8 @@
-import React, { useContext, useEffect } from 'react';
-import './Background.css';
+import React, { useContext } from 'react';
 import { GameContext } from 'src/contexts/GameContext';
+import './Background.css';
 
-const Background = () => {
+const Background: React.FC = () => {
 	const { gameData } = useContext(GameContext);
 
 	return (

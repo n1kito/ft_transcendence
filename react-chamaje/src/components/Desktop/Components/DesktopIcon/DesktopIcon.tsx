@@ -1,6 +1,6 @@
-import React, { MouseEventHandler, useEffect } from 'react';
-import './DesktopIcon.css';
+import React, { useEffect } from 'react';
 import { useIconContext } from '../../../../contexts/IconContext';
+import './DesktopIcon.css';
 
 export interface IconProps {
 	name: string;

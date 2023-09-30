@@ -1,9 +1,11 @@
 import { Socket, io } from 'socket.io-client';
 
 interface callbackInterface {
+	// eslint-disable-next-line
 	(data: any): void;
 }
 interface callbackStatusInterface {
+	// eslint-disable-next-line
 	(id: any, online: boolean, playing: boolean): void;
 }
 
@@ -36,7 +38,9 @@ class WebSocketService {
 					this.socket.disconnect();
 				}
 			});
-		} catch (e) {}
+		} catch (error) {
+			return;
+		}
 	}
 
 	getSocket(): Socket {
@@ -61,7 +65,9 @@ class WebSocketService {
 				online: isonline,
 				playing: isplaying,
 			});
-		} catch (e) {}
+		} catch (e) {
+			return;
+		}
 	}
 
 	onClientLogIn(callback: callbackStatusInterface) {

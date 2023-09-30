@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './ProfilePicBadge.css';
 import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import pen from './images/edit-pen-svgrepo-com.svg';
-import useAuth from 'src/hooks/userAuth';
 
 export interface ProfilePicBadgeProps {
 	picture: string;
@@ -17,8 +16,6 @@ const ProfilePicBadge: React.FC<ProfilePicBadgeProps> = ({
 	setSettingsPanelIsOpen,
 	setSettingsMode,
 }) => {
-	const { accessToken } = useAuth();
-
 	return (
 		<div className="profile-pic-badge-wrapper">
 			<ShadowWrapper shadow={true}>

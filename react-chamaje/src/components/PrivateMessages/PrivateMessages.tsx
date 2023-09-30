@@ -212,15 +212,17 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 								.then((data) => {
 									getNewChatsList(data);
 								})
-								.catch((e) => {});
+								.catch(() => {
+									return;
+								});
 
 							setSettingsPanelIsOpen(false);
 						})
-						.catch((e) => {
+						.catch(() => {
 							setSearchUserError('Could not create chat');
 						});
 				})
-				.catch((e: string) => {
+				.catch(() => {
 					setSearchUserError('Could not find user');
 				});
 		}

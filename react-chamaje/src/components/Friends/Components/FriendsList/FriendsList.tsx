@@ -1,21 +1,17 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import './FriendsList.css';
-import FriendBadge from '../FriendBadge/FriendBadge';
-import useAuth from '../../../../hooks/userAuth';
-import { UserContext } from '../../../../contexts/UserContext';
-import { io } from 'socket.io-client';
-import Window from 'src/components/Window/Window';
+import React, { useContext, useEffect, useState } from 'react';
 import { IFriendStruct } from 'src/components/Desktop/Desktop';
-import Profile from 'src/components/Profile/Profile';
+import InputField from 'src/components/Profile/Components/InputField/InputField';
 import SettingsWindow from 'src/components/Profile/Components/Shared/SettingsWindow/SettingsWindow';
 import Title from 'src/components/Profile/Components/Title/Title';
-import InputField from 'src/components/Profile/Components/InputField/InputField';
 import Button from 'src/components/Shared/Button/Button';
-import { addFriend, fetchFriends } from 'src/utils/FriendsQueries';
-import { fetchProfileData } from 'src/utils/UserQueries';
-import ChatWindow from 'src/components/ChatWindow/ChatWindow';
+import Window from 'src/components/Window/Window';
 import { ChatContext } from 'src/contexts/ChatContext';
 import { useNavigationParams } from 'src/hooks/useNavigationParams';
+import { addFriend } from 'src/utils/FriendsQueries';
+import { fetchProfileData } from 'src/utils/UserQueries';
+import useAuth from '../../../../hooks/userAuth';
+import FriendBadge from '../FriendBadge/FriendBadge';
+import './FriendsList.css';
 
 interface IFriendsListProps {
 	onCloseClick: () => void;
@@ -36,16 +32,13 @@ const FriendsList: React.FC<IFriendsListProps> = ({
 	windowDragConstraintRef,
 	onBadgeClick,
 	setFriends,
-	setShowFriendProfile,
 	setProfileLogin,
 	setIsMyFriend,
 }) => {
-	const { userData, updateUserData } = useContext(UserContext);
 	const { accessToken } = useAuth();
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [searchedLogin, setSearchedLogin] = useState('');
 	const [loginInputError, setLoginInputError] = useState('');
-	const [isFriendAdded, setIsFriendAdded] = useState(false);
 	const [settingsMode, setSettingsMode] = useState('');
 	const { chatData } = useContext(ChatContext);
 

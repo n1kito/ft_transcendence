@@ -1,5 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { UserContext } from 'src/contexts/UserContext';
+import React from 'react';
 import OnlineIndicator from '../../../Profile/Components/Shared/OnlineIndicator/OnlineIndicator';
 import ShadowWrapper, {
 	ShadowWrapperProps,
@@ -35,36 +34,32 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 	dashedBorder = isEmptyBadge || false,
 	shaking = false,
 	onClick,
-	setFriendIsPlaying,
 	playingIndicator = false,
 	showStatusIndicator = true,
 }) => {
-	const userContext = useContext(UserContext);
 	let displayTitle = badgeTitle;
 	if (isChannelBadge && badgeTitle.length > 20) {
 		displayTitle = badgeTitle.slice(0, 20) + '...';
 	}
 
-	// const [friendIsPlaying, setFriendIsPlaying] = useState(false);
-	const [isShaking, setIsShaking] = useState(false);
+	// const [isShaking, setIsShaking] = useState(false);
 
-	useEffect(() => {
-		if (shaking) {
-			const shakeInterval = setInterval(() => {
-				setIsShaking(true);
-				const shakeDuration = 1000; // Shake for 1 seconds
-				setTimeout(() => {
-					setIsShaking(false);
-				}, shakeDuration);
-			}, 5000); // Start shaking every 10 seconds
+	// useEffect(() => {
+	// 	if (shaking) {
+	// 		const shakeInterval = setInterval(() => {
+	// 			setIsShaking(true);
+	// 			const shakeDuration = 1000; // Shake for 1 seconds
+	// 			setTimeout(() => {
+	// 				setIsShaking(false);
+	// 			}, shakeDuration);
+	// 		}, 5000); // Start shaking every 10 seconds
 
-			// Clean up interval on unmount or when hasStartedRoulette changes to true
-			return () => clearInterval(shakeInterval);
-		}
-	}, [shaking]);
+	// 		// Clean up interval on unmount or when hasStartedRoulette changes to true
+	// 		return () => clearInterval(shakeInterval);
+	// 	}
+	// }, [shaking]);
 
 	return (
-		// <div className={isShaking ? 'shake' : ''}>
 		<ShadowWrapper
 			shadow={isEmptyBadge ? true : shadow}
 			isClickable={isEmptyBadge ? true : isClickable}
@@ -102,7 +97,6 @@ const FriendBadge: React.FC<IFriendBadgeProps> = ({
 					)}
 			</div>
 		</ShadowWrapper>
-		// </div>
 	);
 };
 

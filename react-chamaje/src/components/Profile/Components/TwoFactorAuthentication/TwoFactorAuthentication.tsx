@@ -29,7 +29,7 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 	// the QR code.
 	const handleActivateButtonClick = async () => {
 		logInTwoFactorAuthentication(validationCode, accessToken)
-			.then((data) => {
+			.then(() => {
 				// set 2fa to 'enabled'
 				setIsTwoFAEnabled(true);
 				// reset validation code error, just in case
@@ -71,7 +71,7 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 			// verifyin user's 2FA autentication (meaning validation code
 			// is verified by google auth), turn off 2FA and close window
 			if (!isProcessFinishedRef.current) {
-				turnOffTwoFactorAuthentication(accessToken).then((data) => {
+				turnOffTwoFactorAuthentication(accessToken).then(() => {
 					setQrCode('');
 					setIsTwoFAEnabled(false);
 				});
@@ -93,7 +93,7 @@ const TwoFactorAuthentication: React.FC<TwoFactorAuthenticationProps> = ({
 	const handlePageUnload = () => {
 		// Call the API to turn off 2FA here
 		if (!isProcessFinishedRef.current) {
-			turnOffTwoFactorAuthentication(accessToken).then((data) => {
+			turnOffTwoFactorAuthentication(accessToken).then(() => {
 				setQrCode('');
 				setIsTwoFAEnabled(false);
 			});

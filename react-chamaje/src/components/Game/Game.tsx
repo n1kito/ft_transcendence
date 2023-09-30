@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useRef } from 'react';
-import { ChatContext } from 'src/contexts/ChatContext';
 import { GameContext } from '../../contexts/GameContext';
 import { useGameSocket } from '../../hooks/useGameSocket';
 import Window from '../Window/Window';

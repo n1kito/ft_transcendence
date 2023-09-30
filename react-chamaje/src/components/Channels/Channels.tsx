@@ -1,12 +1,19 @@
 import React, { useContext, useEffect, useState } from 'react';
-import './Channels.css';
-import Window from '../Window/Window';
 import FriendBadge from '../Friends/Components/FriendBadge/FriendBadge';
-import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/SettingsWindow';
-import Button from '../Shared/Button/Button';
-import Title from '../Profile/Components/Title/Title';
 import InputField from '../Profile/Components/InputField/InputField';
+import SettingsWindow from '../Profile/Components/Shared/SettingsWindow/SettingsWindow';
+import Title from '../Profile/Components/Title/Title';
+import Button from '../Shared/Button/Button';
+import Window from '../Window/Window';
+import './Channels.css';
 // import { IChatStruct } from '../PrivateMessages/PrivateMessages';
+import {
+	ChatContext,
+	IChatStruct,
+	IMessage,
+	IUserAction,
+} from 'src/contexts/ChatContext';
+import { UserContext } from 'src/contexts/UserContext';
 import useAuth from 'src/hooks/userAuth';
 import {
 	createChannel,
@@ -15,14 +22,7 @@ import {
 	getBlockedUsers,
 	joinChannel,
 } from 'src/utils/queries';
-import { UserContext } from 'src/contexts/UserContext';
 import ChatWindow from '../ChatWindow/ChatWindow';
-import {
-	ChatContext,
-	IChatStruct,
-	IMessage,
-	IUserAction,
-} from 'src/contexts/ChatContext';
 
 interface IChannelsProps {
 	onCloseClick: () => void;
@@ -40,7 +40,7 @@ const Channels: React.FC<IChannelsProps> = ({
 	const [settingsPanelIsOpen, setSettingsPanelIsOpen] = useState(false);
 	const [settingsMode, setSettingsMode] = useState('');
 	const [settingsNameError, setSettingsNameError] = useState('');
-	const [settingsPwdError, setSettingsPwdError] = useState('');
+	const [settingsPwdError] = useState('');
 
 	const [chatWindowIsOpen, setChatWindowIsOpen] = useState(false);
 	const [chatWindowId, setChatWindowId] = useState(0);
@@ -174,7 +174,9 @@ const Channels: React.FC<IChannelsProps> = ({
 						setMessages(data);
 						setChatWindowIsOpen(true);
 					})
-					.catch((e) => {});
+					.catch(() => {
+						return;
+					});
 				return;
 			}
 		});
@@ -249,12 +251,16 @@ const Channels: React.FC<IChannelsProps> = ({
 			.then((data) => {
 				getNewChatsList(data);
 			})
-			.catch((e) => {});
+			.catch(() => {
+				return;
+			});
 		getBlockedUsers(accessToken)
 			.then((data) => {
 				getNewBlockedUsers(data);
 			})
-			.catch(() => {});
+			.catch(() => {
+				return;
+			});
 	}, []);
 
 	return (
@@ -288,7 +294,7 @@ const Channels: React.FC<IChannelsProps> = ({
 				<div className="channels-list-wrapper">
 					{chatData.chatsList.length > 0 &&
 					chatData.chatsList.find((current) => current.isChannel === true) ? (
-						chatData.chatsList.map((room, index) => {
+						chatData.chatsList.map((room) => {
 							if (room.isChannel) {
 								return (
 									<FriendBadge

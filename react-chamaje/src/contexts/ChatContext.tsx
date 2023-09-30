@@ -1,10 +1,4 @@
-import React, {
-	Dispatch,
-	SetStateAction,
-	createContext,
-	useEffect,
-	useState,
-} from 'react';
+import React, { createContext, useState } from 'react';
 import WebSocketService from 'src/services/WebSocketService';
 
 export interface IChatStruct {
@@ -97,14 +91,14 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 	const [chatData, setChatData] = useState<IChatDataProps>(defaultChatState);
 
 	// Logs the updates to chatData as they happen
-	useEffect(() => {
-		const chatDataLog = { ...chatData, socket: 'not loggable' };
-		// console.log(
-		// 	`%c ChatData %c ${JSON.stringify(chatDataLog, null, 4)}`,
-		// 	'color: yellow; background:magenta',
-		// 	'',
-		// );
-	}, [chatData]);
+	// useEffect(() => {
+	// 	const chatDataLog = { ...chatData, socket: 'not loggable' };
+	// 	// console.log(
+	// 	// 	`%c ChatData %c ${JSON.stringify(chatDataLog, null, 4)}`,
+	// 	// 	'color: yellow; background:magenta',
+	// 	// 	'',
+	// 	// );
+	// }, [chatData]);
 
 	// We want a helper function that will allow us to update one, many or all
 	// properties of the chat state without having to override the entire thing manually
@@ -190,13 +184,13 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
 		updateChatData(resetChatValues);
 	};
 
-	const logContext = (content: string) => {
-		console.log(
-			`%c ChatDataUpdated %c ${content}`,
-			'background:blue; color:turquoise',
-			'',
-		);
-	};
+	// const logContext = (content: string) => {
+	// 	console.log(
+	// 		`%c ChatDataUpdated %c ${content}`,
+	// 		'background:blue; color:turquoise',
+	// 		'',
+	// 	);
+	// };
 
 	// Return a provider that will now make the chatData and its helper functions available
 	// for all its children components

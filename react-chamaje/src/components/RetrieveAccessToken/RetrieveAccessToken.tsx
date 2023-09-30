@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/userAuth';
 
 const RetrieveAccessToken = () => {
-	const { updateAccessToken, isTwoFAEnabled, setIsTwoFAEnabled } = useAuth();
+	const { updateAccessToken, setIsTwoFAEnabled } = useAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
 
