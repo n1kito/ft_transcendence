@@ -1,26 +1,25 @@
+import { AnimatePresence } from 'framer-motion';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import './Desktop.css';
-import DesktopIcon from './Components/DesktopIcon/DesktopIcon';
-import { useNavigate } from 'react-router-dom';
+import WebSocketService from 'src/services/WebSocketService';
 import { UserContext } from '../../contexts/UserContext';
 import useAuth from '../../hooks/userAuth';
-import Profile from '../Profile/Profile';
-import WebSocketService from 'src/services/WebSocketService';
-import PrivateMessages from '../PrivateMessages/PrivateMessages';
-import { AnimatePresence } from 'framer-motion';
 import Channels from '../Channels/Channels';
+import PrivateMessages from '../PrivateMessages/PrivateMessages';
+import Profile from '../Profile/Profile';
+import DesktopIcon from './Components/DesktopIcon/DesktopIcon';
+import './Desktop.css';
 
+import { ChatContext } from 'src/contexts/ChatContext';
+import { useNavigationParams } from 'src/hooks/useNavigationParams';
+import { addFriend, fetchFriends } from 'src/utils/FriendsQueries';
+import { GameContext } from '../../contexts/GameContext';
+import FriendsList from '../Friends/Components/FriendsList/FriendsList';
+import Game from '../Game/Game';
 import ProfileIcon from './Icons/CARD.svg';
-import ChatIcon from './Icons/PC.svg';
-import FriendsIcon from './Icons/NOTEBOOK.svg';
 import GameIcon from './Icons/CD.svg';
 import ChannelsIcon from './Icons/EARTH.svg';
-import Game from '../Game/Game';
-import { GameContext, GameProvider } from '../../contexts/GameContext';
-import { ChatContext } from 'src/contexts/ChatContext';
-import { addFriend, fetchFriends } from 'src/utils/FriendsQueries';
-import FriendsList from '../Friends/Components/FriendsList/FriendsList';
-import { useNavigationParams } from 'src/hooks/useNavigationParams';
+import FriendsIcon from './Icons/NOTEBOOK.svg';
+import ChatIcon from './Icons/PC.svg';
 
 // Friend structure to keep track of them and their online/ingame status
 export interface IFriendStruct {
@@ -31,7 +30,7 @@ export interface IFriendStruct {
 	playingStatus: boolean;
 }
 
-const Desktop = () => {
+const Desktop: React.FC = () => {
 	let iconId = 0;
 
 	// Navigation hook
@@ -56,7 +55,6 @@ const Desktop = () => {
 	const [nbOnline, SetNbOnline] = useState(0);
 
 	const [isMyFriend, setIsMyFriend] = useState(false);
-	const navigate = useNavigate();
 	const { isAuthentificated, logOut, accessToken, setIsTwoFAEnabled } =
 		useAuth();
 
@@ -91,7 +89,9 @@ const Desktop = () => {
 			} else {
 				logOut();
 			}
-		} catch (error) {}
+		} catch (error) {
+			return;
+		}
 	};
 
 	const checkURLParams = () => {
@@ -287,7 +287,7 @@ const Desktop = () => {
 			addFriend(addedFriend, accessToken)
 				.then(async (data) => {
 					// copy friends
-					const updatedFriends = [...friends];
+					// const updatedFriends = [...friends];
 					// check if friend to be added is not already in the friends list
 					if (!friends.some((friend) => friend.login === data.login)) {
 						// create friend object for <IFriendStruct>
@@ -308,7 +308,7 @@ const Desktop = () => {
 						setAddedFriend('');
 					}
 				})
-				.catch((error) => {
+				.catch(() => {
 					setAddedFriend('');
 				});
 		};

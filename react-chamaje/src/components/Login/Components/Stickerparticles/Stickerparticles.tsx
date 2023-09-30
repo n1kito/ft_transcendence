@@ -2,7 +2,7 @@ import React from 'react';
 import './Stickerparticles.css';
 import { useCallback } from 'react';
 import Particles from 'react-particles';
-import type { Container, Engine } from 'tsparticles-engine';
+import type { Engine } from 'tsparticles-engine';
 import { loadFull } from 'tsparticles';
 import niktaSticker from './nikita.png';
 import omerSticker from './omer.png';
@@ -12,12 +12,9 @@ const Stickerparticles = () => {
 		await loadFull(engine);
 	}, []);
 
-	const particlesLoaded = useCallback(
-		async (container: Container | undefined) => {
-			// await console.log(container);
-		},
-		[],
-	);
+	const particlesLoaded = useCallback(async () => {
+		// await console.log(container);
+	}, []);
 	return (
 		<Particles
 			id="tsparticles"

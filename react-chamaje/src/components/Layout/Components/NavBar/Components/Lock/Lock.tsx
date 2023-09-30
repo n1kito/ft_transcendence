@@ -1,11 +1,9 @@
 import React, { useContext } from 'react';
 import './Lock.css';
-import { UserContext } from 'src/contexts/UserContext';
 import useAuth from 'src/hooks/userAuth';
 import { ChatContext } from 'src/contexts/ChatContext';
 
 const Lock = () => {
-	const { userData } = useContext(UserContext);
 	const { chatData } = useContext(ChatContext);
 	const { logOut } = useAuth();
 

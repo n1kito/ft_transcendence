@@ -1,6 +1,6 @@
-import Paddle from './Paddle';
-import Ball from './Ball';
 import { IGameState } from '../../../../../../shared-lib/types/game';
+import Ball from './Ball';
+import Paddle from './Paddle';
 
 export class GameLogic {
 	public paddlePlayer: Paddle;
@@ -68,12 +68,12 @@ export class GameLogic {
 		else this.opponentScore++;
 	};
 
-	// Custom utility log function
-	log(message: string): void {
-		console.log(
-			`%c GameLogic %c ${message}`,
-			'background:orange;color:yellow',
-			'',
-		);
-	}
+	// // Custom utility log function
+	// log(message: string): void {
+	// 	console.log(
+	// 		`%c GameLogic %c ${message}`,
+	// 		'background:orange;color:yellow',
+	// 		'',
+	// 	);
+	// }
 }

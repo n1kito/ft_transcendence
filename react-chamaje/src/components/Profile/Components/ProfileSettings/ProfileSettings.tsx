@@ -7,13 +7,6 @@ import InputField from '../InputField/InputField';
 import Title from '../Title/Title';
 import './ProfileSettings.css';
 
-type ValidationError = {
-	property: string;
-	constraints: {
-		[key: string]: string;
-	};
-};
-
 const ProfileSettings: React.FC = () => {
 	// Access userData from the UserContext
 	const { userData, updateUserData } = useContext(UserContext);
@@ -91,19 +84,16 @@ const ProfileSettings: React.FC = () => {
 			// Update the userData in the context with the updated user data
 			if (response.ok) {
 				const updatedUserData = {
-					// ...userData,
 					login: username,
 					email: email,
 					id: userData ? userData.id : 0,
 					image: userData?.image || '',
-					// friends: userData?.friends || [],
-					// winRate: userData?.winRate || 0,
-					// gamesCount: userData?.gamesCount || 0,
 				};
 				updateUserData(updatedUserData);
 			}
 			const responseData = await response.clone().json();
 			if (response.status === 409 || response.status === 400) {
+				// eslint-disable-next-line
 				responseData.errors.forEach((error: any) => {
 					if (error.field === 'login') {
 						setUsernameError(error.message);
@@ -112,7 +102,9 @@ const ProfileSettings: React.FC = () => {
 					}
 				});
 			}
-		} catch (error) {}
+		} catch (error) {
+			return;
+		}
 	};
 
 	return (

@@ -1,4 +1,4 @@
-import React, { forwardRef, useContext, useEffect, useRef } from 'react';
+import React from 'react';
 import './GameCanvas.css';
 import { ICanvasProps } from '../../Game';
 

@@ -104,13 +104,13 @@ export const GameProvider = ({ children }: { children: React.ReactNode }) => {
 		updateGameData(resetGameValues);
 	};
 
-	const logContext = (content: string) => {
-		console.log(
-			`%c GameDataUpdated %c ${content}`,
-			'background:blue; color:turquoise',
-			'',
-		);
-	};
+	// const logContext = (content: string) => {
+	// 	console.log(
+	// 		`%c GameDataUpdated %c ${content}`,
+	// 		'background:blue; color:turquoise',
+	// 		'',
+	// 	);
+	// };
 
 	// Return a provider that will now make the gameData and its helper functions available
 	// for all its children components

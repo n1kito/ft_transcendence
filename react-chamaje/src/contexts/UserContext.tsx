@@ -54,13 +54,13 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 		setUserData(defaultUserData);
 	};
 
-	const logUserData = (content: string) => {
-		console.log(
-			`%c UserDataUpdated %c ${content}`,
-			'background: yellow; color:red',
-			'',
-		);
-	};
+	// const logUserData = (content: string) => {
+	// 	console.log(
+	// 		`%c UserDataUpdated %c ${content}`,
+	// 		'background: yellow; color:red',
+	// 		'',
+	// 	);
+	// };
 
 	return (
 		<UserContext.Provider value={{ userData, updateUserData, resetUserData }}>

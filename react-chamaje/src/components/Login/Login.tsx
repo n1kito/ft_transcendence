@@ -1,18 +1,16 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './Login.css';
-// import Background from '../Background/Background';
 import Window from '../Window/Window';
 import Terminal from './Components/Terminal/Terminal';
 import { motion } from 'framer-motion';
 import Stickerparticles from './Components/Stickerparticles/Stickerparticles';
 import useAuth from 'src/hooks/userAuth';
-import { UserContext } from 'src/contexts/UserContext';
 
 const Login = () => {
 	const constraintRef = useRef(null);
 
 	const [passkey, setPasskey] = useState('');
-	const { isAuthentificated, setIsTwoFAEnabled, isTwoFaVerified } = useAuth();
+	const { isAuthentificated, isTwoFaVerified } = useAuth();
 
 	useEffect(() => {
 		const handleKeyDown = (event: KeyboardEvent) => {

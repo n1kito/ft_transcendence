@@ -46,7 +46,7 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 
 	const updateTargetStatus = async () => {
 		try {
-			const response = await fetch('/api/user/me/updateTargetStatus', {
+			await fetch('/api/user/me/updateTargetStatus', {
 				method: 'PUT',
 				credentials: 'include',
 				headers: {
@@ -54,10 +54,9 @@ const TargetBadge: React.FC<ITargetBadgeProps> = ({
 					'Authorization': `Bearer ${accessToken}`,
 				},
 			});
-			if (!response.ok) {
-				const errorMessage = await response.text();
-			}
-		} catch (error) {}
+		} catch (error) {
+			return;
+		}
 	};
 
 	const startRoulette = () => {

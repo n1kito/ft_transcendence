@@ -1,7 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
-import { access } from 'fs';
-import { UserContext } from './UserContext';
+import React, { useEffect, useState } from 'react';
 
 interface IAuthContext {
 	isAuthentificated: boolean;
@@ -73,14 +70,16 @@ const AuthContextProvider: React.FC<AuthProviderProps> = ({
 	// Log the user out by removing cookies and updating state
 	const logOut = async () => {
 		try {
-			const response = await fetch('/api/login/logout', {
+			await fetch('/api/login/logout', {
 				method: 'PUT',
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
 				},
 				credentials: 'include',
 			});
-		} catch (error) {}
+		} catch (error) {
+			return;
+		}
 		setAccessToken('');
 		setIsAuthentificated(false);
 		setIsTwoFaVerified(false);

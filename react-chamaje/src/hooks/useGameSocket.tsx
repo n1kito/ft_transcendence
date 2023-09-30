@@ -1,7 +1,6 @@
 import { useContext, useEffect, useRef } from 'react';
 import { UserContext } from '../contexts/UserContext';
 import { GameContext } from '../contexts/GameContext';
-import { IGameState } from '../../../shared-lib/types/game';
 import { Socket, io } from 'socket.io-client';
 import useAuth from './userAuth';
 import type { IPlayerInformation } from '../../../shared-lib/types/game';
@@ -48,13 +47,13 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 		};
 	}, [isAuthentificated]);
 
-	const socketLog = (logContent: string) => {
-		console.log(
-			`%c Socket %c ${logContent}`,
-			'background: purple; color: pink',
-			'',
-		);
-	};
+	// const socketLog = (logContent: string) => {
+	// 	console.log(
+	// 		`%c Socket %c ${logContent}`,
+	// 		'background: purple; color: pink',
+	// 		'',
+	// 	);
+	// };
 
 	// Once a socket is assigned, setup our basic listeners
 	useEffect(() => {
@@ -67,7 +66,7 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 			// socketLog('Server authentification confirmed');
 			updateGameData({ connectedToServer: true });
 		});
-		gameData.socket.on('connect_error', (error: Error) => {
+		gameData.socket.on('connect_error', () => {
 			updateGameData({
 				connectionErrorStatus: 'Connection error, please refresh the page !',
 			});
@@ -103,7 +102,7 @@ export const useGameSocket = ({ opponentLogin }: IGameSocketProps) => {
 			}
 		});
 
-		gameData.socket.on('connection-closed', (error: Error) => {
+		gameData.socket.on('connection-closed', () => {
 			updateGameData({
 				connectionErrorStatus: 'You were disconnected !',
 			});

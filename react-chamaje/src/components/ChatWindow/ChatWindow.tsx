@@ -104,13 +104,8 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 	const [inviteToPlayMsg, setInviteToPlayMsg] = useState<IMessage>();
 
 	const { userData } = useContext(UserContext);
-	const {
-		chatData,
-		updateChatList,
-		getNewChatsList,
-		updateBlockedUsers,
-		getNewBlockedUsers,
-	} = useContext(ChatContext);
+	const { chatData, getNewChatsList, updateBlockedUsers, getNewBlockedUsers } =
+		useContext(ChatContext);
 	const chatContentRef = useRef<HTMLDivElement>(null);
 
 	const { updateGameData } = useContext(GameContext);
@@ -254,10 +249,13 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 														);
 														setSearchUserSuccess('Invitation sent');
 													})
-													.catch((e) => {});
+													.catch(() => {
+														return;
+													});
 											})
-											.catch((e) => {});
-									} else {
+											.catch(() => {
+												return;
+											});
 									}
 								});
 						})
@@ -265,7 +263,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 							setSearchUserError(e.message);
 						});
 				})
-				.catch((e: string) => {
+				.catch(() => {
 					setSearchUserError('Could not find user');
 				});
 		}
@@ -305,7 +303,9 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 				chatData.socket?.leaveRoom(chatId);
 				setChatWindowIsOpen(false);
 			})
-			.catch((e) => {});
+			.catch(() => {
+				return;
+			});
 	};
 
 	const inviteToPlay = () => {
@@ -337,7 +337,9 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 								});
 								setNavParam('game');
 							})
-							.catch((e) => {});
+							.catch(() => {
+								return;
+							});
 					}
 				}
 			}
@@ -358,7 +360,9 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 									]);
 									setIsBlocked(true);
 								})
-								.catch((e) => {});
+								.catch(() => {
+									return;
+								});
 						} else {
 							unblockUserQuery(accessToken, pCurrent)
 								.then(() => {
@@ -368,7 +372,9 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 									getNewBlockedUsers(updatedBlockedUsers);
 									setIsBlocked(true);
 								})
-								.catch((e) => {});
+								.catch(() => {
+									return;
+								});
 						}
 					}
 				}
@@ -431,7 +437,7 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 					setIsAdmin(data.isAdmin);
 					setIsOwner(data.isOwner);
 				})
-				.catch((e) => {
+				.catch(() => {
 					setIsAdmin(false);
 					setIsOwner(false);
 				});
@@ -471,7 +477,9 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 				setTextareaContent('');
 				setTextareaIsEmpty(true);
 			})
-			.catch((e) => {});
+			.catch(() => {
+				return;
+			});
 	};
 
 	useEffect(() => {
@@ -641,7 +649,9 @@ const ChatWindow: React.FC<IChatWindowProps> = ({
 								.then(() => {
 									setChannelIsPrivate(!channelIsPrivate);
 								})
-								.catch((e) => {});
+								.catch(() => {
+									return;
+								});
 						}}
 					>
 						make {channelIsPrivate ? 'public' : 'private'}

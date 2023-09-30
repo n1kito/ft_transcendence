@@ -1,15 +1,12 @@
-import React, { ReactNode, useContext, RefObject, useState } from 'react';
-import './ChatBubble.css';
-import Tooltip from '../../../Shared/Tooltip/Tooltip';
-import Button from '../../../Shared/Button/Button';
-import Profile from 'src/components/Profile/Profile';
-import { ban, kick, makeAdmin, mute } from 'src/utils/queries';
-import useAuth from 'src/hooks/userAuth';
-import { access } from 'fs';
+import React, { ReactNode, useContext, useState } from 'react';
 import { ChatContext } from 'src/contexts/ChatContext';
-import { useDragControls } from 'framer-motion';
 import { UserContext } from 'src/contexts/UserContext';
 import { useNavigationParams } from 'src/hooks/useNavigationParams';
+import useAuth from 'src/hooks/userAuth';
+import { ban, kick, makeAdmin, mute } from 'src/utils/queries';
+import Button from '../../../Shared/Button/Button';
+import Tooltip from '../../../Shared/Tooltip/Tooltip';
+import './ChatBubble.css';
 
 interface IChatBubbleProps {
 	userId: number;
@@ -39,7 +36,7 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 	// messageRef,
 }) => {
 	const [tooltipVisible, setTooltipVisible] = useState(false);
-	const [profileIsOpen, setProfileIsOpen] = useState(false);
+	// const [profileIsOpen, setProfileIsOpen] = useState(false);
 	const { chatData } = useContext(ChatContext);
 	const { userData } = useContext(UserContext);
 	const { accessToken } = useAuth();
@@ -50,7 +47,7 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 		if (sender === 'anonymous') return;
 		setNavParam('friendProfile', sender);
 		setShowFriendProfile(true);
-		setProfileIsOpen(true);
+		// setProfileIsOpen(true);
 		setProfileLogin(sender);
 	};
 
@@ -98,7 +95,9 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 													sender,
 												);
 											})
-											.catch((e) => {});
+											.catch(() => {
+												return;
+											});
 									}}
 								>
 									mute
@@ -119,7 +118,9 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 													sender,
 												);
 											})
-											.catch((e) => {});
+											.catch(() => {
+												return;
+											});
 									}}
 								>
 									kick
@@ -141,7 +142,9 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 													sender,
 												);
 											})
-											.catch((e) => {});
+											.catch(() => {
+												return;
+											});
 									}}
 								>
 									ban
@@ -163,7 +166,9 @@ const ChatBubble: React.FC<IChatBubbleProps> = ({
 													sender,
 												);
 											})
-											.catch((e) => {});
+											.catch(() => {
+												return;
+											});
 									}}
 								>
 									admin

@@ -1,11 +1,9 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import './MatchHistory.css';
 import Title from '../Title/Title';
 import ShadowWrapper from '../../../Shared/ShadowWrapper/ShadowWrapper';
 import MatchHistoryBadge from './Components/MatchHistoryBadge/MatchHistoryBadge';
-import m3gan from '../../../../images/m3gan.jpg';
-import { UserContext } from '../../../../contexts/UserContext';
-import { profile } from 'console';
+
 import {
 	IUserData,
 	IMatchHistory,
@@ -16,7 +14,6 @@ interface IMatchHistoryProps {
 }
 
 const MatchHistory: React.FC<IMatchHistoryProps> = ({ profileData }) => {
-	const { userData } = useContext(UserContext);
 	const matchHistory = profileData.matchHistory;
 	return (
 		<div className="match-history-wrapper">
