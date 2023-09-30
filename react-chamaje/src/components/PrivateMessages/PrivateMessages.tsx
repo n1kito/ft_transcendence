@@ -49,7 +49,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	const [searchUserSuccess, setSearchUserSuccess] = useState('');
 	const { userData } = useContext(UserContext);
 	const { accessToken } = useAuth();
-	const { chatData, updateChatList, getNewChatsList, getNewBlockedUsers } =
+	const { chatData, getNewChatsList, getNewBlockedUsers } =
 		useContext(ChatContext);
 
 	/* ********************************************************************* */
@@ -133,11 +133,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 	// on click on an avatar, check if a PM conversation exists.
 	// If it does, open the window, set the userId and chatId, and fetch
 	// the messages.
-	const openPrivateMessageWindow = (
-		roomId: number,
-		friendId: number | undefined,
-	) => {
-		let foundChat = false;
+	const openPrivateMessageWindow = (roomId: number) => {
 		chatData.chatsList.map((currentChat) => {
 			if (roomId === currentChat.chatId) {
 				setChatWindowId(currentChat.chatId);
@@ -169,7 +165,6 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 						return;
 					});
 
-				foundChat = true;
 				return;
 			}
 		});
@@ -280,7 +275,7 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 												onlineIndicator={friend ? friend.onlineStatus : false}
 												isClickable={true}
 												onClick={() => {
-													openPrivateMessageWindow(room.chatId, participantId);
+													openPrivateMessageWindow(room.chatId);
 												}}
 												shaking={room.newMessage || false}
 											/>
