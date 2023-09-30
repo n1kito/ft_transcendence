@@ -120,22 +120,23 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 		fetchChats(accessToken).then((data) => {
 			getNewChatsList(data);
 			// updateChatList(data);
-			getBlockedUsers(accessToken).then((users) => {
-				getNewBlockedUsers(users);
-			});
+			getBlockedUsers(accessToken)
+				.then((users) => {
+					getNewBlockedUsers(users);
+				})
+				.catch(() => {
+					return;
+				});
 		});
 	}, []);
 
 	// on click on an avatar, check if a PM conversation exists.
 	// If it does, open the window, set the userId and chatId, and fetch
 	// the messages.
-	// Otherwise open clean the messages and open the window
 	const openPrivateMessageWindow = (
 		roomId: number,
 		friendId: number | undefined,
 	) => {
-		if (!friendId) return;
-
 		let foundChat = false;
 		chatData.chatsList.map((currentChat) => {
 			if (roomId === currentChat.chatId) {
@@ -160,28 +161,19 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 					}
 					getNewChatsList(updatedChatList);
 				}
-				fetchMessages(currentChat.chatId, accessToken).then((data) => {
-					setMessages(data);
-				});
+				fetchMessages(currentChat.chatId, accessToken)
+					.then((data) => {
+						setMessages(data);
+					})
+					.catch(() => {
+						return;
+					});
 
 				foundChat = true;
 				return;
 			}
 		});
 		setChatWindowIsOpen(true);
-		// If no corresponding chat were found, create it, set messages to empty
-		// change the chat window and update privateMessages[]
-		if (!foundChat && userData) {
-			createChatPrivateMessage(friendId, userData.id, accessToken).then(
-				async (data) => {
-					setChatWindowId(data);
-					setMessages([]);
-					fetchChats(accessToken).then((data) => {
-						updateChatList(data);
-					});
-				},
-			);
-		}
 	};
 
 	// find the user by login and create the chat
@@ -198,29 +190,32 @@ const PrivateMessages: React.FC<IPrivateMessagesProps> = ({
 						return;
 					}
 					createChatPrivateMessage(data.id, userData.id, accessToken)
-						.then((room) => {
+						.then(() => {
 							setSearchUserSuccess('Chat created successfully!');
-							updateChatList([
-								{
-									chatId: room.chatId,
-									participants: [userData?.id ? userData.id : 0, data.id],
-									name: searchedLogin,
-									isChannel: false,
-								},
-							]);
+							// updateChatList([
+							// 	{
+							// 		chatId: room.chatId,
+							// 		participants: [userData?.id ? userData.id : 0, data.id],
+							// 		name: searchedLogin,
+							// 		isChannel: false,
+							// 		avatar: 'coucou',
+							// 	},
+							// ]);
 							fetchChats(accessToken)
 								.then((data) => {
 									getNewChatsList(data);
 								})
-								.catch((e) => {});
+								.catch(() => {
+									return;
+								});
 
 							setSettingsPanelIsOpen(false);
 						})
-						.catch((e) => {
+						.catch(() => {
 							setSearchUserError('Could not create chat');
 						});
 				})
-				.catch((e: string) => {
+				.catch(() => {
 					setSearchUserError('Could not find user');
 				});
 		}
