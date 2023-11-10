@@ -1,11 +1,11 @@
 <p align="center">
 <img src="images/chamaje.png" width="200px" alt="chamaje logo" /><br />
 Our work on the 42Born2Code <b>ft_transcendence</b> project.<br /><br />
-
-<img src="images/chamaje.gif" alt="chamaje preview gif" /><br />
 </p>
 
-
+<p align="center">
+<img src="images/chamaje.gif" alt="chamaje preview gif" /><br />
+</p>
 
 # ft_transcendence
 
