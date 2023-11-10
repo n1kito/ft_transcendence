@@ -71,7 +71,7 @@ This project was brought to life by a team of three 42 students who shared a vis
 
 <p align="center"><br />
 <a href="http://github.com/n1kito" alt="n1kito github profile"><img src="https://github.com/n1kito.png" width="60px style="border-radius:50%"/></a>
-<a href="http://github.com/vrigaudy" alt="jhparkkkk github profile"><img src="https://github.com/jhparkkkk.png" width="60px style="border-radius:50%"/></a>
+<a href="http://github.com/jhparkkkk" alt="jhparkkkk github profile"><img src="https://github.com/jhparkkkk.png" width="60px style="border-radius:50%"/></a>
 <a href="http://github.com/torgaa" alt="torgaa github profile"><img src="https://github.com/torgaa.png" width="60px style="border-radius:50%"/></a>
 
 </p>
